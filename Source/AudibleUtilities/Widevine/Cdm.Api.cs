@@ -13,6 +13,11 @@ namespace AudibleUtilities.Widevine;
 
 public partial class Cdm
 {
+	private static readonly Uri[] ApprovedCdmUris =
+	[
+		new("https://ollj0gz40d.execute-api.us-west-2.amazonaws.com/default/AudibleCdm")
+	];
+
 	/// <summary>
 	/// Get a <see cref="Cdm"/> from <see cref="AccountsSettings"/> or from the API.
 	/// </summary>
@@ -103,17 +108,7 @@ public partial class Cdm
 		try
 		{
 			var fileContents = await httpClient.GetStringAsync(CdmUrlListFile);
-			var releaseIndex = JObject.Parse(fileContents);
-			var urlArray = releaseIndex["CdmUrls"] as JArray;
-			if (urlArray is null)
-				throw new System.IO.InvalidDataException("CDM url list not found in JSON: " + fileContents);
-
-			var uris = urlArray.Select(u => u.Value<string>()).OfType<string>().Select(u => new Uri(u)).ToArray();
-
-			if (uris.Length == 0)
-				throw new System.IO.InvalidDataException("No CDM url found in JSON: " + fileContents);
-
-			return uris;
+			return ParseCdmUris(fileContents);
 		}
 		catch (Exception ex)
 		{
@@ -121,6 +116,39 @@ public partial class Cdm
 			return null;
 		}
 	}
+
+	internal static Uri[] ParseCdmUris(string fileContents)
+	{
+		var releaseIndex = JObject.Parse(fileContents);
+		var urlArray = releaseIndex["CdmUrls"] as JArray;
+		if (urlArray is null)
+			throw new System.IO.InvalidDataException("CDM url list not found in JSON: " + fileContents);
+
+		var uriStrings = urlArray.Select(u => u.Value<string>()).ToArray();
+		if (uriStrings.Any(string.IsNullOrWhiteSpace))
+			throw new System.IO.InvalidDataException("CDM url list contains an invalid entry.");
+
+		var uris = uriStrings.Select(value =>
+		{
+			if (!Uri.TryCreate(value, UriKind.Absolute, out var uri) || !IsApprovedCdmUri(uri))
+				throw new System.IO.InvalidDataException("CDM url is not approved by this Libation release.");
+			return uri;
+		}).ToArray();
+
+		if (uris.Length == 0)
+			throw new System.IO.InvalidDataException("No CDM url found in JSON: " + fileContents);
+
+		return uris;
+	}
+
+	private static bool IsApprovedCdmUri(Uri uri)
+		=> uri.Scheme.Equals(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase)
+		&& uri.IsDefaultPort
+		&& string.IsNullOrEmpty(uri.UserInfo)
+		&& string.IsNullOrEmpty(uri.Fragment)
+		&& ApprovedCdmUris.Any(approved =>
+			Uri.Compare(approved, uri, UriComponents.SchemeAndServer, UriFormat.UriEscaped, StringComparison.OrdinalIgnoreCase) == 0
+			&& Uri.Compare(approved, uri, UriComponents.PathAndQuery, UriFormat.UriEscaped, StringComparison.Ordinal) == 0);
 
 
 	static readonly string[] TLDs = ["com", "co.uk", "com.au", "com.br", "ca", "fr", "de", "in", "it", "co.jp", "es"];

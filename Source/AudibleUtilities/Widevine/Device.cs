@@ -71,7 +71,7 @@ internal class Device
 	/// 
 	/// Absolutely nobody anywhere should use this RSASSA-PSS implementation in anything where they care about security at all. We completely skipped the random salt part of it because libation doesn't need security; it only needs to satisfy Audible server's challenge-response requirements.
 	/// </summary>
-	private static class PssSha1Signer
+	internal static class PssSha1Signer
 	{
 		private const int Sha1DigestSize = 20;
 		private const int Trailer = 0xBC;
@@ -104,7 +104,14 @@ internal class Device
 
 			var input = new BigInteger(block, isUnsigned: true, isBigEndian: true);
 			var result = BigInteger.ModPow(input, Exponent, Modulus);
-			return result.ToByteArray(isUnsigned: true, isBigEndian: true);
+			var unpaddedSignature = result.ToByteArray(isUnsigned: true, isBigEndian: true);
+			var modulusWidth = (rsa.KeySize + 7) / 8;
+			if (unpaddedSignature.Length > modulusWidth)
+				throw new CryptographicException("RSA signature exceeds the modulus width.");
+
+			var signature = new byte[modulusWidth];
+			unpaddedSignature.CopyTo(signature, modulusWidth - unpaddedSignature.Length);
+			return signature;
 		}
 
 		private static byte[] MaskGeneratorFunction1(byte[] Z, int zOff, int zLen, int length)

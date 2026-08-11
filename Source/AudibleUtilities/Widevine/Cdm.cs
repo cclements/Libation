@@ -1,4 +1,5 @@
 ﻿using Google.Protobuf;
+using Mpeg4Lib.Boxes;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -70,7 +71,34 @@ public partial class Cdm
 		Device = device;
 	}
 
-	public ISession OpenSession()
+	public ISession OpenSession() => OpenSessionCore();
+
+	public ISession OpenSession(PsshBox pssh, out string challenge)
+	{
+		ValidateLicensePssh(pssh);
+		var session = OpenSessionCore();
+		try
+		{
+			challenge = session.GetLicenseChallenge(pssh);
+			return session;
+		}
+		catch
+		{
+			session.Dispose();
+			throw;
+		}
+	}
+
+	internal static void ValidateLicensePssh(PsshBox pssh)
+	{
+		ArgumentNullException.ThrowIfNull(pssh);
+		if (pssh.ProtectionSystemId != WidevineContentProtection)
+			throw new InvalidDataException("PSSH does not contain the Widevine protection-system ID.");
+		if (pssh.Version != 0 || pssh.ExtraData.Length != 0)
+			throw new InvalidDataException("Only version-0 Widevine PSSH boxes without KIDs are supported.");
+	}
+
+	private Session OpenSessionCore()
 	{
 		if (Sessions.Count == MAX_NUM_OF_SESSIONS)
 			throw new Exception("Too Many Sessions");
@@ -110,6 +138,12 @@ public partial class Cdm
 		{
 			if (!dash.TryGetPssh(Cdm.WidevineContentProtection, out var pssh))
 				throw new InvalidDataException("No Widevine PSSH found in DASH");
+			return GetLicenseChallenge(pssh);
+		}
+
+		internal string GetLicenseChallenge(PsshBox pssh)
+		{
+			ValidateLicensePssh(pssh);
 
 			var licRequest = new LicenseRequest
 			{
@@ -168,33 +202,55 @@ public partial class Cdm
 		{
 			using var aes = Aes.Create();
 			aes.Key = keyToTheKeys;
-			var keys = new WidevineKey[licenseKeys.Count];
+			var contentKeyContainers = licenseKeys
+				.Where(key => IsContentKeyType((KeyType)key.Type))
+				.ToArray();
+			var keys = new WidevineKey[contentKeyContainers.Length];
 
-			for (int i = 0; i < licenseKeys.Count; i++)
+			for (int i = 0; i < contentKeyContainers.Length; i++)
 			{
-				var keyContainer = licenseKeys[i];
+				var keyContainer = contentKeyContainers[i];
 
 				var keyBytes = aes.DecryptCbc(keyContainer.Key.ToByteArray(), keyContainer.Iv.ToByteArray(), PaddingMode.PKCS7);
-				var id = keyContainer.Id.ToByteArray();
-
-				if (id.Length > 16)
-				{
-					var tryB64 = new byte[id.Length * 3 / 4];
-					if (Convert.TryFromBase64String(Encoding.ASCII.GetString(id), tryB64, out int bytesWritten))
-					{
-						id = tryB64;
-					}
-					Array.Resize(ref id, 16);
-				}
-				else if (id.Length < 16)
-				{
-					id = id.Append(new byte[16 - id.Length]);
-				}
+				var id = DecodeKeyId(keyContainer.Id.ToByteArray());
 
 				keys[i] = new WidevineKey(new Guid(id, bigEndian: true), keyContainer.Type, keyBytes);
 			}
-			return keys;
+			return SelectContentKeys(keys);
 		}
+
+		internal static byte[] DecodeKeyId(byte[] id)
+		{
+			if (id.Length == 16)
+				return id;
+
+			var decoded = new byte[16];
+			if (id.Length > 16
+				&& Convert.TryFromBase64String(Encoding.ASCII.GetString(id), decoded, out var bytesWritten)
+				&& bytesWritten == decoded.Length)
+				return decoded;
+
+			throw new InvalidDataException($"Widevine key ID must contain exactly 16 bytes; received {id.Length}.");
+		}
+
+		internal static WidevineKey[] SelectContentKeys(IEnumerable<WidevineKey> keys)
+		{
+			ArgumentNullException.ThrowIfNull(keys);
+			var selected = keys.Where(key => IsContentKeyType(key.Type)).ToArray();
+			if (selected.Length == 0)
+				throw new InvalidDataException("The Widevine license contains no content-bearing keys.");
+
+			var duplicateKid = selected
+				.GroupBy(key => key.Kid)
+				.FirstOrDefault(group => group.Skip(1).Any());
+			if (duplicateKid is not null)
+				throw new InvalidDataException($"The Widevine license contains duplicate content key ID {duplicateKid.Key}.");
+
+			return selected;
+		}
+
+		private static bool IsContentKeyType(KeyType type)
+			=> type is KeyType.Content or KeyType.OemContent;
 
 		private static bool VerifySignature(SignedMessage signedMessage, byte[] authContext, byte[] sessionKey)
 		{
