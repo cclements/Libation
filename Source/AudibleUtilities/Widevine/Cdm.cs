@@ -199,37 +199,62 @@ public partial class Cdm
 			return DecryptKeys(keyToTheKeys, license.Key);
 		}
 
-		private static WidevineKey[] DecryptKeys(byte[] keyToTheKeys, IList<License.Types.KeyContainer> licenseKeys)
+		internal static WidevineKey[] DecryptKeys(byte[] keyToTheKeys, IList<License.Types.KeyContainer> licenseKeys)
 		{
 			using var aes = Aes.Create();
 			aes.Key = keyToTheKeys;
-			var keys = new WidevineKey[licenseKeys.Count];
+			var contentKeyContainers = licenseKeys
+				.Where(key => IsContentKeyType((KeyType)key.Type))
+				.ToArray();
+			var keys = new WidevineKey[contentKeyContainers.Length];
 
-			for (int i = 0; i < licenseKeys.Count; i++)
+			for (int i = 0; i < contentKeyContainers.Length; i++)
 			{
-				var keyContainer = licenseKeys[i];
+				var keyContainer = contentKeyContainers[i];
 
 				var keyBytes = aes.DecryptCbc(keyContainer.Key.ToByteArray(), keyContainer.Iv.ToByteArray(), PaddingMode.PKCS7);
-				var id = keyContainer.Id.ToByteArray();
-
-				if (id.Length > 16)
-				{
-					var tryB64 = new byte[id.Length * 3 / 4];
-					if (Convert.TryFromBase64String(Encoding.ASCII.GetString(id), tryB64, out int bytesWritten))
-					{
-						id = tryB64;
-					}
-					Array.Resize(ref id, 16);
-				}
-				else if (id.Length < 16)
-				{
-					id = id.Append(new byte[16 - id.Length]);
-				}
+				var id = DecodeKeyId(keyContainer.Id.ToByteArray());
 
 				keys[i] = new WidevineKey(new Guid(id, bigEndian: true), keyContainer.Type, keyBytes);
 			}
-			return keys;
+			return SelectContentKeys(keys);
 		}
+
+		private static byte[] DecodeKeyId(byte[] id)
+		{
+			if (id.Length == 16)
+				return id;
+
+			var decoded = new byte[16];
+			if (id.Length > 16
+				&& Convert.TryFromBase64String(Encoding.ASCII.GetString(id), decoded, out var bytesWritten)
+				&& bytesWritten == decoded.Length)
+				return decoded;
+
+			throw new InvalidDataException($"Widevine key ID must contain exactly 16 bytes; received {id.Length}.");
+		}
+
+		private static WidevineKey[] SelectContentKeys(IEnumerable<WidevineKey> keys)
+		{
+			var selected = keys.Where(key => IsContentKeyType(key.Type)).ToArray();
+			if (selected.Length == 0)
+				throw new InvalidDataException("The Widevine license contains no content-bearing keys.");
+
+			var conflictingKid = selected
+				.GroupBy(key => key.Kid)
+				.FirstOrDefault(group =>
+				{
+					var expected = group.First().Key;
+					return group.Skip(1).Any(key => !CryptographicOperations.FixedTimeEquals(key.Key, expected));
+				});
+			if (conflictingKid is not null)
+				throw new InvalidDataException($"The Widevine license contains conflicting material for content key ID {conflictingKid.Key}.");
+
+			return selected;
+		}
+
+		private static bool IsContentKeyType(KeyType type)
+			=> type is KeyType.Content or KeyType.OemContent;
 
 		private static bool VerifySignature(SignedMessage signedMessage, byte[] authContext, byte[] sessionKey)
 		{
