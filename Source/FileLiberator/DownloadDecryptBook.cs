@@ -311,13 +311,19 @@ public class DownloadDecryptBook : AudioDecodable, IProcessable<DownloadDecryptB
 
 	#region Post-success routines
 	/// <summary>Read the audio format from the audio file's metadata.</summary>
+	/// <remarks>
+	/// Provenance contract: the format must be read from the file Libation wrote, never
+	/// from an in-memory source handle such as a converter's still-open encrypted input.
+	/// A transcode or downmix during decryption makes source metadata wrong for the
+	/// completed book. See OutputAudioMetadataTests.
+	/// </remarks>
 	public AudioFormat GetFileFormatInfo(DownloadOptions options, TempFile firstAudioFile)
 	{
 		try
 		{
 			return firstAudioFile.Extension.ToLowerInvariant() switch
 			{
-				".m4b" or ".m4a" or ".mp4" => GetMp4AudioFormat(),
+				".m4b" or ".m4a" or ".mp4" => AudioFormatDecoder.FromMpeg4(firstAudioFile.FilePath),
 				".mp3" => AudioFormatDecoder.FromMpeg3(firstAudioFile.FilePath),
 				_ => AudioFormat.Default
 			};
@@ -328,11 +334,6 @@ public class DownloadDecryptBook : AudioDecodable, IProcessable<DownloadDecryptB
 			Serilog.Log.Logger.Error(ex, "Error determining output audio format for {@Book}. File = '{@audioFile}'", options.LibraryBook.LogFriendly(), firstAudioFile);
 			return AudioFormat.Default;
 		}
-
-		AudioFormat GetMp4AudioFormat()
-			=> abDownloader is AaxcDownloadConvertBase converter && converter.AaxFile is AAXClean.Mp4File mp4File
-			? AudioFormatDecoder.FromMpeg4(mp4File)
-			: AudioFormatDecoder.FromMpeg4(firstAudioFile.FilePath);
 	}
 
 	/// <summary>Move new files to 'Books' directory</summary>
