@@ -1,4 +1,5 @@
 ﻿using Google.Protobuf;
+using Mpeg4Lib.Boxes;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -70,7 +71,34 @@ public partial class Cdm
 		Device = device;
 	}
 
-	public ISession OpenSession()
+	public ISession OpenSession() => OpenSessionCore();
+
+	public ISession OpenSession(PsshBox pssh, out string challenge)
+	{
+		ValidateLicensePssh(pssh);
+		var session = OpenSessionCore();
+		try
+		{
+			challenge = session.GetLicenseChallenge(pssh);
+			return session;
+		}
+		catch
+		{
+			session.Dispose();
+			throw;
+		}
+	}
+
+	internal static void ValidateLicensePssh(PsshBox pssh)
+	{
+		ArgumentNullException.ThrowIfNull(pssh);
+		if (pssh.ProtectionSystemId != WidevineContentProtection)
+			throw new InvalidDataException("PSSH does not contain the Widevine protection-system ID.");
+		if (pssh.Version != 0 || pssh.ExtraData.Length != 0)
+			throw new InvalidDataException("Only version-0 Widevine PSSH boxes without KIDs are supported.");
+	}
+
+	private Session OpenSessionCore()
 	{
 		if (Sessions.Count == MAX_NUM_OF_SESSIONS)
 			throw new Exception("Too Many Sessions");
@@ -110,6 +138,13 @@ public partial class Cdm
 		{
 			if (!dash.TryGetPssh(Cdm.WidevineContentProtection, out var pssh))
 				throw new InvalidDataException("No Widevine PSSH found in DASH");
+			using (pssh)
+				return GetLicenseChallenge(pssh);
+		}
+
+		internal string GetLicenseChallenge(PsshBox pssh)
+		{
+			ValidateLicensePssh(pssh);
 
 			var licRequest = new LicenseRequest
 			{

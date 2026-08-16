@@ -132,6 +132,9 @@ public partial class DownloadOptions
 			var aacCodecChoice = config.Request_xHE_AAC ? Codecs.xHE_AAC : Codecs.AAC_LC;
 			//Always use the ec+3 codec if converting to mp3
 			var spatialCodecChoice = config.SpatialAudioCodec is Configuration.SpatialCodec.AC_4 ? Codecs.AC_4 : Codecs.EC_3;
+			var expectedDashCodec = config.RequestSpatial
+				? spatialCodecChoice is Codecs.AC_4 ? "ac-4" : "ec-3"
+				: aacCodecChoice is Codecs.xHE_AAC ? "mp4a.40.42" : "mp4a.40.2";
 
 			var contentLic
 				= await api.GetDownloadLicenseAsync(
@@ -155,16 +158,23 @@ public partial class DownloadOptions
 			using var mpdResponse = await client.GetAsync(contentLic.LicenseResponse, token);
 			var dash = new MpegDash(mpdResponse.Content.ReadAsStream(token));
 
-			if (!dash.TryGetUri(new Uri(contentLic.LicenseResponse), out var contentUri))
-				throw new InvalidDataException("Failed to get mpeg-dash content download url.");
+			if (!dash.TryGetContent(
+				new Uri(contentLic.LicenseResponse),
+				Cdm.WidevineContentProtection,
+				expectedDashCodec,
+				out var contentUri,
+				out var pssh))
+				throw new InvalidDataException("Failed to get a bound MPEG-DASH audio URL and Widevine PSSH.");
 
 			contentLic.ContentMetadata.ContentUrl = new() { OfflineUrl = contentUri.ToString() };
 
-			using var session = cdm.OpenSession();
-			var challenge = session.GetLicenseChallenge(dash);
-			var licenseMessage = await api.WidevineDrmLicense(libraryBook.Book.AudibleProductId, challenge);
-			var keys = session.ParseLicense(licenseMessage);
-			return LicenseInfo.Create(contentLic, keys.Select(k => new KeyData(k.Kid.ToByteArray(bigEndian: true), k.Key)));
+			using (pssh)
+			{
+				using var session = cdm.OpenSession(pssh, out var challenge);
+				var licenseMessage = await api.WidevineDrmLicense(libraryBook.Book.AudibleProductId, challenge);
+				var keys = session.ParseLicense(licenseMessage);
+				return LicenseInfo.Create(contentLic, keys.Select(k => new KeyData(k.Kid.ToByteArray(bigEndian: true), k.Key)));
+			}
 		}
 		catch (Exception ex)
 		{
