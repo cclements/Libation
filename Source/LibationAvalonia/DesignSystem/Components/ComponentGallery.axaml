@@ -1,0 +1,217 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:components="using:LibationAvalonia.DesignSystem.Components"
+			 x:Class="LibationAvalonia.DesignSystem.Components.ComponentGallery"
+			 x:Name="Gallery">
+	<UserControl.Styles>
+		<StyleInclude Source="avares://Libation/DesignSystem/Styles/All.axaml" />
+		<Style Selector="TextBlock.gallery-section">
+			<Setter Property="FontFamily" Value="{DynamicResource Libation.Font.Display}" />
+			<Setter Property="FontSize" Value="{DynamicResource Libation.FontSize.Section}" />
+			<Setter Property="Foreground" Value="{DynamicResource Libation.Brush.TextPrimary}" />
+		</Style>
+	</UserControl.Styles>
+	<Grid RowDefinitions="Auto,*" Background="{DynamicResource Libation.Brush.Canvas}">
+		<Border Background="{DynamicResource Libation.Brush.SurfaceRaised}" BorderBrush="{DynamicResource Libation.Brush.BorderSubtle}"
+				BorderThickness="0,0,0,1" Padding="16">
+			<WrapPanel Orientation="Horizontal">
+				<TextBlock Text="Profile" VerticalAlignment="Center" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+				<ComboBox Classes="contemporary" ItemsSource="{x:Static components:ComponentGallery.ProfileOptions}"
+						  SelectedItem="{Binding PreviewStyle, ElementName=Gallery, Mode=TwoWay}" />
+				<TextBlock Text="Density" VerticalAlignment="Center" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+				<ComboBox Classes="contemporary" ItemsSource="{x:Static components:ComponentGallery.DensityOptions}"
+						  SelectedItem="{Binding PreviewDensity, ElementName=Gallery, Mode=TwoWay}" />
+				<TextBlock Text="Decoration" VerticalAlignment="Center" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+				<ComboBox Classes="contemporary" ItemsSource="{x:Static components:ComponentGallery.DecorationOptions}"
+						  SelectedItem="{Binding PreviewDecoration, ElementName=Gallery, Mode=TwoWay}" />
+				<TextBlock Text="Motion" VerticalAlignment="Center" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+				<ComboBox Classes="contemporary" ItemsSource="{x:Static components:ComponentGallery.MotionOptions}"
+						  SelectedItem="{Binding PreviewMotion, ElementName=Gallery, Mode=TwoWay}" />
+				<CheckBox Classes="contemporary" Content="System typography"
+						  IsChecked="{Binding UseSystemTypography, ElementName=Gallery, Mode=TwoWay}" VerticalAlignment="Center" />
+			</WrapPanel>
+		</Border>
+
+		<ThemeVariantScope x:Name="PreviewScope" Grid.Row="1">
+			<ScrollViewer>
+				<StackPanel Margin="24" Spacing="{DynamicResource Libation.Space.5}"
+							MaxWidth="{DynamicResource Libation.Content.MaxReadingWidth}">
+					<StackPanel Spacing="{DynamicResource Libation.Space.1}">
+						<TextBlock Text="Contemporary component gallery" FontFamily="{DynamicResource Libation.Font.Display}"
+								   FontSize="{DynamicResource Libation.FontSize.Page}" Foreground="{DynamicResource Libation.Brush.TextPrimary}" />
+						<TextBlock x:Name="PreviewDescription" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+					</StackPanel>
+
+					<TextBlock Classes="gallery-section" Text="Native controls and shared styles" />
+					<Border Classes="card">
+						<StackPanel Spacing="{DynamicResource Libation.Space.3}">
+							<WrapPanel Orientation="Horizontal">
+								<Button Classes="contemporary primary" Content="Primary" Command="{Binding InertCommand, ElementName=Gallery}" />
+								<Button Classes="contemporary" Content="Secondary" Command="{Binding InertCommand, ElementName=Gallery}" />
+								<Button Classes="contemporary quiet" Content="Quiet" Command="{Binding InertCommand, ElementName=Gallery}" />
+								<Button Classes="contemporary danger" Content="Danger" Command="{Binding InertCommand, ElementName=Gallery}" />
+								<Button Classes="contemporary" Content="Disabled" IsEnabled="False" />
+								<Button Classes="filter selected" Content="Selected filter" Command="{Binding InertCommand, ElementName=Gallery}" />
+							</WrapPanel>
+							<Grid ColumnDefinitions="*,*" ColumnSpacing="{DynamicResource Libation.Space.3}">
+								<TextBox Classes="contemporary search" PlaceholderText="Search the library" />
+								<ComboBox Grid.Column="1" Classes="contemporary" ItemsSource="{Binding NavigationItems, ElementName=Gallery}" SelectedIndex="0" />
+							</Grid>
+							<ProgressBar Classes="contemporary prominent" Minimum="0" Maximum="100" Value="62" AutomationProperties.Name="Sample progress" />
+							<Menu Classes="contemporary">
+								<MenuItem Classes="contemporary" Header="Sample menu">
+									<MenuItem Classes="contemporary" Header="Open" Command="{Binding InertCommand, ElementName=Gallery}" />
+									<MenuItem Classes="contemporary" Header="Disabled" IsEnabled="False" />
+								</MenuItem>
+							</Menu>
+							<DataGrid Classes="contemporary" ItemsSource="{Binding GalleryBooks, ElementName=Gallery}"
+									  AutoGenerateColumns="True" IsReadOnly="True" MaxHeight="220" />
+						</StackPanel>
+					</Border>
+
+					<TextBlock Classes="gallery-section" Text="Navigation rail" />
+					<Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="{DynamicResource Libation.Space.4}">
+						<components:LibationNavigationRail x:Name="NavigationSample" ItemsSource="{Binding NavigationItems, ElementName=Gallery}" IsExpanded="True">
+							<components:LibationNavigationRail.BrandContent><TextBlock Text="LIBATION" FontWeight="Bold" /></components:LibationNavigationRail.BrandContent>
+							<components:LibationNavigationRail.FooterContent><TextBlock Text="Settings" /></components:LibationNavigationRail.FooterContent>
+							<components:LibationNavigationRail.ItemTemplate>
+								<DataTemplate x:DataType="components:GalleryNavigationItem">
+									<Grid ColumnDefinitions="*,Auto">
+										<TextBlock Text="{Binding Label}" />
+										<TextBlock Grid.Column="1" Text="{Binding Badge}" FontWeight="SemiBold" />
+									</Grid>
+								</DataTemplate>
+							</components:LibationNavigationRail.ItemTemplate>
+						</components:LibationNavigationRail>
+						<components:LibationNavigationRail Grid.Column="1" ItemsSource="{Binding NavigationItems, ElementName=Gallery}" IsExpanded="False">
+							<components:LibationNavigationRail.BrandContent><TextBlock Text="L" FontWeight="Bold" /></components:LibationNavigationRail.BrandContent>
+							<components:LibationNavigationRail.FooterContent><TextBlock Text="⚙" /></components:LibationNavigationRail.FooterContent>
+							<components:LibationNavigationRail.ItemTemplate>
+								<DataTemplate x:DataType="components:GalleryNavigationItem"><TextBlock Text="{Binding Label}" TextTrimming="CharacterEllipsis" /></DataTemplate>
+							</components:LibationNavigationRail.ItemTemplate>
+						</components:LibationNavigationRail>
+					</Grid>
+
+					<TextBlock Classes="gallery-section" Text="Page header" />
+					<components:PageHeader Eyebrow="LIBRARY" Title="Your listening cellar"
+								   SupportingText="A real header surface with commands, status, and decorative art."
+								   PrimaryActionText="Add books" PrimaryCommand="{Binding InertCommand, ElementName=Gallery}">
+						<components:PageHeader.StatusContent><components:StatusBadge Status="Completed" TextOverride="Up to date" /></components:PageHeader.StatusContent>
+						<components:PageHeader.HeroArt>
+							<Path Data="{DynamicResource brand.mark.one-color}" Width="90" Height="90" Stretch="Uniform"
+								  Stroke="{DynamicResource Libation.Brush.AccentSecondary}" StrokeThickness="1.5" />
+						</components:PageHeader.HeroArt>
+					</components:PageHeader>
+
+					<TextBlock Classes="gallery-section" Text="Metric cards" />
+					<UniformGrid Columns="4" Rows="1">
+						<components:MetricCard Margin="4" IconData="{DynamicResource glyph.library}" Value="128" Label="Audiobooks" StatusText="All books" />
+						<components:MetricCard Margin="4" IconData="{DynamicResource glyph.downloads}" Value="12" Label="Ready" DeltaText="+3" StatusText="Downloaded" Severity="Success" />
+						<components:MetricCard Margin="4" IconData="{DynamicResource glyph.processing}" Value="2" Label="Processing" StatusText="Active" Severity="Info" />
+						<components:MetricCard Margin="4" IconData="{DynamicResource glyph.failed}" Value="1" Label="Needs review" StatusText="Failed" Severity="Danger"
+									   CommandText="Review" Command="{Binding InertCommand, ElementName=Gallery}" />
+					</UniformGrid>
+
+					<TextBlock Classes="gallery-section" Text="Status badges" />
+					<WrapPanel Orientation="Horizontal">
+						<components:StatusBadge Margin="4" Status="DownloadPending" />
+						<components:StatusBadge Margin="4" Status="Downloading" />
+						<components:StatusBadge Margin="4" Status="Downloaded" />
+						<components:StatusBadge Margin="4" Status="Processing" />
+						<components:StatusBadge Margin="4" Status="Completed" />
+						<components:StatusBadge Margin="4" Status="Failed" />
+						<components:StatusBadge Margin="4" Status="Cancelled" />
+						<components:StatusBadge Margin="4" Status="Unavailable" />
+						<components:StatusBadge Margin="4" Status="NeedsAttention" />
+					</WrapPanel>
+
+					<TextBlock Classes="gallery-section" Text="Book cards" />
+					<UniformGrid Columns="4" Rows="1">
+						<components:BookCard Margin="4" Title="Cellar Notes" Author="A. Listener" Narrator="B. Voice" Duration="11 hr 42 min"
+									 Status="Downloaded" Command="{Binding InertCommand, ElementName=Gallery}" ContextCommand="{Binding InertCommand, ElementName=Gallery}" />
+						<components:BookCard Margin="4" Title="Selected Vintage" Author="C. Author" Duration="8 hr 4 min" Status="Completed" IsSelected="True"
+									 Command="{Binding InertCommand, ElementName=Gallery}" />
+						<components:BookCard Margin="4" Title="Decanting Now" Author="D. Author" Duration="5 hr 18 min" Status="Processing"
+									 ShowProgress="True" Progress="62" Command="{Binding InertCommand, ElementName=Gallery}" />
+						<components:BookCard Margin="4" Title="Unavailable Book" Author="E. Author" Duration="Unknown" Status="Unavailable" IsEnabled="False" />
+					</UniformGrid>
+
+					<TextBlock Classes="gallery-section" Text="Book rows" />
+					<StackPanel Spacing="{DynamicResource Libation.Space.2}">
+						<components:BookRow Title="Recent title" SupportingText="A. Author · B. Narrator" Metadata="Added today" Status="Downloaded"
+									Command="{Binding InertCommand, ElementName=Gallery}" ContextCommand="{Binding InertCommand, ElementName=Gallery}" />
+						<components:BookRow Title="Selected title" SupportingText="C. Author" Metadata="11 hr 9 min" Status="Completed" IsSelected="True"
+									Command="{Binding InertCommand, ElementName=Gallery}" />
+						<components:BookRow Title="Processing title" SupportingText="D. Author" Metadata="Chapter 8" Status="Processing" ShowProgress="True" Progress="62" />
+						<components:BookRow Title="Failed title" SupportingText="E. Author" Metadata="Permission required" Status="Failed" />
+					</StackPanel>
+
+					<TextBlock Classes="gallery-section" Text="Flight tray" />
+					<components:FlightTray Title="Flight" CountText="3 books" WarningText="One book needs attention before processing."
+								   OutputProfileText="M4B · chapter files" ItemsSource="{Binding GalleryBooks, ElementName=Gallery}"
+								   ProcessCommand="{Binding InertCommand, ElementName=Gallery}" ClearCommand="{Binding InertCommand, ElementName=Gallery}">
+						<components:FlightTray.ItemTemplate>
+							<DataTemplate x:DataType="components:GalleryBook">
+								<components:BookRow Title="{Binding Title}" SupportingText="{Binding SupportingText}" Metadata="{Binding Metadata}"
+												Status="{Binding Status}" ShowProgress="True" Progress="{Binding Progress}" />
+							</DataTemplate>
+						</components:FlightTray.ItemTemplate>
+					</components:FlightTray>
+
+					<TextBlock Classes="gallery-section" Text="Decanter and queue" />
+					<StackPanel Spacing="{DynamicResource Libation.Space.3}">
+						<components:DecanterSummary SummaryText="2 active · 1 waiting" ActiveText="Cellar Notes" ShowProgress="True" Progress="62"
+										 IsExpanded="True" CanPause="True" CanCancel="True" PauseCommand="{Binding InertCommand, ElementName=Gallery}"
+										 CancelCommand="{Binding InertCommand, ElementName=Gallery}">
+							<components:DecanterSummary.DetailsContent><TextBlock Text="The authoritative queue remains owned by the host." /></components:DecanterSummary.DetailsContent>
+						</components:DecanterSummary>
+						<components:DecanterSummary SummaryText="Queue is collapsed" ActiveText="No active process" IsExpanded="False" />
+						<components:QueueItem Title="Cellar Notes" Stage="Decrypting chapter 8" Status="Processing" Progress="62" ShowProgress="True"
+									  CancelCommand="{Binding InertCommand, ElementName=Gallery}" />
+						<components:QueueItem Title="A Finished Vintage" Stage="Written to output" Status="Completed" Progress="100" ShowProgress="True"
+									  RevealCommand="{Binding InertCommand, ElementName=Gallery}" />
+						<components:QueueItem Title="Permission Failure" Stage="Could not write output" Status="Failed" ShowProgress="False" IsExpanded="True"
+									  Message="Choose a writable output folder and retry." ErrorDetails="Access to the output path was denied."
+									  RetryCommand="{Binding InertCommand, ElementName=Gallery}" />
+					</StackPanel>
+
+					<TextBlock Classes="gallery-section" Text="Drop zones" />
+					<Grid ColumnDefinitions="*,*,*" ColumnSpacing="{DynamicResource Libation.Space.3}">
+						<components:DropZone Title="Drop audiobook files" Hint="Or use Browse to choose files." AcceptedTypesText="AAX, AA, M4B"
+									 BrowseCommand="{Binding InertCommand, ElementName=Gallery}" />
+						<components:DropZone Grid.Column="1" Title="Release to add" Hint="Files are ready to be added." AcceptedTypesText="AAX, AA, M4B"
+									 IsDragOver="True" BrowseCommand="{Binding InertCommand, ElementName=Gallery}" />
+						<components:DropZone Grid.Column="2" Title="Folder unavailable" Hint="Choose another location."
+									 ErrorText="Libation does not have permission to read this folder."
+									 BrowseCommand="{Binding InertCommand, ElementName=Gallery}" />
+					</Grid>
+
+					<TextBlock Classes="gallery-section" Text="Attention banners" />
+					<StackPanel Spacing="{DynamicResource Libation.Space.2}">
+						<components:AttentionBanner Severity="Info" Title="Library scan available" Message="New purchases may be ready to import."
+										ActionText="Scan" ActionCommand="{Binding InertCommand, ElementName=Gallery}" />
+						<components:AttentionBanner Severity="Success" Title="All books are current" Message="No action is required." />
+						<components:AttentionBanner Severity="Warning" Title="Output folder is nearly full" Message="Review storage before processing the Flight."
+										ActionText="Review storage" ActionCommand="{Binding InertCommand, ElementName=Gallery}" />
+						<components:AttentionBanner Severity="Danger" Title="Account needs attention" Message="Sign in again to continue downloads."
+										ActionText="Open accounts" ActionCommand="{Binding InertCommand, ElementName=Gallery}" />
+					</StackPanel>
+
+					<TextBlock Classes="gallery-section" Text="Empty state" />
+					<components:EmptyState Title="Your cellar is ready" Explanation="Scan your Audible library or add local audiobook files to begin."
+								   PrimaryActionText="Scan library" PrimaryCommand="{Binding InertCommand, ElementName=Gallery}"
+								   SecondaryActionText="Add files" SecondaryCommand="{Binding InertCommand, ElementName=Gallery}" />
+
+					<TextBlock Classes="gallery-section" Text="Toasts" />
+					<components:ToastHost ItemsSource="{Binding ToastMessages, ElementName=Gallery}" HorizontalAlignment="Right" />
+
+					<TextBlock Classes="gallery-section" Text="Theme preview card" />
+					<components:ThemePreviewCard ProfileName="Selected experience" Description="Real token-driven controls inside an isolated preview scope."
+									 BadgeStatus="Completed" BadgeText="Ready" Progress="64" SelectedRowTitle="Cellar Notes"
+									 SelectedRowMetadata="A. Listener · 11 hr 42 min" ActionText="Apply"
+									 ActionCommand="{Binding InertCommand, ElementName=Gallery}" />
+				</StackPanel>
+			</ScrollViewer>
+		</ThemeVariantScope>
+	</Grid>
+</UserControl>

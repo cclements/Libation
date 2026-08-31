@@ -1,0 +1,31 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 x:Class="LibationAvalonia.DesignSystem.Components.EmptyState"
+			 x:Name="Root">
+	<Border Classes="card" Padding="32" AutomationProperties.Name="{Binding Title, ElementName=Root}">
+		<StackPanel HorizontalAlignment="Center" MaxWidth="520" Spacing="{DynamicResource Libation.Space.3}">
+			<Grid Height="120" IsVisible="{DynamicResource Libation.Decoration.Visible}"
+				Opacity="{DynamicResource Libation.Decoration.Opacity}"
+				  AutomationProperties.IsControlElementOverride="False" AutomationProperties.AccessibilityView="Raw">
+				<Path Data="{DynamicResource glyph.library}" Stretch="Uniform" Width="80" Height="80"
+					  Stroke="{DynamicResource Libation.Brush.TextTertiary}" StrokeThickness="1.5"
+					  IsVisible="{Binding IllustrationTemplate, ElementName=Root, Converter={x:Static ObjectConverters.IsNull}}" />
+				<ContentControl Width="160" Height="120" Template="{Binding IllustrationTemplate, ElementName=Root}"
+							IsVisible="{Binding IllustrationTemplate, ElementName=Root, Converter={x:Static ObjectConverters.IsNotNull}}" />
+			</Grid>
+			<TextBlock Text="{Binding Title, ElementName=Root}" FontFamily="{DynamicResource Libation.Font.Display}"
+					   FontSize="{DynamicResource Libation.FontSize.Section}" Foreground="{DynamicResource Libation.Brush.TextPrimary}"
+					   TextAlignment="Center" TextWrapping="Wrap" />
+			<TextBlock Text="{Binding Explanation, ElementName=Root}" Foreground="{DynamicResource Libation.Brush.TextSecondary}"
+					   TextAlignment="Center" TextWrapping="Wrap" />
+			<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="{DynamicResource Libation.Density.ToolbarGap}">
+				<Button Classes="contemporary primary" Content="{Binding PrimaryActionText, ElementName=Root}"
+						Command="{Binding PrimaryCommand, ElementName=Root}" CommandParameter="{Binding PrimaryCommandParameter, ElementName=Root}"
+						IsVisible="{Binding PrimaryActionText, ElementName=Root, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+				<Button Classes="contemporary quiet" Content="{Binding SecondaryActionText, ElementName=Root}"
+						Command="{Binding SecondaryCommand, ElementName=Root}" CommandParameter="{Binding SecondaryCommandParameter, ElementName=Root}"
+						IsVisible="{Binding SecondaryActionText, ElementName=Root, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+			</StackPanel>
+		</StackPanel>
+	</Border>
+</UserControl>

@@ -1,4 +1,5 @@
-﻿using Avalonia.Controls;
+﻿using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Data.Converters;
 using Avalonia.Input.Platform;
 using Avalonia.Threading;
@@ -14,15 +15,16 @@ namespace LibationAvalonia.Views;
 
 public partial class ProcessQueueControl : UserControl
 {
+	public static readonly StyledProperty<int> SelectedTabIndexProperty
+		= AvaloniaProperty.Register<ProcessQueueControl, int>(nameof(SelectedTabIndex));
+
 	private TrackedQueue<ProcessBookViewModel>? Queue => _viewModel?.Queue;
 	private ProcessQueueViewModel? _viewModel => DataContext as ProcessQueueViewModel;
+	private bool staticHandlersAttached;
 
 	public ProcessQueueControl()
 	{
 		InitializeComponent();
-
-		ProcessBookControl.PositionButtonClicked += ProcessBookControl2_ButtonClicked;
-		ProcessBookControl.CancelButtonClicked += ProcessBookControl2_CancelButtonClicked;
 
 		#region Design Mode Testing
 #if DEBUG
@@ -90,6 +92,41 @@ public partial class ProcessQueueControl : UserControl
 		}
 #endif
 		#endregion
+	}
+
+	public int SelectedTabIndex
+	{
+		get => GetValue(SelectedTabIndexProperty);
+		set => SetValue(SelectedTabIndexProperty, value);
+	}
+
+	protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
+	{
+		base.OnAttachedToVisualTree(e);
+		if (!staticHandlersAttached)
+		{
+			ProcessBookControl.PositionButtonClicked += ProcessBookControl2_ButtonClicked;
+			ProcessBookControl.CancelButtonClicked += ProcessBookControl2_CancelButtonClicked;
+			staticHandlersAttached = true;
+		}
+		if (DataContext is ProcessQueueViewModel vm)
+		{
+			vm.ProcessStart -= Book_ProcessStart;
+			vm.ProcessStart += Book_ProcessStart;
+		}
+	}
+
+	protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
+	{
+		if (staticHandlersAttached)
+		{
+			ProcessBookControl.PositionButtonClicked -= ProcessBookControl2_ButtonClicked;
+			ProcessBookControl.CancelButtonClicked -= ProcessBookControl2_CancelButtonClicked;
+			staticHandlersAttached = false;
+		}
+		if (DataContext is ProcessQueueViewModel vm)
+			vm.ProcessStart -= Book_ProcessStart;
+		base.OnDetachedFromVisualTree(e);
 	}
 
 	#region Auto-Scroll Current Item Into View

@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="RouteOverviewLabel" xml:space="preserve">
+    <value>Overview</value>
+  </data>
+  <data name="RouteOverviewDescription" xml:space="preserve">
+    <value>Library and processing overview</value>
+  </data>
+  <data name="RouteLibraryLabel" xml:space="preserve">
+    <value>Library</value>
+  </data>
+  <data name="RouteLibraryDescription" xml:space="preserve">
+    <value>Browse and select library titles</value>
+  </data>
+  <data name="RouteDownloadsLabel" xml:space="preserve">
+    <value>Downloads</value>
+  </data>
+  <data name="RouteDownloadsDescription" xml:space="preserve">
+    <value>Review audiobook acquisition state</value>
+  </data>
+  <data name="RouteProcessingLabel" xml:space="preserve">
+    <value>Processing</value>
+  </data>
+  <data name="RouteProcessingDescription" xml:space="preserve">
+    <value>Review and control processing work</value>
+  </data>
+  <data name="RouteHistoryLabel" xml:space="preserve">
+    <value>History</value>
+  </data>
+  <data name="RouteHistoryDescription" xml:space="preserve">
+    <value>Review available recent outcomes</value>
+  </data>
+  <data name="RouteAccountsLabel" xml:space="preserve">
+    <value>Accounts</value>
+  </data>
+  <data name="RouteAccountsDescription" xml:space="preserve">
+    <value>Manage Audible accounts</value>
+  </data>
+  <data name="RouteSettingsLabel" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="RouteSettingsDescription" xml:space="preserve">
+    <value>Configure Libation</value>
+  </data>
+  <data name="RouteToolsLabel" xml:space="preserve">
+    <value>Tools</value>
+  </data>
+  <data name="RouteToolsDescription" xml:space="preserve">
+    <value>Open library and file tools</value>
+  </data>
+  <data name="RouteTrashLabel" xml:space="preserve">
+    <value>Trash</value>
+  </data>
+  <data name="RouteTrashDescription" xml:space="preserve">
+    <value>Review removed library titles</value>
+  </data>
+  <data name="RouteAboutLabel" xml:space="preserve">
+    <value>About</value>
+  </data>
+  <data name="RouteAboutDescription" xml:space="preserve">
+    <value>Version, update, and project information</value>
+  </data>
+  <data name="ShellCloseNavigationOverlayAutomationName" xml:space="preserve">
+    <value>Close navigation overlay</value>
+  </data>
+  <data name="ShellAboutPageTitle" xml:space="preserve">
+    <value>About Libation</value>
+  </data>
+  <data name="ShellAboutPageDescription" xml:space="preserve">
+    <value>Version, project, update, and license information.</value>
+  </data>
+  <data name="ShellNavigationCommandLabel" xml:space="preserve">
+    <value>Navigation</value>
+  </data>
+  <data name="ShellOpenPrimaryNavigationAutomationName" xml:space="preserve">
+    <value>Open primary navigation</value>
+  </data>
+  <data name="ShellOpenAboutCommandLabel" xml:space="preserve">
+    <value>Open About</value>
+  </data>
+  <data name="ShellOpenProcessingWorkspaceCommandLabel" xml:space="preserve">
+    <value>Open full Processing workspace</value>
+  </data>
+  <data name="ShellOpenProcessingSummaryAutomationName" xml:space="preserve">
+    <value>Open processing summary</value>
+  </data>
+  <data name="ShellOpenCurrentFlightAutomationName" xml:space="preserve">
+    <value>Open Current Flight</value>
+  </data>
+  <data name="ShellCurrentFlightCountFormat" xml:space="preserve">
+    <value>Current Flight: {0} selected</value>
+  </data>
+  <data name="ShellCompactFlightCountFormat" xml:space="preserve">
+    <value>Flight: {0}</value>
+  </data>
+  <data name="ShellOpenCompactProcessingBarAutomationName" xml:space="preserve">
+    <value>Open compact processing bar</value>
+  </data>
+  <data name="ShellCloseProcessingDrawerAutomationName" xml:space="preserve">
+    <value>Close processing drawer</value>
+  </data>
+  <data name="ShellCloseCommandLabel" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="MenuImportHeader" xml:space="preserve">
+    <value>_Import</value>
+  </data>
+  <data name="MenuAutoScanLibraryHeader" xml:space="preserve">
+    <value>A_uto Scan Library</value>
+  </data>
+  <data name="MenuAddAccountHeader" xml:space="preserve">
+    <value>A_dd Account...</value>
+  </data>
+  <data name="MenuScanLibraryHeader" xml:space="preserve">
+    <value>Scan _Library</value>
+  </data>
+  <data name="MenuScanAllAccountsHeader" xml:space="preserve">
+    <value>Scan Library of _All Accounts</value>
+  </data>
+  <data name="MenuScanSomeAccountsHeader" xml:space="preserve">
+    <value>Scan Library of _Some Accounts</value>
+  </data>
+  <data name="MenuRemoveLibraryBooksHeader" xml:space="preserve">
+    <value>_Remove Library Books</value>
+  </data>
+  <data name="MenuRemoveBooksAllAccountsHeader" xml:space="preserve">
+    <value>Remove Books from _All Accounts</value>
+  </data>
+  <data name="MenuRemoveBooksSomeAccountsHeader" xml:space="preserve">
+    <value>Remove Books from _Some Accounts</value>
+  </data>
+  <data name="MenuLocateAudiobooksHeader" xml:space="preserve">
+    <value>L_ocate Audiobooks...</value>
+  </data>
+  <data name="MenuLiberateHeader" xml:space="preserve">
+    <value>_Liberate</value>
+  </data>
+  <data name="MenuConvertAllM4BToMp3Header" xml:space="preserve">
+    <value>Convert all _M4B to MP3 [Long-running]...</value>
+  </data>
+  <data name="MenuExportHeader" xml:space="preserve">
+    <value>E_xport</value>
+  </data>
+  <data name="MenuExportLibraryHeader" xml:space="preserve">
+    <value>E_xport Library</value>
+  </data>
+  <data name="MenuQuickFiltersHeader" xml:space="preserve">
+    <value>Quick _Filters</value>
+  </data>
+  <data name="MenuReplaceTagsHeader" xml:space="preserve">
+    <value>Replace _Tags...</value>
+  </data>
+  <data name="MenuSetBookDownloadedHeader" xml:space="preserve">
+    <value>Set book '_Downloaded' status manually...</value>
+  </data>
+  <data name="MenuSetPdfDownloadedHeader" xml:space="preserve">
+    <value>Set _PDF 'Downloaded' status manually...</value>
+  </data>
+  <data name="MenuSetDownloadedAutomaticallyHeader" xml:space="preserve">
+    <value>Set '_Downloaded' status automatically...</value>
+  </data>
+  <data name="MenuRemoveFromLibraryHeader" xml:space="preserve">
+    <value>_Remove from library...</value>
+  </data>
+  <data name="MenuSettingsHeader" xml:space="preserve">
+    <value>_Settings</value>
+  </data>
+  <data name="MenuAccountsHeader" xml:space="preserve">
+    <value>_Accounts...</value>
+  </data>
+  <data name="MenuOpenSettingsHeader" xml:space="preserve">
+    <value>_Settings...</value>
+  </data>
+  <data name="MenuLaunchHangoverHeader" xml:space="preserve">
+    <value>Launch _Hangover</value>
+  </data>
+  <data name="MenuScanForBetterQualityAudiobooksHeader" xml:space="preserve">
+    <value>Scan for Better Quality Audiobooks</value>
+  </data>
+  <data name="MenuReviewContemporarySetupHeader" xml:space="preserve">
+    <value>Review Contemporary _Setup...</value>
+  </data>
+  <data name="MenuAboutHeader" xml:space="preserve">
+    <value>A_bout...</value>
+  </data>
+  <data name="ShellDoneReviewingCommandLabel" xml:space="preserve">
+    <value>Done reviewing</value>
+  </data>
+</root>

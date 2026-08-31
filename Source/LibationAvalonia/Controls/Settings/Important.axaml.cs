@@ -52,6 +52,12 @@ public partial class Important : UserControl
 
 	private void EditThemeColors_Click(object sender, Avalonia.Interactivity.RoutedEventArgs e)
 	{
+		// The legacy editor snapshots the live Fluent palette. Contemporary profiles
+		// deliberately replace those live colors, so opening it in that state could
+		// overwrite the user's preserved Chardonnay overrides.
+		if (Configuration.Instance.UseContemporaryShell)
+			return;
+
 		if (App.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime lifetime)
 		{
 			//Only allow a single instance of the theme picker

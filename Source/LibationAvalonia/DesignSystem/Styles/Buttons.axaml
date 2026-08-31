@@ -1,0 +1,43 @@
+<Styles xmlns="https://github.com/avaloniaui"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+	<Style Selector="Button.contemporary">
+		<Setter Property="MinHeight" Value="{DynamicResource Libation.ControlHeight.Default}" />
+		<Setter Property="Padding" Value="16,8" />
+		<Setter Property="CornerRadius" Value="{DynamicResource Libation.Radius.Small}" />
+		<Setter Property="Background" Value="{DynamicResource Libation.Brush.SurfaceInteractive}" />
+		<Setter Property="Foreground" Value="{DynamicResource Libation.Brush.TextPrimary}" />
+		<Setter Property="BorderBrush" Value="{DynamicResource Libation.Brush.BorderStrong}" />
+		<Setter Property="BorderThickness" Value="1" />
+		<Setter Property="FontFamily" Value="{DynamicResource Libation.Font.UI}" />
+	</Style>
+	<Style Selector="Button.contemporary:pointerover">
+		<Setter Property="Background" Value="{DynamicResource Libation.Brush.AccentHover}" />
+		<Setter Property="Foreground" Value="{DynamicResource Libation.Brush.TextOnAccent}" />
+	</Style>
+	<Style Selector="Button.contemporary:pressed">
+		<Setter Property="Background" Value="{DynamicResource Libation.Brush.AccentPressed}" />
+		<Setter Property="Foreground" Value="{DynamicResource Libation.Brush.TextOnAccent}" />
+	</Style>
+	<Style Selector="Button.contemporary:focus-visible">
+		<Setter Property="BorderBrush" Value="{DynamicResource Libation.Brush.Focus}" />
+		<Setter Property="BorderThickness" Value="2" />
+	</Style>
+	<Style Selector="Button.contemporary.primary">
+		<Setter Property="Background" Value="{DynamicResource Libation.Brush.AccentPrimary}" />
+		<Setter Property="Foreground" Value="{DynamicResource Libation.Brush.TextOnAccent}" />
+		<Setter Property="BorderBrush" Value="{DynamicResource Libation.Brush.AccentPrimary}" />
+	</Style>
+	<Style Selector="Button.contemporary.danger">
+		<Setter Property="Background" Value="{DynamicResource Libation.Brush.Danger}" />
+		<Setter Property="Foreground" Value="{DynamicResource Libation.Brush.TextOnAccent}" />
+		<Setter Property="BorderBrush" Value="{DynamicResource Libation.Brush.Danger}" />
+	</Style>
+	<Style Selector="Button.contemporary.quiet">
+		<Setter Property="Background" Value="Transparent" />
+		<Setter Property="BorderBrush" Value="Transparent" />
+	</Style>
+	<Style Selector="Button.contemporary.compact">
+		<Setter Property="MinHeight" Value="{DynamicResource Libation.ControlHeight.Compact}" />
+		<Setter Property="Padding" Value="12,6" />
+	</Style>
+</Styles>

@@ -170,6 +170,169 @@ public partial class Configuration
 	[Description("Libation's display color theme")]
 	public Theme ThemeVariant { get => GetNonString(defaultValue: Theme.System); set => SetNonString(value); }
 
+	[Description("Use the Contemporary Cellar interface")]
+	public bool UseContemporaryShell { get => GetContemporaryValue(defaultValue: false); set => SetNonString(value); }
+
+	[Description("Contemporary interface appearance")]
+	public ExperienceStyle ExperienceStyle
+	{
+		get => GetContemporaryEnum(defaultValue: global::LibationFileManager.ExperienceStyle.FollowSystem);
+		set => SetNonString(value);
+	}
+
+	[Description("Contemporary interface density")]
+	public DensityMode DensityMode
+	{
+		get => GetContemporaryEnum(defaultValue: global::LibationFileManager.DensityMode.Comfortable);
+		set => SetNonString(value);
+	}
+
+	[Description("Contemporary interface decoration")]
+	public DecorationLevel DecorationLevel
+	{
+		get => GetContemporaryEnum(defaultValue: global::LibationFileManager.DecorationLevel.Full);
+		set => SetNonString(value);
+	}
+
+	[Description("Contemporary interface motion")]
+	public ReducedMotionPreference ReducedMotionPreference
+	{
+		get => GetContemporaryEnum(defaultValue: global::LibationFileManager.ReducedMotionPreference.FollowSystem);
+		set => SetNonString(value);
+	}
+
+	[Description("Use system typography throughout the contemporary interface")]
+	public bool UseSystemTypography { get => GetContemporaryValue(defaultValue: false); set => SetNonString(value); }
+
+	[Description("Default contemporary library presentation")]
+	public LibraryViewMode LibraryViewMode
+	{
+		get => GetContemporaryEnum(defaultValue: global::LibationFileManager.LibraryViewMode.Details);
+		set => SetNonString(value);
+	}
+
+	[Description("Contemporary navigation rail behavior")]
+	public NavigationRailPreference NavigationRailPreference
+	{
+		get => GetContemporaryEnum(defaultValue: global::LibationFileManager.NavigationRailPreference.Automatic);
+		set => SetNonString(value);
+	}
+
+	[Description("Show the Decanter processing dock in the contemporary interface")]
+	public bool ShowDecanterDock { get => GetContemporaryValue(defaultValue: true); set => SetNonString(value); }
+
+	[Description("Last destination shown in the contemporary interface")]
+	public string ContemporaryLastRoute { get => GetString(defaultValue: ""); set => SetString(value); }
+
+	[Description("Restore the Current Flight after restarting Libation")]
+	public bool PersistFlightBetweenSessions { get => GetContemporaryValue(defaultValue: false); set => SetNonString(value); }
+
+	[Description("Stable product identifiers in the saved Current Flight")]
+	public string[] ContemporaryFlightProductIds
+	{
+		get => GetContemporaryValue(defaultValue: Array.Empty<string>());
+		set => SetNonString(value.Where(id => !string.IsNullOrWhiteSpace(id)).Distinct(StringComparer.Ordinal).ToArray());
+	}
+
+	public ContemporaryExperienceSettings GetContemporaryExperienceSettings()
+		=> new(
+			ExperienceStyle,
+			DensityMode,
+			DecorationLevel,
+			ReducedMotionPreference,
+			UseSystemTypography,
+			LibraryViewMode,
+			NavigationRailPreference,
+			ShowDecanterDock,
+			PersistFlightBetweenSessions,
+			UseContemporaryShell);
+
+	/// <summary>
+	/// Persists the contemporary preference set with one atomic settings-file replacement.
+	/// All change notifications bracket the single write, and shell activation remains the
+	/// final notification so presentation subscribers see the complete new profile.
+	/// </summary>
+	public void SaveContemporaryExperienceSettings(
+		ContemporaryExperienceSettings settings,
+		bool completeFirstLaunch = false)
+	{
+		ArgumentNullException.ThrowIfNull(settings);
+
+		var changes = new List<(string PropertyName, object? OldValue, object? NewValue)>();
+		AddChange(nameof(ExperienceStyle), ExperienceStyle, settings.ExperienceStyle);
+		AddChange(nameof(DensityMode), DensityMode, settings.DensityMode);
+		AddChange(nameof(DecorationLevel), DecorationLevel, settings.DecorationLevel);
+		AddChange(nameof(ReducedMotionPreference), ReducedMotionPreference, settings.ReducedMotionPreference);
+		AddChange(nameof(UseSystemTypography), UseSystemTypography, settings.UseSystemTypography);
+		AddChange(nameof(LibraryViewMode), LibraryViewMode, settings.LibraryViewMode);
+		AddChange(nameof(NavigationRailPreference), NavigationRailPreference, settings.NavigationRailPreference);
+		AddChange(nameof(ShowDecanterDock), ShowDecanterDock, settings.ShowDecanterDock);
+		AddChange(nameof(PersistFlightBetweenSessions), PersistFlightBetweenSessions, settings.PersistFlightBetweenSessions);
+		if (completeFirstLaunch)
+			AddChange(nameof(FirstLaunch), FirstLaunch, false);
+		// Activation is deliberately last in both the persisted batch and notification order.
+		AddChange(nameof(UseContemporaryShell), UseContemporaryShell, settings.UseContemporaryShell);
+
+		if (changes.Count == 0)
+			return;
+
+		foreach (var change in changes)
+			OnPropertyChanging(change.PropertyName, change.OldValue, change.NewValue);
+
+		Settings.SetNonStrings(changes
+			.Select(change => new KeyValuePair<string, object?>(change.PropertyName, change.NewValue))
+			.ToArray());
+
+		foreach (var change in changes)
+			OnPropertyChanged(change.PropertyName, change.NewValue);
+
+		void AddChange(string propertyName, object? oldValue, object? newValue)
+		{
+			if (!Equals(oldValue, newValue))
+				changes.Add((propertyName, oldValue, newValue));
+		}
+	}
+
+	private TEnum GetContemporaryEnum<TEnum>(TEnum defaultValue, [CallerMemberName] string propertyName = "")
+		where TEnum : struct, Enum
+		=> GetContemporaryValue(defaultValue, propertyName);
+
+	private T GetContemporaryValue<T>(T defaultValue, [CallerMemberName] string propertyName = "")
+	{
+		try
+		{
+			return GetNonString(defaultValue, propertyName)!;
+		}
+		catch (Exception ex) when (ex is InvalidConfigurationValueException
+			or InvalidCastException
+			or FormatException
+			or OverflowException
+			or ArgumentException
+			or JsonException)
+		{
+			StartupLog.Warning(ex, $"The '{propertyName}' setting is invalid. Libation restored the current interface and will use '{defaultValue}'.");
+			// Bypass the normal setter's equality pre-check: the typed getter now returns
+			// the fallback, so it would mistake the invalid stored value for an already-
+			// correct one. Repair the value and the shell escape hatch in one replacement,
+			// then notify the live window after the complete safe state is observable.
+			var repairs = new List<KeyValuePair<string, object?>>
+			{
+				new(propertyName, defaultValue),
+			};
+			if (propertyName != nameof(UseContemporaryShell))
+				repairs.Add(new(nameof(UseContemporaryShell), false));
+
+			OnPropertyChanging(propertyName, null, defaultValue);
+			if (propertyName != nameof(UseContemporaryShell))
+				OnPropertyChanging(nameof(UseContemporaryShell), null, false);
+			Settings.SetNonStrings(repairs);
+			OnPropertyChanged(propertyName, defaultValue);
+			if (propertyName != nameof(UseContemporaryShell))
+				OnPropertyChanged(nameof(UseContemporaryShell), false);
+			return defaultValue;
+		}
+	}
+
 	[Description("Allow Libation to fix up audiobook metadata")]
 	public bool AllowLibationFixup { get => GetNonString(defaultValue: true); set => SetNonString(value); }
 

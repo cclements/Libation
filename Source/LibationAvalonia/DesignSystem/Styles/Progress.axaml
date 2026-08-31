@@ -1,0 +1,12 @@
+<Styles xmlns="https://github.com/avaloniaui"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+	<Style Selector="ProgressBar.contemporary">
+		<Setter Property="Height" Value="6" />
+		<Setter Property="Background" Value="{DynamicResource Libation.Brush.ProgressTrack}" />
+		<Setter Property="Foreground" Value="{DynamicResource Libation.Brush.ProgressFill}" />
+		<Setter Property="CornerRadius" Value="{DynamicResource Libation.Radius.Small}" />
+	</Style>
+	<Style Selector="ProgressBar.contemporary.prominent">
+		<Setter Property="Height" Value="10" />
+	</Style>
+</Styles>

@@ -1,0 +1,60 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:components="using:LibationAvalonia.DesignSystem.Components"
+			 xmlns:library="using:LibationAvalonia.Features.Library"
+			 x:Class="LibationAvalonia.Features.Library.BookDetailsPane"
+			 x:DataType="library:LibraryViewModel">
+	<Border Classes="card raised"
+			BorderBrush="{DynamicResource Libation.Brush.BorderStrong}"
+			AutomationProperties.Name="Selected book details">
+		<Grid RowDefinitions="Auto,*" RowSpacing="{DynamicResource Libation.Space.3}">
+			<Grid ColumnDefinitions="*,Auto">
+				<TextBlock Text="Book details"
+						   FontSize="{DynamicResource Libation.FontSize.Section}"
+						   FontWeight="SemiBold"
+						   Foreground="{DynamicResource Libation.Brush.TextPrimary}" />
+				<Button Grid.Column="1"
+						Classes="contemporary quiet compact"
+						Content="Close details"
+						Command="{Binding CloseDetailsCommand}" />
+			</Grid>
+
+			<ScrollViewer Grid.Row="1">
+				<ContentControl Content="{Binding FocusedItem}">
+					<ContentControl.ContentTemplate>
+						<DataTemplate x:DataType="library:LibraryBookItemViewModel">
+							<StackPanel Spacing="{DynamicResource Libation.Space.3}">
+					<library:CachedCover Width="300" Height="300" HorizontalAlignment="Center" />
+					<TextBlock Text="{Binding Title}"
+							   FontFamily="{DynamicResource Libation.Font.Display}"
+							   FontSize="{DynamicResource Libation.FontSize.Section}"
+							   FontWeight="SemiBold"
+							   TextWrapping="Wrap"
+							   Foreground="{DynamicResource Libation.Brush.TextPrimary}" />
+					<TextBlock Text="{Binding Author}" TextWrapping="Wrap" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+					<TextBlock Text="{Binding Narrator, StringFormat='Narrated by {0}'}" TextWrapping="Wrap" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+					<components:StatusBadge Status="{Binding Status}" TextOverride="{Binding StatusText}" HorizontalAlignment="Left" />
+					<Separator />
+					<TextBlock Text="Metadata" FontWeight="SemiBold" />
+					<TextBlock Text="{Binding Series, StringFormat='Series: {0}'}" TextWrapping="Wrap" />
+					<TextBlock Text="{Binding Duration, StringFormat='Duration: {0}'}" />
+					<TextBlock Text="{Binding Account, StringFormat='Account: {0}'}" TextWrapping="Wrap" />
+					<TextBlock Text="{Binding DateAdded, StringFormat='Added: {0}'}" />
+					<TextBlock Text="{Binding Category, StringFormat='Categories: {0}'}" TextWrapping="Wrap" />
+					<TextBlock Text="{Binding Tags, StringFormat='Tags: {0}'}" TextWrapping="Wrap" />
+					<TextBlock Text="{Binding RatingText, StringFormat='Rating: {0}'}" />
+					<Separator />
+					<TextBlock Text="Local state" FontWeight="SemiBold" />
+					<TextBlock Text="{Binding LocalStateText}" TextWrapping="Wrap" />
+					<TextBlock Text="{Binding PdfStateText}" TextWrapping="Wrap" />
+					<Separator />
+					<TextBlock Text="Description" FontWeight="SemiBold" />
+					<TextBlock Text="{Binding Description}" TextWrapping="Wrap" />
+							</StackPanel>
+						</DataTemplate>
+					</ContentControl.ContentTemplate>
+				</ContentControl>
+			</ScrollViewer>
+		</Grid>
+	</Border>
+</UserControl>

@@ -19,8 +19,13 @@ public partial class LocateAudiobooksDialog : DialogWindow
 {
 	private readonly CancellationTokenSource tokenSource = new();
 	private readonly LocatedAudiobooksViewModel _viewModel;
-	public LocateAudiobooksDialog()
+	private readonly string? initialFolder;
+
+	public LocateAudiobooksDialog() : this(null) { }
+
+	public LocateAudiobooksDialog(string? initialFolder)
 	{
+		this.initialFolder = initialFolder;
 		InitializeComponent();
 
 		var list = new AvaloniaList<FoundAudiobook>();
@@ -51,32 +56,36 @@ public partial class LocateAudiobooksDialog : DialogWindow
 
 	private async void LocateAudiobooksDialog_Opened(object? sender, EventArgs e)
 	{
-		var folderPicker = new FolderPickerOpenOptions
+		string? selectedFolder = Directory.Exists(initialFolder) ? initialFolder : null;
+		if (selectedFolder is null)
 		{
-			Title = "Select the folder to search for audiobooks",
-			AllowMultiple = false,
-		};
+			var folderPicker = new FolderPickerOpenOptions
+			{
+				Title = "Select the folder to search for audiobooks",
+				AllowMultiple = false,
+			};
 
-		var start = FolderPickerInitialPath.GetExistingDirectoryOrNull(Configuration.Instance.Books?.Path ?? "");
-		if (start is not null)
-		{
-			var loc = await StorageProvider.TryGetFolderFromPathAsync(start);
-			if (loc is not null)
-				folderPicker.SuggestedStartLocation = loc;
-		}
+			var start = FolderPickerInitialPath.GetExistingDirectoryOrNull(Configuration.Instance.Books?.Path ?? "");
+			if (start is not null)
+			{
+				var loc = await StorageProvider.TryGetFolderFromPathAsync(start);
+				if (loc is not null)
+					folderPicker.SuggestedStartLocation = loc;
+			}
 
-		IReadOnlyList<IStorageFolder> picked;
-		try
-		{
-			picked = await StorageProvider.OpenFolderPickerAsync(folderPicker);
-		}
-		catch
-		{
-			folderPicker.SuggestedStartLocation = null;
-			picked = await StorageProvider.OpenFolderPickerAsync(folderPicker);
-		}
+			IReadOnlyList<IStorageFolder> picked;
+			try
+			{
+				picked = await StorageProvider.OpenFolderPickerAsync(folderPicker);
+			}
+			catch
+			{
+				folderPicker.SuggestedStartLocation = null;
+				picked = await StorageProvider.OpenFolderPickerAsync(folderPicker);
+			}
 
-		var selectedFolder = picked?.SingleOrDefault()?.TryGetLocalPath();
+			selectedFolder = picked?.SingleOrDefault()?.TryGetLocalPath();
+		}
 
 		if (selectedFolder is null || !Directory.Exists(selectedFolder))
 		{

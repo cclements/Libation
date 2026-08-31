@@ -5,6 +5,7 @@ using LibationAvalonia.Dialogs;
 using LibationUiBase.Forms;
 using ReactiveUI;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -109,6 +110,56 @@ partial class MainVM
 			return;
 
 		await visibleLibraryBooks.UpdateTagsAsync(dialog.NewTags);
+	}
+
+	public Task<UserActionResult> AddTagsToBooksAsync(IReadOnlyList<LibraryBook> books)
+		=> UpdateTagsForBooksAsync(books, addTags: true);
+
+	public Task<UserActionResult> ReplaceTagsForBooksAsync(IReadOnlyList<LibraryBook> books)
+		=> UpdateTagsForBooksAsync(books, addTags: false);
+
+	private async Task<UserActionResult> UpdateTagsForBooksAsync(IReadOnlyList<LibraryBook> books, bool addTags)
+	{
+		ArgumentNullException.ThrowIfNull(books);
+		var selectedBooks = books.Where(book => book?.Book is not null).ToArray();
+		if (selectedBooks.Length == 0)
+			return new(UserActionOutcome.NoChange, "Select at least one Current Flight title before changing tags.");
+
+		var dialog = new TagsBatchDialog(addTags);
+		var result = await dialog.ShowDialog<DialogResult>(MainWindow);
+		if (result != DialogResult.OK)
+			return new(UserActionOutcome.Cancelled, addTags ? "Add tags cancelled. No metadata was changed." : "Replace tags cancelled. No metadata was changed.");
+
+		var incoming = (dialog.NewTags ?? string.Empty)
+			.Split(null as char[], StringSplitOptions.RemoveEmptyEntries)
+			.Distinct(StringComparer.OrdinalIgnoreCase)
+			.ToArray();
+		if (addTags && incoming.Length == 0)
+			return new(UserActionOutcome.NoChange, "No tags were entered, so no metadata was changed.");
+
+		var confirmationResult = await MessageBox.ShowConfirmationDialog(
+			MainWindow,
+			selectedBooks,
+			addTags
+				? "Are you sure you want to add tags to {0}? Existing tags will be kept."
+				: "Are you sure you want to replace tags in {0}?",
+			addTags ? "Add tags?" : "Replace tags?");
+		if (confirmationResult != DialogResult.Yes)
+			return new(UserActionOutcome.Cancelled, addTags ? "Add tags cancelled. No metadata was changed." : "Replace tags cancelled. No metadata was changed.");
+
+		int changed = addTags
+			? await selectedBooks.UpdateUserDefinedItemAsync(udi =>
+				udi.Tags = string.Join(" ", udi.TagsEnumerated.Concat(incoming).Distinct(StringComparer.OrdinalIgnoreCase)))
+			: await selectedBooks.UpdateTagsAsync(dialog.NewTags);
+
+		if (changed == 0)
+			return new(UserActionOutcome.NoChange, "The selected tags already matched, so no metadata was changed.");
+
+		return new(
+			UserActionOutcome.Completed,
+			addTags
+				? $"Added tags to {changed} Current Flight title(s)."
+				: $"Replaced tags in {changed} Current Flight title(s).");
 	}
 
 	public async Task SetBookDownloadedAsync()

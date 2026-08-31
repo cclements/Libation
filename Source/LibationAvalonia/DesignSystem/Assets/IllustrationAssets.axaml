@@ -1,0 +1,100 @@
+<ResourceDictionary
+	xmlns="https://github.com/avaloniaui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+	<!--
+		Original, code-native functional illustration masters. They contain no text,
+		cover art, or board fragments. The hosting state owns copy, accessible naming,
+		commands, and whether decoration is shown.
+	-->
+	<ControlTemplate x:Key="illustration.cellar.empty-library" TargetType="ContentControl">
+		<Viewbox Stretch="Uniform">
+			<Canvas Width="96" Height="72">
+				<Path Data="M14,64 V21 C14,9 82,9 82,21 V64 M10,64 H86" Stroke="{DynamicResource Libation.Brush.BorderStrong}" StrokeThickness="2" StrokeLineCap="Round" />
+				<Path Data="M23,25 H73 M23,42 H73 M23,59 H73 M28,17 V25 M35,19 V25 M43,16 V25 M29,34 V42 M38,32 V42 M47,35 V42 M57,31 V42 M65,34 V42 M28,50 V59 M36,48 V59 M45,51 V59" Stroke="{DynamicResource Libation.Brush.AccentSecondary}" StrokeThickness="2" StrokeLineCap="Round" />
+				<Path Data="M59,48 C64,46 69,47 73,50 V61 C69,59 64,59 59,61 Z M73,50 C77,47 82,46 87,48 V61 C82,59 77,59 73,61 Z" Stroke="{DynamicResource Libation.Brush.TextPrimary}" StrokeThickness="2" StrokeJoin="Round" />
+			</Canvas>
+		</Viewbox>
+	</ControlTemplate>
+
+	<ControlTemplate x:Key="illustration.shared.account-connection" TargetType="ContentControl">
+		<Viewbox Stretch="Uniform">
+			<Canvas Width="96" Height="72">
+				<Path Data="M22,30 A9,9 0 1 0 22,12 A9,9 0 1 0 22,30 M7,55 C7,42 13,34 22,34 C31,34 37,42 37,55" Stroke="{DynamicResource Libation.Brush.TextPrimary}" StrokeThickness="2" StrokeLineCap="Round" />
+				<Path Data="M70,17 H84 V31 H70 Z M73,17 V13 H81 V17 M73,23 H81 M77,17 V31" Stroke="{DynamicResource Libation.Brush.AccentSecondary}" StrokeThickness="2" StrokeJoin="Round" />
+				<Path Data="M37,26 L42,23 M46,21 L51,20 M55,20 L60,20 M64,21 L70,22 M37,46 L42,49 M46,51 L51,53 M55,54 L60,53 M64,51 L69,47 M71,45 L73,43" Stroke="{DynamicResource Libation.Brush.BorderStrong}" StrokeThickness="2" StrokeLineCap="Round" />
+				<Path Data="M73,43 L78,48 L88,36" Stroke="{DynamicResource Libation.Brush.Success}" StrokeThickness="3" StrokeLineCap="Round" StrokeJoin="Round" />
+			</Canvas>
+		</Viewbox>
+	</ControlTemplate>
+
+	<ControlTemplate x:Key="illustration.cellar.add-books" TargetType="ContentControl">
+		<Viewbox Stretch="Uniform">
+			<Canvas Width="96" Height="72">
+				<Path Data="M13,64 V20 C13,11 20,6 28,6 H68 C76,6 83,11 83,20 V64 M18,64 H78" Stroke="{DynamicResource Libation.Brush.BorderStrong}" StrokeThickness="2" />
+				<Path Data="M24,17 H72 V59 H24 Z M30,17 V59 M66,17 V59" Stroke="{DynamicResource Libation.Brush.AccentSecondary}" StrokeThickness="2" StrokeJoin="Round" />
+				<Path Data="M33,29 C39,27 44,29 48,32 V50 C44,47 39,47 33,49 Z M48,32 C52,29 57,27 63,29 V49 C57,47 52,47 48,50 Z M48,22 V28 M45,25 H51" Stroke="{DynamicResource Libation.Brush.TextPrimary}" StrokeThickness="2" StrokeLineCap="Round" StrokeJoin="Round" />
+			</Canvas>
+		</Viewbox>
+	</ControlTemplate>
+
+	<ControlTemplate x:Key="illustration.tasting-room.add-books" TargetType="ContentControl">
+		<Viewbox Stretch="Uniform">
+			<Canvas Width="96" Height="72">
+				<Path Data="M12,31 L48,17 L84,31 L48,45 Z M12,31 V58 L48,69 V45 M84,31 V58 L48,69 M18,39 L48,49 L78,39 M18,49 L48,59 L78,49" Stroke="{DynamicResource Libation.Brush.BorderStrong}" StrokeThickness="2" StrokeJoin="Round" />
+				<Path Data="M31,24 V9 H40 V21 M43,19 V7 H52 V16 M55,20 V11 H64 V24" Stroke="{DynamicResource Libation.Brush.AccentSecondary}" StrokeThickness="2" StrokeJoin="Round" />
+				<Path Data="M72,11 V23 M66,17 H78" Stroke="{DynamicResource Libation.Brush.AccentPrimary}" StrokeThickness="3" StrokeLineCap="Round" />
+			</Canvas>
+		</Viewbox>
+	</ControlTemplate>
+
+	<ControlTemplate x:Key="illustration.cellar.empty-decanter" TargetType="ContentControl">
+		<Viewbox Stretch="Uniform">
+			<Canvas Width="96" Height="72">
+				<Path Data="M40,6 H56 M42,6 V20 C42,23 27,34 27,49 C27,61 36,67 48,67 C60,67 69,61 69,49 C69,34 54,23 54,20 V6 M32,52 C42,55 54,55 64,52" Stroke="{DynamicResource Libation.Brush.TextPrimary}" StrokeThickness="2" StrokeLineCap="Round" StrokeJoin="Round" />
+				<Path Data="M35,48 H40 M44,48 H49 M53,48 H58 M60,48 H61" Stroke="{DynamicResource Libation.Brush.AccentSecondary}" StrokeThickness="2" StrokeLineCap="Round" />
+				<Path Data="M18,67 H78" Stroke="{DynamicResource Libation.Brush.BorderStrong}" StrokeThickness="2" />
+			</Canvas>
+		</Viewbox>
+	</ControlTemplate>
+
+	<ControlTemplate x:Key="illustration.tasting-room.empty-decanter" TargetType="ContentControl">
+		<Viewbox Stretch="Uniform">
+			<Canvas Width="96" Height="72">
+				<Path Data="M41,7 H55 M43,7 V22 C43,26 29,36 29,50 C29,61 37,66 48,66 C59,66 67,61 67,50 C67,36 53,26 53,22 V7 M34,51 C43,53 53,53 62,51" Stroke="{DynamicResource Libation.Brush.TextPrimary}" StrokeThickness="2" StrokeLineCap="Round" StrokeJoin="Round" />
+				<Path Data="M18,66 H78" Stroke="{DynamicResource Libation.Brush.BorderSubtle}" StrokeThickness="2" />
+				<Path Data="M75,14 V25 M69.5,19.5 H80.5" Stroke="{DynamicResource Libation.Brush.AccentPrimary}" StrokeThickness="2" StrokeLineCap="Round" />
+			</Canvas>
+		</Viewbox>
+	</ControlTemplate>
+
+	<ControlTemplate x:Key="illustration.shared.processing-complete" TargetType="ContentControl">
+		<Viewbox Stretch="Uniform">
+			<Canvas Width="96" Height="72">
+				<Path Data="M48,64 A27,27 0 1 0 48,10 A27,27 0 1 0 48,64" Stroke="{DynamicResource Libation.Brush.BorderStrong}" StrokeThickness="3" />
+				<Path Data="M31,37 L42,48 L65,25" Stroke="{DynamicResource Libation.Brush.Success}" StrokeThickness="5" StrokeLineCap="Round" StrokeJoin="Round" />
+				<Path Data="M16,12 V22 M11,17 H21 M80,47 V57 M75,52 H85" Stroke="{DynamicResource Libation.Brush.AccentSecondary}" StrokeThickness="2" StrokeLineCap="Round" />
+			</Canvas>
+		</Viewbox>
+	</ControlTemplate>
+
+	<ControlTemplate x:Key="illustration.shared.no-search-results" TargetType="ContentControl">
+		<Viewbox Stretch="Uniform">
+			<Canvas Width="96" Height="72">
+				<Path Data="M10,19 C20,16 30,18 39,24 V62 C30,57 20,57 10,60 Z M39,24 C48,18 58,16 68,19 V43" Stroke="{DynamicResource Libation.Brush.BorderStrong}" StrokeThickness="2" StrokeJoin="Round" />
+				<Path Data="M64,50 A13,13 0 1 0 64,24 A13,13 0 1 0 64,50 M73,46 L86,59" Stroke="{DynamicResource Libation.Brush.TextPrimary}" StrokeThickness="3" StrokeLineCap="Round" />
+				<Path Data="M58,31 L70,43 M70,31 L58,43" Stroke="{DynamicResource Libation.Brush.Danger}" StrokeThickness="2" StrokeLineCap="Round" />
+			</Canvas>
+		</Viewbox>
+	</ControlTemplate>
+
+	<ControlTemplate x:Key="illustration.shared.offline-auth-attention" TargetType="ContentControl">
+		<Viewbox Stretch="Uniform">
+			<Canvas Width="96" Height="72">
+				<Path Data="M31,27 A10,10 0 1 0 31,7 A10,10 0 1 0 31,27 M13,56 C13,40 20,31 31,31 C42,31 49,40 49,56" Stroke="{DynamicResource Libation.Brush.TextPrimary}" StrokeThickness="2" StrokeLineCap="Round" />
+				<Path Data="M58,15 C67,8 80,13 80,24 C89,25 91,39 81,42 H57 C47,41 46,28 55,25 C54,21 55,18 58,15" Stroke="{DynamicResource Libation.Brush.BorderStrong}" StrokeThickness="2" StrokeJoin="Round" />
+				<Path Data="M54,55 L84,25" Stroke="{DynamicResource Libation.Brush.Danger}" StrokeThickness="3" StrokeLineCap="Round" />
+				<Path Data="M70,48 V56 M70,61 V61.2" Stroke="{DynamicResource Libation.Brush.Warning}" StrokeThickness="3" StrokeLineCap="Round" />
+			</Canvas>
+		</Viewbox>
+	</ControlTemplate>
+</ResourceDictionary>

@@ -1,0 +1,29 @@
+<ResourceDictionary
+	xmlns="https://github.com/avaloniaui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+	<SolidColorBrush x:Key="Libation.Brush.Canvas" Color="{DynamicResource Libation.Color.Canvas}" />
+	<SolidColorBrush x:Key="Libation.Brush.Sidebar" Color="{DynamicResource Libation.Color.Sidebar}" />
+	<SolidColorBrush x:Key="Libation.Brush.Surface" Color="{DynamicResource Libation.Color.Surface}" />
+	<SolidColorBrush x:Key="Libation.Brush.SurfaceRaised" Color="{DynamicResource Libation.Color.SurfaceRaised}" />
+	<SolidColorBrush x:Key="Libation.Brush.SurfaceSunken" Color="{DynamicResource Libation.Color.SurfaceSunken}" />
+	<SolidColorBrush x:Key="Libation.Brush.SurfaceInteractive" Color="{DynamicResource Libation.Color.SurfaceInteractive}" />
+	<SolidColorBrush x:Key="Libation.Brush.TextPrimary" Color="{DynamicResource Libation.Color.TextPrimary}" />
+	<SolidColorBrush x:Key="Libation.Brush.TextSecondary" Color="{DynamicResource Libation.Color.TextSecondary}" />
+	<SolidColorBrush x:Key="Libation.Brush.TextTertiary" Color="{DynamicResource Libation.Color.TextTertiary}" />
+	<SolidColorBrush x:Key="Libation.Brush.TextOnAccent" Color="{DynamicResource Libation.Color.TextOnAccent}" />
+	<SolidColorBrush x:Key="Libation.Brush.BorderSubtle" Color="{DynamicResource Libation.Color.BorderSubtle}" />
+	<SolidColorBrush x:Key="Libation.Brush.BorderStrong" Color="{DynamicResource Libation.Color.BorderStrong}" />
+	<SolidColorBrush x:Key="Libation.Brush.AccentPrimary" Color="{DynamicResource Libation.Color.AccentPrimary}" />
+	<SolidColorBrush x:Key="Libation.Brush.AccentSecondary" Color="{DynamicResource Libation.Color.AccentSecondary}" />
+	<SolidColorBrush x:Key="Libation.Brush.AccentHover" Color="{DynamicResource Libation.Color.AccentHover}" />
+	<SolidColorBrush x:Key="Libation.Brush.AccentPressed" Color="{DynamicResource Libation.Color.AccentPressed}" />
+	<SolidColorBrush x:Key="Libation.Brush.Focus" Color="{DynamicResource Libation.Color.Focus}" />
+	<SolidColorBrush x:Key="Libation.Brush.Selection" Color="{DynamicResource Libation.Color.Selection}" />
+	<SolidColorBrush x:Key="Libation.Brush.Success" Color="{DynamicResource Libation.Color.Success}" />
+	<SolidColorBrush x:Key="Libation.Brush.Warning" Color="{DynamicResource Libation.Color.Warning}" />
+	<SolidColorBrush x:Key="Libation.Brush.Danger" Color="{DynamicResource Libation.Color.Danger}" />
+	<SolidColorBrush x:Key="Libation.Brush.Info" Color="{DynamicResource Libation.Color.Info}" />
+	<SolidColorBrush x:Key="Libation.Brush.ProgressTrack" Color="{DynamicResource Libation.Color.ProgressTrack}" />
+	<SolidColorBrush x:Key="Libation.Brush.ProgressFill" Color="{DynamicResource Libation.Color.ProgressFill}" />
+	<SolidColorBrush x:Key="Libation.Brush.CoverPlaceholder" Color="{DynamicResource Libation.Color.CoverPlaceholder}" />
+</ResourceDictionary>

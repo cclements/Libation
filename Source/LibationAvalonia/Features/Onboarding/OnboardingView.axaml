@@ -1,0 +1,153 @@
+<UserControl
+	xmlns="https://github.com/avaloniaui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:onboarding="using:LibationAvalonia.Features.Onboarding"
+	xmlns:components="using:LibationAvalonia.DesignSystem.Components"
+	xmlns:experience="using:LibationFileManager"
+	x:Class="LibationAvalonia.Features.Onboarding.OnboardingView"
+	x:DataType="onboarding:OnboardingViewModel">
+	<Grid RowDefinitions="*,Auto">
+		<ScrollViewer HorizontalScrollBarVisibility="Disabled">
+			<StackPanel Margin="{DynamicResource Libation.Space.5}" Spacing="{DynamicResource Libation.Space.4}">
+				<components:PageHeader Eyebrow="Welcome to Libation" Title="{Binding StepTitle}"
+					SupportingText="Setup is a local draft until you finish. You can skip now or run this chooser again from Settings." />
+				<StackPanel Spacing="{DynamicResource Libation.Space.2}">
+					<Grid ColumnDefinitions="*,Auto">
+						<TextBlock Text="{Binding StepSummary}" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+						<TextBlock Grid.Column="1" Text="{Binding SelectedProfileText}" FontWeight="SemiBold"
+							Foreground="{DynamicResource Libation.Brush.AccentSecondary}" />
+					</Grid>
+					<ProgressBar Classes="contemporary prominent" Minimum="0" Maximum="100" Value="{Binding Progress}"
+						AutomationProperties.Name="Onboarding progress" />
+				</StackPanel>
+
+				<components:AttentionBanner IsVisible="{Binding HasError}" Severity="{x:Static components:ComponentSeverity.Danger}" FocusOnShow="True"
+					Title="Setup action unavailable" Message="{Binding ErrorMessage}"
+					ActionText="Copy technical details" ActionCommand="{Binding CopyTechnicalDetailsCommand}" />
+
+				<StackPanel IsVisible="{Binding IsWelcomeStep}" Spacing="{DynamicResource Libation.Space.3}">
+					<TextBlock Text="Libation catalogs your Audible library and creates local open copies on this computer. Your existing library, account, file, and processing owners remain authoritative whichever interface profile you choose."
+						TextWrapping="Wrap" Foreground="{DynamicResource Libation.Brush.TextPrimary}" />
+					<TextBlock Text="{Binding ProfileChoiceHelpText}" TextWrapping="Wrap"
+						Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+					<components:AttentionBanner IsVisible="{Binding NeedsExplicitProfileChoice}"
+						Severity="{x:Static components:ComponentSeverity.Warning}"
+						Title="Choose a profile before continuing"
+						Message="The starting Follow System preview is not a silent opt-in. Select it or another profile, or skip to leave the current interface unchanged." />
+					<Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="{DynamicResource Libation.Space.3}"
+						RowSpacing="{DynamicResource Libation.Space.3}">
+						<onboarding:ProfileChoicePreview ProfileStyle="{x:Static experience:ExperienceStyle.FollowSystem}"
+							ProfileName="Follow System" Description="Uses the operating system appearance while keeping Libation’s contemporary structure."
+							ActionText="Choose Follow System" SelectCommand="{Binding SelectFollowSystemCommand}"
+							IsSelected="{Binding IsFollowSystemSelected}" />
+						<onboarding:ProfileChoicePreview Grid.Column="1" ProfileStyle="{x:Static experience:ExperienceStyle.Cellar}"
+							ProfileName="Cellar" Description="Warm, quiet, collection-first presentation for focused library stewardship."
+							ActionText="Choose Cellar" SelectCommand="{Binding SelectCellarCommand}"
+							IsSelected="{Binding IsCellarSelected}" />
+						<onboarding:ProfileChoicePreview Grid.Row="1" ProfileStyle="{x:Static experience:ExperienceStyle.TastingRoom}"
+							ProfileName="Tasting Room" Description="A brighter, editorial presentation with the same underlying library and commands."
+							ActionText="Choose Tasting Room" SelectCommand="{Binding SelectTastingRoomCommand}"
+							IsSelected="{Binding IsTastingRoomSelected}" />
+						<onboarding:ProfileChoicePreview Grid.Row="1" Grid.Column="1"
+							ProfileStyle="{x:Static experience:ExperienceStyle.CurrentAvalonia}"
+							ProfileName="Current Libation interface"
+							Description="Keeps the current Libation desktop interface. This is distinct from the separately shipped Libation-Classic app."
+							ActionText="Keep current interface" SelectCommand="{Binding SelectCurrentInterfaceCommand}"
+							IsSelected="{Binding IsCurrentInterfaceSelected}" />
+						<onboarding:ProfileChoicePreview Grid.Row="2" Grid.ColumnSpan="2"
+							ProfileStyle="{x:Static experience:ExperienceStyle.HighContrast}"
+							ProfileName="High Contrast"
+							Description="Uses the contemporary structure with the strongest semantic contrast and the same literal commands."
+							ActionText="Choose High Contrast" SelectCommand="{Binding SelectHighContrastCommand}"
+							IsSelected="{Binding IsHighContrastSelected}" />
+					</Grid>
+				</StackPanel>
+
+				<Border Classes="card raised" IsVisible="{Binding IsAccountStep}">
+					<Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource Libation.Space.4}">
+						<StackPanel Spacing="{DynamicResource Libation.Space.2}">
+							<TextBlock Text="Accounts stay private" FontFamily="{DynamicResource Libation.Font.Display}"
+								FontSize="{DynamicResource Libation.FontSize.Section}" />
+							<TextBlock Text="{Binding AccountStateText}" FontWeight="SemiBold" />
+							<TextBlock Text="Sign-in session data, marketplace choices, and identity details remain inside Libation’s established account subsystem and protected account dialog; they are never repeated here."
+								TextWrapping="Wrap" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+							<StackPanel Orientation="Horizontal" Spacing="8">
+								<Button Classes="contemporary primary" Content="Add account" Command="{Binding AddAccountCommand}" />
+								<Button Classes="contemporary" Content="Manage accounts" Command="{Binding ManageAccountsCommand}" />
+							</StackPanel>
+						</StackPanel>
+						<ContentControl Grid.Column="1" Width="180" Height="120"
+							Template="{StaticResource illustration.shared.account-connection}"
+							IsVisible="{DynamicResource Libation.Decoration.Visible}"
+							Opacity="{DynamicResource Libation.Decoration.Opacity}"
+							AutomationProperties.IsControlElementOverride="False" />
+					</Grid>
+				</Border>
+
+				<Border Classes="card raised" IsVisible="{Binding IsLocationStep}">
+					<StackPanel Spacing="{DynamicResource Libation.Space.3}">
+						<TextBlock Text="Keep originals and converted files where you expect" FontFamily="{DynamicResource Libation.Font.Display}"
+							FontSize="{DynamicResource Libation.FontSize.Section}" />
+						<TextBlock Text="{Binding LocationStateText}" TextWrapping="Wrap" />
+						<TextBlock Text="The established Settings editor validates locations, creates required directories, and saves the choice. Locate files only discovers existing audiobooks; it does not move them."
+							TextWrapping="Wrap" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+						<TextBlock Text="This setup surface does not have an authoritative free-space estimate, so it does not invent one. Review the selected volume before starting a large library workflow."
+							TextWrapping="Wrap" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+						<StackPanel Orientation="Horizontal" Spacing="8">
+							<Button Classes="contemporary primary" Content="Open Settings" Command="{Binding OpenSettingsCommand}" />
+							<Button Classes="contemporary" Content="Locate existing files" Command="{Binding LocateFilesCommand}" />
+						</StackPanel>
+					</StackPanel>
+				</Border>
+
+				<Border Classes="card raised" IsVisible="{Binding IsScanStep}">
+					<StackPanel Spacing="{DynamicResource Libation.Space.3}">
+						<Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource Libation.Space.3}">
+							<StackPanel Spacing="{DynamicResource Libation.Space.1}">
+								<TextBlock Text="Bring your library into view" FontFamily="{DynamicResource Libation.Font.Display}"
+									FontSize="{DynamicResource Libation.FontSize.Section}" />
+								<TextBlock Text="{Binding ScanStateText}" TextWrapping="Wrap" />
+							</StackPanel>
+							<components:StatusBadge Grid.Column="1" Status="{x:Static components:LibationStatusKind.Processing}"
+								TextOverride="Scan is nonblocking" AccessibleName="Library scan is nonblocking" />
+						</Grid>
+						<TextBlock Text="A scan uses the existing account and authentication pipeline. You can continue using Libation while work proceeds, and review progress from Overview or Processing."
+							TextWrapping="Wrap" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+						<Button Classes="contemporary primary" Content="Scan all accounts" Command="{Binding ScanCommand}"
+							IsEnabled="{Binding HasAccounts}" HorizontalAlignment="Left" />
+					</StackPanel>
+				</Border>
+
+				<Border Classes="card raised" IsVisible="{Binding IsFirstFlightStep}">
+					<StackPanel Spacing="{DynamicResource Libation.Space.3}">
+						<Grid ColumnDefinitions="Auto,*" ColumnSpacing="{DynamicResource Libation.Space.3}">
+							<Path Data="{StaticResource glyph.flight}" Width="32" Height="32" Stretch="Uniform"
+								Stroke="{DynamicResource Libation.Brush.AccentSecondary}" StrokeThickness="1.5" />
+							<StackPanel Grid.Column="1" Spacing="{DynamicResource Libation.Space.1}">
+								<TextBlock Text="Current Flight stays intentional" FontFamily="{DynamicResource Libation.Font.Display}"
+									FontSize="{DynamicResource Libation.FontSize.Section}" />
+								<TextBlock Text="After entering Libation, choose real books from Library and add only the titles you want to process next. Setup does not invent a queue or select books on your behalf."
+									TextWrapping="Wrap" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+								<TextBlock Text="Download Pending means a title is catalogued but does not yet have a completed open local copy. Completed means the established workflow recorded that copy."
+									TextWrapping="Wrap" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+								<TextBlock Text="{Binding LocationStateText}" TextWrapping="Wrap"
+									Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+							</StackPanel>
+						</Grid>
+						<components:AttentionBanner Severity="{x:Static components:ComponentSeverity.Info}"
+							Title="Your saved library remains authoritative"
+							Message="Finishing applies only the profile you explicitly chose. It does not scan, download, process, remove, or fabricate library data." />
+					</StackPanel>
+				</Border>
+			</StackPanel>
+		</ScrollViewer>
+
+		<Border Grid.Row="1" Classes="card" CornerRadius="0" BorderThickness="0,1,0,0">
+			<Grid Margin="{DynamicResource Libation.Space.4}" ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="{DynamicResource Libation.Space.2}">
+				<Button Classes="contemporary" Content="Back" Command="{Binding BackCommand}" IsEnabled="{Binding CanGoBack}" />
+				<Button Grid.Column="2" Classes="contemporary" Content="{Binding SkipText}" Command="{Binding SkipCommand}" />
+				<Button Grid.Column="3" Classes="contemporary primary" Content="{Binding NextText}" Command="{Binding NextCommand}" />
+			</Grid>
+		</Border>
+	</Grid>
+</UserControl>

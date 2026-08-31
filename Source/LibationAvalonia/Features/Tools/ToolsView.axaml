@@ -1,0 +1,49 @@
+<UserControl
+	xmlns="https://github.com/avaloniaui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:tools="using:LibationAvalonia.Features.Tools"
+	xmlns:components="using:LibationAvalonia.DesignSystem.Components"
+	x:Class="LibationAvalonia.Features.Tools.ToolsView"
+	x:DataType="tools:ToolsViewModel">
+	<UserControl.Resources>
+		<DataTemplate x:Key="ToolAction" x:DataType="tools:ToolActionItem">
+			<Border Classes="card" Margin="0,0,0,8">
+				<Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource Libation.Space.3}">
+					<StackPanel Spacing="{DynamicResource Libation.Space.1}">
+						<TextBlock Text="{Binding Name}" FontWeight="SemiBold" Foreground="{DynamicResource Libation.Brush.TextPrimary}" />
+						<TextBlock Text="{Binding Consequence}" TextWrapping="Wrap" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+						<TextBlock Text="{Binding StateText}" TextWrapping="Wrap" Foreground="{DynamicResource Libation.Brush.TextTertiary}"
+							IsVisible="{Binding StateText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+					</StackPanel>
+					<StackPanel Grid.Column="1" Spacing="{DynamicResource Libation.Space.2}" HorizontalAlignment="Right">
+						<components:StatusBadge Status="{Binding RiskStatus}" TextOverride="{Binding RiskText}" AccessibleName="{Binding RiskText}" />
+						<Button Classes="contemporary" Content="Run" Command="{Binding Command}" HorizontalAlignment="Right"
+							AutomationProperties.Name="{Binding Name}" />
+					</StackPanel>
+				</Grid>
+			</Border>
+		</DataTemplate>
+		<DataTemplate x:Key="ToolGroup" x:DataType="tools:ToolActionGroup">
+			<StackPanel Spacing="{DynamicResource Libation.Space.3}" Margin="0,0,0,16">
+				<StackPanel Spacing="{DynamicResource Libation.Space.1}">
+					<TextBlock Text="{Binding Name}" FontFamily="{DynamicResource Libation.Font.Display}"
+						FontSize="{DynamicResource Libation.FontSize.Section}" Foreground="{DynamicResource Libation.Brush.TextPrimary}" />
+					<TextBlock Text="{Binding Description}" TextWrapping="Wrap" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+				</StackPanel>
+				<ItemsControl ItemsSource="{Binding Actions}" ItemTemplate="{StaticResource ToolAction}" />
+			</StackPanel>
+		</DataTemplate>
+	</UserControl.Resources>
+	<ScrollViewer HorizontalScrollBarVisibility="Disabled">
+		<StackPanel Margin="{DynamicResource Libation.Space.5}" Spacing="{DynamicResource Libation.Space.4}">
+			<components:PageHeader Eyebrow="Advanced operations" Title="Tools"
+				SupportingText="Each command uses its literal name, states its consequence, and delegates to Libation’s existing dialogs and confirmations." />
+			<components:AttentionBanner IsVisible="{Binding HasError}" Severity="{x:Static components:ComponentSeverity.Danger}" FocusOnShow="True"
+				Title="Tool action unavailable" Message="{Binding ErrorMessage}"
+				ActionText="Copy technical details" ActionCommand="{Binding CopyTechnicalDetailsCommand}" />
+			<components:AttentionBanner Severity="{x:Static components:ComponentSeverity.Warning}" Title="The current Library filter defines visible-title scope"
+				Message="Commands that say visible titles operate on the shared Library filter, including titles outside the current viewport. Review that filter before running a scoped or destructive action." />
+			<ItemsControl ItemsSource="{Binding Groups}" ItemTemplate="{StaticResource ToolGroup}" />
+		</StackPanel>
+	</ScrollViewer>
+</UserControl>

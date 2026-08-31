@@ -1,0 +1,120 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:components="using:LibationAvalonia.DesignSystem.Components"
+			 xmlns:library="using:LibationAvalonia.Features.Library"
+			 xmlns:views="using:LibationAvalonia.Views"
+			 x:Class="LibationAvalonia.Features.Library.LibraryView"
+			 x:DataType="library:LibraryViewModel">
+	<Grid RowDefinitions="Auto,*" RowSpacing="{DynamicResource Libation.Space.3}">
+		<Border Classes="card" Padding="{DynamicResource Libation.Space.4}">
+			<Grid RowDefinitions="Auto,Auto" RowSpacing="{DynamicResource Libation.Space.3}">
+				<Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource Libation.Space.3}">
+					<StackPanel>
+						<TextBlock Text="The Cellar"
+								   FontFamily="{DynamicResource Libation.Font.Display}"
+								   FontSize="{DynamicResource Libation.FontSize.Page}"
+								   Foreground="{DynamicResource Libation.Brush.TextPrimary}" />
+						<StackPanel Orientation="Horizontal" Spacing="{DynamicResource Libation.Space.3}">
+							<TextBlock Text="{Binding ResultStateText}" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+							<TextBlock Text="{Binding SelectionStateText}" Foreground="{DynamicResource Libation.Brush.TextSecondary}"
+									   AutomationProperties.LiveSetting="Polite" />
+						</StackPanel>
+					</StackPanel>
+					<StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="{DynamicResource Libation.Density.ToolbarGap}">
+						<Button Classes="contemporary" Content="Add Audible account" Command="{Binding AddAccountCommand}" />
+						<Button Classes="contemporary" Content="Scan library" Command="{Binding ScanLibraryCommand}" />
+						<Button Classes="contemporary" Content="Add shown to Flight"
+							Command="{Binding AddVisibleToFlightCommand}"
+							IsEnabled="{Binding CanAddVisibleToFlight}" />
+						<Button Classes="contemporary primary" Content="Process selected" Command="{Binding ProcessSelectionCommand}" />
+					</StackPanel>
+				</Grid>
+
+				<WrapPanel Grid.Row="1" Orientation="Horizontal" VerticalAlignment="Center">
+					<TextBox x:Name="SearchBox"
+							 Classes="contemporary search"
+							 Width="360"
+							 PlaceholderText="Search titles, authors, narrators, series, tags, or use a filter expression"
+							 Text="{Binding SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+							 AutomationProperties.Name="Search and filter the Library" />
+					<Button Classes="contemporary quiet" Content="Clear search" Command="{Binding ClearSearchCommand}" Margin="8,0,0,0" />
+					<Button x:Name="FilterHelpButton" Classes="contemporary quiet" Content="Filter help" Command="{Binding OpenFilterHelpCommand}" Margin="8,0,0,0" />
+					<Menu Margin="8,0,0,0">
+						<MenuItem Header="Quick filters" ItemsSource="{Binding QuickFilterMenuItems}" />
+					</Menu>
+					<ComboBox Width="190"
+							  Margin="8,0,0,0"
+							  ItemsSource="{Binding SortOptions}"
+							  SelectedItem="{Binding SelectedSort, Mode=TwoWay}"
+							  AutomationProperties.Name="Sort Library">
+						<ComboBox.ItemTemplate>
+							<DataTemplate x:DataType="library:LibrarySortOption">
+								<TextBlock Text="{Binding Label}" />
+							</DataTemplate>
+						</ComboBox.ItemTemplate>
+					</ComboBox>
+					<Button Classes="contemporary" Content="Details view" Command="{Binding ShowDetailsCommand}" Margin="8,0,0,0" />
+					<Button Classes="contemporary" Content="Gallery view" Command="{Binding ShowGalleryCommand}" Margin="8,0,0,0" />
+					<Button Classes="contemporary quiet" Content="Choose columns" Click="ColumnChooser_Click" Margin="8,0,0,0"
+							IsVisible="{Binding IsDetailsMode}" />
+				</WrapPanel>
+			</Grid>
+		</Border>
+
+		<SplitView Grid.Row="1"
+				   PanePlacement="Right"
+				   DisplayMode="{Binding DetailsPaneDisplayMode}"
+				   IsPaneOpen="{Binding ShowDetailsPane, Mode=OneWay}"
+				   OpenPaneLength="360"
+				   CompactPaneLength="0">
+			<SplitView.Pane>
+				<library:BookDetailsPane DataContext="{Binding}" Margin="12,0,0,0" />
+			</SplitView.Pane>
+			<Grid>
+				<Grid IsVisible="{Binding HasResults}">
+					<Grid IsVisible="{Binding IsDetailsMode}">
+						<views:ProductsDisplay x:Name="DetailsDisplay"
+							DataContext="{Binding Products, Mode=OneTime}" />
+					</Grid>
+					<Grid IsVisible="{Binding IsGalleryMode}">
+						<library:LibraryGalleryView x:Name="GalleryDisplay"
+							DataContext="{Binding}" />
+					</Grid>
+				</Grid>
+
+				<Border IsVisible="{Binding IsLoading}" Classes="card" Padding="32">
+					<StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
+						<ProgressBar IsIndeterminate="True" Width="240" AutomationProperties.Name="Loading Library" />
+						<TextBlock Text="Loading your Library…" />
+					</StackPanel>
+				</Border>
+
+				<components:EmptyState
+					IsVisible="{Binding ShowEmptyLibrary}"
+					Title="{Binding EmptyTitle}"
+					Explanation="{Binding EmptyExplanation}"
+					PrimaryActionText="{Binding EmptyPrimaryText}"
+					PrimaryCommand="{Binding EmptyPrimaryCommand}"
+					SecondaryActionText="{Binding EmptySecondaryText}"
+					SecondaryCommand="{Binding OpenTrashCommand}"
+					IllustrationTemplate="{DynamicResource illustration.library.empty}" />
+
+				<StackPanel IsVisible="{Binding ShowNoResults}" VerticalAlignment="Center" Spacing="12">
+					<components:EmptyState
+						Title="No Library results"
+						Explanation="{Binding NoResultsText}"
+						PrimaryActionText="Clear search"
+						PrimaryCommand="{Binding ClearSearchCommand}"
+						SecondaryActionText="Filter help"
+						SecondaryCommand="{Binding OpenFilterHelpCommand}"
+					IllustrationTemplate="{StaticResource illustration.shared.no-search-results}" />
+					<TextBlock IsVisible="{Binding ShowNoResultsTrashHint}"
+							   Text="{Binding NoResultsTrashHint}"
+							   TextAlignment="Center"
+							   TextWrapping="Wrap"
+							   Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+				</StackPanel>
+			</Grid>
+		</SplitView>
+	</Grid>
+</UserControl>

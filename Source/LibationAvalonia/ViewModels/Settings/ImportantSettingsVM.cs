@@ -24,10 +24,13 @@ public class ImportantSettingsVM : ViewModelBase
 	private string osStoreUnavailableMessage = "";
 	private TokenStorageMethod initialTokenStorageMethod;
 	private bool osSecretStoreAvailable;
+	private bool useContemporaryShell;
+	private readonly bool legacyThemeWasSafeAtOpen;
 
 	public ImportantSettingsVM(Configuration config)
 	{
 		this.config = config;
+		legacyThemeWasSafeAtOpen = !config.UseContemporaryShell;
 
 		BooksDirectory = config.Books?.PathWithoutPrefix ?? "";
 		SavePodcastsToParentFolder = config.SavePodcastsToParentFolder;
@@ -39,6 +42,17 @@ public class ImportantSettingsVM : ViewModelBase
 		LoggingLevel = config.LogLevel;
 		GridScaleFactor = scaleFactorToLinearRange(config.GridScaleFactor);
 		GridFontScaleFactor = scaleFactorToLinearRange(config.GridFontScaleFactor);
+		UseContemporaryShell = config.UseContemporaryShell;
+		SelectedExperienceStyle = ExperienceStyles.FirstOrDefault(v => v.Value == config.ExperienceStyle)
+			?? ExperienceStyles.Single(v => v.Value == global::LibationFileManager.ExperienceStyle.FollowSystem);
+		SelectedDensityMode = DensityModes.Single(v => v.Value == config.DensityMode);
+		SelectedDecorationLevel = DecorationLevels.Single(v => v.Value == config.DecorationLevel);
+		SelectedReducedMotionPreference = ReducedMotionPreferences.Single(v => v.Value == config.ReducedMotionPreference);
+		SelectedLibraryViewMode = LibraryViewModes.Single(v => v.Value == config.LibraryViewMode);
+		SelectedNavigationRailPreference = NavigationRailPreferences.Single(v => v.Value == config.NavigationRailPreference);
+		UseSystemTypography = config.UseSystemTypography;
+		ShowDecanterDock = config.ShowDecanterDock;
+		PersistFlightBetweenSessions = config.PersistFlightBetweenSessions;
 
 		themeVariant = Themes.Single(v => v.Value == config.ThemeVariant);
 
@@ -81,6 +95,17 @@ public class ImportantSettingsVM : ViewModelBase
 		config.CheckForUpgradesAtStartup = CheckForUpgradesAtStartup;
 		config.LogLevel = LoggingLevel;
 		config.TokenStorageMethod = SelectedTokenStorageMethod;
+		config.SaveContemporaryExperienceSettings(new(
+			SelectedExperienceStyle.Value,
+			SelectedDensityMode.Value,
+			SelectedDecorationLevel.Value,
+			SelectedReducedMotionPreference.Value,
+			UseSystemTypography,
+			SelectedLibraryViewMode.Value,
+			SelectedNavigationRailPreference.Value,
+			ShowDecanterDock,
+			PersistFlightBetweenSessions,
+			UseContemporaryShell));
 		initialTokenStorageMethod = SelectedTokenStorageMethod;
 		RefreshTokenStorageUiState();
 	}
@@ -156,6 +181,36 @@ public class ImportantSettingsVM : ViewModelBase
 		= Enum.GetValues<Configuration.Theme>()
 		.Select(v => new EnumDisplay<Configuration.Theme>(v))
 		.ToArray();
+	public EnumDisplay<ExperienceStyle>[] ExperienceStyles { get; }
+		= new[]
+		{
+			global::LibationFileManager.ExperienceStyle.FollowSystem,
+			global::LibationFileManager.ExperienceStyle.Cellar,
+			global::LibationFileManager.ExperienceStyle.TastingRoom,
+			global::LibationFileManager.ExperienceStyle.HighContrast,
+		}
+		.Select(v => new EnumDisplay<ExperienceStyle>(v))
+		.ToArray();
+	public EnumDisplay<DensityMode>[] DensityModes { get; }
+		= Enum.GetValues<DensityMode>()
+		.Select(v => new EnumDisplay<DensityMode>(v))
+		.ToArray();
+	public EnumDisplay<DecorationLevel>[] DecorationLevels { get; }
+		= Enum.GetValues<DecorationLevel>()
+		.Select(v => new EnumDisplay<DecorationLevel>(v))
+		.ToArray();
+	public EnumDisplay<ReducedMotionPreference>[] ReducedMotionPreferences { get; }
+		= Enum.GetValues<ReducedMotionPreference>()
+		.Select(v => new EnumDisplay<ReducedMotionPreference>(v))
+		.ToArray();
+	public EnumDisplay<LibraryViewMode>[] LibraryViewModes { get; }
+		= Enum.GetValues<LibraryViewMode>()
+		.Select(v => new EnumDisplay<LibraryViewMode>(v))
+		.ToArray();
+	public EnumDisplay<NavigationRailPreference>[] NavigationRailPreferences { get; }
+		= Enum.GetValues<NavigationRailPreference>()
+		.Select(v => new EnumDisplay<NavigationRailPreference>(v))
+		.ToArray();
 
 	public string EncryptTokensText { get; } = TokenStorageSettingsUi.CheckboxText;
 	public string PlaintextWarningText { get; } = TokenStorageSettingsUi.PlaintextWarningText;
@@ -165,6 +220,11 @@ public class ImportantSettingsVM : ViewModelBase
 	public string ExportButtonToolTip { get; } = TokenStorageSettingsUi.ExportButtonToolTip;
 	public bool CanEditEncryptTokens { get; }
 	public bool ExportButtonEnabled { get; }
+	// The legacy editor reads the live Fluent palette. If this dialog opened while
+	// a contemporary profile was active, opting out is not committed until Save,
+	// so the editor must remain closed for this dialog lifetime. Conversely, opting
+	// in disables it immediately so it cannot outlive the shell transition.
+	public bool CanEditLegacyTheme => legacyThemeWasSafeAtOpen && !UseContemporaryShell;
 
 	public string BooksDirectory { get; set; }
 	public bool SavePodcastsToParentFolder { get; set; }
@@ -176,6 +236,27 @@ public class ImportantSettingsVM : ViewModelBase
 	public bool UseWebView { get; set; }
 	public bool CheckForUpgradesAtStartup { get; set; }
 	public Serilog.Events.LogEventLevel LoggingLevel { get; set; }
+	public bool UseContemporaryShell
+	{
+		get => useContemporaryShell;
+		set
+		{
+			if (useContemporaryShell == value)
+				return;
+
+			this.RaiseAndSetIfChanged(ref useContemporaryShell, value);
+			this.RaisePropertyChanged(nameof(CanEditLegacyTheme));
+		}
+	}
+	public EnumDisplay<ExperienceStyle> SelectedExperienceStyle { get; set; }
+	public EnumDisplay<DensityMode> SelectedDensityMode { get; set; }
+	public EnumDisplay<DecorationLevel> SelectedDecorationLevel { get; set; }
+	public EnumDisplay<ReducedMotionPreference> SelectedReducedMotionPreference { get; set; }
+	public EnumDisplay<LibraryViewMode> SelectedLibraryViewMode { get; set; }
+	public EnumDisplay<NavigationRailPreference> SelectedNavigationRailPreference { get; set; }
+	public bool UseSystemTypography { get; set; }
+	public bool ShowDecanterDock { get; set; }
+	public bool PersistFlightBetweenSessions { get; set; }
 
 	public bool EncryptTokens
 	{

@@ -54,6 +54,8 @@ partial class MainVM
 
 	public async Task StartWalkthroughAsync()
 	{
+		if (MainWindow.TryShowContemporaryOnboarding())
+			return;
 		MenuBarVisible = true;
 		await new Walkthrough(MainWindow).RunAsync();
 		MenuBarVisible = !Configuration.IsMacOs;

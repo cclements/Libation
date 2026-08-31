@@ -1,0 +1,19 @@
+<Styles xmlns="https://github.com/avaloniaui"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+	<Style Selector="Border.card">
+		<Setter Property="Padding" Value="{DynamicResource Libation.Density.CardPadding}" />
+		<Setter Property="CornerRadius" Value="{DynamicResource Libation.Radius.Medium}" />
+		<Setter Property="Background" Value="{DynamicResource Libation.Brush.Surface}" />
+		<Setter Property="BorderBrush" Value="{DynamicResource Libation.Brush.BorderSubtle}" />
+		<Setter Property="BorderThickness" Value="1" />
+	</Style>
+	<Style Selector="Border.card.raised">
+		<Setter Property="Background" Value="{DynamicResource Libation.Brush.SurfaceRaised}" />
+		<Setter Property="BoxShadow" Value="{DynamicResource Libation.Shadow.Low}" />
+	</Style>
+	<Style Selector="Border.card.selected">
+		<Setter Property="Background" Value="{DynamicResource Libation.Brush.Selection}" />
+		<Setter Property="BorderBrush" Value="{DynamicResource Libation.Brush.AccentPrimary}" />
+		<Setter Property="BorderThickness" Value="2" />
+	</Style>
+</Styles>

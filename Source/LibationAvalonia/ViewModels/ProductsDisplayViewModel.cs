@@ -19,10 +19,29 @@ using System.Threading.Tasks;
 
 namespace LibationAvalonia.ViewModels;
 
+/// <summary>
+/// Immutable view of the current ProductsDisplay filter result. It deliberately exposes
+/// existing GridEntry instances so presentation can observe metadata without copying ownership.
+/// </summary>
+public sealed class VisibleLibraryEntriesChangedEventArgs(
+	IReadOnlyList<LibraryBookEntry> entries,
+	bool isInitialLoadComplete,
+	string? filterText) : EventArgs
+{
+	public IReadOnlyList<LibraryBookEntry> Entries { get; } = entries;
+	public bool IsInitialLoadComplete { get; } = isInitialLoadComplete;
+	public string FilterText { get; } = filterText ?? string.Empty;
+}
+
 public class ProductsDisplayViewModel : ViewModelBase
 {
 	/// <summary>Number of visible rows has changed</summary>
 	public event EventHandler<int>? VisibleCountChanged;
+	/// <summary>
+	/// Read-only presentation projection changed. Contemporary Library surfaces consume this
+	/// instead of creating a second filter/search owner.
+	/// </summary>
+	public event EventHandler<VisibleLibraryEntriesChangedEventArgs>? VisibleLibraryEntriesChanged;
 	public event EventHandler<int>? RemovableCountChanged;
 
 	/// <summary>Backing list of all grid entries</summary>
@@ -33,12 +52,58 @@ public class ProductsDisplayViewModel : ViewModelBase
 
 	public DataGridCollectionView? GridEntries { get => field; private set => this.RaiseAndSetIfChanged(ref field, value); }
 	public bool RemoveColumnVisible { get => field; private set => this.RaiseAndSetIfChanged(ref field, value); }
+	public bool IsInitialLoadComplete { get => field; private set => this.RaiseAndSetIfChanged(ref field, value); }
 
 	public List<LibraryBook> GetVisibleBookEntries()
 		=> GetVisibleGridEntries().Select(lbe => lbe.LibraryBook).ToList();
 
 	public IEnumerable<LibraryBookEntry> GetVisibleGridEntries()
 		=> (FilteredInGridEntries as IEnumerable<GridEntry> ?? SOURCE).OfType<LibraryBookEntry>();
+
+	/// <summary>
+	/// Stable snapshot of the same entries selected by the established search/filter engine.
+	/// The snapshot is safe for a presentation layer to enumerate after this call returns.
+	/// </summary>
+	public IReadOnlyList<LibraryBookEntry> GetVisibleLibraryEntrySnapshot()
+	{
+		if (GridEntries is null)
+			return GetVisibleGridEntries().ToArray();
+
+		var filtered = FilteredInGridEntries;
+		return GridEntries
+			.OfType<GridEntry>()
+			.SelectMany(entry => entry switch
+			{
+				LibraryBookEntry book => new[] { book },
+				SeriesEntry series => series.Children.Where(child => filtered is null || filtered.Contains(child)),
+				_ => Enumerable.Empty<LibraryBookEntry>(),
+			})
+			.DistinctBy(entry => entry.AudibleProductId)
+			.ToArray();
+	}
+
+	public LibraryBookEntry? FindLibraryEntry(string productId)
+		=> string.IsNullOrWhiteSpace(productId)
+			? null
+			: SOURCE.BookEntries().FirstOrDefault(entry => string.Equals(entry.AudibleProductId, productId, StringComparison.Ordinal));
+
+	/// <summary>
+	/// Applies a shared header sort to the existing collection view. Passing a null member leaves
+	/// the user's current Details sort untouched.
+	/// </summary>
+	public void ApplyPresentationSort(string? memberName, ListSortDirection direction)
+	{
+		if (string.IsNullOrWhiteSpace(memberName) || GridEntries is null)
+			return;
+		if (!Dispatcher.UIThread.CheckAccess())
+		{
+			Dispatcher.UIThread.Post(() => ApplyPresentationSort(memberName, direction));
+			return;
+		}
+
+		GridEntries.SortDescriptions.Clear();
+		GridEntries.SortDescriptions.Add(DataGridSortDescription.FromPath(memberName, direction));
+	}
 
 	private IEnumerable<LibraryBookEntry> GetAllBookEntries() => SOURCE.BookEntries();
 
@@ -135,11 +200,21 @@ public class ProductsDisplayViewModel : ViewModelBase
 
 	private void GridEntries_CollectionChanged(object? sender = null, EventArgs? e = null)
 	{
+		if (!Dispatcher.UIThread.CheckAccess())
+		{
+			Dispatcher.UIThread.Post(() => GridEntries_CollectionChanged(sender, e));
+			return;
+		}
+
 		var count
 			= FilteredInGridEntries?.OfType<LibraryBookEntry>().Count()
 			?? SOURCE.OfType<LibraryBookEntry>().Count();
 
+		IsInitialLoadComplete = GridEntries is not null;
 		VisibleCountChanged?.Invoke(this, count);
+		VisibleLibraryEntriesChanged?.Invoke(
+			this,
+			new VisibleLibraryEntriesChangedEventArgs(GetVisibleLibraryEntrySnapshot(), IsInitialLoadComplete, FilterString));
 	}
 
 	/// <summary>

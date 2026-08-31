@@ -1,0 +1,49 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 x:Class="LibationAvalonia.DesignSystem.Components.FlightTray"
+			 x:Name="Root">
+	<Border Classes="card raised" AutomationProperties.Name="{Binding Title, ElementName=Root}">
+		<Grid RowDefinitions="Auto,Auto,*,Auto" RowSpacing="{DynamicResource Libation.Space.3}">
+			<Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{DynamicResource Libation.Space.2}">
+				<Path Data="{DynamicResource glyph.flight}" Width="22" Height="22" Stretch="Uniform"
+					  Stroke="{DynamicResource Libation.Brush.AccentSecondary}" StrokeThickness="1.75"
+					  StrokeLineCap="Round" StrokeJoin="Round" />
+				<TextBlock Grid.Column="1" Text="{Binding Title, ElementName=Root}" FontFamily="{DynamicResource Libation.Font.Display}"
+						   FontSize="{DynamicResource Libation.FontSize.Section}" Foreground="{DynamicResource Libation.Brush.TextPrimary}" />
+				<StackPanel Grid.Column="2" VerticalAlignment="Center">
+					<TextBlock Text="{Binding CountText, ElementName=Root}" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+					<TextBlock Text="{Binding DurationText, ElementName=Root}"
+						FontSize="{DynamicResource Libation.FontSize.Caption}"
+						Foreground="{DynamicResource Libation.Brush.TextTertiary}" />
+					<TextBlock Text="{Binding EstimatedSizeText, ElementName=Root}"
+						FontSize="{DynamicResource Libation.FontSize.Caption}"
+						Foreground="{DynamicResource Libation.Brush.TextTertiary}" />
+				</StackPanel>
+			</Grid>
+			<TextBlock x:Name="WarningSummary" Grid.Row="1" Text="{Binding WarningText, ElementName=Root}"
+					   IsVisible="{Binding WarningText, ElementName=Root, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+					   Focusable="{Binding FocusWarningOnShow, ElementName=Root}"
+					   Foreground="{DynamicResource Libation.Brush.Warning}" TextWrapping="Wrap"
+					   AutomationProperties.Name="Current Flight processing notice"
+					   AutomationProperties.LiveSetting="Polite" />
+			<ListBox Grid.Row="2" Classes="contemporary" ItemsSource="{Binding ItemsSource, ElementName=Root}"
+					 ItemTemplate="{Binding ItemTemplate, ElementName=Root}" MinHeight="96" MaxHeight="320"
+					 AutomationProperties.Name="Books in Flight" />
+			<Grid Grid.Row="3" ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="{DynamicResource Libation.Density.ToolbarGap}">
+				<StackPanel Orientation="Horizontal" Spacing="{DynamicResource Libation.Space.2}" VerticalAlignment="Center">
+					<Path Data="{DynamicResource glyph.output-profile}" Width="18" Height="18" Stretch="Uniform"
+						  Stroke="{DynamicResource Libation.Brush.TextSecondary}" StrokeThickness="1.75" />
+					<TextBlock Text="{Binding OutputProfileText, ElementName=Root}" Foreground="{DynamicResource Libation.Brush.TextSecondary}"
+							   TextTrimming="CharacterEllipsis" />
+				</StackPanel>
+				<Button Grid.Column="1" Classes="contemporary quiet" Content="{Binding UndoActionText, ElementName=Root}"
+						Command="{Binding UndoCommand, ElementName=Root}"
+						IsVisible="{Binding UndoActionText, ElementName=Root, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+				<Button Grid.Column="2" Classes="contemporary quiet" Content="Clear" Command="{Binding ClearCommand, ElementName=Root}"
+						CommandParameter="{Binding ClearCommandParameter, ElementName=Root}" />
+				<Button Grid.Column="3" Classes="contemporary primary" Content="{Binding ProcessActionText, ElementName=Root}" Command="{Binding ProcessCommand, ElementName=Root}"
+						CommandParameter="{Binding ProcessCommandParameter, ElementName=Root}" />
+			</Grid>
+		</Grid>
+	</Border>
+</UserControl>

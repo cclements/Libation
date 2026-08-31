@@ -67,6 +67,8 @@
 					<NativeMenuItem Command="{Binding ShowTrashBinAsync}" Header="{Binding TrashBinMenuText}" Gesture="{OnPlatform macOS='alt+⌘+T'}" />
 					<NativeMenuItem Command="{Binding LaunchHangover}" Header="Launch Hangover" />
 					<NativeMenuItemSeparator />
+					<NativeMenuItem Command="{Binding ShowFindBetterQualityBooksAsync}" Header="Scan for Better Quality Audiobooks" />
+					<NativeMenuItemSeparator />
 					<NativeMenuItem Command="{Binding StartWalkthroughAsync}" Header="Take a Guided Tour of Libation" />
 					<NativeMenuItem Command="{Binding ShowAboutAsync}" Header="About..." />
 				</NativeMenu>

@@ -1,0 +1,52 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:components="using:LibationAvalonia.DesignSystem.Components"
+			 xmlns:flight="using:LibationAvalonia.Features.Flight"
+			 x:Class="LibationAvalonia.Features.Flight.CurrentFlightView"
+			 x:DataType="flight:CurrentFlightViewModel">
+	<Grid RowDefinitions="*,Auto,Auto,Auto" RowSpacing="{DynamicResource Libation.Space.3}">
+		<components:FlightTray
+			ItemsSource="{Binding Items}"
+			CountText="{Binding CountText}"
+			DurationText="{Binding DurationText}"
+			EstimatedSizeText="{Binding EstimatedSizeText}"
+			WarningText="{Binding WarningText}"
+			FocusWarningOnShow="{Binding FocusWarning}"
+			OutputProfileText="{Binding OutputProfileText}"
+			ProcessActionText="{Binding ProcessActionText}"
+			ProcessCommand="{Binding ProcessCommand}"
+			ClearCommand="{Binding ClearCommand}"
+			UndoActionText="{Binding UndoActionText}"
+			UndoCommand="{Binding UndoCommand}">
+			<components:FlightTray.ItemTemplate>
+				<DataTemplate x:DataType="flight:CurrentFlightItemViewModel">
+					<Grid ColumnDefinitions="*,Auto" ColumnSpacing="8" Margin="2,4">
+						<StackPanel>
+							<TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+							<TextBlock Text="{Binding Author}" Foreground="{DynamicResource Libation.Brush.TextSecondary}" TextTrimming="CharacterEllipsis" />
+							<TextBlock Text="{Binding DurationText}" FontSize="{DynamicResource Libation.FontSize.Caption}" Foreground="{DynamicResource Libation.Brush.TextTertiary}" />
+						</StackPanel>
+						<Button Grid.Column="1" Classes="contemporary quiet compact" Content="Remove" Command="{Binding RemoveCommand}" AutomationProperties.Name="Remove title from Current Flight" />
+					</Grid>
+				</DataTemplate>
+			</components:FlightTray.ItemTemplate>
+		</components:FlightTray>
+
+		<Grid Grid.Row="1" ColumnDefinitions="Auto,*" ColumnSpacing="8">
+			<TextBlock VerticalAlignment="Center" Text="Output profile" />
+			<ComboBox Grid.Column="1" ItemsSource="{Binding OutputProfiles}" SelectedItem="{Binding SelectedOutputProfile, Mode=TwoWay}"
+				AutomationProperties.Name="Output profile">
+				<ComboBox.ItemTemplate><DataTemplate x:DataType="flight:FlightOutputProfileOption"><StackPanel><TextBlock Text="{Binding Label}" /><TextBlock Text="{Binding Description}" FontSize="{DynamicResource Libation.FontSize.Caption}" Foreground="{DynamicResource Libation.Brush.TextSecondary}" /></StackPanel></DataTemplate></ComboBox.ItemTemplate>
+			</ComboBox>
+		</Grid>
+		<WrapPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Left">
+			<Button Classes="contemporary quiet compact" Margin="0,0,8,8" Content="Inspect preflight" Command="{Binding InspectPreflightCommand}" />
+			<Button Classes="contemporary quiet compact" Margin="0,0,8,8" Content="Export metadata" Command="{Binding ExportMetadataCommand}" />
+			<Button Classes="contemporary quiet compact" Margin="0,0,8,8" Content="Add tags" Command="{Binding AddTagsCommand}" />
+			<Button Classes="contemporary quiet compact" Margin="0,0,8,8" Content="Replace tags" Command="{Binding ReplaceTagsCommand}" />
+			<Button Classes="contemporary quiet compact" Margin="0,0,8,8" Content="Copy technical details"
+				Command="{Binding CopyTechnicalDetailsCommand}" IsVisible="{Binding HasError}" />
+		</WrapPanel>
+		<TextBlock Grid.Row="3" Text="{Binding Announcement}" AutomationProperties.LiveSetting="Polite" Opacity="0" Height="1" />
+	</Grid>
+</UserControl>

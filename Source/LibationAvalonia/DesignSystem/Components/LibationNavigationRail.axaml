@@ -1,0 +1,34 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:components="using:LibationAvalonia.DesignSystem.Components"
+			 x:Class="LibationAvalonia.DesignSystem.Components.LibationNavigationRail"
+			 x:Name="Root">
+	<UserControl.Styles>
+		<Style Selector="components|LibationNavigationRail Border#RailRoot">
+			<Setter Property="Width" Value="{DynamicResource Libation.Navigation.WidthExpanded}" />
+		</Style>
+		<Style Selector="components|LibationNavigationRail:compact Border#RailRoot">
+			<Setter Property="Width" Value="{DynamicResource Libation.Navigation.WidthCompact}" />
+		</Style>
+	</UserControl.Styles>
+	<Border x:Name="RailRoot"
+			Background="{DynamicResource Libation.Brush.Sidebar}"
+			BorderBrush="{DynamicResource Libation.Brush.BorderSubtle}"
+			BorderThickness="0,0,1,0"
+			Padding="12"
+			AutomationProperties.Name="{Binding AccessibleName, ElementName=Root}">
+		<Grid RowDefinitions="Auto,*,Auto" RowSpacing="{DynamicResource Libation.Space.4}">
+			<ContentControl Content="{Binding BrandContent, ElementName=Root}"
+							HorizontalContentAlignment="Center"
+							AutomationProperties.AccessibilityView="Raw" />
+			<ListBox Grid.Row="1"
+					 Classes="contemporary"
+					 ItemsSource="{Binding ItemsSource, ElementName=Root}"
+					 ItemTemplate="{Binding ItemTemplate, ElementName=Root}"
+					 SelectedItem="{Binding SelectedItem, ElementName=Root, Mode=TwoWay}"
+					 SelectionMode="Single"
+					 AutomationProperties.Name="{Binding AccessibleName, ElementName=Root}" />
+			<ContentControl Grid.Row="2" Content="{Binding FooterContent, ElementName=Root}" />
+		</Grid>
+	</Border>
+</UserControl>

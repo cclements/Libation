@@ -1,0 +1,25 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:library="using:LibationAvalonia.Features.Library"
+			 x:Class="LibationAvalonia.Features.Library.CachedCover"
+			 x:DataType="library:LibraryBookItemViewModel"
+			 x:Name="Root">
+	<Grid>
+		<Border Background="{DynamicResource Libation.Brush.CoverPlaceholder}"
+				CornerRadius="{DynamicResource Libation.Radius.Small}"
+				IsVisible="{Binding Cover, ElementName=Root, Converter={x:Static ObjectConverters.IsNull}}">
+			<Path Data="{DynamicResource glyph.library}"
+				  Stretch="Uniform"
+				  Width="72"
+				  Height="72"
+				  Stroke="{DynamicResource Libation.Brush.TextTertiary}"
+				  StrokeThickness="1.5"
+				  AutomationProperties.IsControlElementOverride="False"
+				  AutomationProperties.AccessibilityView="Raw" />
+		</Border>
+		<Image Source="{Binding Cover, ElementName=Root}"
+			   Stretch="UniformToFill"
+			   IsVisible="{Binding Cover, ElementName=Root, Converter={x:Static ObjectConverters.IsNotNull}}"
+			   AutomationProperties.Name="{Binding Title}" />
+	</Grid>
+</UserControl>

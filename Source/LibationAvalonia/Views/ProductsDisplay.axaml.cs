@@ -1,4 +1,5 @@
 using Avalonia;
+using Avalonia.Collections;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Input.Platform;
@@ -24,12 +25,21 @@ using System.Threading.Tasks;
 
 namespace LibationAvalonia.Views;
 
+public sealed class ProductsDisplaySelectionChangedEventArgs(
+	IReadOnlyList<LibraryBookEntry> selectedEntries,
+	LibraryBookEntry? focusedEntry) : EventArgs
+{
+	public IReadOnlyList<LibraryBookEntry> SelectedEntries { get; } = selectedEntries;
+	public LibraryBookEntry? FocusedEntry { get; } = focusedEntry;
+}
+
 public partial class ProductsDisplay : UserControl
 {
 	public event LiberateClickedHandler? LiberateClicked;
 	public event EventHandler<SeriesEntry>? LiberateSeriesClicked;
 	public event EventHandler<LibraryBook[]>? ConvertToMp3Clicked;
 	public event EventHandler<LibraryBook>? TagsButtonClicked;
+	public event EventHandler<ProductsDisplaySelectionChangedEventArgs>? LibrarySelectionChanged;
 
 
 	public static readonly StyledProperty<bool> DisableContextMenuProperty =
@@ -52,6 +62,8 @@ public partial class ProductsDisplay : UserControl
 
 	private ProductsDisplayViewModel? _viewModel => DataContext as ProductsDisplayViewModel;
 	ImageDisplayDialog? imageDisplayDialog;
+	private bool configurationHandlersAttached;
+	private bool applyingSharedSelection;
 
 	public ProductsDisplay()
 	{
@@ -72,9 +84,6 @@ public partial class ProductsDisplay : UserControl
 		var tboxH2Selector = cellSelector.Child().Is<Panel>().Child().Is<TextBlock>().Class("h2");
 		fontSizeH2Style = new Style(_ => tboxH2Selector);
 		fontSizeH2Style.Setters.Add(fontSizeH2Setter);
-
-		Configuration.Instance.PropertyChanged += Configuration_GridScaleChanged;
-		Configuration.Instance.PropertyChanged += Configuration_FontChanged;
 
 		#region Design Mode Testing
 #if DEBUG
@@ -108,6 +117,7 @@ public partial class ProductsDisplay : UserControl
 		{
 			column.CustomSortComparer = new RowComparer(column);
 		}
+		productsGrid.SelectionChanged += ProductsGrid_SelectionChanged;
 
 		// macOS: control-click may be delivered as left+control or as a secondary click; the default
 		// ContextMenu route can fail on DataGrid cells. Open explicitly after children handle the event.
@@ -115,6 +125,107 @@ public partial class ProductsDisplay : UserControl
 		{
 			productsGrid.AddHandler(InputElement.PointerPressedEvent, ProductsGrid_PointerPressedMacContextMenu, RoutingStrategies.Bubble, handledEventsToo: true);
 		}
+	}
+
+	private void ProductsGrid_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+	{
+		if (applyingSharedSelection)
+			return;
+
+		var selected = productsGrid.SelectedItems
+			.OfType<GridEntry>()
+			.SelectMany(GetLibraryEntries)
+			.DistinctBy(entry => entry.AudibleProductId)
+			.ToArray();
+		var focused = productsGrid.SelectedItem switch
+		{
+			LibraryBookEntry book => book,
+			SeriesEntry series => series.Children.FirstOrDefault(),
+			_ => null,
+		};
+		LibrarySelectionChanged?.Invoke(this, new(selected, focused));
+	}
+
+	/// <summary>
+	/// Mirrors the shell-scoped stable-ID selection into visible DataGrid rows without changing
+	/// the grid's columns, sort, context commands, or filter ownership.
+	/// </summary>
+	public void ApplySharedSelection(IReadOnlySet<string> productIds, string? focusedProductId = null)
+	{
+		ArgumentNullException.ThrowIfNull(productIds);
+		applyingSharedSelection = true;
+		try
+		{
+			if (productsGrid.ItemsSource is not System.Collections.IEnumerable rows)
+				return;
+
+			var selectedRows = rows.OfType<GridEntry>().Where(row => row switch
+			{
+				LibraryBookEntry book => productIds.Contains(book.AudibleProductId),
+				SeriesEntry series => series.Children.Count > 0 && series.Children.All(child => productIds.Contains(child.AudibleProductId)),
+				_ => false,
+			}).ToArray();
+			var focusedRow = selectedRows.FirstOrDefault(row => row switch
+			{
+				LibraryBookEntry book => string.Equals(book.AudibleProductId, focusedProductId, StringComparison.Ordinal),
+				SeriesEntry series => series.Children.Any(child => string.Equals(child.AudibleProductId, focusedProductId, StringComparison.Ordinal)),
+				_ => false,
+			});
+
+			productsGrid.SelectedItems.Clear();
+			if (focusedRow is not null)
+				productsGrid.SelectedItem = focusedRow;
+			foreach (var row in selectedRows.Where(row => !productsGrid.SelectedItems.Contains(row)))
+				productsGrid.SelectedItems.Add(row);
+			if (focusedRow is not null && productsGrid.Columns.Count > 0)
+				productsGrid.ScrollIntoView(focusedRow, productsGrid.Columns[0]);
+		}
+		finally
+		{
+			applyingSharedSelection = false;
+		}
+	}
+
+	private static IEnumerable<LibraryBookEntry> GetLibraryEntries(GridEntry entry) => entry switch
+	{
+		SeriesEntry series => series.Children,
+		LibraryBookEntry book => new[] { book },
+		_ => Enumerable.Empty<LibraryBookEntry>(),
+	};
+
+	public bool FocusLibraryEntry(string productId)
+	{
+		if (_viewModel?.FindLibraryEntry(productId) is not { } entry)
+			return false;
+		if (productsGrid.ItemsSource is not System.Collections.IEnumerable rows || !rows.OfType<GridEntry>().Contains(entry))
+			return false;
+
+		productsGrid.SelectedItem = entry;
+		if (productsGrid.Columns.Count > 0)
+			productsGrid.ScrollIntoView(entry, productsGrid.Columns[0]);
+		productsGrid.Focus();
+		return true;
+	}
+
+	protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
+	{
+		base.OnAttachedToVisualTree(e);
+		if (configurationHandlersAttached)
+			return;
+		Configuration.Instance.PropertyChanged += Configuration_GridScaleChanged;
+		Configuration.Instance.PropertyChanged += Configuration_FontChanged;
+		configurationHandlersAttached = true;
+	}
+
+	protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
+	{
+		if (configurationHandlersAttached)
+		{
+			Configuration.Instance.PropertyChanged -= Configuration_GridScaleChanged;
+			Configuration.Instance.PropertyChanged -= Configuration_FontChanged;
+			configurationHandlersAttached = false;
+		}
+		base.OnDetachedFromVisualTree(e);
 	}
 
 	private void ProductsGrid_PointerPressedMacContextMenu(object? sender, PointerPressedEventArgs e)
@@ -262,30 +373,61 @@ public partial class ProductsDisplay : UserControl
 		if (sender is not ContextMenu contextMenu ||
 			DataGridCellContextMenu<GridEntry>.Create(contextMenu) is not { } args)
 			return;
+		PopulateLibraryContextMenu(args.ContextMenuItems, args.RowItems, args);
+	}
 
-		var entries = args.RowItems;
+	/// <summary>
+	/// Creates the same domain-action menu used by Details cells for Gallery selection. Cell-only
+	/// clipboard commands remain exclusive to the grid because Gallery has no clicked column.
+	/// </summary>
+	public ContextMenu CreateLibraryContextMenu(IEnumerable<LibraryBookEntry> entries)
+	{
+		ArgumentNullException.ThrowIfNull(entries);
+		var menu = new ContextMenu();
+		var items = new AvaloniaList<Control>();
+		menu.ItemsSource = items;
+		PopulateLibraryContextMenu(items, entries.Cast<GridEntry>().ToArray(), null);
+		return menu;
+	}
+
+	private void PopulateLibraryContextMenu(
+		AvaloniaList<Control> menuItems,
+		GridEntry[] entries,
+		DataGridCellContextMenu<GridEntry>? gridContext)
+	{
+		if (entries.Length == 0)
+			return;
 		var ctx = new GridContextMenu(entries, '_');
 
-		if (App.MainWindow?.Clipboard is IClipboard clipboard)
+		if (gridContext is not null && App.MainWindow?.Clipboard is IClipboard clipboard)
 		{
 			//Avalonia's DataGrid can't select individual cells, so add separate
 			//options for copying single cell's contents and who row contents.
-			if (entries.Length == 1 && args.Column.SortMemberPath is not "Liberate" and not "Cover")
+			if (entries.Length == 1 && gridContext.Column.SortMemberPath is not "Liberate" and not "Cover")
 			{
-				args.ContextMenuItems.Add(new MenuItem
+				menuItems.Add(new MenuItem
 				{
 					Header = ctx.CopyCellText,
-					Command = ReactiveCommand.CreateFromTask(() => clipboard?.SetTextAsync(args.CellClipboardContents) ?? Task.CompletedTask)
+					Command = ReactiveCommand.CreateFromTask(() => clipboard?.SetTextAsync(gridContext.CellClipboardContents) ?? Task.CompletedTask)
 				});
 			}
 
-			args.ContextMenuItems.Add(new MenuItem
+			menuItems.Add(new MenuItem
 			{
 				Header = "_Copy Row Contents",
-				Command = ReactiveCommand.CreateFromTask(() => clipboard?.SetTextAsync(args.GetRowClipboardContents()) ?? Task.CompletedTask)
+				Command = ReactiveCommand.CreateFromTask(() => clipboard?.SetTextAsync(gridContext.GetRowClipboardContents()) ?? Task.CompletedTask)
 			});
 
-			args.ContextMenuItems.Add(new Separator());
+			menuItems.Add(new Separator());
+		}
+		else if (App.MainWindow?.Clipboard is IClipboard galleryClipboard)
+		{
+			menuItems.Add(new MenuItem
+			{
+				Header = entries.Length == 1 ? "_Copy Book Details" : "_Copy Selected Book Details",
+				Command = ReactiveCommand.CreateFromTask(() => galleryClipboard.SetTextAsync(GetGalleryClipboardText(entries)))
+			});
+			menuItems.Add(new Separator());
 		}
 
 
@@ -293,7 +435,7 @@ public partial class ProductsDisplay : UserControl
 
 		if (entries.Length == 1 && entries[0] is SeriesEntry seriesEntry)
 		{
-			args.ContextMenuItems.Add(new MenuItem()
+			menuItems.Add(new MenuItem()
 			{
 				Header = ctx.LiberateEpisodesText,
 				IsEnabled = ctx.LiberateEpisodesEnabled,
@@ -304,7 +446,7 @@ public partial class ProductsDisplay : UserControl
 		#endregion
 		#region Set Download status to Downloaded
 
-		args.ContextMenuItems.Add(new MenuItem()
+		menuItems.Add(new MenuItem()
 		{
 			Header = ctx.SetDownloadedText,
 			IsEnabled = ctx.SetDownloadedEnabled,
@@ -314,7 +456,7 @@ public partial class ProductsDisplay : UserControl
 		#endregion
 		#region Set Download status to Not Downloaded
 
-		args.ContextMenuItems.Add(new MenuItem()
+		menuItems.Add(new MenuItem()
 		{
 			Header = ctx.SetNotDownloadedText,
 			IsEnabled = ctx.SetNotDownloadedEnabled,
@@ -326,14 +468,14 @@ public partial class ProductsDisplay : UserControl
 
 		if (ctx.ShowPdfStatusItems)
 		{
-			args.ContextMenuItems.Add(new MenuItem()
+			menuItems.Add(new MenuItem()
 			{
 				Header = ctx.SetPdfDownloadedText,
 				IsEnabled = ctx.SetPdfDownloadedEnabled,
 				Command = ReactiveCommand.Create(ctx.SetPdfDownloaded)
 			});
 
-			args.ContextMenuItems.Add(new MenuItem()
+			menuItems.Add(new MenuItem()
 			{
 				Header = ctx.SetPdfNotDownloadedText,
 				IsEnabled = ctx.SetPdfNotDownloadedEnabled,
@@ -346,7 +488,7 @@ public partial class ProductsDisplay : UserControl
 
 		if (entries.Length == 1 && entries[0] is LibraryBookEntry entry)
 		{
-			args.ContextMenuItems.Add(new MenuItem
+			menuItems.Add(new MenuItem
 			{
 				Header = ctx.LocateFileText,
 				Command = ReactiveCommand.CreateFromTask(async () =>
@@ -384,7 +526,7 @@ public partial class ProductsDisplay : UserControl
 		#endregion
 		#region Remove from library
 
-		args.ContextMenuItems.Add(new MenuItem
+		menuItems.Add(new MenuItem
 		{
 			Header = ctx.RemoveText,
 			Command = ReactiveCommand.CreateFromTask(ctx.RemoveAsync)
@@ -395,7 +537,7 @@ public partial class ProductsDisplay : UserControl
 		var selectedBookCount = entries.OfType<LibraryBookEntry>().Count();
 		if (selectedBookCount >= 1)
 		{
-			args.ContextMenuItems.Add(new MenuItem
+			menuItems.Add(new MenuItem
 			{
 				Header = selectedBookCount == 1 ? ctx.DownloadSingleText : ctx.DownloadSelectedText,
 				IsEnabled = ctx.DownloadBookEnabled,
@@ -407,7 +549,7 @@ public partial class ProductsDisplay : UserControl
 		#region Download split by chapters
 		if (entries.Length == 1 && entries[0] is LibraryBookEntry entry3_a)
 		{
-			args.ContextMenuItems.Add(new MenuItem()
+			menuItems.Add(new MenuItem()
 			{
 				Header = ctx.DownloadAsChapters,
 				IsEnabled = ctx.DownloadAsChaptersEnabled,
@@ -427,7 +569,7 @@ public partial class ProductsDisplay : UserControl
 
 		if (ctx.LibraryBookEntries.Length > 0)
 		{
-			args.ContextMenuItems.Add(new MenuItem
+			menuItems.Add(new MenuItem
 			{
 				Header = ctx.ConvertToMp3Text,
 				IsEnabled = ctx.ConvertToMp3Enabled,
@@ -439,7 +581,7 @@ public partial class ProductsDisplay : UserControl
 		#region Force Re-Download (Single book only)
 		if (entries.Length == 1 && entries[0] is LibraryBookEntry entry4)
 		{
-			args.ContextMenuItems.Add(new MenuItem()
+			menuItems.Add(new MenuItem()
 			{
 				Header = ctx.ReDownloadText,
 				IsEnabled = ctx.ReDownloadEnabled,
@@ -458,8 +600,8 @@ public partial class ProductsDisplay : UserControl
 
 		if (entries.Length != 1 || ctx.RemoveFromAudibleEnabled)
 		{
-			args.ContextMenuItems.Add(new Separator());
-			args.ContextMenuItems.Add(new MenuItem
+			menuItems.Add(new Separator());
+			menuItems.Add(new MenuItem
 			{
 				Header = ctx.RemoveFromAudibleText,
 				IsEnabled = ctx.RemoveFromAudibleEnabled,
@@ -472,7 +614,7 @@ public partial class ProductsDisplay : UserControl
 		if (entries.Length > 1)
 			return;
 
-		args.ContextMenuItems.Add(new Separator());
+		menuItems.Add(new Separator());
 
 		#region Edit Templates (Single book only)
 
@@ -489,7 +631,7 @@ public partial class ProductsDisplay : UserControl
 
 		if (entries.Length == 1 && entries[0] is LibraryBookEntry entry2)
 		{
-			args.ContextMenuItems.Add(new MenuItem
+			menuItems.Add(new MenuItem
 			{
 				Header = ctx.EditTemplatesText,
 				ItemsSource = new[]
@@ -511,7 +653,7 @@ public partial class ProductsDisplay : UserControl
 					}
 				}
 			});
-			args.ContextMenuItems.Add(new Separator());
+			menuItems.Add(new Separator());
 		}
 
 		#endregion
@@ -519,7 +661,7 @@ public partial class ProductsDisplay : UserControl
 
 		if (entries.Length == 1 && entries[0] is LibraryBookEntry entry3 && this.GetParentWindow() is Window window)
 		{
-			args.ContextMenuItems.Add(new MenuItem
+			menuItems.Add(new MenuItem
 			{
 				Header = ctx.ViewBookmarksText,
 				Command = ReactiveCommand.CreateFromTask(() => new BookRecordsDialog(entry3.LibraryBook).ShowDialog(window))
@@ -531,17 +673,29 @@ public partial class ProductsDisplay : UserControl
 
 		if (entries.Length == 1 && entries[0].Book.SeriesLink.Any())
 		{
-			args.ContextMenuItems.Add(new MenuItem
+			menuItems.Add(new MenuItem
 			{
 				Header = ctx.ViewSeriesText,
 				Command = ReactiveCommand.Create(() => new SeriesViewDialog(entries[0].LibraryBook).Show())
 			});
 		}
 
-		#endregion
+			#endregion
+		}
+
+	private string GetGalleryClipboardText(IEnumerable<GridEntry> entries)
+	{
+		var columns = productsGrid.Columns
+			.Where(column => column.IsVisible && column.SortMemberPath is not nameof(GridEntry.Cover) and not nameof(GridEntry.Liberate))
+			.OrderBy(column => column.DisplayIndex)
+			.ToArray();
+		var header = string.Join('\t', columns.Select(column => column.Header?.ToString() ?? column.SortMemberPath));
+		var rows = entries.Select(entry => string.Join('\t', columns.Select(column =>
+			entry.GetMemberValue(column.SortMemberPath)?.ToString()?.Replace("\r\n", " ").Replace('\r', ' ').Replace('\n', ' ') ?? string.Empty)));
+		return string.Join(Environment.NewLine, new[] { header }.Concat(rows));
 	}
 
-	#endregion
+		#endregion
 
 	#region Column Customizations
 
@@ -578,6 +732,13 @@ public partial class ProductsDisplay : UserControl
 
 			column.DisplayIndex = displayIndices.GetValueOrDefault(itemName, productsGrid.Columns.IndexOf(column));
 		}
+	}
+
+	public void OpenColumnChooser(Control placementTarget)
+	{
+		ArgumentNullException.ThrowIfNull(placementTarget);
+		if (!DisableColumnCustomization)
+			GridHeaderContextMenu.Open(placementTarget);
 	}
 
 	private void ApplyDisableColumnCustimaziton()
