@@ -4,11 +4,12 @@
 - Completed: Prompts 01–10 are integrated at source level on the default-off
   Contemporary Cellar graph; Prompt 12 source review records a rollout
   **NO-GO**.
-- Partially completed: Prompt 11 has a documented evidence matrix, and the final
-  current-source macOS Release compilation succeeded with 0 warnings and 0
-  errors. Neither is an admitted runtime, test, package, or supported-platform
-  result.
-- Not completed: automated tests, isolated app interaction, major-screen
+- Partially completed: Prompt 11 has a documented evidence matrix; the focused
+  settings, persistence, and diagnostic-scrubbing packet passed 23 selected
+  cases; and the final current-source macOS Release compilation succeeded with
+  0 warnings and 0 errors. This is not an admitted runtime, package, complete
+  test-suite, or supported-platform result.
+- Not completed: broader automated suites, isolated app interaction, major-screen
   comparisons in both profiles, accessibility, 10k/50k performance,
   migration/rollback interaction, installed packages, Windows/Linux coverage,
   beta evidence, upstream-project acceptance, and rollout authorization. An
@@ -28,6 +29,10 @@
   secondary destinations, and onboarding presentations.
 - `Source/LibationUiBase/Diagnostics/` and process-queue seams: scrubbed copied
   diagnostics and queue-log presentation with one correlation reference per job.
+- `Source/_Tests/FileManager.Tests/`, `LibationFileManager.Tests/`, and
+  `LibationUiBase.Tests/`: the three authorized focused contract classes plus a
+  namespace compatibility repair required by the current upstream dependency
+  graph.
 - `Source/LibationAvalonia/Properties/`: English route and command resources
   used by the shell and typed route catalog.
 - `Source/LibationAvalonia/App.axaml`, `App.axaml.cs`, `Views/`,
@@ -42,7 +47,7 @@
   review, and this consolidated handoff.
 - Current delivery state: the source is committed on
   `codex/contemporary-cellar`, rebased onto upstream
-  `3e7191adc7f41f1dec252b95e505b3f318be3b34`, and prepared for the same-named
+  `3e7191adc7f41f1dec252b95e505b3f318be3b34`, and delivered to the same-named
   branch on the `cclements` GitHub fork. No pull request or upstream write is
   authorized.
 
@@ -73,16 +78,24 @@
 - Build command: `/Users/chris/.dotnet/dotnet build
   Source/LibationAvalonia/LibationAvalonia.csproj --configuration Release
   --no-restore --disable-build-servers -m:1 -v:minimal`.
-- Build result: the final post-rebase pass succeeded on macOS in 19.77 seconds
-  with 0 warnings and 0 errors. Earlier compile passes exposed and then closed
-  the missing Avalonia clipboard extension imports and XAML-required public
-  parameterless Locate Audiobooks constructor.
-- Test command: none. Tests were deliberately not run because execution requires
-  current exact approval; there is no test pass.
+- Build result: the full post-test-fix pass succeeded on macOS in 20.53 seconds,
+  and the final incremental pass after the last scrubber ordering change
+  succeeded in 2.57 seconds; both reported 0 warnings and 0 errors. Earlier
+  compile passes exposed and then closed the missing Avalonia clipboard
+  extension imports and XAML-required public parameterless Locate Audiobooks
+  constructor.
+- Focused test commands: project-scoped `dotnet test --no-restore --filter`
+  invocations for `ContemporarySettingsDictionaryTests`,
+  `ContemporaryExperienceSettingsTests`, and `DiagnosticTextScrubberTests`.
+- Test result: 3 + 8 + 12 selected cases passed, with 0 failures and 0 skips.
+  The projects' stale ignored dependency assets were refreshed from the local
+  NuGet cache only. No broader test project, app launch, or runtime packet ran.
+- Defects closed by the packet: authorization redaction no longer leaves bearer
+  tokens behind, and URI user-info redaction now preserves the safe destination.
 - Uncovered risk: persistence repair/restart, route and shortcut behavior,
-  Flight synchronization/preflight, live queue actions, onboarding, privacy,
-  focus/screen-reader behavior, performance, migration/rollback interaction,
-  and supported-platform packaging.
+  Flight synchronization/preflight, live queue actions, onboarding, runtime
+  privacy, focus/screen-reader behavior, performance, migration/rollback
+  interaction, and supported-platform packaging.
 
 ## Visual verification
 - Profile/platform/scale: both profile references and focused crops were
@@ -120,8 +133,8 @@
   no library, selection, queue, or media migration is required.
 
 ## Follow-up work
-- Blocking: define an isolated no-account configuration; obtain exact approval
-  for the named deterministic test and interaction packets; provide the
+- Blocking: define an isolated no-account configuration; obtain separate exact
+  approval for any remaining deterministic or interaction packet; provide the
   performance fixture and supported Windows/macOS/Linux environments; execute
   the visual/accessibility/package/rollback matrices; dispose resulting
   defects; then obtain explicit owner rollout authority.

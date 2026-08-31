@@ -15,9 +15,9 @@ public static partial class DiagnosticTextScrubber
 		if (string.IsNullOrEmpty(text))
 			return text;
 
-		var scrubbed = SecretValueRegex().Replace(text, "$1[redacted]");
-		scrubbed = BearerValueRegex().Replace(scrubbed, "$1[redacted]");
-		scrubbed = UriUserInfoRegex().Replace(scrubbed, "$1[redacted]@");
+		var scrubbed = UriUserInfoRegex().Replace(text, "$1[redacted]@");
+		scrubbed = AuthorizationValueRegex().Replace(scrubbed, "$1[redacted]");
+		scrubbed = SecretValueRegex().Replace(scrubbed, "$1[redacted]");
 		scrubbed = PemBlockRegex().Replace(scrubbed, "[redacted private key]");
 		scrubbed = EmailRegex().Replace(scrubbed, "[redacted account]");
 
@@ -28,11 +28,11 @@ public static partial class DiagnosticTextScrubber
 		return UserProfilePathRegex().Replace(scrubbed, "[redacted user path]");
 	}
 
-	[GeneratedRegex("""(?i)(["']?\b(?:access[_-]?token|refresh[_-]?token|id[_-]?token|adp[_-]?token|device[_-]?token|authorization|password|passwd|client[_-]?secret|private[_-]?key|cookie|account[_-]?(?:id|name|email)|customer[_-]?id|username)\b["']?\s*[:=]\s*)(?:"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|[^\s,;}\]]+)""")]
+	[GeneratedRegex("""(?i)(["']?\b(?:access[_-]?token|refresh[_-]?token|id[_-]?token|adp[_-]?token|device[_-]?token|password|passwd|client[_-]?secret|private[_-]?key|cookie|account[_-]?(?:id|name|email)|customer[_-]?id|username)\b["']?\s*[:=]\s*)(?:"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|[^\s,;}\]]+)""")]
 	private static partial Regex SecretValueRegex();
 
-	[GeneratedRegex(@"(?i)(\bauthorization\b\s*[:=]\s*bearer\s+)[^\s,;]+")]
-	private static partial Regex BearerValueRegex();
+	[GeneratedRegex("""(?i)(["']?\bauthorization\b["']?\s*[:=]\s*)(?:"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|(?:(?:bearer|basic)\s+)?[^\s,;}\]]+)""")]
+	private static partial Regex AuthorizationValueRegex();
 
 	[GeneratedRegex(@"(?i)(\b[a-z][a-z0-9+.-]*://)[^/\s:@]+(?::[^/\s@]*)?@")]
 	private static partial Regex UriUserInfoRegex();
