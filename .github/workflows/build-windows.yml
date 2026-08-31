@@ -53,7 +53,13 @@ jobs:
       - name: Unit test
         if: ${{ inputs.run-unit-tests }}
         working-directory: ./Source
-        run: dotnet test
+        run: |
+          $testProjects = @(Get-ChildItem -Path "_Tests/*.Tests/*.csproj")
+          if ($testProjects.Count -eq 0) { throw "No unit-test projects were found." }
+          foreach ($testProject in $testProjects) {
+            dotnet run --project $testProject.FullName --configuration Release -- --minimum-expected-tests 1
+            if ($LASTEXITCODE -ne 0) { throw "Unit tests failed for $($testProject.FullName)" }
+          }
         
       - name: Publish
         working-directory: ./Source
@@ -142,4 +148,3 @@ jobs:
           path: ./bin/${{ steps.setup.outputs.setup }}
           if-no-files-found: error
           retention-days: ${{ inputs.retention-days }}
-

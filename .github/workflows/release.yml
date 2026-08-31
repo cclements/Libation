@@ -36,6 +36,7 @@ jobs:
       libation-version: ${{ needs.prerelease.outputs.version }}
       publish-r2r: true
       release: true
+      run-unit-tests: true
 
   release:
     needs: [prerelease, build]
