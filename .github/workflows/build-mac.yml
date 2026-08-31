@@ -50,7 +50,16 @@ jobs:
       - name: Unit test
         if: ${{ inputs.run-unit-tests }}
         working-directory: ./Source
-        run: dotnet test
+        run: |
+          shopt -s nullglob
+          TEST_PROJECTS=(_Tests/*.Tests/*.csproj)
+          if (( ${#TEST_PROJECTS[@]} == 0 )); then
+            echo "::error::No unit-test projects were found."
+            exit 1
+          fi
+          for TEST_PROJECT in "${TEST_PROJECTS[@]}"; do
+            dotnet run --project "${TEST_PROJECT}" --configuration Release -- --minimum-expected-tests 1
+          done
 
       - name: Publish
         id: publish
