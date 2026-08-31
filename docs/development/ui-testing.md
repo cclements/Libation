@@ -64,8 +64,10 @@ tokens, and personally identifying metadata before admission.
 
 ## Current evidence boundary
 
-The contemporary source currently has Release-build evidence on macOS. Tests,
-isolated runtime interaction, visual baselines, accessibility tools, large-library
-measurements, platform packages, and Windows/Linux runs have not been executed
-in this workstream. They require explicit command/environment authority and must
-remain marked unverified until reproduced.
+The contemporary source has Release-build evidence on macOS. Three authorized,
+project-scoped filters passed 23 selected settings, persistence, Flight-ID JSON,
+and diagnostic-scrubbing cases. No broader suite, isolated runtime interaction,
+visual baseline, accessibility tool, large-library measurement, platform
+package, or Windows/Linux run has been executed in this workstream. Those tiers
+require separate command/environment authority and remain unverified until
+reproduced.

@@ -5,8 +5,9 @@ default-off.**
 
 This decision is evidence-based, not a statement that the implementation is
 known to be defective. The source and compiled XAML build on the current macOS
-host. The plan's interaction, accessibility, migration, performance, package,
-and supported-platform launch evidence has not been authorized or reproduced.
+host, and the authorized 23-case settings/persistence/scrubber packet passes.
+The plan's interaction, accessibility, migration, performance, package, and
+supported-platform launch evidence has not been reproduced.
 
 ## Rollout controls
 
@@ -27,8 +28,9 @@ library or queue migration.
 | Gate | Current evidence | Result |
 |---|---|---|
 | one library, one Flight, one queue, routed existing commands | direct source review and Release compilation | source-pass |
-| default-disabled flag and current-interface path | direct persistence and host review | source-pass; runtime rollback unverified |
+| default-disabled flag and current-interface path | direct persistence/host review plus focused settings tests | unit-pass for defaults and round trip; runtime rollback unverified |
 | compiled resources/XAML | macOS Release build, 0 warnings / 0 errors | pass for this target only |
+| batched settings final state and copied-diagnostic privacy | focused dictionary, experience-settings, and scrubber cases | pass for selected contracts only; crash/concurrent-observer atomicity remains unverified |
 | asset source/provenance | vector dictionaries, SVG master, manifest, platform input files | source-pass; installed packages unverified |
 | no raw reference-board pixels ship | repository asset review | source-pass |
 | profile/dialog/active-processing stability | no isolated interaction run | unverified |
