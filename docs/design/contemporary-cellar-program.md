@@ -1,19 +1,21 @@
 # Contemporary Cellar program baseline
 This file binds the implementation pack to the live repository before production
-UI changes. The effective source baseline is
-`094e207c0b245f36592ce31000f693674b886057` from `origin/master` on 2026-08-30.
+UI changes. The UI intake was measured at
+`094e207c0b245f36592ce31000f693674b886057`; the final source delivery is
+rebased onto `3e7191adc7f41f1dec252b95e505b3f318be3b34` from `origin/master` on
+2026-08-30.
 
 ## Repository and execution plan
 
-- Integration branch: `codex/contemporary-cellar`, created directly from the
-  effective upstream baseline.
+- Integration branch: `codex/contemporary-cellar`, created from the measured UI
+  intake and rebased onto the final upstream delivery baseline.
 - Existing unrelated worktrees and staged changes are out of scope and remain
   untouched.
 - Work proceeds serially on the integration branch so each dependency is
   reconciled before its consumer changes.
-- The 29 scopes in the pack remain logical review boundaries. No commit, push,
-  pull request, maintainer contact, publication, or rollout is authorized by this
-  implementation task.
+- The 29 scopes in the pack remain logical review boundaries. Local commits and
+  pushes to the `cclements` GitHub fork are authorized. Pull requests,
+  maintainer contact, writes to upstream, publication, and rollout are not.
 - If review branches are later requested, their names will use
   `codex/contemporary-cellar-<scope>` and start from the last accepted dependency,
   not from an unrelated staged worktree.

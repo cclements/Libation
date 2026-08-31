@@ -1,6 +1,9 @@
 # Current UI command parity
 
-Baseline: `094e207c0b245f36592ce31000f693674b886057` (Libation 14.0.0).
+Measured UI intake baseline: `094e207c0b245f36592ce31000f693674b886057`
+(Libation 14.0.0). Delivery baseline:
+`3e7191adc7f41f1dec252b95e505b3f318be3b34`; its intervening upstream changes
+do not touch the UI command surfaces inventoried here.
 
 This is the preservation contract for the contemporary shell. “Integrated
 destination / seam” names presentation wiring now present in the source fan-in,
