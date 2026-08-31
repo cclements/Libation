@@ -89,6 +89,7 @@ public sealed class AppShellViewModel : ViewModelBase, IDisposable
 		configuration.PropertyChanged += Configuration_PropertyChanged;
 		LibraryCommands.LibrarySizeChanged += LibraryCommands_LibrarySizeChanged;
 		Flight.SelectionChanged += Flight_SelectionChanged;
+		SetActiveDestinations(Navigation.CurrentRoute.Id);
 	}
 
 	public ILibationCommandAdapter CommandAdapter { get; }
@@ -204,6 +205,7 @@ public sealed class AppShellViewModel : ViewModelBase, IDisposable
 
 	private void Navigation_RouteChanged(object? sender, AppRouteChangedEventArgs e)
 	{
+		SetActiveDestinations(e.Current.Id);
 		this.RaisePropertyChanged(nameof(CurrentRoute));
 		this.RaisePropertyChanged(nameof(IsOverviewRoute));
 		this.RaisePropertyChanged(nameof(IsLibraryRoute));
@@ -224,6 +226,13 @@ public sealed class AppShellViewModel : ViewModelBase, IDisposable
 		this.RaisePropertyChanged(nameof(ShowFlightToggle));
 		IsNavigationOverlayOpen = false;
 		IsDecanterDrawerOpen = false;
+	}
+
+	private void SetActiveDestinations(AppRouteId route)
+	{
+		bool shellActive = configuration.UseContemporaryShell;
+		Dashboard.SetActive(shellActive && route == AppRouteId.Overview);
+		History.SetActive(shellActive && route == AppRouteId.History);
 	}
 
 	private void Responsive_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -327,7 +336,8 @@ public sealed class AppShellViewModel : ViewModelBase, IDisposable
 	{
 		if (e.PropertyName is not nameof(Configuration.DecorationLevel)
 			and not nameof(Configuration.NavigationRailPreference)
-			and not nameof(Configuration.ShowDecanterDock))
+			and not nameof(Configuration.ShowDecanterDock)
+			and not nameof(Configuration.UseContemporaryShell))
 			return;
 		if (!Dispatcher.UIThread.CheckAccess())
 		{
@@ -339,6 +349,7 @@ public sealed class AppShellViewModel : ViewModelBase, IDisposable
 
 	private void RefreshConfigurationProjection()
 	{
+		SetActiveDestinations(Navigation.CurrentRoute.Id);
 		UpdateLayout(lastEffectiveSize);
 		this.RaisePropertyChanged(nameof(ShowQueueDock));
 		this.RaisePropertyChanged(nameof(ShowDecanterDrawer));

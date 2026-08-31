@@ -20,7 +20,7 @@
 			</Border>
 		</DataTemplate>
 	</UserControl.Resources>
-	<Grid Margin="{DynamicResource Libation.Space.5}" RowDefinitions="Auto,Auto,Auto,Auto,*"
+	<Grid Margin="{DynamicResource Libation.Thickness.5}" RowDefinitions="Auto,Auto,Auto,Auto,*"
 		RowSpacing="{DynamicResource Libation.Space.3}">
 			<components:PageHeader Grid.Row="0" Eyebrow="Available records" Title="History"
 				SupportingText="Review the timestamps and current-session outcomes Libation already records." />

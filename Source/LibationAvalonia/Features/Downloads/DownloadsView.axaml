@@ -6,7 +6,7 @@
 	x:Class="LibationAvalonia.Features.Downloads.DownloadsView"
 	x:DataType="downloads:DownloadsViewModel">
 	<ScrollViewer HorizontalScrollBarVisibility="Disabled">
-		<StackPanel Margin="{DynamicResource Libation.Space.5}" Spacing="{DynamicResource Libation.Space.4}">
+		<StackPanel Margin="{DynamicResource Libation.Thickness.5}" Spacing="{DynamicResource Libation.Space.4}">
 			<components:PageHeader
 				Eyebrow="Acquisition"
 				Title="Downloads"

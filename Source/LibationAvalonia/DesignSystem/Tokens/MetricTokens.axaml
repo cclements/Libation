@@ -9,6 +9,9 @@
 	<x:Double x:Key="Libation.Space.6">32</x:Double>
 	<x:Double x:Key="Libation.Space.7">48</x:Double>
 	<x:Double x:Key="Libation.Space.8">64</x:Double>
+	<Thickness x:Key="Libation.Thickness.3">12</Thickness>
+	<Thickness x:Key="Libation.Thickness.4">16</Thickness>
+	<Thickness x:Key="Libation.Thickness.5">24</Thickness>
 
 	<CornerRadius x:Key="Libation.Radius.Small">6</CornerRadius>
 	<CornerRadius x:Key="Libation.Radius.Medium">12</CornerRadius>

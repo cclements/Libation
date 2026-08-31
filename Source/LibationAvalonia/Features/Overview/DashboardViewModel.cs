@@ -56,7 +56,10 @@ public sealed class DashboardViewModel : ViewModelBase, IDisposable
 	private bool refreshRunning;
 	private bool refreshAgain;
 	private bool hasLoadedSearchText;
+	private bool isActive;
+	private bool refreshPending = true;
 	private bool disposed;
+	internal bool IsActive => isActive;
 
 	public DashboardViewModel(
 		ILibationCommandAdapter commands,
@@ -116,8 +119,23 @@ public sealed class DashboardViewModel : ViewModelBase, IDisposable
 			"Libation could not cancel all active processing. Open Processing to review the remaining work.")));
 		ToggleFlightExpandedCommand = Track(ReactiveCommand.Create(() => IsFlightExpanded = !IsFlightExpanded));
 		currentFlight.PropertyChanged += CurrentFlight_PropertyChanged;
+	}
 
-		_ = RefreshAsync();
+	public void SetActive(bool active)
+	{
+		if (disposed)
+			return;
+		if (!Dispatcher.UIThread.CheckAccess())
+		{
+			Dispatcher.UIThread.Post(() => SetActive(active));
+			return;
+		}
+		isActive = active;
+		if (isActive && refreshPending)
+		{
+			refreshPending = false;
+			_ = RefreshAsync();
+		}
 	}
 
 	public DashboardSnapshot Snapshot
@@ -255,6 +273,7 @@ public sealed class DashboardViewModel : ViewModelBase, IDisposable
 			Dispatcher.UIThread.Post(() => _ = RefreshAsync());
 			return;
 		}
+		refreshPending = false;
 		if (refreshRunning)
 		{
 			refreshAgain = true;
@@ -385,7 +404,21 @@ public sealed class DashboardViewModel : ViewModelBase, IDisposable
 	}
 
 	private void Source_Invalidated(object? sender, EventArgs e)
-		=> Dispatcher.UIThread.Post(() => _ = RefreshAsync());
+	{
+		if (disposed)
+			return;
+		if (!Dispatcher.UIThread.CheckAccess())
+		{
+			Dispatcher.UIThread.Post(() => Source_Invalidated(sender, e));
+			return;
+		}
+		if (!isActive)
+		{
+			refreshPending = true;
+			return;
+		}
+		_ = RefreshAsync();
+	}
 
 	private async Task CopyTechnicalDetailsAsync()
 	{
