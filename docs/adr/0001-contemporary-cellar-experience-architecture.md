@@ -1,7 +1,10 @@
 # ADR 0001: Contemporary Cellar experience architecture
 - Status: Accepted for implementation
 - Date: 2026-08-30
-- Baseline: `094e207c0b245f36592ce31000f693674b886057` (`origin/master`, Libation 14.0.0)
+- Measured UI intake baseline: `094e207c0b245f36592ce31000f693674b886057`
+  (`origin/master`, Libation 14.0.0)
+- Delivery baseline: `3e7191adc7f41f1dec252b95e505b3f318be3b34`
+  (`origin/master` on 2026-08-30)
 - Decision owners: Contemporary Cellar program
 
 ## Context

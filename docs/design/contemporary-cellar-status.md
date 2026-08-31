@@ -1,6 +1,7 @@
 # Contemporary Cellar workstream status
 
-Effective baseline: `094e207c0b245f36592ce31000f693674b886057`.
+Effective delivery baseline: `3e7191adc7f41f1dec252b95e505b3f318be3b34`.
+Measured UI intake baseline: `094e207c0b245f36592ce31000f693674b886057`.
 Integration branch: `codex/contemporary-cellar`.
 Integration worktree: `/Users/chris/projects/libation-patch/Libation`.
 
@@ -12,10 +13,11 @@ admission.
 The supplied records do not retain individual worker identities, so
 **Owner/agent** names the accountable prompt role plus Prompt 00 fan-in rather
 than inventing a person. **PR scope** records the pack's logical review boundary;
-all work is still uncommitted in the integration worktree, and no pull request is
-open. The final current-source macOS Release compilation succeeded with 0
-warnings and 0 errors. That result does not satisfy any test, interaction,
-package, supported-platform, or rollout gate.
+the integrated source is committed on `codex/contemporary-cellar`, rebased onto
+the effective delivery baseline, and designated for the `cclements` fork only.
+No pull request is open or authorized. The final post-rebase macOS Release
+compilation succeeded with 0 warnings and 0 errors. That result does not satisfy
+any test, interaction, package, supported-platform, or rollout gate.
 
 | Prompt | Workstream | Owner/agent | Prerequisite | Branch/worktree | PR scope | State | Test state | Visual verification state | Asset dependencies | Blocker |
 |---|---|---|---|---|---|---|---|---|---|---|

@@ -11,7 +11,9 @@
 - Not completed: automated tests, isolated app interaction, major-screen
   comparisons in both profiles, accessibility, 10k/50k performance,
   migration/rollback interaction, installed packages, Windows/Linux coverage,
-  beta evidence, commit/PR delivery, and rollout authorization.
+  beta evidence, upstream-project acceptance, and rollout authorization. An
+  upstream pull request and maintainer contact are explicitly outside this
+  delivery.
 
 ## Files changed
 - `Source/LibationFileManager/ContemporaryExperienceSettings.cs` and related
@@ -38,8 +40,11 @@
 - `docs/adr/`, `docs/design/`, and `docs/development/`: architecture,
   preservation contracts, source/evidence ledgers, asset provenance, release
   review, and this consolidated handoff.
-- Current delivery state: these paths remain in a dirty, uncommitted
-  `codex/contemporary-cellar` worktree; no commit, push, or pull request exists.
+- Current delivery state: the source is committed on
+  `codex/contemporary-cellar`, rebased onto upstream
+  `3e7191adc7f41f1dec252b95e505b3f318be3b34`, and prepared for the same-named
+  branch on the `cclements` GitHub fork. No pull request or upstream write is
+  authorized.
 
 ## Architecture decisions
 - Decision: keep one existing library, one shell-scoped stable-ID Flight
@@ -68,10 +73,10 @@
 - Build command: `/Users/chris/.dotnet/dotnet build
   Source/LibationAvalonia/LibationAvalonia.csproj --configuration Release
   --no-restore --disable-build-servers -m:1 -v:minimal`.
-- Build result: final pass succeeded on macOS in 8.01 seconds with 0 warnings and
-  0 errors. Earlier compile passes exposed and then closed the missing Avalonia
-  clipboard extension imports and XAML-required public parameterless Locate
-  Audiobooks constructor.
+- Build result: the final post-rebase pass succeeded on macOS in 19.77 seconds
+  with 0 warnings and 0 errors. Earlier compile passes exposed and then closed
+  the missing Avalonia clipboard extension imports and XAML-required public
+  parameterless Locate Audiobooks constructor.
 - Test command: none. Tests were deliberately not run because execution requires
   current exact approval; there is no test pass.
 - Uncovered risk: persistence repair/restart, route and shortcut behavior,

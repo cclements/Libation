@@ -62,5 +62,6 @@ library or queue migration.
 > accessibility and packaging matrix; report rendering, keyboard, discovery, or
 > workflow differences with the beta template.
 
-No commit, push, pull request, package publication, beta distribution, or
-default-rollout action is authorized by this source workstream.
+Local commits and delivery to the `cclements` fork branch are authorized. No
+pull request, upstream write, maintainer contact, package publication, beta
+distribution, or default-rollout action is authorized by this source workstream.
