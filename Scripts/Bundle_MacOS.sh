@@ -24,9 +24,21 @@ then
   exit 1
 fi
 
+if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
+then
+  echo "The Libation version must contain three period-separated integers for CFBundleShortVersionString."
+  exit 1
+fi
+
 if [ -z "${ARCH:-}" ]
 then
   echo "This script must be called with the Libation cpu architecture as an argument."
+  exit 1
+fi
+
+if [ "$ARCH" != "x64" ] && [ "$ARCH" != "arm64" ]
+then
+  echo "The Libation macOS architecture must be x64 or arm64."
   exit 1
 fi
 
@@ -65,7 +77,6 @@ create_dmg_with_retry() {
     fi
 
     echo "hdiutil create failed on attempt ${attempt}"
-    hdiutil detach -force /Volumes/Libation 2>/dev/null || true
     rm -f "${output_path}" "${output_path}.temp.dmg" 2>/dev/null || true
     sync
 
@@ -94,9 +105,7 @@ mkdir -p $BUNDLE_CONTENTS
 mkdir -p $BUNDLE_RESOURCES
 mkdir -p $BUNDLE_MACOS
 
-mv "${BIN_DIR}/"*  $BUNDLE_MACOS
-
-if [ $? -ne 0 ]; then
+if ! mv "${BIN_DIR}/"* "$BUNDLE_MACOS"; then
   echo "Error moving ${BIN_DIR} files"
   exit 1
 fi
@@ -122,33 +131,34 @@ mv $BUNDLE_MACOS/background.png ./background.png
 echo "Moving background.png file..."
 mv $BUNDLE_MACOS/Libation.entitlements ./Libation.entitlements
 
-PLIST_ARCH=$(echo $ARCH | sed 's/x64/x86_64/')
-echo "Set LSArchitecturePriority to $PLIST_ARCH"
-# Portable sed -i (BSD sed on macOS requires backup arg; use .bak then remove)
-sed -i.bak "s/ARCHITECTURE_STRING/$PLIST_ARCH/" $BUNDLE_CONTENTS/Info.plist && rm -f $BUNDLE_CONTENTS/Info.plist.bak
+echo "Moving local ad-hoc entitlements file..."
+mv $BUNDLE_MACOS/Libation.adhoc.entitlements ./Libation.adhoc.entitlements
 
 echo "Set CFBundleVersion to $VERSION"
+# Portable sed -i (BSD sed on macOS requires backup arg; use .bak then remove)
 sed -i.bak "s/VERSION_STRING/$VERSION/" $BUNDLE_CONTENTS/Info.plist && rm -f $BUNDLE_CONTENTS/Info.plist.bak
 
 delfiles=('MacOSConfigApp' 'MacOSConfigApp.deps.json' 'MacOSConfigApp.runtimeconfig.json')
 for n in "${delfiles[@]}"
 do
   echo "Deleting $n"
-  rm $BUNDLE_MACOS/$n
+  rm "$BUNDLE_MACOS/$n"
 done
 
 DMG_FILE="Libation.${VERSION}-macOS-chardonnay-${ARCH}.dmg"
 
 all_identities=$(security find-identity -v -p codesigning)
-identity=$(echo ${all_identities} | sed -n 's/.*"\(.*\)".*/\1/p')
+identity=$(printf '%s\n' "$all_identities" | sed -n 's/.*"\(.*\)".*/\1/p')
 
 if [ "$SIGN_WITH_KEY" == "true" ]; then
   echo "Signing executables in: $BUNDLE"
   codesign --force --deep --timestamp --options=runtime --entitlements "./Libation.entitlements" --sign "${identity}" "$BUNDLE"
-  codesign --verify --verbose "$BUNDLE"
+  codesign --verify --deep --strict --verbose=2 "$BUNDLE"
 else
-  echo "Signing with empty key: $BUNDLE"
-  codesign --force --deep -s - $BUNDLE
+  echo "Signing with an ad-hoc key and local hardened-runtime entitlements: $BUNDLE"
+  echo "The local-only library-validation exception is required because ad-hoc signatures have no shared Team ID."
+  codesign --force --deep --options=runtime --entitlements "./Libation.adhoc.entitlements" -s - "$BUNDLE"
+  codesign --verify --deep --strict --verbose=2 "$BUNDLE"
 fi
 
 echo "Creating app disk image: $DMG_FILE"
@@ -157,7 +167,7 @@ mv $BUNDLE ./Libation/$BUNDLE
 mv Libation_DS_Store Libation/.DS_Store
 mkdir Libation/.background
 mv background.png Libation/.background/
-ln -s /Applications "./Libation/ "
+ln -s /Applications "./Libation/Applications"
 mkdir ./bundle
 create_dmg_with_retry ./Libation "./bundle/$DMG_FILE"
 # Create a .DS_Store by:
