@@ -108,7 +108,6 @@ public sealed class LibraryViewModel : ViewModelBase, IDisposable
 	public IReadOnlyList<LibrarySortOption> SortOptions { get; }
 	public IReadOnlyList<LibraryBookItemViewModel> VisibleItems => visibleItems;
 	public IReadOnlyList<GalleryRowViewModel> GalleryRows => galleryRows;
-	public IEnumerable<Control> QuickFilterMenuItems => commands.Main.QuickFilterMenuItems;
 	public ICommand? ProcessSelectionCommand { get; }
 	public ReactiveCommand<Unit, Unit> ShowDetailsCommand { get; }
 	public ReactiveCommand<Unit, Unit> ShowGalleryCommand { get; }

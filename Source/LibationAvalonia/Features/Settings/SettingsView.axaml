@@ -19,7 +19,7 @@
 		</DataTemplate>
 	</UserControl.Resources>
 	<ScrollViewer HorizontalScrollBarVisibility="Disabled">
-		<StackPanel Margin="{DynamicResource Libation.Space.5}" Spacing="{DynamicResource Libation.Space.4}">
+		<StackPanel Margin="{DynamicResource Libation.Thickness.5}" Spacing="{DynamicResource Libation.Space.4}">
 			<components:PageHeader Eyebrow="Preferences" Title="Settings"
 				SupportingText="Search stable categories, review the active appearance, and open Libation’s established settings editor."
 				PrimaryActionText="Open Settings" PrimaryCommand="{Binding OpenSettingsCommand}" />

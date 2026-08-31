@@ -6,7 +6,7 @@
 			 x:Class="LibationAvalonia.Features.Library.LibraryView"
 			 x:DataType="library:LibraryViewModel">
 	<Grid RowDefinitions="Auto,*" RowSpacing="{DynamicResource Libation.Space.3}">
-		<Border Classes="card" Padding="{DynamicResource Libation.Space.4}">
+		<Border Classes="card" Padding="{DynamicResource Libation.Thickness.4}">
 			<Grid RowDefinitions="Auto,Auto" RowSpacing="{DynamicResource Libation.Space.3}">
 				<Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource Libation.Space.3}">
 					<StackPanel>
@@ -39,9 +39,6 @@
 							 AutomationProperties.Name="Search and filter the Library" />
 					<Button Classes="contemporary quiet" Content="Clear search" Command="{Binding ClearSearchCommand}" Margin="8,0,0,0" />
 					<Button x:Name="FilterHelpButton" Classes="contemporary quiet" Content="Filter help" Command="{Binding OpenFilterHelpCommand}" Margin="8,0,0,0" />
-					<Menu Margin="8,0,0,0">
-						<MenuItem Header="Quick filters" ItemsSource="{Binding QuickFilterMenuItems}" />
-					</Menu>
 					<ComboBox Width="190"
 							  Margin="8,0,0,0"
 							  ItemsSource="{Binding SortOptions}"

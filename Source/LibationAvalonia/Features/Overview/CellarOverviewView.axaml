@@ -65,7 +65,7 @@
 	</UserControl.Styles>
 
 	<ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-		<StackPanel Margin="{DynamicResource Libation.Space.4}" Spacing="{DynamicResource Libation.Space.4}">
+		<StackPanel Margin="{DynamicResource Libation.Thickness.4}" Spacing="{DynamicResource Libation.Space.4}">
 			<components:PageHeader
 				Eyebrow="Library workspace"
 				Title="The Cellar"

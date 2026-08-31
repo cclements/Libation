@@ -11,6 +11,7 @@ using ReactiveUI;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace LibationAvalonia.ViewModels;
 
@@ -32,6 +33,7 @@ partial class MainVM
 		}
 	} = new(string.Empty, null);
 	public AvaloniaList<Control> QuickFilterMenuItems { get; } = new();
+	public AvaloniaList<Control> ContemporaryQuickFilterMenuItems { get; } = new();
 	/// <summary> Indicates if the first quick filter is the default filter </summary>
 	public bool FirstFilterIsDefault { get => field; set => QuickFilters.UseDefault = this.RaiseAndSetIfChanged(ref field, value); }
 
@@ -45,21 +47,29 @@ partial class MainVM
 		//To do that, we need quick filter's menu items source to be writable, which we can only
 		//achieve by creating the list ourselves (instead of allowing Avalonia to create it from the xaml)
 
-		QuickFilterMenuItems.Add(new MenuItem
-		{
+		var toggleDefaultCommand = ReactiveCommand.Create(ToggleFirstFilterIsDefault);
+		var editFiltersCommand = ReactiveCommand.Create(EditQuickFiltersAsync);
+		QuickFilterMenuItems.Add(CreateDefaultFilterMenuItem(toggleDefaultCommand));
+		ContemporaryQuickFilterMenuItems.Add(CreateDefaultFilterMenuItem(toggleDefaultCommand));
+		QuickFilterMenuItems.Add(new MenuItem { Header = "_Edit quick filters...", Command = editFiltersCommand });
+		ContemporaryQuickFilterMenuItems.Add(new MenuItem { Header = "_Edit quick filters...", Command = editFiltersCommand });
+		QuickFilterMenuItems.Add(new Separator());
+		ContemporaryQuickFilterMenuItems.Add(new Separator());
+	}
 
+	private MenuItem CreateDefaultFilterMenuItem(ICommand command)
+		=> new()
+		{
+			DataContext = this,
 			Header = "Start Libation with 1st filter _Default",
-			Command = ReactiveCommand.Create(ToggleFirstFilterIsDefault),
+			Command = command,
 			Icon = new CheckBox
 			{
 				BorderThickness = new Thickness(0),
 				IsHitTestVisible = false,
 				[!CheckBox.IsCheckedProperty] = new Binding(nameof(FirstFilterIsDefault))
 			}
-		});
-		QuickFilterMenuItems.Add(new MenuItem { Header = "_Edit quick filters...", Command = ReactiveCommand.Create(EditQuickFiltersAsync) });
-		QuickFilterMenuItems.Add(new Separator());
-	}
+		};
 
 	public void AddQuickFilterBtn() { if (SelectedNamedFilter != null) QuickFilters.Add(SelectedNamedFilter); }
 	public async Task FilterBtn(string filterString) => await PerformFilter(new(filterString, null));
@@ -214,6 +224,7 @@ partial class MainVM
 
 			quickFilterNativeMenu.Items.RemoveAt(i);
 			QuickFilterMenuItems.RemoveAt(i);
+			ContemporaryQuickFilterMenuItems.RemoveAt(i);
 		}
 
 		// re-populate
@@ -222,8 +233,10 @@ partial class MainVM
 		{
 			var command = ReactiveCommand.Create(async () => await PerformFilter(filter));
 
-			var menuItem = new MenuItem { Header = $"{++index}: {(string.IsNullOrWhiteSpace(filter.Name) ? filter.Filter : filter.Name)}", Command = command };
-			var nativeMenuItem = new NativeMenuItem { Header = $"{index}: {(string.IsNullOrWhiteSpace(filter.Name) ? filter.Filter : filter.Name)}", Command = command };
+			var header = $"{++index}: {(string.IsNullOrWhiteSpace(filter.Name) ? filter.Filter : filter.Name)}";
+			var menuItem = new MenuItem { Header = header, Command = command };
+			var contemporaryMenuItem = new MenuItem { Header = header, Command = command };
+			var nativeMenuItem = new NativeMenuItem { Header = header, Command = command };
 
 			if (Configuration.IsMacOs && index <= 10)
 			{
@@ -235,10 +248,12 @@ partial class MainVM
 			{
 				//Register hotkeys F1 - F12 for quick filters
 				menuItem.InputGesture = new KeyGesture(Key.F1 + index - 1);
+				contemporaryMenuItem.InputGesture = menuItem.InputGesture;
 				MainWindow.KeyBindings.Add(new KeyBinding { Command = command, Gesture = menuItem.InputGesture });
 			}
 
 			QuickFilterMenuItems.Add(menuItem);
+			ContemporaryQuickFilterMenuItems.Add(contemporaryMenuItem);
 			quickFilterNativeMenu.Items.Add(nativeMenuItem);
 		}
 	}

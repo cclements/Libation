@@ -66,7 +66,7 @@
 	</UserControl.Styles>
 
 	<ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-		<StackPanel Margin="{DynamicResource Libation.Space.5}" Spacing="{DynamicResource Libation.Space.5}">
+		<StackPanel Margin="{DynamicResource Libation.Thickness.5}" Spacing="{DynamicResource Libation.Space.5}">
 			<components:PageHeader
 				Eyebrow="Overview"
 				Title="Today’s Selection"

@@ -1,10 +1,12 @@
 using AudibleUtilities;
+using AppScaffolding;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Threading;
 using DataLayer;
 using FileManager;
 using LibationAvalonia.Dialogs;
+using LibationAvalonia.DesignSystem;
 using LibationAvalonia.Features.Onboarding;
 using LibationAvalonia.Shell;
 using LibationAvalonia.ViewModels;
@@ -26,13 +28,23 @@ public partial class MainWindow : ReactiveWindow<MainVM>
 	private readonly Control classicContent;
 	private readonly double classicMinWidth;
 	private readonly double classicMinHeight;
+	private readonly ExperienceManager? experienceManagerOverride;
+	private readonly Func<AppShellView>? contemporaryShellFactory;
 	private AppShellView? contemporaryShell;
 	private AppShellViewModel? contemporaryShellViewModel;
 	private OnboardingViewModel? onboardingViewModel;
 	private List<LibraryBook>? loadedLibrary;
+	private bool isOpened;
+	private bool contemporaryShellFailureNoticePending;
 
-	public MainWindow()
+	public MainWindow() : this(null, null) { }
+
+	internal MainWindow(
+		ExperienceManager? experienceManagerOverride,
+		Func<AppShellView>? contemporaryShellFactory)
 	{
+		this.experienceManagerOverride = experienceManagerOverride;
+		this.contemporaryShellFactory = contemporaryShellFactory;
 		if (Design.IsDesignMode)
 			Configuration.CreateMockInstance();
 
@@ -123,15 +135,45 @@ public partial class MainWindow : ReactiveWindow<MainVM>
 		}, DispatcherPriority.Normal);
 	}
 
-	private void EnsureContemporaryShell()
+	private bool EnsureContemporaryShell()
 	{
-		if (contemporaryShell is not null || ViewModel is not MainVM main || App.ExperienceManager is not { } manager)
-			return;
-		contemporaryShellViewModel = new(main, Configuration.Instance, manager);
-		contemporaryShellViewModel.Settings.OnboardingRequested += Settings_OnboardingRequested;
-		if (loadedLibrary is not null)
-			contemporaryShellViewModel.Flight.ReconcileLibrary(loadedLibrary);
-		contemporaryShell = new AppShellView { DataContext = contemporaryShellViewModel };
+		if (contemporaryShell is not null)
+			return true;
+		if (ViewModel is not MainVM main || (experienceManagerOverride ?? App.ExperienceManager) is not { } manager)
+			return false;
+
+		AppShellViewModel? candidateViewModel = null;
+		AppShellView? candidateShell = null;
+		try
+		{
+			candidateViewModel = new(main, Configuration.Instance, manager);
+			candidateViewModel.Settings.OnboardingRequested += Settings_OnboardingRequested;
+			if (loadedLibrary is not null)
+				candidateViewModel.Flight.ReconcileLibrary(loadedLibrary);
+			candidateShell = contemporaryShellFactory?.Invoke() ?? new AppShellView();
+			candidateShell.DataContext = candidateViewModel;
+			contemporaryShellViewModel = candidateViewModel;
+			contemporaryShell = candidateShell;
+			return true;
+		}
+		catch (Exception ex)
+		{
+			if (candidateViewModel is not null)
+			{
+				candidateViewModel.Settings.OnboardingRequested -= Settings_OnboardingRequested;
+				candidateShell?.ClearValue(DataContextProperty);
+				try
+				{
+					candidateViewModel.Dispose();
+				}
+				catch (Exception disposeFailure)
+				{
+					StartupLog.Warning(disposeFailure, "The failed contemporary shell could not be fully released.");
+				}
+			}
+			HandleContemporaryShellFailure(ex);
+			return false;
+		}
 	}
 
 	private void ApplyShellMode()
@@ -145,13 +187,19 @@ public partial class MainWindow : ReactiveWindow<MainVM>
 
 		if (Configuration.Instance.UseContemporaryShell)
 		{
-			EnsureContemporaryShell();
-			if (contemporaryShell is not null)
+			if (EnsureContemporaryShell() && contemporaryShell is not null)
 			{
-				Content = contemporaryShell;
-				// Plan §8 defines this minimum for the contemporary desktop shell.
-				MinWidth = 720;
-				MinHeight = 560;
+				try
+				{
+					Content = contemporaryShell;
+					// Plan §8 defines this minimum for the contemporary desktop shell.
+					MinWidth = 720;
+					MinHeight = 560;
+				}
+				catch (Exception ex)
+				{
+					HandleContemporaryShellFailure(ex);
+				}
 			}
 		}
 		else
@@ -159,6 +207,71 @@ public partial class MainWindow : ReactiveWindow<MainVM>
 			Content = classicContent;
 			MinWidth = classicMinWidth;
 			MinHeight = classicMinHeight;
+		}
+	}
+
+	private void HandleContemporaryShellFailure(Exception failure)
+	{
+		StartupLog.Error(failure, "The contemporary shell failed to initialize. Libation restored the current interface.");
+		DiscardContemporaryShell();
+		contemporaryShellFailureNoticePending = true;
+		if (Configuration.Instance.UseContemporaryShell)
+			Configuration.Instance.UseContemporaryShell = false;
+
+		try
+		{
+			Content = classicContent;
+			MinWidth = classicMinWidth;
+			MinHeight = classicMinHeight;
+		}
+		catch (Exception restoreFailure)
+		{
+			StartupLog.Error(restoreFailure, "The current interface could not be restored after the contemporary shell failed.");
+		}
+
+		if (isOpened)
+			Dispatcher.UIThread.Post(() => _ = ShowContemporaryShellFailureAsync(), DispatcherPriority.Normal);
+	}
+
+	private void DiscardContemporaryShell()
+	{
+		var shell = contemporaryShell;
+		var viewModel = contemporaryShellViewModel;
+		contemporaryShell = null;
+		contemporaryShellViewModel = null;
+		if (viewModel is null)
+			return;
+
+		viewModel.Settings.OnboardingRequested -= Settings_OnboardingRequested;
+		shell?.ClearValue(DataContextProperty);
+		try
+		{
+			viewModel.Dispose();
+		}
+		catch (Exception ex)
+		{
+			StartupLog.Warning(ex, "The failed contemporary shell could not be fully released.");
+		}
+	}
+
+	private async Task ShowContemporaryShellFailureAsync()
+	{
+		if (!contemporaryShellFailureNoticePending)
+			return;
+		contemporaryShellFailureNoticePending = false;
+		try
+		{
+			await MessageBox.Show(
+				this,
+				"Libation could not start the redesigned interface, so it restored the current interface. "
+					+ "Your library data was not changed. The failure was written to the Libation log.",
+				"Redesigned interface could not start",
+				MessageBoxButtons.OK,
+				MessageBoxIcon.Warning);
+		}
+		catch (Exception ex)
+		{
+			StartupLog.Warning(ex, "Libation could not show the contemporary-shell fallback notice.");
 		}
 	}
 
@@ -171,27 +284,49 @@ public partial class MainWindow : ReactiveWindow<MainVM>
 		return onboardingViewModel is not null;
 	}
 
-	private void ShowOnboarding(bool isManualReentry)
+	internal void ShowOnboarding(bool isManualReentry)
 	{
 		if (onboardingViewModel is not null || ViewModel is not MainVM main)
 			return;
 
-		var viewModel = new OnboardingViewModel(
-			new LibationCommandAdapter(main),
-			isManualReentry,
-			Configuration.Instance);
-		if (!isManualReentry && !viewModel.ShouldOfferAutomatically)
+		OnboardingViewModel? candidate = null;
+		try
 		{
-			viewModel.Dispose();
-			return;
-		}
+			candidate = new OnboardingViewModel(
+				new LibationCommandAdapter(main),
+				isManualReentry,
+				Configuration.Instance);
+			if (!isManualReentry && !candidate.ShouldOfferAutomatically)
+			{
+				candidate.Dispose();
+				return;
+			}
 
-		onboardingViewModel = viewModel;
-		viewModel.ExitRequested += Onboarding_ExitRequested;
-		Content = new OnboardingView { DataContext = viewModel };
-		// Plan section 8 owns the contemporary desktop minimum.
-		MinWidth = 720;
-		MinHeight = 560;
+			onboardingViewModel = candidate;
+			candidate.ExitRequested += Onboarding_ExitRequested;
+			Content = new OnboardingView { DataContext = candidate };
+			// Plan section 8 owns the contemporary desktop minimum.
+			MinWidth = 720;
+			MinHeight = 560;
+		}
+		catch (Exception ex)
+		{
+			if (candidate is not null)
+			{
+				candidate.ExitRequested -= Onboarding_ExitRequested;
+				if (ReferenceEquals(onboardingViewModel, candidate))
+					onboardingViewModel = null;
+				try
+				{
+					candidate.Dispose();
+				}
+				catch (Exception disposeFailure)
+				{
+					StartupLog.Warning(disposeFailure, "The failed contemporary onboarding surface could not be fully released.");
+				}
+			}
+			HandleContemporaryShellFailure(ex);
+		}
 	}
 
 	private void Onboarding_ExitRequested(object? sender, OnboardingExitEventArgs e)
@@ -202,7 +337,10 @@ public partial class MainWindow : ReactiveWindow<MainVM>
 		viewModel.ExitRequested -= Onboarding_ExitRequested;
 		onboardingViewModel = null;
 		viewModel.Dispose();
-		ApplyShellMode();
+		// Saving the selected profile schedules its resource transaction first.
+		// Queue the shell swap behind that commit so a new visual never inherits
+		// the previous profile's resource values while it is being attached.
+		Dispatcher.UIThread.Post(ApplyShellMode, DispatcherPriority.Normal);
 	}
 
 #if DEBUG
@@ -315,7 +453,9 @@ public partial class MainWindow : ReactiveWindow<MainVM>
 
 	private async void MainWindow_Opened(object? sender, EventArgs e)
 	{
+		isOpened = true;
 		await MessageBox.VerboseLoggingWarning_ShowIfTrue();
+		await ShowContemporaryShellFailureAsync();
 
 		if (AudibleFileStorage.BooksDirectory is null)
 		{

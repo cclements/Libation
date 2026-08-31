@@ -127,7 +127,7 @@
 				<MenuItem Header="{x:Static properties:Resources.MenuExportHeader}">
 					<MenuItem IsEnabled="{Binding Main.LibraryStats.HasBookResults, TargetNullValue=false}" Command="{Binding Main.ExportLibraryAsync}" Header="{x:Static properties:Resources.MenuExportLibraryHeader}" InputGesture="ctrl+S" />
 				</MenuItem>
-				<MenuItem Header="{x:Static properties:Resources.MenuQuickFiltersHeader}" ItemsSource="{Binding Main.QuickFilterMenuItems}" />
+				<MenuItem Header="{x:Static properties:Resources.MenuQuickFiltersHeader}" ItemsSource="{Binding Main.ContemporaryQuickFilterMenuItems}" />
 				<MenuItem Header="{Binding Main.VisibleCountMenuItemText}">
 					<MenuItem Command="{Binding Main.LiberateVisible}" Header="{Binding Main.LiberateVisibleToolStripText_2}" IsEnabled="{Binding Main.AnyVisibleNotLiberated}" />
 					<MenuItem Command="{Binding Main.ReplaceTagsAsync}" Header="{x:Static properties:Resources.MenuReplaceTagsHeader}" />
@@ -154,7 +154,7 @@
 					Background="{DynamicResource Libation.Brush.Surface}"
 					BorderBrush="{DynamicResource Libation.Brush.BorderSubtle}"
 					BorderThickness="0,0,0,1"
-					Padding="{DynamicResource Libation.Space.4}">
+					Padding="{DynamicResource Libation.Thickness.4}">
 				<Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
 					<Button Classes="contemporary quiet compact"
 						IsVisible="{Binding IsRailOverlay}"
@@ -188,7 +188,7 @@
 				Background="{DynamicResource Libation.Brush.SurfaceRaised}"
 				BorderBrush="{DynamicResource Libation.Brush.Warning}"
 				BorderThickness="0,0,0,1"
-				Padding="{DynamicResource Libation.Space.3}">
+				Padding="{DynamicResource Libation.Thickness.3}">
 				<Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="{DynamicResource Libation.Space.3}">
 					<StackPanel>
 						<TextBlock FontWeight="SemiBold" Text="Review titles removed from the latest account scan" />
@@ -204,7 +204,7 @@
 				</Grid>
 			</Border>
 
-			<Grid x:Name="ContentRegion" Grid.Row="3" Margin="{DynamicResource Libation.Space.4}" ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource Libation.Space.4}">
+			<Grid x:Name="ContentRegion" Grid.Row="3" Margin="{DynamicResource Libation.Thickness.4}" ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource Libation.Space.4}">
 			<Panel Grid.Column="0">
 				<Grid IsVisible="{Binding IsLibraryRoute}">
 					<library:LibraryView x:Name="LibraryDisplay"
@@ -246,7 +246,7 @@
 				<ScrollViewer IsVisible="{Binding IsAboutRoute}">
 					<StackPanel Spacing="16" MaxWidth="900">
 						<components:PageHeader Title="{x:Static properties:Resources.ShellAboutPageTitle}" SupportingText="{x:Static properties:Resources.ShellAboutPageDescription}" />
-						<Button HorizontalAlignment="Left" Content="{x:Static properties:Resources.ShellOpenAboutCommandLabel}" Click="OpenAbout_Click" />
+						<Button HorizontalAlignment="Left" Content="{x:Static properties:Resources.ShellOpenAboutCommandLabel}" Command="{Binding Settings.OpenAboutCommand}" />
 					</StackPanel>
 				</ScrollViewer>
 
@@ -263,7 +263,7 @@
 					Background="{DynamicResource Libation.Brush.SurfaceRaised}"
 					BorderBrush="{DynamicResource Libation.Brush.BorderSubtle}"
 					BorderThickness="1" CornerRadius="{DynamicResource Libation.Radius.Large}"
-					Padding="{DynamicResource Libation.Space.3}">
+					Padding="{DynamicResource Libation.Thickness.3}">
 				<flight:CurrentFlightView DataContext="{Binding CurrentFlight, Mode=OneTime}" />
 			</Border>
 			<Border x:Name="FlightOverlay" Grid.Column="0" Grid.ColumnSpan="2" Width="360" HorizontalAlignment="Right"
@@ -271,14 +271,14 @@
 					Background="{DynamicResource Libation.Brush.SurfaceRaised}"
 					BorderBrush="{DynamicResource Libation.Brush.BorderStrong}"
 					BorderThickness="1" CornerRadius="{DynamicResource Libation.Radius.Large}"
-					Padding="{DynamicResource Libation.Space.3}">
+					Padding="{DynamicResource Libation.Thickness.3}">
 				<flight:CurrentFlightView DataContext="{Binding CurrentFlight, Mode=OneTime}" />
 			</Border>
 			</Grid>
 		</Grid>
 
 		<components:DecanterSummary x:Name="QueueDock" Grid.Row="1" Grid.Column="1"
-			Margin="{DynamicResource Libation.Space.3}"
+			Margin="{DynamicResource Libation.Thickness.3}"
 			IsVisible="{Binding ShowQueueDock}"
 			Title="The Decanter"
 			SummaryText="{Binding Processing.SummaryText}"
@@ -354,8 +354,8 @@
 			HorizontalAlignment="Right"
 			VerticalAlignment="Stretch"
 			MaxWidth="{DynamicResource Libation.Content.MaxReadingWidth}"
-			Margin="{DynamicResource Libation.Space.4}"
-			Padding="{DynamicResource Libation.Space.4}"
+			Margin="{DynamicResource Libation.Thickness.4}"
+			Padding="{DynamicResource Libation.Thickness.4}"
 			Background="{DynamicResource Libation.Brush.SurfaceRaised}"
 			BorderBrush="{DynamicResource Libation.Brush.BorderStrong}"
 			BorderThickness="1"
@@ -386,7 +386,7 @@
 		</Border>
 		<components:ToastHost Grid.Column="1" Grid.RowSpan="3" ZIndex="60"
 			HorizontalAlignment="Right" VerticalAlignment="Bottom"
-			Margin="{DynamicResource Libation.Space.4}"
+			Margin="{DynamicResource Libation.Thickness.4}"
 			ItemsSource="{Binding CurrentFlight.Notifications}" />
 	</Grid>
 </UserControl>

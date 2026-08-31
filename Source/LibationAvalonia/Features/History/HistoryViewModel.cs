@@ -31,6 +31,10 @@ public sealed class HistoryViewModel : SecondaryDestinationViewModel
 	private IReadOnlyList<HistoryItem> allItems = [];
 	private bool refreshRunning;
 	private bool refreshAgain;
+	private bool isActive;
+	private bool refreshPending = true;
+	private bool disposed;
+	internal bool IsActive => isActive;
 
 	public HistoryViewModel(MainVM main)
 	{
@@ -38,7 +42,23 @@ public sealed class HistoryViewModel : SecondaryDestinationViewModel
 		RefreshCommand = Track(ReactiveCommand.CreateFromTask(RefreshAsync));
 		main.PropertyChanged += Main_PropertyChanged;
 		main.ProcessQueue.LogEntries.CollectionChanged += LogEntries_CollectionChanged;
-		_ = RefreshAsync();
+	}
+
+	public void SetActive(bool active)
+	{
+		if (disposed)
+			return;
+		if (!Dispatcher.UIThread.CheckAccess())
+		{
+			Dispatcher.UIThread.Post(() => SetActive(active));
+			return;
+		}
+		isActive = active;
+		if (isActive && refreshPending)
+		{
+			refreshPending = false;
+			_ = RefreshAsync();
+		}
 	}
 
 	public string SearchText
@@ -64,11 +84,14 @@ public sealed class HistoryViewModel : SecondaryDestinationViewModel
 
 	public async Task RefreshAsync()
 	{
+		if (disposed)
+			return;
 		if (!Dispatcher.UIThread.CheckAccess())
 		{
 			Dispatcher.UIThread.Post(() => _ = RefreshAsync());
 			return;
 		}
+		refreshPending = false;
 		if (refreshRunning)
 		{
 			refreshAgain = true;
@@ -182,13 +205,31 @@ public sealed class HistoryViewModel : SecondaryDestinationViewModel
 	private void Main_PropertyChanged(object? sender, PropertyChangedEventArgs e)
 	{
 		if (string.IsNullOrEmpty(e.PropertyName) || e.PropertyName == nameof(MainVM.LibraryStats))
-			_ = RefreshAsync();
+			RequestRefresh();
 	}
 
-	private void LogEntries_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e) => _ = RefreshAsync();
+	private void LogEntries_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e) => RequestRefresh();
+
+	private void RequestRefresh()
+	{
+		if (disposed)
+			return;
+		if (!Dispatcher.UIThread.CheckAccess())
+		{
+			Dispatcher.UIThread.Post(RequestRefresh);
+			return;
+		}
+		if (!isActive)
+		{
+			refreshPending = true;
+			return;
+		}
+		_ = RefreshAsync();
+	}
 
 	protected override void DisposeCore()
 	{
+		disposed = true;
 		main.PropertyChanged -= Main_PropertyChanged;
 		main.ProcessQueue.LogEntries.CollectionChanged -= LogEntries_CollectionChanged;
 		lifetime.Cancel();

@@ -8,7 +8,7 @@
 	x:DataType="onboarding:OnboardingViewModel">
 	<Grid RowDefinitions="*,Auto">
 		<ScrollViewer HorizontalScrollBarVisibility="Disabled">
-			<StackPanel Margin="{DynamicResource Libation.Space.5}" Spacing="{DynamicResource Libation.Space.4}">
+			<StackPanel Margin="{DynamicResource Libation.Thickness.5}" Spacing="{DynamicResource Libation.Space.4}">
 				<components:PageHeader Eyebrow="Welcome to Libation" Title="{Binding StepTitle}"
 					SupportingText="Setup is a local draft until you finish. You can skip now or run this chooser again from Settings." />
 				<StackPanel Spacing="{DynamicResource Libation.Space.2}">
@@ -143,7 +143,7 @@
 		</ScrollViewer>
 
 		<Border Grid.Row="1" Classes="card" CornerRadius="0" BorderThickness="0,1,0,0">
-			<Grid Margin="{DynamicResource Libation.Space.4}" ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="{DynamicResource Libation.Space.2}">
+			<Grid Margin="{DynamicResource Libation.Thickness.4}" ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="{DynamicResource Libation.Space.2}">
 				<Button Classes="contemporary" Content="Back" Command="{Binding BackCommand}" IsEnabled="{Binding CanGoBack}" />
 				<Button Grid.Column="2" Classes="contemporary" Content="{Binding SkipText}" Command="{Binding SkipCommand}" />
 				<Button Grid.Column="3" Classes="contemporary primary" Content="{Binding NextText}" Command="{Binding NextCommand}" />

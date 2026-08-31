@@ -56,7 +56,8 @@ live resources, and global application still delegates to `ChardonnayTheme`.
 
 | Token family | Declared values | Rule |
 |---|---|---|
-| `Libation.Space.1…8` | 4, 8, 12, 16, 24, 32, 48, 64 | Prefer the scale; document a true optical correction. |
+| `Libation.Space.1…8` | `Double` values 4, 8, 12, 16, 24, 32, 48, 64 | Use for scalar gap properties such as `Spacing`, `RowSpacing`, and `ColumnSpacing`; document a true optical correction. |
+| `Libation.Thickness.3…5` | uniform `Thickness` values 12, 16, 24 | Use the typed projection for `Margin` and `Padding`; a dynamic `Double` resource cannot be assigned to `Thickness`. |
 | `Libation.Radius.*` | Small 6, Medium 12, Large 18 | Pills are reserved for compact filters/status. |
 | `Libation.ControlHeight.*` | Compact 32, Default 40, Prominent 48 | Density must not weaken focus or accessible activation. |
 | `Libation.Navigation.Width*` | Expanded 232, Compact 64 | Derived from the reference composition; not a responsive breakpoint. |

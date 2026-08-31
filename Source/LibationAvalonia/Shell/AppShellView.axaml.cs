@@ -147,17 +147,6 @@ public partial class AppShellView : UserControl
 		Dispatcher.UIThread.Post(() => LibraryDisplay.InsertSearchTag(tag), DispatcherPriority.Input);
 	}
 	public void CloseImageDisplay() => LibraryDisplay.CloseImageDisplay();
-	private async void DownloadBooks_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e) { if (ViewModel is not null) await ViewModel.CommandAdapter.DownloadPendingBooksAsync(); }
-	private async void DownloadPdfs_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e) { if (ViewModel is not null) await ViewModel.CommandAdapter.DownloadPendingPdfsAsync(); }
-	private async void LocateAudiobooks_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e) { if (ViewModel is not null) await ViewModel.CommandAdapter.LocateAudiobooksAsync(); }
-	private async void ManageAccounts_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e) { if (ViewModel is not null) await ViewModel.CommandAdapter.ShowAccountsAsync(); }
-	private async void ScanLibrary_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e) { if (ViewModel is not null) await ViewModel.CommandAdapter.ScanLibraryAsync(); }
-	private async void ScanSomeAccounts_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e) { if (ViewModel is not null) await ViewModel.CommandAdapter.ScanSelectedAccountsAsync(); }
-	private async void OpenSettings_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e) { if (ViewModel is not null) await ViewModel.CommandAdapter.ShowSettingsAsync(); }
-	private async void QualityScan_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e) { if (ViewModel is not null) await ViewModel.CommandAdapter.ShowQualityScanAsync(); }
-	private async void ConvertLibrary_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e) { if (ViewModel is not null) await ViewModel.CommandAdapter.ConvertLibraryToMp3Async(); }
-	private async void OpenTrash_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e) { if (ViewModel is not null) await ViewModel.CommandAdapter.ShowTrashAsync(); }
-	private async void OpenAbout_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e) { if (ViewModel is not null) await ViewModel.CommandAdapter.ShowAboutAsync(); }
 
 	private void ProductsDisplay_LiberateClicked(object? sender, IList<LibraryBook> books, Configuration config)
 		=> App.MainWindow?.ProductsDisplay_LiberateClicked(sender!, books, config);
