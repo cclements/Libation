@@ -1,0 +1,42 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:components="using:LibationAvalonia.DesignSystem.Components"
+			 x:Class="LibationAvalonia.DesignSystem.Components.MetricCard"
+			 x:Name="Root">
+	<UserControl.Styles>
+		<Style Selector="components|MetricCard Path#MetricIcon"><Setter Property="Stroke" Value="{DynamicResource Libation.Brush.TextSecondary}" /></Style>
+		<Style Selector="components|MetricCard:info Path#MetricIcon"><Setter Property="Stroke" Value="{DynamicResource Libation.Brush.Info}" /></Style>
+		<Style Selector="components|MetricCard:success Path#MetricIcon"><Setter Property="Stroke" Value="{DynamicResource Libation.Brush.Success}" /></Style>
+		<Style Selector="components|MetricCard:warning Path#MetricIcon"><Setter Property="Stroke" Value="{DynamicResource Libation.Brush.Warning}" /></Style>
+		<Style Selector="components|MetricCard:danger Path#MetricIcon"><Setter Property="Stroke" Value="{DynamicResource Libation.Brush.Danger}" /></Style>
+	</UserControl.Styles>
+	<Border Classes="card raised" AutomationProperties.Name="{Binding Label, ElementName=Root}">
+		<Grid ColumnDefinitions="Auto,*" ColumnSpacing="{DynamicResource Libation.Space.4}">
+			<Path x:Name="MetricIcon"
+				  Width="24" Height="24" Stretch="Uniform" StrokeThickness="1.75"
+				  StrokeLineCap="Round" StrokeJoin="Round"
+				  Data="{Binding IconData, ElementName=Root}"
+				  AutomationProperties.IsControlElementOverride="False"
+				  AutomationProperties.AccessibilityView="Raw" />
+			<StackPanel Grid.Column="1" Spacing="{DynamicResource Libation.Space.1}">
+				<TextBlock Text="{Binding Value, ElementName=Root}" FontFamily="{DynamicResource Libation.Font.Display}"
+						   FontSize="{DynamicResource Libation.FontSize.Section}" Foreground="{DynamicResource Libation.Brush.TextPrimary}" />
+				<TextBlock Text="{Binding Label, ElementName=Root}" FontSize="{DynamicResource Libation.FontSize.BodySmall}"
+						   Foreground="{DynamicResource Libation.Brush.TextSecondary}" TextWrapping="Wrap" />
+				<StackPanel Orientation="Horizontal" Spacing="{DynamicResource Libation.Space.2}">
+					<TextBlock Text="{Binding DeltaText, ElementName=Root}"
+							   IsVisible="{Binding DeltaText, ElementName=Root, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+							   Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+					<TextBlock Text="{Binding StatusText, ElementName=Root}"
+							   IsVisible="{Binding StatusText, ElementName=Root, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+							   Foreground="{DynamicResource Libation.Brush.TextSecondary}" FontWeight="SemiBold" />
+				</StackPanel>
+				<Button Classes="contemporary quiet compact" HorizontalAlignment="Left"
+						Content="{Binding CommandText, ElementName=Root}"
+						Command="{Binding Command, ElementName=Root}"
+						CommandParameter="{Binding CommandParameter, ElementName=Root}"
+						IsVisible="{Binding CommandText, ElementName=Root, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+			</StackPanel>
+		</Grid>
+	</Border>
+</UserControl>

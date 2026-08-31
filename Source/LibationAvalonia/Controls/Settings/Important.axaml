@@ -8,7 +8,7 @@
 			 x:DataType="vm:ImportantSettingsVM"
              x:Class="LibationAvalonia.Controls.Settings.Important">
 
-	<Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,*">
+	<Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,*">
 		<controls:GroupBox
 			Grid.Row="0"
 			Margin="5"
@@ -217,8 +217,98 @@
 			</Grid>
 		</controls:GroupBox>
 
-		<Grid
+		<controls:GroupBox
 			Grid.Row="5"
+			Margin="5"
+			Label="Contemporary Cellar">
+			<StackPanel Spacing="8">
+				<CheckBox
+					Content="Use the Contemporary Cellar interface"
+					IsChecked="{Binding UseContemporaryShell, Mode=TwoWay}" />
+				<TextBlock
+					Opacity="0.8"
+					Text="Appearance changes are applied after Save. Turning this off restores the current Libation interface without changing your library or queue."
+					TextWrapping="Wrap" />
+				<Grid
+					IsEnabled="{Binding UseContemporaryShell}"
+					ColumnDefinitions="Auto,*"
+					RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto">
+					<TextBlock Margin="0,0,12,8" VerticalAlignment="Center" Text="Appearance" />
+					<controls:WheelComboBox
+						Grid.Column="1"
+						Margin="0,0,0,8"
+						MinWidth="220"
+						HorizontalContentAlignment="Stretch"
+						AutomationProperties.Name="Contemporary appearance"
+						ItemsSource="{Binding ExperienceStyles}"
+						SelectedItem="{Binding SelectedExperienceStyle, Mode=TwoWay}" />
+
+					<TextBlock Grid.Row="1" Margin="0,0,12,8" VerticalAlignment="Center" Text="Density" />
+					<controls:WheelComboBox
+						Grid.Row="1"
+						Grid.Column="1"
+						Margin="0,0,0,8"
+						HorizontalContentAlignment="Stretch"
+						AutomationProperties.Name="Contemporary density"
+						ItemsSource="{Binding DensityModes}"
+						SelectedItem="{Binding SelectedDensityMode, Mode=TwoWay}" />
+
+					<TextBlock Grid.Row="2" Margin="0,0,12,8" VerticalAlignment="Center" Text="Decoration" />
+					<controls:WheelComboBox
+						Grid.Row="2"
+						Grid.Column="1"
+						Margin="0,0,0,8"
+						HorizontalContentAlignment="Stretch"
+						AutomationProperties.Name="Contemporary decoration"
+						ItemsSource="{Binding DecorationLevels}"
+						SelectedItem="{Binding SelectedDecorationLevel, Mode=TwoWay}" />
+
+					<TextBlock Grid.Row="3" Margin="0,0,12,0" VerticalAlignment="Center" Text="Reduced motion" />
+					<controls:WheelComboBox
+						Grid.Row="3"
+						Grid.Column="1"
+						Margin="0,0,0,8"
+						HorizontalContentAlignment="Stretch"
+						AutomationProperties.Name="Contemporary reduced motion"
+						ItemsSource="{Binding ReducedMotionPreferences}"
+						SelectedItem="{Binding SelectedReducedMotionPreference, Mode=TwoWay}" />
+
+					<TextBlock Grid.Row="4" Margin="0,0,12,8" VerticalAlignment="Center" Text="Library view" />
+					<controls:WheelComboBox
+						Grid.Row="4"
+						Grid.Column="1"
+						Margin="0,0,0,8"
+						HorizontalContentAlignment="Stretch"
+						AutomationProperties.Name="Default contemporary Library view"
+						ItemsSource="{Binding LibraryViewModes}"
+						SelectedItem="{Binding SelectedLibraryViewMode, Mode=TwoWay}" />
+
+					<TextBlock Grid.Row="5" Margin="0,0,12,0" VerticalAlignment="Center" Text="Navigation rail" />
+					<controls:WheelComboBox
+						Grid.Row="5"
+						Grid.Column="1"
+						HorizontalContentAlignment="Stretch"
+						AutomationProperties.Name="Contemporary navigation rail"
+						ItemsSource="{Binding NavigationRailPreferences}"
+						SelectedItem="{Binding SelectedNavigationRailPreference, Mode=TwoWay}" />
+				</Grid>
+				<CheckBox
+					IsEnabled="{Binding UseContemporaryShell}"
+					Content="Use system typography (recovery setting)"
+					IsChecked="{Binding UseSystemTypography, Mode=TwoWay}" />
+				<CheckBox
+					IsEnabled="{Binding UseContemporaryShell}"
+					Content="Show the Decanter processing dock when space allows"
+					IsChecked="{Binding ShowDecanterDock, Mode=TwoWay}" />
+				<CheckBox
+					IsEnabled="{Binding UseContemporaryShell}"
+					Content="Restore Current Flight after restarting Libation"
+					IsChecked="{Binding PersistFlightBetweenSessions, Mode=TwoWay}" />
+			</StackPanel>
+		</controls:GroupBox>
+
+		<Grid
+			Grid.Row="6"
 			ColumnDefinitions="Auto,Auto,*"
 			Margin="10"
 			VerticalAlignment="Bottom">
@@ -239,8 +329,10 @@
 			<Button
 				Grid.Column="2"
 				HorizontalAlignment="Right"
+				IsEnabled="{Binding CanEditLegacyTheme}"
 				Padding="20,0"
 				VerticalAlignment="Stretch"
+				ToolTip.Tip="Switch to the current Libation interface before editing legacy Chardonnay colors."
 				Content="Edit Theme Colors"
 				Click="EditThemeColors_Click"/>
 		</Grid>

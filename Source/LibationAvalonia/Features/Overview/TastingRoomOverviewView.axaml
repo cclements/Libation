@@ -1,0 +1,290 @@
+<UserControl
+	xmlns="https://github.com/avaloniaui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:overview="using:LibationAvalonia.Features.Overview"
+	xmlns:components="using:LibationAvalonia.DesignSystem.Components"
+	x:Class="LibationAvalonia.Features.Overview.TastingRoomOverviewView"
+	x:Name="Root"
+	x:DataType="overview:DashboardViewModel">
+	<UserControl.Resources>
+		<DataTemplate x:Key="TastingBookRow" x:DataType="overview:DashboardBookItem">
+			<components:BookRow
+				Title="{Binding Title}"
+				SupportingText="{Binding SupportingText}"
+				Metadata="{Binding Metadata}"
+				Status="{Binding Status}"
+				StatusText="{Binding StatusText}"
+				Command="{Binding OpenCommand}"
+				CommandParameter="{Binding}" />
+		</DataTemplate>
+		<DataTemplate x:Key="TastingQueueRow" x:DataType="overview:DashboardQueueItem">
+			<components:QueueItem
+				Title="{Binding Title}"
+				Stage="{Binding Stage}"
+				Message="{Binding Message}"
+				Status="{Binding Status}"
+				StatusText="{Binding StatusText}"
+				Progress="{Binding Progress}"
+				ShowProgress="{Binding ShowProgress}"
+				ErrorDetails="{Binding ErrorDetails}" />
+		</DataTemplate>
+	</UserControl.Resources>
+
+	<UserControl.Styles>
+		<Style Selector="overview|TastingRoomOverviewView:standard UniformGrid#TastingMetrics">
+			<Setter Property="Columns" Value="2" />
+		</Style>
+		<Style Selector="overview|TastingRoomOverviewView:compact UniformGrid#TastingMetrics">
+			<Setter Property="Columns" Value="2" />
+		</Style>
+		<Style Selector="overview|TastingRoomOverviewView:narrow UniformGrid#TastingMetrics">
+			<Setter Property="Columns" Value="1" />
+		</Style>
+		<Style Selector="overview|TastingRoomOverviewView:compact components|DecanterSummary#TastingDecanter">
+			<Setter Property="Grid.Column" Value="0" />
+			<Setter Property="Grid.Row" Value="1" />
+			<Setter Property="Margin" Value="0,16,0,0" />
+		</Style>
+		<Style Selector="overview|TastingRoomOverviewView:narrow components|DecanterSummary#TastingDecanter">
+			<Setter Property="Grid.Column" Value="0" />
+			<Setter Property="Grid.Row" Value="1" />
+			<Setter Property="Margin" Value="0,16,0,0" />
+		</Style>
+		<Style Selector="overview|TastingRoomOverviewView:compact components|DropZone#TastingDropZone">
+			<Setter Property="Grid.Column" Value="0" />
+			<Setter Property="Grid.Row" Value="1" />
+			<Setter Property="Margin" Value="0,16,0,0" />
+		</Style>
+		<Style Selector="overview|TastingRoomOverviewView:narrow components|DropZone#TastingDropZone">
+			<Setter Property="Grid.Column" Value="0" />
+			<Setter Property="Grid.Row" Value="1" />
+			<Setter Property="Margin" Value="0,16,0,0" />
+		</Style>
+		<Style Selector="overview|TastingRoomOverviewView:narrow ContentControl#TastingHeroArt">
+			<Setter Property="IsVisible" Value="False" />
+		</Style>
+	</UserControl.Styles>
+
+	<ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+		<StackPanel Margin="{DynamicResource Libation.Space.5}" Spacing="{DynamicResource Libation.Space.5}">
+			<components:PageHeader
+				Eyebrow="Overview"
+				Title="Today’s Selection"
+				SupportingText="Here is the current state of your library, selected titles, and processing work."
+				PrimaryActionText="Locate Audiobooks"
+				PrimaryCommand="{Binding LocateAudiobooksCommand}">
+				<components:PageHeader.StatusContent>
+					<components:StatusBadge
+						Status="{Binding AccountStatus}"
+						TextOverride="{Binding AccountHealthText}"
+						AccessibleName="{Binding AccountHealthText}" />
+				</components:PageHeader.StatusContent>
+				<components:PageHeader.HeroArt>
+					<ContentControl x:Name="TastingHeroArt" Width="144" Height="108"
+						Template="{StaticResource illustration.tasting-room.add-books}" />
+				</components:PageHeader.HeroArt>
+			</components:PageHeader>
+
+			<Border Classes="card" IsVisible="{Binding IsLoading}" AutomationProperties.LiveSetting="Polite">
+				<StackPanel Spacing="{DynamicResource Libation.Space.3}">
+					<TextBlock Text="Loading today’s library overview…" FontWeight="SemiBold"
+						Foreground="{DynamicResource Libation.Brush.TextPrimary}" />
+					<ProgressBar Classes="contemporary prominent" IsIndeterminate="True"
+						AutomationProperties.Name="Loading library overview" />
+				</StackPanel>
+			</Border>
+
+			<components:AttentionBanner
+				IsVisible="{Binding HasError}"
+				Severity="{x:Static components:ComponentSeverity.Danger}"
+				FocusOnShow="True"
+				Title="Overview unavailable"
+				Message="{Binding ErrorMessage}"
+				ActionText="Refresh"
+				ActionCommand="{Binding RefreshCommand}"
+				SecondaryActionText="Copy technical details"
+				SecondaryActionCommand="{Binding CopyTechnicalDetailsCommand}" />
+
+			<StackPanel IsVisible="{Binding HasDashboardData}" Spacing="{DynamicResource Libation.Space.5}">
+				<UniformGrid x:Name="TastingMetrics" Columns="4" Rows="0">
+					<components:MetricCard Margin="0,0,12,12" IconData="{StaticResource glyph.library}"
+						Value="{Binding TotalTitlesText}" Label="Books in Library"
+						CommandText="Open Library" Command="{Binding OpenLibraryCommand}" />
+					<components:MetricCard Margin="0,0,12,12" IconData="{StaticResource glyph.downloads}"
+						Value="{Binding DownloadPendingText}" Label="Download Pending"
+						Severity="{x:Static components:ComponentSeverity.Warning}"
+						CommandText="Open Library" Command="{Binding OpenLibraryCommand}" />
+					<components:MetricCard Margin="0,0,12,12" IconData="{StaticResource glyph.processing}"
+						Value="{Binding ProcessingText}" Label="Processing"
+						Severity="{x:Static components:ComponentSeverity.Info}"
+						CommandText="Open Processing" Command="{Binding OpenProcessingCommand}" />
+					<components:MetricCard Margin="0,0,12,12" IconData="{StaticResource glyph.completed}"
+						Value="{Binding CompletedText}" Label="Completed"
+						Severity="{x:Static components:ComponentSeverity.Success}"
+						CommandText="Open Library" Command="{Binding OpenLibraryCommand}" />
+				</UniformGrid>
+
+				<StackPanel Spacing="{DynamicResource Libation.Space.3}">
+					<components:AttentionBanner
+						IsVisible="{Binding IsScanning}"
+						Severity="{x:Static components:ComponentSeverity.Info}"
+						Title="Scanning your library"
+						Message="{Binding ScanStateText}" />
+					<components:AttentionBanner
+						IsVisible="{Binding IsOffline}"
+						Severity="{x:Static components:ComponentSeverity.Warning}"
+						Title="Offline"
+						Message="Libation cannot confirm account or update status while offline. Your local library remains available."
+						ActionText="Refresh"
+						ActionCommand="{Binding RefreshCommand}" />
+					<components:AttentionBanner
+						IsVisible="{Binding IsScanStale}"
+						Severity="{x:Static components:ComponentSeverity.Warning}"
+						Title="Library scan needs attention"
+						Message="The dashboard status source reports that the last successful scan is stale. Scan the library to refresh title availability."
+						ActionText="Scan Library"
+						ActionCommand="{Binding ScanLibraryCommand}" />
+					<components:AttentionBanner
+						IsVisible="{Binding HasFailedJobs}"
+						Severity="{x:Static components:ComponentSeverity.Danger}"
+						Title="Processing needs attention"
+						Message="{Binding FailedJobsText}"
+						ActionText="Open Processing"
+						ActionCommand="{Binding OpenProcessingCommand}" />
+				</StackPanel>
+
+				<components:EmptyState
+					IsVisible="{Binding ShowNoAccount}"
+					IllustrationTemplate="{StaticResource illustration.shared.account-connection}"
+					Title="Connect an Audible account"
+					Explanation="Add an account to scan the marketplaces where your audiobooks live."
+					PrimaryActionText="Add Account"
+					PrimaryCommand="{Binding AddAccountCommand}" />
+				<components:EmptyState
+					IsVisible="{Binding ShowNeedsScan}"
+					IllustrationTemplate="{StaticResource illustration.tasting-room.add-books}"
+					Title="Your cellar is ready"
+					Explanation="Scan your library to bring your titles into Libation."
+					PrimaryActionText="Scan Library"
+					PrimaryCommand="{Binding ScanLibraryCommand}"
+					SecondaryActionText="Manage Accounts"
+					SecondaryCommand="{Binding ManageAccountsCommand}" />
+				<components:EmptyState
+					IsVisible="{Binding ShowScanningEmpty}"
+					IllustrationTemplate="{StaticResource illustration.shared.account-connection}"
+					Title="Scanning your library"
+					Explanation="{Binding ScanStateText}" />
+				<components:EmptyState
+					IsVisible="{Binding HasCatalogWithoutLocalCopies}"
+					IllustrationTemplate="{StaticResource illustration.tasting-room.empty-decanter}"
+					Title="Your books are catalogued"
+					Explanation="Select titles and choose Process to create open local copies."
+					PrimaryActionText="Open Library"
+					PrimaryCommand="{Binding OpenLibraryCommand}" />
+
+				<Grid x:Name="TastingPrimaryRow" ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto"
+					ColumnSpacing="{DynamicResource Libation.Space.4}">
+					<components:FlightTray
+						Title="Current Flight"
+						ItemsSource="{Binding CurrentFlightItems}"
+						ItemTemplate="{StaticResource TastingBookRow}"
+						CountText="{Binding FlightCountText}"
+						DurationText="{Binding FlightDurationText}"
+						WarningText="{Binding FlightWarningText}"
+						FocusWarningOnShow="{Binding FocusFlightWarning}"
+						OutputProfileText="{Binding FlightOutputProfileText}"
+						ProcessActionText="{Binding ProcessFlightActionText}"
+						ProcessCommand="{Binding ProcessFlightCommand}"
+						ClearCommand="{Binding ClearFlightCommand}"
+						UndoActionText="{Binding FlightUndoActionText}"
+						UndoCommand="{Binding UndoFlightCommand}" />
+					<components:DecanterSummary
+						x:Name="TastingDecanter"
+						Grid.Column="1"
+						Title="The Decanter"
+						SummaryText="{Binding QueueSummaryText}"
+						ActiveText="{Binding QueueActiveText}"
+						Progress="{Binding QueueProgress}"
+						ShowProgress="{Binding HasActiveWork}"
+						IsExpanded="{Binding IsQueueExpanded, Mode=TwoWay}"
+						CancelCommand="{Binding CancelAllProcessingCommand}"
+						CanCancel="{Binding HasActiveWork}">
+						<components:DecanterSummary.DetailsContent>
+							<ListBox ItemsSource="{Binding ActiveQueueItems}" ItemTemplate="{StaticResource TastingQueueRow}"
+								MaxHeight="320" AutomationProperties.Name="Active processing work" />
+						</components:DecanterSummary.DetailsContent>
+					</components:DecanterSummary>
+				</Grid>
+
+				<Grid x:Name="TastingLowerRow" ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto"
+					ColumnSpacing="{DynamicResource Libation.Space.4}">
+					<Border Classes="card raised" IsVisible="{Binding HasLibrary}">
+						<StackPanel Spacing="{DynamicResource Libation.Space.3}">
+							<Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource Libation.Space.3}">
+								<StackPanel>
+									<TextBlock Text="Recent Additions" FontFamily="{DynamicResource Libation.Font.Display}"
+										FontSize="{DynamicResource Libation.FontSize.Section}" Foreground="{DynamicResource Libation.Brush.TextPrimary}" />
+									<TextBlock Text="Titles ordered by the date Libation added them."
+										Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+								</StackPanel>
+								<Button Grid.Column="1" Classes="contemporary quiet" Content="Open Library"
+									Command="{Binding OpenLibraryCommand}" />
+							</Grid>
+							<Border Classes="card">
+								<Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource Libation.Space.3}">
+									<TextBox Text="{Binding SearchText, Mode=TwoWay}"
+										PlaceholderText="Search your library" KeyDown="SearchBox_KeyDown"
+										AutomationProperties.Name="Search the library" />
+									<Button Grid.Column="1" Classes="contemporary" Content="Search"
+										Command="{Binding ApplySearchCommand}" />
+								</Grid>
+							</Border>
+							<ListBox ItemsSource="{Binding RecentAdditions}" ItemTemplate="{StaticResource TastingBookRow}"
+								MinHeight="180" MaxHeight="380" AutomationProperties.Name="Recent library additions">
+								<ListBox.ItemsPanel>
+									<ItemsPanelTemplate><VirtualizingStackPanel /></ItemsPanelTemplate>
+								</ListBox.ItemsPanel>
+							</ListBox>
+						</StackPanel>
+					</Border>
+					<components:DropZone
+						x:Name="TastingDropZone"
+						Grid.Column="1"
+						Title="Add books to your cellar"
+						Hint="Choose audiobook files or folders already on this computer."
+							AcceptedTypesText="Uses Libation's existing file locator"
+							BrowseCommand="{Binding LocateAudiobooksCommand}"
+							DropCommand="{Binding DropAudiobooksCommand}" />
+				</Grid>
+
+				<Border Classes="card">
+					<Grid ColumnDefinitions="*,*,*" ColumnSpacing="{DynamicResource Libation.Space.4}">
+						<StackPanel Spacing="{DynamicResource Libation.Space.2}">
+							<TextBlock Text="Account health" FontWeight="SemiBold" Foreground="{DynamicResource Libation.Brush.TextPrimary}" />
+							<components:StatusBadge Status="{Binding AccountStatus}" TextOverride="{Binding AccountHealthText}"
+								AccessibleName="{Binding AccountHealthText}" HorizontalAlignment="Left" />
+							<Button Classes="contemporary quiet compact" Content="Add or manage account"
+								Command="{Binding AddAccountCommand}" HorizontalAlignment="Left" />
+						</StackPanel>
+						<StackPanel Grid.Column="1" Spacing="{DynamicResource Libation.Space.2}">
+							<TextBlock Text="Library scan" FontWeight="SemiBold" Foreground="{DynamicResource Libation.Brush.TextPrimary}" />
+							<components:StatusBadge Status="{Binding ScanStatus}" TextOverride="{Binding ScanStateText}"
+								AccessibleName="{Binding ScanStateText}" HorizontalAlignment="Left" />
+							<Button Classes="contemporary quiet compact" Content="Scan Library"
+								Command="{Binding ScanLibraryCommand}" HorizontalAlignment="Left" />
+						</StackPanel>
+						<StackPanel Grid.Column="2" Spacing="{DynamicResource Libation.Space.2}">
+							<TextBlock Text="Storage and updates" FontWeight="SemiBold" Foreground="{DynamicResource Libation.Brush.TextPrimary}" />
+							<TextBlock Text="{Binding LocalStorageText, StringFormat='Local storage: {0}'}"
+								Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+							<TextBlock Text="{Binding StorageSavedText, StringFormat='Storage saved: {0}'}"
+								Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+							<TextBlock Text="{Binding UpdateStateText}" IsVisible="{Binding HasUpdateState}"
+								Foreground="{DynamicResource Libation.Brush.TextSecondary}" TextWrapping="Wrap" />
+						</StackPanel>
+					</Grid>
+				</Border>
+			</StackPanel>
+		</StackPanel>
+	</ScrollViewer>
+</UserControl>

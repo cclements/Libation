@@ -1,0 +1,69 @@
+<ResourceDictionary
+	xmlns="https://github.com/avaloniaui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+	<!--
+		Original code-native master. The open pages form the outer silhouette while the
+		central carafe supplies the vessel cue. Keep the mark outlined so it remains
+		legible without relying on profile color or decorative material.
+	-->
+	<StreamGeometry x:Key="brand.app-icon">
+		M2,6 C5,5 8,5 12,8 C16,5 19,5 22,6 V18 C18,17 15,18 12,21 C9,18 6,17 2,18 Z
+		M10,3 H14 M11,3 V7 C11,8 8,11 8,15 C8,18 9.8,20 12,20 C14.2,20 16,18 16,15 C16,11 13,8 13,7 V3
+	</StreamGeometry>
+	<StreamGeometry x:Key="brand.mark.one-color">
+		M2,6 C5,5 8,5 12,8 C16,5 19,5 22,6 V18 C18,17 15,18 12,21 C9,18 6,17 2,18 Z
+		M10,3 H14 M11,3 V7 C11,8 8,11 8,15 C8,18 9.8,20 12,20 C14.2,20 16,18 16,15 C16,11 13,8 13,7 V3
+	</StreamGeometry>
+	<StreamGeometry x:Key="brand.mark.light">
+		M2,6 C5,5 8,5 12,8 C16,5 19,5 22,6 V18 C18,17 15,18 12,21 C9,18 6,17 2,18 Z
+		M10,3 H14 M11,3 V7 C11,8 8,11 8,15 C8,18 9.8,20 12,20 C14.2,20 16,18 16,15 C16,11 13,8 13,7 V3
+	</StreamGeometry>
+	<StreamGeometry x:Key="brand.mark.dark">
+		M2,6 C5,5 8,5 12,8 C16,5 19,5 22,6 V18 C18,17 15,18 12,21 C9,18 6,17 2,18 Z
+		M10,3 H14 M11,3 V7 C11,8 8,11 8,15 C8,18 9.8,20 12,20 C14.2,20 16,18 16,15 C16,11 13,8 13,7 V3
+	</StreamGeometry>
+
+	<!--
+		The horizontal lockups deliberately keep lettering live and system-rendered.
+		Platform packages must export reviewed outlined masters later; no generated
+		lettering or board text is embedded here.
+	-->
+	<ControlTemplate x:Key="brand.wordmark.horizontal.light" TargetType="ContentControl">
+		<StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+			<Viewbox Width="28" Height="28">
+				<Path
+					Data="{StaticResource brand.mark.light}"
+					Stroke="{DynamicResource Libation.Brush.TextPrimary}"
+					StrokeThickness="1.75"
+					StrokeLineCap="Round"
+					StrokeJoin="Round" />
+			</Viewbox>
+			<TextBlock
+				VerticalAlignment="Center"
+				FontFamily="{DynamicResource Libation.Font.UI}"
+				FontSize="20"
+				FontWeight="SemiBold"
+				Foreground="{DynamicResource Libation.Brush.TextPrimary}"
+				Text="LIBATION" />
+		</StackPanel>
+	</ControlTemplate>
+	<ControlTemplate x:Key="brand.wordmark.horizontal.dark" TargetType="ContentControl">
+		<StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+			<Viewbox Width="28" Height="28">
+				<Path
+					Data="{StaticResource brand.mark.dark}"
+					Stroke="{DynamicResource Libation.Brush.TextPrimary}"
+					StrokeThickness="1.75"
+					StrokeLineCap="Round"
+					StrokeJoin="Round" />
+			</Viewbox>
+			<TextBlock
+				VerticalAlignment="Center"
+				FontFamily="{DynamicResource Libation.Font.UI}"
+				FontSize="20"
+				FontWeight="SemiBold"
+				Foreground="{DynamicResource Libation.Brush.TextPrimary}"
+				Text="LIBATION" />
+		</StackPanel>
+	</ControlTemplate>
+</ResourceDictionary>

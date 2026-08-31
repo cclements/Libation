@@ -8,8 +8,8 @@ using Avalonia.Markup.Xaml;
 using Avalonia.Platform;
 using Avalonia.Styling;
 using Avalonia.Threading;
-using Dinah.Core;
 using LibationAvalonia.Dialogs;
+using LibationAvalonia.DesignSystem;
 using LibationAvalonia.Themes;
 using LibationAvalonia.Views;
 using LibationFileManager;
@@ -39,6 +39,7 @@ public class App : Application
 	/// <summary>Set when the user accepted the offer to start Libation again. Read by <see cref="Program"/> after shutdown.</summary>
 	public static bool RestartRequested { get; private set; }
 	public static ChardonnayTheme? DefaultThemeColors { get; private set; }
+	public static ExperienceManager? ExperienceManager { get; private set; }
 	public static MainWindow? MainWindow { get; private set; }
 	public static Uri AssetUriBase { get; } = new("avares://Libation/Assets/");
 	public static new Application Current => Application.Current ?? throw new InvalidOperationException("The Avalonia app hasn't started yet.");
@@ -206,29 +207,19 @@ public class App : Application
 
 	private static void ShowMainWindow(IClassicDesktopStyleApplicationLifetime desktop)
 	{
-		Configuration.Instance.PropertyChanged += ThemeVariant_PropertyChanged;
-		Current.ActualThemeVariantChanged += OnActualThemeVariantChanged;
-		OnActualThemeVariantChanged(Current, EventArgs.Empty);
+		ExperienceManager = new(Current, Configuration.Instance);
+		ExperienceManager.Initialize();
 
 		MainWindow mainWindow = new();
 		desktop.MainWindow = MainWindow = mainWindow;
 		mainWindow.Loaded += MainWindow_Loaded;
-		mainWindow.Closed += (_, _) => desktop.Shutdown();
+		mainWindow.Closed += (_, _) =>
+		{
+			ExperienceManager?.Dispose();
+			desktop.Shutdown();
+		};
 		mainWindow.RestoreSizeAndLocation(Configuration.Instance);
 		mainWindow.Show();
-	}
-
-	[PropertyChangeFilter(nameof(ThemeVariant))]
-	private static void ThemeVariant_PropertyChanged(object sender, PropertyChangedEventArgsEx e)
-		=> OpenAndApplyTheme(e.NewValue as Configuration.Theme? ?? Configuration.Theme.System);
-
-	private static void OnActualThemeVariantChanged(object? sender, EventArgs e)
-		=> OpenAndApplyTheme(Configuration.Instance.ThemeVariant);
-
-	private static void OpenAndApplyTheme(Configuration.Theme themeVariant)
-	{
-		using ChardonnayThemePersister? themePersister = ChardonnayThemePersister.Create();
-		themePersister?.Target.ApplyTheme(themeVariant);
 	}
 
 	private static async void MainWindow_Loaded(object? sender, Avalonia.Interactivity.RoutedEventArgs e)

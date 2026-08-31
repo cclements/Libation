@@ -1,0 +1,19 @@
+<Styles xmlns="https://github.com/avaloniaui"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+	<Style Selector="DataGrid.contemporary">
+		<Setter Property="Background" Value="{DynamicResource Libation.Brush.Surface}" />
+		<Setter Property="Foreground" Value="{DynamicResource Libation.Brush.TextPrimary}" />
+		<Setter Property="BorderBrush" Value="{DynamicResource Libation.Brush.BorderSubtle}" />
+		<Setter Property="RowBackground" Value="{DynamicResource Libation.Brush.Surface}" />
+		<Setter Property="HorizontalGridLinesBrush" Value="{DynamicResource Libation.Brush.BorderSubtle}" />
+		<Setter Property="VerticalGridLinesBrush" Value="{DynamicResource Libation.Brush.BorderSubtle}" />
+		<Setter Property="RowHeight" Value="{DynamicResource Libation.Density.RowHeight}" />
+	</Style>
+	<Style Selector="DataGrid.contemporary DataGridRow:selected">
+		<Setter Property="Background" Value="{DynamicResource Libation.Brush.Selection}" />
+	</Style>
+	<Style Selector="DataGrid.contemporary DataGridCell:focus">
+		<Setter Property="BorderBrush" Value="{DynamicResource Libation.Brush.Focus}" />
+		<Setter Property="BorderThickness" Value="2" />
+	</Style>
+</Styles>

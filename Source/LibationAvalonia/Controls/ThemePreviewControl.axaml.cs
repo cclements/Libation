@@ -1,6 +1,8 @@
 using Avalonia.Controls;
+using Avalonia.Styling;
 using DataLayer;
 using Dinah.Core.ErrorHandling;
+using LibationAvalonia.DesignSystem;
 using LibationAvalonia.ViewModels;
 using LibationFileManager;
 using LibationUiBase.ProcessQueue;
@@ -21,6 +23,7 @@ public partial class ThemePreviewControl : UserControl
 	public ProcessBookViewModel CompletedBook { get; }
 	public ProcessBookViewModel CancelledBook { get; }
 	public ProcessBookViewModel FailedBook { get; }
+	public ExperienceStyle? PreviewStyle { get; private set; }
 	public ThemePreviewControl()
 	{
 		InitializeComponent();
@@ -47,6 +50,27 @@ public partial class ThemePreviewControl : UserControl
 		ProductsDisplay = new ProductsDisplayViewModel();
 		_ = ProductsDisplay.BindToGridAsync(sampleEntries);
 		DataContext = this;
+	}
+
+	/// <summary>
+	/// Applies an isolated profile to this preview only. Separate instances can
+	/// display different profiles side by side without changing App resources.
+	/// </summary>
+	public void ApplyExperiencePreview(ExperienceStyle style)
+	{
+		if (App.ExperienceManager is not { } manager)
+			return;
+		var preview = manager.CreatePreviewScope(style);
+		ExperienceScope.Resources = preview.Resources;
+		ExperienceScope.RequestedThemeVariant = preview.Host.RequestedThemeVariant;
+		PreviewStyle = style;
+	}
+
+	public void ClearExperiencePreview()
+	{
+		ExperienceScope.Resources = new ResourceDictionary();
+		ExperienceScope.RequestedThemeVariant = ThemeVariant.Default;
+		PreviewStyle = null;
 	}
 
 	private IEnumerable<LibraryBook> CreateMockBooks()

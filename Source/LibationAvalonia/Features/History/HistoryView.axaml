@@ -1,0 +1,59 @@
+<UserControl
+	xmlns="https://github.com/avaloniaui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:history="using:LibationAvalonia.Features.History"
+	xmlns:components="using:LibationAvalonia.DesignSystem.Components"
+	x:Class="LibationAvalonia.Features.History.HistoryView"
+	x:DataType="history:HistoryViewModel">
+	<UserControl.Resources>
+		<DataTemplate x:Key="HistoryRow" x:DataType="history:HistoryItem">
+			<Border Classes="card" Margin="0,0,0,8">
+				<Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{DynamicResource Libation.Space.3}">
+					<TextBlock Text="{Binding DateText}" Width="150" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+					<StackPanel Grid.Column="1" Spacing="{DynamicResource Libation.Space.1}">
+						<TextBlock Text="{Binding Title}" FontWeight="SemiBold" Foreground="{DynamicResource Libation.Brush.TextPrimary}" />
+						<TextBlock Text="{Binding Action}" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+						<TextBlock Text="{Binding Detail}" TextWrapping="Wrap" Foreground="{DynamicResource Libation.Brush.TextTertiary}" />
+					</StackPanel>
+					<components:StatusBadge Grid.Column="2" Status="{Binding Status}" TextOverride="{Binding Result}" AccessibleName="{Binding Result}" />
+				</Grid>
+			</Border>
+		</DataTemplate>
+	</UserControl.Resources>
+	<Grid Margin="{DynamicResource Libation.Space.5}" RowDefinitions="Auto,Auto,Auto,Auto,*"
+		RowSpacing="{DynamicResource Libation.Space.3}">
+			<components:PageHeader Grid.Row="0" Eyebrow="Available records" Title="History"
+				SupportingText="Review the timestamps and current-session outcomes Libation already records." />
+			<components:AttentionBanner Grid.Row="1" Severity="{x:Static components:ComponentSeverity.Info}"
+				Title="History is currently a limited projection"
+				Message="This is not a comprehensive audit log. It includes library-added dates, recorded last-download dates, and retained processing-session messages. Scans, exports, metadata changes, removals, restores, retries, accounts, and marketplaces are shown only when an existing source records them." />
+			<components:AttentionBanner Grid.Row="2" IsVisible="{Binding HasLoadError}" Severity="{x:Static components:ComponentSeverity.Danger}" FocusOnShow="True"
+				Title="History unavailable" Message="{Binding LoadError}" ActionText="Refresh" ActionCommand="{Binding RefreshCommand}"
+				SecondaryActionText="Copy technical details" SecondaryActionCommand="{Binding CopyTechnicalDetailsCommand}" />
+			<Border Grid.Row="3" Classes="card">
+				<Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource Libation.Space.3}">
+					<StackPanel Spacing="{DynamicResource Libation.Space.1}">
+						<TextBox Text="{Binding SearchText, Mode=TwoWay}" PlaceholderText="Search date, title, action, result, or recorded detail"
+							AutomationProperties.Name="Search available history" />
+						<TextBlock Text="{Binding ResultSummary}" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+					</StackPanel>
+					<Button Grid.Column="1" Classes="contemporary quiet" Content="Refresh" Command="{Binding RefreshCommand}" />
+				</Grid>
+			</Border>
+			<Grid Grid.Row="4">
+				<Border Classes="card" IsVisible="{Binding IsLoading}" VerticalAlignment="Top">
+					<StackPanel Spacing="{DynamicResource Libation.Space.2}">
+						<TextBlock Text="Loading available history…" FontWeight="SemiBold" />
+						<ProgressBar IsIndeterminate="True" AutomationProperties.Name="Loading available history" />
+					</StackPanel>
+				</Border>
+				<components:EmptyState IsVisible="{Binding ShowEmpty}" VerticalAlignment="Top" Title="No recorded outcomes match"
+					Explanation="Clear the search, or return after Libation records a library addition, completed title, or processing-session message."
+					PrimaryActionText="Refresh" PrimaryCommand="{Binding RefreshCommand}" />
+				<ListBox ItemsSource="{Binding VisibleItems}" ItemTemplate="{StaticResource HistoryRow}"
+					IsVisible="{Binding HasItems}" AutomationProperties.Name="Available history outcomes">
+					<ListBox.ItemsPanel><ItemsPanelTemplate><VirtualizingStackPanel /></ItemsPanelTemplate></ListBox.ItemsPanel>
+				</ListBox>
+			</Grid>
+	</Grid>
+</UserControl>

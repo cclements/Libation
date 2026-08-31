@@ -1,0 +1,49 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:library="using:LibationAvalonia.Features.Library"
+			 x:Class="LibationAvalonia.Features.Library.LibraryGalleryView"
+			 x:DataType="library:LibraryViewModel">
+	<ListBox x:Name="GalleryRowsControl"
+			 ItemsSource="{Binding GalleryRows}"
+			 Background="Transparent"
+			 BorderThickness="0"
+			 Focusable="False"
+			 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+			 AutomationProperties.Name="Library Gallery">
+		<ListBox.ItemsPanel>
+			<ItemsPanelTemplate>
+				<VirtualizingStackPanel />
+			</ItemsPanelTemplate>
+		</ListBox.ItemsPanel>
+		<ListBox.Styles>
+			<Style Selector="ListBoxItem">
+				<Setter Property="Padding" Value="0" />
+				<Setter Property="Margin" Value="0,0,0,12" />
+				<Setter Property="HorizontalContentAlignment" Value="Stretch" />
+				<Setter Property="Focusable" Value="False" />
+			</Style>
+		</ListBox.Styles>
+		<ListBox.ItemTemplate>
+			<DataTemplate x:DataType="library:GalleryRowViewModel">
+				<ItemsControl ItemsSource="{Binding Items}">
+					<ItemsControl.ItemsPanel>
+						<ItemsPanelTemplate>
+							<StackPanel Orientation="Horizontal" Spacing="12" />
+						</ItemsPanelTemplate>
+					</ItemsControl.ItemsPanel>
+					<ItemsControl.ItemTemplate>
+						<DataTemplate x:DataType="library:LibraryBookItemViewModel">
+							<library:GalleryBookCard
+								Width="220"
+								SelectionRequested="GalleryCard_SelectionRequested"
+								FocusRequested="GalleryCard_FocusRequested"
+								OpenRequested="GalleryCard_OpenRequested"
+								ContextMenuRequested="GalleryCard_ContextMenuRequested"
+								NavigationRequested="GalleryCard_NavigationRequested" />
+						</DataTemplate>
+					</ItemsControl.ItemTemplate>
+				</ItemsControl>
+			</DataTemplate>
+		</ListBox.ItemTemplate>
+	</ListBox>
+</UserControl>

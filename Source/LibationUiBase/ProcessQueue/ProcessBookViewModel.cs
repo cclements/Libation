@@ -7,6 +7,7 @@ using Dinah.Core.ErrorHandling;
 using FileLiberator;
 using LibationFileManager;
 using LibationUiBase.Forms;
+using Serilog.Context;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -47,6 +48,11 @@ public class ProcessBookViewModel : ReactiveObject
 {
 	public LibraryBook LibraryBook { get; protected set; }
 	public Configuration Configuration { get; }
+	/// <summary>
+	/// Stable join key for this queue item's visible failure, retained queue log,
+	/// and structured application log entries.
+	/// </summary>
+	public string CorrelationId { get; } = Guid.NewGuid().ToString("N");
 	private readonly BadBookSessionContext? _badBookSession;
 
 	#region Properties exposed to the view
@@ -96,7 +102,7 @@ public class ProcessBookViewModel : ReactiveObject
 	#region Process Queue Logging
 
 	public event EventHandler<string>? LogWritten;
-	private void OnLogWritten(string text) => LogWritten?.Invoke(this, text.Trim());
+	private void OnLogWritten(string text) => LogWritten?.Invoke(this, $"[{CorrelationId}] {text.Trim()}");
 
 	private void LogError(string? message, Exception? ex = null)
 	{
@@ -148,6 +154,7 @@ public class ProcessBookViewModel : ReactiveObject
 
 	public async Task<ProcessBookResult> ProcessOneAsync()
 	{
+		using var correlation = LogContext.PushProperty(nameof(CorrelationId), CorrelationId);
 		ProcessBookResult result = ProcessBookResult.None;
 		try
 		{

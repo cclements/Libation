@@ -1,0 +1,31 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:components="using:LibationAvalonia.DesignSystem.Components"
+			 xmlns:library="using:LibationAvalonia.Features.Library"
+			 x:Class="LibationAvalonia.Features.Library.GalleryBookCard"
+			 x:DataType="library:LibraryBookItemViewModel"
+			 x:Name="Root"
+			 Focusable="True"
+			 AutomationProperties.Name="{Binding AccessibleName}"
+			 AutomationProperties.HelpText="Use arrow keys to move, Space to select, Enter to open details, and Shift+F10 for book actions.">
+	<Grid RowDefinitions="*,Auto">
+		<components:BookCard
+			Cover="{Binding Cover, ElementName=Root}"
+			Title="{Binding Title}"
+			Author="{Binding Author}"
+			Narrator="{Binding Narrator}"
+			Duration="{Binding Duration}"
+			Status="{Binding Status}"
+			StatusText="{Binding StatusText}"
+			IsSelected="{Binding IsSelected}"
+			Command="{Binding OpenCommand, ElementName=Root}"
+			ContextCommand="{Binding ContextCommand, ElementName=Root}" />
+		<TextBlock Grid.Row="1"
+				   Text="{Binding SelectionText}"
+				   FontWeight="SemiBold"
+				   Foreground="{DynamicResource Libation.Brush.TextPrimary}"
+				   HorizontalAlignment="Center"
+				   Margin="0,4,0,0"
+				   MinHeight="18" />
+	</Grid>
+</UserControl>

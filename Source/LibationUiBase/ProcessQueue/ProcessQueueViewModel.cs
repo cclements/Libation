@@ -4,6 +4,8 @@ using FileLiberator;
 using LibationFileManager;
 using LibationUiBase.Forms;
 using LibationUiBase;
+using LibationUiBase.Diagnostics;
+using Serilog.Context;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -214,7 +216,7 @@ public class ProcessQueueViewModel : ReactiveObject
 	private void ProcessBook_LogWritten(object? sender, string logMessage) => AddQueueLogEntry(logMessage);
 
 	private void AddQueueLogEntry(string logMessage)
-		=> Invoke(() => LogEntries.Add(new(DateTime.Now, logMessage.Trim())));
+		=> Invoke(() => LogEntries.Add(new(DateTime.Now, DiagnosticTextScrubber.Scrub(logMessage.Trim()) ?? string.Empty)));
 
 	#region Add Books to Queue
 
@@ -744,6 +746,7 @@ public class ProcessQueueViewModel : ReactiveObject
 
 			async Task ProcessBookAsync(ProcessBookViewModel book)
 			{
+				using var correlation = LogContext.PushProperty(nameof(ProcessBookViewModel.CorrelationId), book.CorrelationId);
 				Serilog.Log.Logger.Information("Begin processing queued item: '{item_LibraryBook}'", book.LibraryBook);
 				ProcessStart?.Invoke(this, book);
 

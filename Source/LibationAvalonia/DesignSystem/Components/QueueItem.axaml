@@ -1,0 +1,61 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:components="using:LibationAvalonia.DesignSystem.Components"
+			 x:Class="LibationAvalonia.DesignSystem.Components.QueueItem"
+			 x:Name="Root">
+	<Border Classes="card" MinHeight="{DynamicResource Libation.Density.QueueItemHeight}"
+			AutomationProperties.Name="{Binding Title, ElementName=Root}" AutomationProperties.LiveSetting="Polite">
+		<Grid RowDefinitions="Auto,Auto" RowSpacing="{DynamicResource Libation.Space.2}">
+		<Expander IsExpanded="{Binding IsExpanded, ElementName=Root, Mode=TwoWay}">
+			<Expander.Header>
+				<Grid ColumnDefinitions="48,*" ColumnSpacing="{DynamicResource Libation.Space.3}">
+					<Grid Width="48" Height="48">
+						<Border Background="{DynamicResource Libation.Brush.CoverPlaceholder}"
+								CornerRadius="{DynamicResource Libation.Radius.Small}"
+								IsVisible="{Binding Cover, ElementName=Root, Converter={x:Static ObjectConverters.IsNull}}">
+							<Path Data="{DynamicResource glyph.processing}" Stroke="{DynamicResource Libation.Brush.TextTertiary}"
+								  Stretch="Uniform" Width="24" Height="24" StrokeThickness="1.5" />
+						</Border>
+						<Image Source="{Binding Cover, ElementName=Root}" Stretch="UniformToFill"
+							   IsVisible="{Binding Cover, ElementName=Root, Converter={x:Static ObjectConverters.IsNotNull}}"
+							   AutomationProperties.IsControlElementOverride="False" AutomationProperties.AccessibilityView="Raw" />
+					</Grid>
+					<StackPanel Grid.Column="1" Spacing="{DynamicResource Libation.Space.2}">
+					<Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource Libation.Space.2}">
+						<TextBlock Text="{Binding Title, ElementName=Root}" FontWeight="SemiBold"
+								   Foreground="{DynamicResource Libation.Brush.TextPrimary}" TextTrimming="CharacterEllipsis" />
+						<components:StatusBadge Grid.Column="1" Status="{Binding Status, ElementName=Root}"
+											TextOverride="{Binding StatusText, ElementName=Root}" />
+					</Grid>
+					<TextBlock Text="{Binding Stage, ElementName=Root}" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+					<ProgressBar Classes="contemporary" Minimum="0" Maximum="100" Value="{Binding Progress, ElementName=Root}"
+							 IsVisible="{Binding ShowProgress, ElementName=Root}" AutomationProperties.Name="Item progress" />
+					</StackPanel>
+				</Grid>
+			</Expander.Header>
+			<StackPanel Spacing="{DynamicResource Libation.Space.2}">
+				<TextBlock Text="{Binding Message, ElementName=Root}" Foreground="{DynamicResource Libation.Brush.TextSecondary}" TextWrapping="Wrap" />
+				<TextBlock Text="{Binding ErrorDetails, ElementName=Root}"
+						   IsVisible="{Binding ErrorDetails, ElementName=Root, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+						   Foreground="{DynamicResource Libation.Brush.Danger}" FontFamily="monospace" TextWrapping="Wrap" />
+			</StackPanel>
+		</Expander>
+		<StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="{DynamicResource Libation.Space.2}" HorizontalAlignment="Right">
+			<Button Classes="contemporary quiet compact" Content="Copy technical details"
+					Command="{Binding CopyTechnicalDetailsCommand, ElementName=Root}"
+					IsVisible="{Binding CopyTechnicalDetailsCommand, ElementName=Root, Converter={x:Static ObjectConverters.IsNotNull}}" />
+			<Button Classes="contemporary quiet compact" Content="Retry" Command="{Binding RetryCommand, ElementName=Root}"
+					CommandParameter="{Binding CommandParameter, ElementName=Root}"
+					IsVisible="{Binding RetryCommand, ElementName=Root, Converter={x:Static ObjectConverters.IsNotNull}}" />
+			<Button Classes="contemporary quiet compact" Content="Open log" Command="{Binding OpenLogCommand, ElementName=Root}"
+					IsVisible="{Binding OpenLogCommand, ElementName=Root, Converter={x:Static ObjectConverters.IsNotNull}}" />
+			<Button Classes="contemporary quiet compact" Content="Reveal" Command="{Binding RevealCommand, ElementName=Root}"
+					CommandParameter="{Binding CommandParameter, ElementName=Root}"
+					IsVisible="{Binding RevealCommand, ElementName=Root, Converter={x:Static ObjectConverters.IsNotNull}}" />
+			<Button Classes="contemporary danger compact" Content="Cancel" Command="{Binding CancelCommand, ElementName=Root}"
+					CommandParameter="{Binding CommandParameter, ElementName=Root}"
+					IsVisible="{Binding CancelCommand, ElementName=Root, Converter={x:Static ObjectConverters.IsNotNull}}" />
+		</StackPanel>
+		</Grid>
+	</Border>
+</UserControl>

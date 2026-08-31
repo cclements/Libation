@@ -32,10 +32,22 @@ partial class MainVM
 
 	public async void LiberateClicked(System.Collections.Generic.IList<LibraryBook> libraryBooks, Configuration config)
 	{
+		await QueueBooksAsync(libraryBooks, config);
+	}
+
+	/// <summary>
+	/// Shared awaitable entry point for the current grid and the contemporary
+	/// Flight adapter. The existing ProcessQueueViewModel remains authoritative.
+	/// </summary>
+	public async System.Threading.Tasks.Task<bool> QueueBooksAsync(System.Collections.Generic.IList<LibraryBook> libraryBooks, Configuration config)
+	{
 		try
 		{
 			if (await ProcessQueue.QueueDownloadDecryptAsync(libraryBooks, config))
+			{
 				setQueueCollapseState(false);
+				return true;
+			}
 			else if (libraryBooks.Count == 1 && libraryBooks[0].Book.AudioExists)
 			{
 				// liberated: open explorer to file
@@ -46,10 +58,12 @@ partial class MainVM
 					await MessageBox.Show($"File not found" + suffix);
 				}
 			}
+			return false;
 		}
 		catch (Exception ex)
 		{
 			Serilog.Log.Logger.Error(ex, "An error occurred while handling the stop light button click for {libraryBook}", libraryBooks);
+			return false;
 		}
 	}
 

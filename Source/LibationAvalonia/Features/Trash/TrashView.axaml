@@ -1,0 +1,51 @@
+<UserControl
+	xmlns="https://github.com/avaloniaui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:trash="using:LibationAvalonia.Features.Trash"
+	xmlns:components="using:LibationAvalonia.DesignSystem.Components"
+	x:Class="LibationAvalonia.Features.Trash.TrashView"
+	x:DataType="trash:TrashViewModel">
+	<ScrollViewer HorizontalScrollBarVisibility="Disabled">
+		<StackPanel Margin="{DynamicResource Libation.Space.5}" Spacing="{DynamicResource Libation.Space.4}">
+			<components:PageHeader Eyebrow="Removed library records" Title="Trash"
+				SupportingText="Review titles hidden from the Library, restore them, or explicitly remove their records from Libation."
+				PrimaryActionText="Open protected Trash workflow" PrimaryCommand="{Binding OpenTrashCommand}">
+				<components:PageHeader.StatusContent>
+					<components:StatusBadge Status="{Binding Status}" TextOverride="{Binding CountText}" AccessibleName="{Binding CountText}" />
+				</components:PageHeader.StatusContent>
+			</components:PageHeader>
+			<components:AttentionBanner IsVisible="{Binding HasError}" Severity="{x:Static components:ComponentSeverity.Danger}" FocusOnShow="True"
+				Title="Trash unavailable" Message="{Binding ErrorMessage}"
+				ActionText="Copy technical details" ActionCommand="{Binding CopyTechnicalDetailsCommand}" />
+			<components:EmptyState IsVisible="{Binding !HasItems}" Title="Trash is empty"
+				Explanation="Titles moved out of the Library appear here until they are restored or their Libation records are permanently deleted."
+				PrimaryActionText="Refresh count" PrimaryCommand="{Binding RefreshCommand}" />
+
+			<StackPanel IsVisible="{Binding HasItems}" Spacing="{DynamicResource Libation.Space.4}">
+				<components:AttentionBanner Severity="{x:Static components:ComponentSeverity.Warning}"
+					Title="Review the selected titles before permanent deletion"
+					Message="The established Trash dialog has separate Restore and Permanently Delete from Libation actions. Its permanent action removes selected database records immediately after activation, so verify the selection before using it." />
+				<Grid ColumnDefinitions="*,*" ColumnSpacing="{DynamicResource Libation.Space.4}">
+					<Border Classes="card raised">
+						<StackPanel Spacing="{DynamicResource Libation.Space.3}">
+							<TextBlock Text="Restore" FontFamily="{DynamicResource Libation.Font.Display}" FontSize="{DynamicResource Libation.FontSize.Section}" />
+							<TextBlock Text="Restoring returns selected records to the Library. It does not redownload or replace audiobook files."
+								TextWrapping="Wrap" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+						</StackPanel>
+					</Border>
+					<Border Grid.Column="1" Classes="card raised">
+						<StackPanel Spacing="{DynamicResource Libation.Space.3}">
+							<TextBlock Text="Permanently delete from Libation" FontFamily="{DynamicResource Libation.Font.Display}" FontSize="{DynamicResource Libation.FontSize.Section}" />
+							<TextBlock Text="This removes selected Book and LibraryBook database records. The current domain operation does not delete open audiobook files from disk."
+								TextWrapping="Wrap" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+						</StackPanel>
+					</Border>
+				</Grid>
+				<StackPanel Orientation="Horizontal" Spacing="8">
+					<Button Classes="contemporary primary" Content="Open Trash to review titles" Command="{Binding OpenTrashCommand}" />
+					<Button Classes="contemporary quiet" Content="Refresh count" Command="{Binding RefreshCommand}" />
+				</StackPanel>
+			</StackPanel>
+		</StackPanel>
+	</ScrollViewer>
+</UserControl>

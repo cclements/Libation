@@ -1,0 +1,34 @@
+<Styles xmlns="https://github.com/avaloniaui"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+	<Style Selector="TextBox.search">
+		<Setter Property="MinWidth" Value="240" />
+		<Setter Property="MinHeight" Value="{DynamicResource Libation.ControlHeight.Default}" />
+		<Setter Property="Padding" Value="12,8" />
+		<Setter Property="CornerRadius" Value="{DynamicResource Libation.Radius.Small}" />
+		<Setter Property="Background" Value="{DynamicResource Libation.Brush.SurfaceSunken}" />
+		<Setter Property="Foreground" Value="{DynamicResource Libation.Brush.TextPrimary}" />
+		<Setter Property="BorderBrush" Value="{DynamicResource Libation.Brush.BorderStrong}" />
+		<Setter Property="SelectionBrush" Value="{DynamicResource Libation.Brush.Selection}" />
+	</Style>
+	<Style Selector="TextBox.search:focus-within">
+		<Setter Property="BorderBrush" Value="{DynamicResource Libation.Brush.Focus}" />
+		<Setter Property="BorderThickness" Value="2" />
+	</Style>
+	<Style Selector="Button.filter">
+		<Setter Property="MinHeight" Value="{DynamicResource Libation.ControlHeight.Compact}" />
+		<Setter Property="Padding" Value="12,6" />
+		<Setter Property="CornerRadius" Value="{DynamicResource Libation.Radius.Large}" />
+		<Setter Property="Background" Value="{DynamicResource Libation.Brush.SurfaceInteractive}" />
+		<Setter Property="Foreground" Value="{DynamicResource Libation.Brush.TextSecondary}" />
+		<Setter Property="BorderBrush" Value="{DynamicResource Libation.Brush.BorderSubtle}" />
+	</Style>
+	<Style Selector="Button.filter.selected">
+		<Setter Property="Background" Value="{DynamicResource Libation.Brush.Selection}" />
+		<Setter Property="Foreground" Value="{DynamicResource Libation.Brush.TextPrimary}" />
+		<Setter Property="BorderBrush" Value="{DynamicResource Libation.Brush.AccentPrimary}" />
+	</Style>
+	<Style Selector="Button.filter:focus-visible">
+		<Setter Property="BorderBrush" Value="{DynamicResource Libation.Brush.Focus}" />
+		<Setter Property="BorderThickness" Value="2" />
+	</Style>
+</Styles>

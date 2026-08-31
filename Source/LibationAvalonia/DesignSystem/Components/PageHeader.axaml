@@ -1,0 +1,48 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 x:Class="LibationAvalonia.DesignSystem.Components.PageHeader"
+			 x:Name="Root">
+	<Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource Libation.Space.5}">
+		<Grid RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="{DynamicResource Libation.Space.2}">
+			<TextBlock Text="{Binding Eyebrow, ElementName=Root}"
+					   IsVisible="{Binding Eyebrow, ElementName=Root, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+					   Foreground="{DynamicResource Libation.Brush.AccentSecondary}"
+					   FontFamily="{DynamicResource Libation.Font.UI}"
+					   FontSize="{DynamicResource Libation.FontSize.Caption}"
+					   FontWeight="SemiBold" />
+			<StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="{DynamicResource Libation.Space.3}">
+				<TextBlock Text="{Binding Title, ElementName=Root}"
+						   Foreground="{DynamicResource Libation.Brush.TextPrimary}"
+						   FontFamily="{DynamicResource Libation.Font.Display}"
+						   FontSize="{DynamicResource Libation.FontSize.Page}"
+						   TextWrapping="Wrap" />
+				<ContentControl Content="{Binding StatusContent, ElementName=Root}" VerticalAlignment="Center" />
+			</StackPanel>
+			<TextBlock Grid.Row="2"
+					   Text="{Binding SupportingText, ElementName=Root}"
+					   IsVisible="{Binding SupportingText, ElementName=Root, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+					   Foreground="{DynamicResource Libation.Brush.TextSecondary}"
+					   FontSize="{DynamicResource Libation.FontSize.Body}"
+					   TextWrapping="Wrap" />
+			<StackPanel Grid.Row="3" Orientation="Horizontal" Spacing="{DynamicResource Libation.Density.ToolbarGap}">
+				<Button Classes="contemporary primary"
+						Content="{Binding PrimaryActionText, ElementName=Root}"
+						Command="{Binding PrimaryCommand, ElementName=Root}"
+						CommandParameter="{Binding PrimaryCommandParameter, ElementName=Root}"
+						IsVisible="{Binding PrimaryActionText, ElementName=Root, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+				<ItemsControl ItemsSource="{Binding SecondaryActions, ElementName=Root}"
+							  ItemTemplate="{Binding SecondaryActionTemplate, ElementName=Root}">
+					<ItemsControl.ItemsPanel>
+						<ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+					</ItemsControl.ItemsPanel>
+				</ItemsControl>
+			</StackPanel>
+		</Grid>
+		<ContentControl Grid.Column="1"
+					Content="{Binding HeroArt, ElementName=Root}"
+					IsVisible="{DynamicResource Libation.Decoration.Visible}"
+					Opacity="{DynamicResource Libation.Decoration.Opacity}"
+					AutomationProperties.IsControlElementOverride="False"
+					AutomationProperties.AccessibilityView="Raw" />
+	</Grid>
+</UserControl>

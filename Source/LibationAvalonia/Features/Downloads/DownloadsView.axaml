@@ -1,0 +1,95 @@
+<UserControl
+	xmlns="https://github.com/avaloniaui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:downloads="using:LibationAvalonia.Features.Downloads"
+	xmlns:components="using:LibationAvalonia.DesignSystem.Components"
+	x:Class="LibationAvalonia.Features.Downloads.DownloadsView"
+	x:DataType="downloads:DownloadsViewModel">
+	<ScrollViewer HorizontalScrollBarVisibility="Disabled">
+		<StackPanel Margin="{DynamicResource Libation.Space.5}" Spacing="{DynamicResource Libation.Space.4}">
+			<components:PageHeader
+				Eyebrow="Acquisition"
+				Title="Downloads"
+				SupportingText="Understand whether titles are catalogued, downloaded in Audible format, processed into open files, or need attention."
+				PrimaryActionText="Download pending titles"
+				PrimaryCommand="{Binding DownloadPendingCommand}" />
+
+			<components:AttentionBanner IsVisible="{Binding HasError}"
+				Severity="{x:Static components:ComponentSeverity.Danger}" FocusOnShow="True" Title="Download action unavailable"
+				Message="{Binding ErrorMessage}" ActionText="Copy technical details" ActionCommand="{Binding CopyTechnicalDetailsCommand}" />
+			<Border Classes="card" IsVisible="{Binding IsLoading}">
+				<StackPanel Spacing="{DynamicResource Libation.Space.2}">
+					<TextBlock Text="Loading download state…" FontWeight="SemiBold" />
+					<ProgressBar IsIndeterminate="True" AutomationProperties.Name="Loading download state" />
+				</StackPanel>
+			</Border>
+
+			<components:EmptyState IsVisible="{Binding ShowEmptyLibrary}" Title="No catalogued titles yet"
+				Explanation="{Binding EmptyLibraryExplanation}" PrimaryActionText="{Binding EmptyLibraryActionText}"
+				PrimaryCommand="{Binding EmptyLibraryCommand}" SecondaryActionText="Refresh counts"
+				SecondaryCommand="{Binding RefreshCommand}" />
+
+			<StackPanel IsVisible="{Binding HasLibraryTitles}" Spacing="{DynamicResource Libation.Space.4}">
+				<UniformGrid Columns="4" Rows="0">
+					<components:MetricCard Margin="0,0,12,12" IconData="{StaticResource glyph.downloads}"
+						Value="{Binding PendingText}" Label="Download Pending" Severity="{x:Static components:ComponentSeverity.Warning}"
+						CommandText="Start workflow" Command="{Binding DownloadPendingCommand}" />
+					<components:MetricCard Margin="0,0,12,12" IconData="{StaticResource status.downloaded}"
+						Value="{Binding DownloadedText}" Label="Downloaded Audible files" Severity="{x:Static components:ComponentSeverity.Info}" />
+					<components:MetricCard Margin="0,0,12,12" IconData="{StaticResource glyph.completed}"
+						Value="{Binding CompletedText}" Label="Processed open copies" Severity="{x:Static components:ComponentSeverity.Success}" />
+					<components:MetricCard Margin="0,0,12,12" IconData="{StaticResource status.needs-attention}"
+						Value="{Binding AttentionText}" Label="Unavailable or failed" Severity="{x:Static components:ComponentSeverity.Danger}" />
+				</UniformGrid>
+				<TextBlock Text="{Binding PendingExplanation}" TextWrapping="Wrap"
+					Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+
+				<components:AttentionBanner IsVisible="{Binding HasAttention}"
+					Severity="{x:Static components:ComponentSeverity.Warning}" Title="Some titles need attention"
+					Message="{Binding AttentionExplanation}" />
+
+				<Border Classes="card raised">
+					<StackPanel Spacing="{DynamicResource Libation.Space.3}">
+						<Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource Libation.Space.3}">
+							<StackPanel Spacing="{DynamicResource Libation.Space.1}">
+								<TextBlock Text="Current pipeline" FontFamily="{DynamicResource Libation.Font.Display}"
+									FontSize="{DynamicResource Libation.FontSize.Section}" />
+								<TextBlock Text="{Binding PipelineText}" TextWrapping="Wrap"
+									Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+							</StackPanel>
+							<components:StatusBadge Grid.Column="1" Status="{Binding PipelineStatus}"
+								TextOverride="{Binding PipelineBadgeText}" AccessibleName="{Binding PipelineText}" />
+						</Grid>
+						<TextBlock Text="Libation’s existing workflow may download and process a title in one queued operation. This page separates the states in its explanation without claiming a second downloader exists."
+							TextWrapping="Wrap" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+					</StackPanel>
+				</Border>
+
+				<Grid ColumnDefinitions="*,*" ColumnSpacing="{DynamicResource Libation.Space.4}">
+					<Border Classes="card">
+						<StackPanel Spacing="{DynamicResource Libation.Space.3}">
+							<TextBlock Text="Find and acquire" FontFamily="{DynamicResource Libation.Font.Display}" FontSize="{DynamicResource Libation.FontSize.Section}" />
+							<TextBlock Text="Start the established pending-title workflow, download PDF supplements, or locate open files that already exist on this computer."
+								TextWrapping="Wrap" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+							<StackPanel Orientation="Horizontal" Spacing="8">
+								<Button Classes="contemporary primary" Content="Download pending titles" Command="{Binding DownloadPendingCommand}" />
+								<Button Classes="contemporary" Content="Download pending PDFs" Command="{Binding DownloadPdfsCommand}" />
+								<Button Classes="contemporary" Content="Locate existing files" Command="{Binding LocateFilesCommand}" />
+							</StackPanel>
+						</StackPanel>
+					</Border>
+					<Border Grid.Column="1" Classes="card">
+						<StackPanel Spacing="{DynamicResource Libation.Space.3}">
+							<TextBlock Text="Long-running conversion" FontFamily="{DynamicResource Libation.Font.Display}" FontSize="{DynamicResource Libation.FontSize.Section}" />
+							<TextBlock Text="Convert all existing M4B titles to MP3. Original files are retained, and the operation can use substantial time and additional disk space. The established confirmation appears before work starts."
+								TextWrapping="Wrap" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+							<Button Classes="contemporary" HorizontalAlignment="Left" Content="Convert all M4B titles to MP3"
+								Command="{Binding ConvertAllToMp3Command}" />
+						</StackPanel>
+					</Border>
+				</Grid>
+				<Button Classes="contemporary quiet" HorizontalAlignment="Left" Content="Refresh download counts" Command="{Binding RefreshCommand}" />
+			</StackPanel>
+		</StackPanel>
+	</ScrollViewer>
+</UserControl>

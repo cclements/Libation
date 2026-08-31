@@ -5,6 +5,8 @@ using Avalonia.Threading;
 using DataLayer;
 using FileManager;
 using LibationAvalonia.Dialogs;
+using LibationAvalonia.Features.Onboarding;
+using LibationAvalonia.Shell;
 using LibationAvalonia.ViewModels;
 using LibationFileManager;
 using LibationUiBase.Forms;
@@ -15,11 +17,20 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace LibationAvalonia.Views;
 
 public partial class MainWindow : ReactiveWindow<MainVM>
 {
+	private readonly Control classicContent;
+	private readonly double classicMinWidth;
+	private readonly double classicMinHeight;
+	private AppShellView? contemporaryShell;
+	private AppShellViewModel? contemporaryShellViewModel;
+	private OnboardingViewModel? onboardingViewModel;
+	private List<LibraryBook>? loadedLibrary;
+
 	public MainWindow()
 	{
 		if (Design.IsDesignMode)
@@ -29,12 +40,26 @@ public partial class MainWindow : ReactiveWindow<MainVM>
 
 		AudibleApiStorage.LoadError += AudibleApiStorage_LoadError;
 		InitializeComponent();
+		classicContent = (Control)(Content ?? throw new InvalidOperationException("MainWindow did not load its classic content."));
+		classicMinWidth = MinWidth;
+		classicMinHeight = MinHeight;
+		DataContext = new MainVM(this);
 		Configure_Upgrade();
 
 		Opened += MainWindow_Opened;
+		Activated += (_, _) => App.ExperienceManager?.RefreshSystemPreferences();
 		Closing += MainWindow_Closing;
 
 		KeyBindings.Add(new KeyBinding { Command = ReactiveCommand.Create(selectAndFocusSearchBox), Gesture = new KeyGesture(Key.F, KeyGestureHelper.CommandModifier) });
+		KeyBindings.Add(new KeyBinding { Command = ReactiveCommand.Create(selectAndFocusSearchBox), Gesture = new KeyGesture(Key.K, KeyGestureHelper.CommandModifier) });
+		KeyBindings.Add(new KeyBinding { Command = ReactiveCommand.Create(closeContemporaryTransientSurface), Gesture = new KeyGesture(Key.Escape) });
+		KeyBindings.Add(new KeyBinding { Command = ReactiveCommand.Create(processContemporaryFlight), Gesture = new KeyGesture(Key.Enter, KeyGestureHelper.CommandModifier) });
+		KeyBindings.Add(new KeyBinding { Command = ReactiveCommand.Create(cycleContemporaryFocusRegion), Gesture = new KeyGesture(Key.F6) });
+		KeyBindings.Add(new KeyBinding { Command = ReactiveCommand.Create(() => NavigateContemporary(AppRouteId.Overview)), Gesture = new KeyGesture(Key.D1, KeyGestureHelper.CommandModifier | KeyModifiers.Shift) });
+		KeyBindings.Add(new KeyBinding { Command = ReactiveCommand.Create(() => NavigateContemporary(AppRouteId.Library)), Gesture = new KeyGesture(Key.D2, KeyGestureHelper.CommandModifier | KeyModifiers.Shift) });
+		KeyBindings.Add(new KeyBinding { Command = ReactiveCommand.Create(() => NavigateContemporary(AppRouteId.Downloads)), Gesture = new KeyGesture(Key.D3, KeyGestureHelper.CommandModifier | KeyModifiers.Shift) });
+		KeyBindings.Add(new KeyBinding { Command = ReactiveCommand.Create(() => NavigateContemporary(AppRouteId.Processing)), Gesture = new KeyGesture(Key.D4, KeyGestureHelper.CommandModifier | KeyModifiers.Shift) });
+		KeyBindings.Add(new KeyBinding { Command = ReactiveCommand.Create(() => NavigateContemporary(AppRouteId.History)), Gesture = new KeyGesture(Key.D5, KeyGestureHelper.CommandModifier | KeyModifiers.Shift) });
 
 		if (!Configuration.IsMacOs && ViewModel is MainVM vm)
 		{
@@ -44,11 +69,140 @@ public partial class MainWindow : ReactiveWindow<MainVM>
 		}
 
 		Configuration.Instance.PropertyChanged += Settings_PropertyChanged;
+		Configuration.Instance.PropertyChanged += ShellSettings_PropertyChanged;
 		Settings_PropertyChanged(this, null);
-		DataContext = new MainVM(this);
+		ApplyShellMode();
 #if DEBUG
 		Configure_DebugMenu();
 #endif
+	}
+
+	private void NavigateContemporary(AppRouteId route)
+	{
+		if (!Configuration.Instance.UseContemporaryShell)
+			return;
+		EnsureContemporaryShell();
+		contemporaryShellViewModel?.Navigation.Navigate(route);
+	}
+
+	private void closeContemporaryTransientSurface() => contemporaryShellViewModel?.CloseTransientSurface();
+	private void processContemporaryFlight()
+	{
+		if (!Configuration.Instance.UseContemporaryShell || onboardingViewModel is not null)
+			return;
+		ICommand? command = contemporaryShellViewModel?.CurrentFlight.ProcessCommand;
+		if (command?.CanExecute(null) == true)
+			command.Execute(null);
+	}
+	private void cycleContemporaryFocusRegion()
+	{
+		if (Configuration.Instance.UseContemporaryShell && onboardingViewModel is null)
+			contemporaryShell?.CycleFocusRegion();
+	}
+
+	private void ShellSettings_PropertyChanged(object? sender, Dinah.Core.PropertyChangedEventArgsEx e)
+	{
+		if (e.PropertyName != nameof(Configuration.UseContemporaryShell))
+			return;
+		// ExperienceManager subscribed before the window and commits the matching
+		// resources on this dispatcher. Queue the content swap after that transaction
+		// so neither opt-in nor rollback presents a one-frame mixed appearance.
+		Dispatcher.UIThread.Post(() =>
+		{
+			// A manually reopened chooser must not mask an explicit opt-out made in
+			// Settings. Automatic first-run onboarding is different: it intentionally
+			// appears while the contemporary flag is still off and remains skippable.
+			if (!Configuration.Instance.UseContemporaryShell
+				&& onboardingViewModel?.IsManualReentry == true)
+			{
+				onboardingViewModel.ExitRequested -= Onboarding_ExitRequested;
+				onboardingViewModel.Dispose();
+				onboardingViewModel = null;
+			}
+			ApplyShellMode();
+		}, DispatcherPriority.Normal);
+	}
+
+	private void EnsureContemporaryShell()
+	{
+		if (contemporaryShell is not null || ViewModel is not MainVM main || App.ExperienceManager is not { } manager)
+			return;
+		contemporaryShellViewModel = new(main, Configuration.Instance, manager);
+		contemporaryShellViewModel.Settings.OnboardingRequested += Settings_OnboardingRequested;
+		if (loadedLibrary is not null)
+			contemporaryShellViewModel.Flight.ReconcileLibrary(loadedLibrary);
+		contemporaryShell = new AppShellView { DataContext = contemporaryShellViewModel };
+	}
+
+	private void ApplyShellMode()
+	{
+		// The chooser is a first-class main-window surface so its established owner
+		// dialogs remain usable. Profile commits can raise shell changes before the
+		// chooser has emitted ExitRequested; keep it attached until that transaction
+		// is complete.
+		if (onboardingViewModel is not null)
+			return;
+
+		if (Configuration.Instance.UseContemporaryShell)
+		{
+			EnsureContemporaryShell();
+			if (contemporaryShell is not null)
+			{
+				Content = contemporaryShell;
+				// Plan §8 defines this minimum for the contemporary desktop shell.
+				MinWidth = 720;
+				MinHeight = 560;
+			}
+		}
+		else
+		{
+			Content = classicContent;
+			MinWidth = classicMinWidth;
+			MinHeight = classicMinHeight;
+		}
+	}
+
+	private void Settings_OnboardingRequested(object? sender, EventArgs e) => ShowOnboarding(isManualReentry: true);
+	public bool TryShowContemporaryOnboarding()
+	{
+		if (!Configuration.Instance.UseContemporaryShell)
+			return false;
+		ShowOnboarding(isManualReentry: true);
+		return onboardingViewModel is not null;
+	}
+
+	private void ShowOnboarding(bool isManualReentry)
+	{
+		if (onboardingViewModel is not null || ViewModel is not MainVM main)
+			return;
+
+		var viewModel = new OnboardingViewModel(
+			new LibationCommandAdapter(main),
+			isManualReentry,
+			Configuration.Instance);
+		if (!isManualReentry && !viewModel.ShouldOfferAutomatically)
+		{
+			viewModel.Dispose();
+			return;
+		}
+
+		onboardingViewModel = viewModel;
+		viewModel.ExitRequested += Onboarding_ExitRequested;
+		Content = new OnboardingView { DataContext = viewModel };
+		// Plan section 8 owns the contemporary desktop minimum.
+		MinWidth = 720;
+		MinHeight = 560;
+	}
+
+	private void Onboarding_ExitRequested(object? sender, OnboardingExitEventArgs e)
+	{
+		if (sender is not OnboardingViewModel viewModel || !ReferenceEquals(viewModel, onboardingViewModel))
+			return;
+
+		viewModel.ExitRequested -= Onboarding_ExitRequested;
+		onboardingViewModel = null;
+		viewModel.Dispose();
+		ApplyShellMode();
 	}
 
 #if DEBUG
@@ -177,22 +331,24 @@ public partial class MainWindow : ReactiveWindow<MainVM>
 				await new SettingsDialog().ShowDialog(this);
 		}
 
-		if (Configuration.Instance.FirstLaunch)
-		{
-			var result = await MessageBox.Show(this, "Would you like a guided tour to get started?", "Libation Walkthrough", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1);
-
-			if (result is DialogResult.Yes)
-			{
-				await new Walkthrough(this).RunAsync();
-			}
-
-			Configuration.Instance.FirstLaunch = false;
-		}
+		ShowOnboarding(isManualReentry: false);
 	}
 
 	private void MainWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
 	{
 		productsDisplay?.CloseImageDisplay();
+		contemporaryShell?.CloseImageDisplay();
+		if (onboardingViewModel is not null)
+		{
+			onboardingViewModel.ExitRequested -= Onboarding_ExitRequested;
+			onboardingViewModel.Dispose();
+			onboardingViewModel = null;
+		}
+		if (contemporaryShellViewModel is not null)
+			contemporaryShellViewModel.Settings.OnboardingRequested -= Settings_OnboardingRequested;
+		contemporaryShellViewModel?.Dispose();
+		Configuration.Instance.PropertyChanged -= Settings_PropertyChanged;
+		Configuration.Instance.PropertyChanged -= ShellSettings_PropertyChanged;
 		this.SaveSizeAndLocation(Configuration.Instance);
 		//This is double firing with 11.3.9
 		Closing -= MainWindow_Closing;
@@ -200,12 +356,18 @@ public partial class MainWindow : ReactiveWindow<MainVM>
 
 	private void selectAndFocusSearchBox()
 	{
-		filterSearchTb.SelectAll();
-		filterSearchTb.Focus();
+		if (Content == contemporaryShell && contemporaryShell is not null)
+			contemporaryShell.SelectAndFocusSearch();
+		else
+		{
+			filterSearchTb.SelectAll();
+			filterSearchTb.Focus();
+		}
 	}
 
 	public async Task OnLibraryLoadedAsync(List<LibraryBook> initialLibrary)
 	{
+		loadedLibrary = initialLibrary;
 		//Get the ViewModel before crossing the await boundary
 		if (ViewModel is not MainVM vm)
 			return;
@@ -219,6 +381,7 @@ public partial class MainWindow : ReactiveWindow<MainVM>
 			Task.Run(() => vm.ProductsDisplay.BindToGridAsync(initialLibrary)));
 
 		await vm.BindToGridTask;
+		contemporaryShellViewModel?.Flight.ReconcileLibrary(initialLibrary);
 	}
 
 	public void ProductsDisplay_LiberateClicked(object _, IList<LibraryBook> libraryBook, Configuration config) => ViewModel?.LiberateClicked(libraryBook, config);
@@ -264,6 +427,8 @@ public partial class MainWindow : ReactiveWindow<MainVM>
 #pragma warning disable CS8321 // Local function is declared but never used
 		async Task upgradeAvailable(LibationUiBase.UpgradeEventArgs e)
 		{
+			if (ViewModel is not null)
+				ViewModel.ApplicationUpdateState = $"Version {e.UpgradeProperties.LatestRelease:3} is available.";
 			var notificationResult = await new UpgradeNotificationDialog(e.UpgradeProperties, e.CapUpgrade, e.UpgradeUnavailableReason).ShowDialogAsync(this);
 
 			e.Ignore = notificationResult == DialogResult.Ignore;
@@ -273,12 +438,34 @@ public partial class MainWindow : ReactiveWindow<MainVM>
 
 		var upgrader = new LibationUiBase.Upgrader();
 		upgrader.DownloadProgress += async (_, e) => await Dispatcher.UIThread.InvokeAsync(() => ViewModel?.DownloadProgress = e.ProgressPercentage);
-		upgrader.DownloadBegin += async (_, _) => await Dispatcher.UIThread.InvokeAsync(() => setProgressVisible(true));
-		upgrader.DownloadCompleted += async (_, _) => await Dispatcher.UIThread.InvokeAsync(() => setProgressVisible(false));
-		upgrader.UpgradeFailed += async (_, message) => await Dispatcher.UIThread.InvokeAsync(() => { setProgressVisible(false); MessageBox.Show(this, message, "Upgrade Failed", MessageBoxButtons.OK, MessageBoxIcon.Error); });
+		upgrader.DownloadBegin += async (_, _) => await Dispatcher.UIThread.InvokeAsync(() =>
+		{
+			setProgressVisible(true);
+			if (ViewModel is not null)
+				ViewModel.ApplicationUpdateState = "Downloading the selected application update.";
+		});
+		upgrader.DownloadCompleted += async (_, _) => await Dispatcher.UIThread.InvokeAsync(() =>
+		{
+			setProgressVisible(false);
+			if (ViewModel is not null)
+				ViewModel.ApplicationUpdateState = "The application update download completed.";
+		});
+		upgrader.UpgradeFailed += async (_, message) => await Dispatcher.UIThread.InvokeAsync(() =>
+		{
+			setProgressVisible(false);
+			if (ViewModel is not null)
+				ViewModel.ApplicationUpdateState = "The application update check or install failed. Open About to try again.";
+			MessageBox.Show(this, message, "Upgrade Failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
+		});
 
 #if !DEBUG
-		Opened += async (_, _) => await upgrader.CheckForUpgradeAtStartupAsync(upgradeAvailable);
+		Opened += async (_, _) =>
+		{
+			await upgrader.CheckForUpgradeAtStartupAsync(upgradeAvailable);
+			if (Configuration.Instance.CheckForUpgradesAtStartup
+				&& ViewModel?.ApplicationUpdateState == "Update status has not been checked in this session.")
+				ViewModel.ApplicationUpdateState = "No application update was reported by the startup check.";
+		};
 #endif
 	}
 
@@ -289,17 +476,28 @@ public partial class MainWindow : ReactiveWindow<MainVM>
 		var dialog = new SearchSyntaxDialog();
 		dialog.TagDoubleClicked += Dialog_TagDoubleClicked;
 		dialog.Closed += Dialog_Closed;
-		filterHelpBtn.IsEnabled = false;
+		if (Content == contemporaryShell && contemporaryShell is not null)
+			contemporaryShell.SetFilterHelpEnabled(false);
+		else
+			filterHelpBtn.IsEnabled = false;
 		dialog.Show(this);
 		return dialog;
 
 		void Dialog_Closed(object? sender, EventArgs e)
 		{
 			dialog.TagDoubleClicked -= Dialog_TagDoubleClicked;
-			filterHelpBtn.IsEnabled = true;
+			if (Content == contemporaryShell && contemporaryShell is not null)
+				contemporaryShell.SetFilterHelpEnabled(true);
+			else
+				filterHelpBtn.IsEnabled = true;
 		}
 		void Dialog_TagDoubleClicked(object? sender, string tag)
 		{
+			if (Content == contemporaryShell && contemporaryShell is not null)
+			{
+				contemporaryShell.InsertSearchTag(tag);
+				return;
+			}
 			var text = filterSearchTb.Text;
 			filterSearchTb.Text = text?.Insert(Math.Min(Math.Max(0, filterSearchTb.CaretIndex), text.Length), tag);
 			filterSearchTb.CaretIndex += tag.Length;

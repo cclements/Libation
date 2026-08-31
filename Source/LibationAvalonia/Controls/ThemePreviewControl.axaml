@@ -5,10 +5,55 @@
              mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="650"
 		     xmlns:views="clr-namespace:LibationAvalonia.Views"
 		     xmlns:controls="clr-namespace:LibationAvalonia.Controls"
-			 x:DataType="controls:ThemePreviewControl"
+             x:DataType="controls:ThemePreviewControl"
              x:Class="LibationAvalonia.Controls.ThemePreviewControl">
-	<Grid RowDefinitions="Auto,Auto,*">
-		<controls:GroupBox>
+	<ThemeVariantScope Name="ExperienceScope">
+	<Grid RowDefinitions="Auto,Auto,Auto,*">
+		<Border
+			Grid.Row="0"
+			Margin="0,0,0,8"
+			Padding="{DynamicResource Libation.Density.CardPadding}"
+			Background="{DynamicResource Libation.Brush.Surface}"
+			BorderBrush="{DynamicResource Libation.Brush.BorderSubtle}"
+			BorderThickness="1"
+			BoxShadow="{DynamicResource Libation.Shadow.Low}"
+			CornerRadius="{DynamicResource Libation.Radius.Medium}">
+			<Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto">
+				<StackPanel>
+					<TextBlock
+						FontFamily="{DynamicResource Libation.Font.Display}"
+						FontSize="{DynamicResource Libation.FontSize.Section}"
+						Foreground="{DynamicResource Libation.Brush.TextPrimary}"
+						Text="Semantic component preview" />
+					<TextBlock
+						FontSize="{DynamicResource Libation.FontSize.BodySmall}"
+						Foreground="{DynamicResource Libation.Brush.TextSecondary}"
+						Text="Live controls use the selected profile's local resources." />
+				</StackPanel>
+				<Border
+					Grid.Column="1"
+					Padding="10,5"
+					Background="{DynamicResource Libation.Brush.Success}"
+					CornerRadius="{DynamicResource Libation.Radius.Small}">
+					<TextBlock Foreground="{DynamicResource Libation.Brush.TextOnAccent}" Text="Completed" />
+				</Border>
+				<ProgressBar
+					Grid.Row="1"
+					Grid.ColumnSpan="2"
+					Margin="0,12,0,8"
+					Background="{DynamicResource Libation.Brush.ProgressTrack}"
+					Foreground="{DynamicResource Libation.Brush.ProgressFill}"
+					Value="64" />
+				<Button
+					Grid.Row="2"
+					HorizontalAlignment="Left"
+					Padding="16,8"
+					Background="{DynamicResource Libation.Brush.AccentPrimary}"
+					Foreground="{DynamicResource Libation.Brush.TextOnAccent}"
+					Content="Primary action" />
+			</Grid>
+		</Border>
+		<controls:GroupBox Grid.Row="1">
 			<WrapPanel>
 				<RadioButton Margin="5,0" Content="This is an option" IsChecked="True" />
 				<RadioButton Margin="5,0" Content="This is another option" />
@@ -36,7 +81,7 @@
 				</StackPanel>
 			</WrapPanel>
 		</controls:GroupBox>
-		<WrapPanel Orientation="Horizontal" Grid.Row="1">
+		<WrapPanel Orientation="Horizontal" Grid.Row="2">
 			<views:ProcessBookControl DataContext="{Binding QueuedBook}" ProcessBookStatus="{Binding Status}"  />
 			<views:ProcessBookControl DataContext="{Binding WorkingBook}" ProcessBookStatus="{Binding Status}"  />
 			<views:ProcessBookControl DataContext="{Binding CompletedBook}" ProcessBookStatus="{Binding Status}"  />
@@ -46,8 +91,11 @@
 		</WrapPanel>
 		
 		<views:ProductsDisplay
-			Grid.Row="2"
+			Grid.Row="3"
+			DisableColumnCustomization="True"
+			DisableContextMenu="True"
 			DataContext="{Binding ProductsDisplay}"	/>
 		
 	</Grid>
+	</ThemeVariantScope>
 </UserControl>

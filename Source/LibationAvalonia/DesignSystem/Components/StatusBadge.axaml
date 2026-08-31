@@ -1,0 +1,72 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:components="using:LibationAvalonia.DesignSystem.Components"
+			 x:Class="LibationAvalonia.DesignSystem.Components.StatusBadge"
+			 x:Name="Root">
+	<UserControl.Styles>
+		<Style Selector="components|StatusBadge Border#BadgeRoot">
+			<Setter Property="BorderBrush" Value="{DynamicResource Libation.Brush.BorderStrong}" />
+		</Style>
+		<Style Selector="components|StatusBadge Path#StatusIcon">
+			<Setter Property="Stroke" Value="{DynamicResource Libation.Brush.TextSecondary}" />
+		</Style>
+		<Style Selector="components|StatusBadge:download-pending Path#StatusIcon">
+			<Setter Property="Data" Value="{DynamicResource status.download-pending}" />
+			<Setter Property="Stroke" Value="{DynamicResource Libation.Brush.Info}" />
+		</Style>
+		<Style Selector="components|StatusBadge:downloading Path#StatusIcon">
+			<Setter Property="Data" Value="{DynamicResource status.downloading}" />
+			<Setter Property="Stroke" Value="{DynamicResource Libation.Brush.Info}" />
+		</Style>
+		<Style Selector="components|StatusBadge:downloaded Path#StatusIcon">
+			<Setter Property="Data" Value="{DynamicResource status.downloaded}" />
+			<Setter Property="Stroke" Value="{DynamicResource Libation.Brush.Success}" />
+		</Style>
+		<Style Selector="components|StatusBadge:processing Path#StatusIcon">
+			<Setter Property="Data" Value="{DynamicResource status.processing}" />
+			<Setter Property="Stroke" Value="{DynamicResource Libation.Brush.Info}" />
+		</Style>
+		<Style Selector="components|StatusBadge:completed Path#StatusIcon">
+			<Setter Property="Data" Value="{DynamicResource status.completed}" />
+			<Setter Property="Stroke" Value="{DynamicResource Libation.Brush.Success}" />
+		</Style>
+		<Style Selector="components|StatusBadge:connected Path#StatusIcon">
+			<Setter Property="Data" Value="{DynamicResource status.connected}" />
+			<Setter Property="Stroke" Value="{DynamicResource Libation.Brush.Success}" />
+		</Style>
+		<Style Selector="components|StatusBadge:failed Path#StatusIcon">
+			<Setter Property="Data" Value="{DynamicResource status.failed}" />
+			<Setter Property="Stroke" Value="{DynamicResource Libation.Brush.Danger}" />
+		</Style>
+		<Style Selector="components|StatusBadge:cancelled Path#StatusIcon">
+			<Setter Property="Data" Value="{DynamicResource status.cancelled}" />
+			<Setter Property="Stroke" Value="{DynamicResource Libation.Brush.Warning}" />
+		</Style>
+		<Style Selector="components|StatusBadge:unavailable Path#StatusIcon">
+			<Setter Property="Data" Value="{DynamicResource status.unavailable}" />
+		</Style>
+		<Style Selector="components|StatusBadge:needs-attention Path#StatusIcon">
+			<Setter Property="Data" Value="{DynamicResource status.needs-attention}" />
+			<Setter Property="Stroke" Value="{DynamicResource Libation.Brush.Warning}" />
+		</Style>
+	</UserControl.Styles>
+	<Border x:Name="BadgeRoot"
+			Background="{DynamicResource Libation.Brush.SurfaceInteractive}"
+			BorderThickness="1"
+			CornerRadius="{DynamicResource Libation.Radius.Large}"
+			Padding="8,4">
+		<StackPanel Orientation="Horizontal" Spacing="{DynamicResource Libation.Space.1}">
+			<Path x:Name="StatusIcon"
+				  Width="14" Height="14" Stretch="Uniform"
+				  StrokeThickness="1.75" StrokeLineCap="Round" StrokeJoin="Round"
+				  Data="M12,21 A9,9 0 1 0 12,3 A9,9 0 1 0 12,21"
+				  AutomationProperties.IsControlElementOverride="False"
+				  AutomationProperties.AccessibilityView="Raw" />
+			<TextBlock x:Name="BadgeText"
+					   VerticalAlignment="Center"
+					   Foreground="{DynamicResource Libation.Brush.TextPrimary}"
+					   FontSize="{DynamicResource Libation.FontSize.Caption}"
+					   FontWeight="SemiBold" />
+		</StackPanel>
+	</Border>
+</UserControl>

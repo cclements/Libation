@@ -1,0 +1,29 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:components="using:LibationAvalonia.DesignSystem.Components"
+			 x:Class="LibationAvalonia.DesignSystem.Components.ToastHost"
+			 x:Name="Root"
+			 IsHitTestVisible="True">
+	<ItemsControl ItemsSource="{Binding ItemsSource, ElementName=Root}"
+				  ItemTemplate="{Binding ItemTemplate, ElementName=Root}"
+				  AutomationProperties.Name="Notifications"
+				  AutomationProperties.LiveSetting="Polite">
+		<ItemsControl.ItemsPanel>
+			<ItemsPanelTemplate><StackPanel Spacing="{DynamicResource Libation.Space.2}" /></ItemsPanelTemplate>
+		</ItemsControl.ItemsPanel>
+		<ItemsControl.DataTemplates>
+			<DataTemplate x:DataType="components:ToastMessage" DataType="{x:Type components:ToastMessage}">
+				<Border Classes="card raised" MinWidth="280" MaxWidth="440">
+					<Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{DynamicResource Libation.Space.2}">
+						<components:StatusBadge Status="{Binding Status}" />
+						<TextBlock Grid.Column="1" Text="{Binding Message}" Foreground="{DynamicResource Libation.Brush.TextPrimary}"
+								   TextWrapping="Wrap" VerticalAlignment="Center" />
+						<Button Grid.Column="2" Classes="contemporary quiet compact" Content="{Binding ActionText}"
+								Command="{Binding ActionCommand}" CommandParameter="{Binding ActionCommandParameter}"
+								IsVisible="{Binding ActionText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+					</Grid>
+				</Border>
+			</DataTemplate>
+		</ItemsControl.DataTemplates>
+	</ItemsControl>
+</UserControl>

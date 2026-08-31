@@ -1,0 +1,49 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:components="using:LibationAvalonia.DesignSystem.Components"
+			 x:Class="LibationAvalonia.DesignSystem.Components.BookRow"
+			 x:Name="Root">
+	<UserControl.Styles>
+		<Style Selector="components|BookRow:selected Border#RowRoot">
+			<Setter Property="Background" Value="{DynamicResource Libation.Brush.Selection}" />
+			<Setter Property="BorderBrush" Value="{DynamicResource Libation.Brush.AccentPrimary}" />
+		</Style>
+	</UserControl.Styles>
+	<Border x:Name="RowRoot" Classes="card" MinHeight="{DynamicResource Libation.Density.RowHeight}"
+			AutomationProperties.Name="{Binding Title, ElementName=Root}">
+		<Grid ColumnDefinitions="48,*,Auto,Auto" ColumnSpacing="{DynamicResource Libation.Space.3}">
+			<Grid Width="48" Height="48">
+				<Border Background="{DynamicResource Libation.Brush.CoverPlaceholder}" CornerRadius="{DynamicResource Libation.Radius.Small}"
+						IsVisible="{Binding Cover, ElementName=Root, Converter={x:Static ObjectConverters.IsNull}}">
+					<Path Data="{DynamicResource glyph.library}" Stroke="{DynamicResource Libation.Brush.TextTertiary}"
+						  Stretch="Uniform" Width="24" Height="24" StrokeThickness="1.5" />
+				</Border>
+				<Image Source="{Binding Cover, ElementName=Root}" Stretch="UniformToFill"
+					   IsVisible="{Binding Cover, ElementName=Root, Converter={x:Static ObjectConverters.IsNotNull}}"
+					   AutomationProperties.IsControlElementOverride="False" AutomationProperties.AccessibilityView="Raw" />
+			</Grid>
+			<Grid Grid.Column="1" RowDefinitions="Auto,Auto,Auto" RowSpacing="{DynamicResource Libation.Space.1}" VerticalAlignment="Center">
+				<TextBlock Text="{Binding Title, ElementName=Root}" FontWeight="SemiBold" Foreground="{DynamicResource Libation.Brush.TextPrimary}"
+						   TextTrimming="CharacterEllipsis" />
+				<TextBlock Grid.Row="1" Text="{Binding SupportingText, ElementName=Root}" Foreground="{DynamicResource Libation.Brush.TextSecondary}"
+						   TextTrimming="CharacterEllipsis" />
+				<StackPanel Grid.Row="2" Spacing="{DynamicResource Libation.Space.1}">
+					<TextBlock Text="{Binding Metadata, ElementName=Root}" Foreground="{DynamicResource Libation.Brush.TextTertiary}"
+							   FontSize="{DynamicResource Libation.FontSize.Caption}" Opacity="{DynamicResource Libation.Density.MetadataOpacity}" />
+					<ProgressBar Classes="contemporary" Minimum="0" Maximum="100" Value="{Binding Progress, ElementName=Root}"
+							 IsVisible="{Binding ShowProgress, ElementName=Root}" AutomationProperties.Name="Book progress" />
+				</StackPanel>
+			</Grid>
+			<components:StatusBadge Grid.Column="2" Status="{Binding Status, ElementName=Root}"
+								TextOverride="{Binding StatusText, ElementName=Root}" VerticalAlignment="Center" />
+			<StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="{DynamicResource Libation.Space.2}" VerticalAlignment="Center">
+				<Button Classes="contemporary quiet compact" Content="Open" Command="{Binding Command, ElementName=Root}"
+						CommandParameter="{Binding CommandParameter, ElementName=Root}" />
+				<Button Classes="contemporary quiet compact" Content="More" Command="{Binding ContextCommand, ElementName=Root}"
+						CommandParameter="{Binding ContextCommandParameter, ElementName=Root}"
+						IsVisible="{Binding ContextCommand, ElementName=Root, Converter={x:Static ObjectConverters.IsNotNull}}"
+						AutomationProperties.Name="More book actions" />
+			</StackPanel>
+		</Grid>
+	</Border>
+</UserControl>

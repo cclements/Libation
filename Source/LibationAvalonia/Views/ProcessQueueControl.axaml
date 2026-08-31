@@ -10,12 +10,13 @@
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="650"
 	Background="{DynamicResource SystemRegionColor}"
-	x:Class="LibationAvalonia.Views.ProcessQueueControl">
+	x:Class="LibationAvalonia.Views.ProcessQueueControl"
+	x:Name="Root">
 	<UserControl.Resources>
 		<views:DecimalConverter x:Key="myConverter" />
 	</UserControl.Resources>
 	<Grid RowDefinitions="*,Auto">
-		<TabControl Grid.Row="0">
+		<TabControl Grid.Row="0" SelectedIndex="{Binding SelectedTabIndex, ElementName=Root, Mode=TwoWay}">
 			<TabControl.Styles>
 				<Style Selector="TabControl /template/ ItemsPresenter#PART_ItemsPresenter">
 					<Setter Property="Height" Value="33"/>

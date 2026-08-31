@@ -167,6 +167,51 @@ public class PersistentDictionary : IJsonBackedDictionary
 			logConfigChanged(propertyName, parsedNewValue.ToString());
 	}
 
+	/// <summary>
+	/// Persists a related set of non-string settings with one settings-file replacement.
+	/// Callers and concurrent processes therefore observe either the complete old set or
+	/// the complete new set, never a partially written group.
+	/// </summary>
+	public void SetNonStrings(IReadOnlyList<KeyValuePair<string, object?>> values)
+	{
+		ArgumentNullException.ThrowIfNull(values);
+		if (values.Count == 0 || IsReadOnly)
+			return;
+
+		var parsedValues = new (string PropertyName, object? Value, JToken JsonValue)[values.Count];
+		for (var i = 0; i < values.Count; i++)
+		{
+			var value = values[i];
+			parsedValues[i] = (
+				value.Key,
+				value.Value,
+				JToken.Parse(JsonConvert.SerializeObject(value.Value)));
+		}
+
+		List<(string PropertyName, string JsonValue)> changedValues = [];
+		lock (locker)
+		{
+			var jObject = readFile();
+			foreach (var value in parsedValues)
+			{
+				if (!JToken.DeepEquals(jObject[value.PropertyName], value.JsonValue))
+					changedValues.Add((value.PropertyName, value.JsonValue.ToString()));
+				jObject[value.PropertyName] = value.JsonValue;
+			}
+
+			if (changedValues.Count > 0)
+				writeFileContents(JsonConvert.SerializeObject(jObject, Formatting.Indented));
+
+			// Do not let an unsuccessful disk write make the in-process cache claim that
+			// the transaction committed. Cache publication follows the atomic replacement.
+			foreach (var value in parsedValues)
+				objectCache[value.PropertyName] = value.Value;
+		}
+
+		foreach (var value in changedValues)
+			logConfigChanged(value.PropertyName, value.JsonValue);
+	}
+
 	public bool RemoveProperty(string propertyName)
 	{
 		if (IsReadOnly)

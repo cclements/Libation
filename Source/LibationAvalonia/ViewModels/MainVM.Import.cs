@@ -8,6 +8,8 @@ using LibationUiBase;
 using LibationUiBase.Forms;
 using ReactiveUI;
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -186,6 +188,28 @@ public partial class MainVM
 		}
 	}
 
+	public async Task LocateAudiobooksFromDropAsync(IReadOnlyList<string> paths)
+	{
+		ArgumentNullException.ThrowIfNull(paths);
+		var folder = paths
+			.Select(path => Directory.Exists(path)
+				? path
+				: File.Exists(path) ? Path.GetDirectoryName(path) : null)
+			.FirstOrDefault(path => !string.IsNullOrWhiteSpace(path));
+
+		if (folder is null)
+		{
+			await MessageBox.Show(
+				MainWindow,
+				"Libation could not access a local folder from the dropped items. Use Browse and choose a folder instead.",
+				"Dropped Location Unavailable");
+			return;
+		}
+
+		var locateDialog = new LibationAvalonia.Dialogs.LocateAudiobooksDialog(folder);
+		await locateDialog.ShowDialog(MainWindow);
+	}
+
 	private void setyNumScanningAccounts(int numScanning)
 	{
 		_numAccountsScanning = numScanning;
@@ -214,6 +238,7 @@ public partial class MainVM
 		try
 		{
 			var (totalProcessed, newAdded) = await Task.Run(() => LibraryCommands.ImportAccountAsync(accounts));
+			LastSuccessfulScan = DateTimeOffset.Now;
 			autoScanRunner?.OnManualScanSucceeded();
 
 			// this is here instead of ScanEnd so that the following is only possible when it's user-initiated, not automatic loop

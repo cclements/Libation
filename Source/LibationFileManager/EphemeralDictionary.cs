@@ -1,5 +1,7 @@
 ﻿using FileManager;
 using Newtonsoft.Json.Linq;
+using System;
+using System.Collections.Generic;
 
 namespace LibationFileManager;
 
@@ -29,6 +31,18 @@ internal class EphemeralDictionary : IJsonBackedDictionary
 		=> JsonObject[propertyName] = newValue;
 	public void SetNonString(string propertyName, object? newValue)
 		=> JsonObject[propertyName] = newValue is null ? null : JToken.FromObject(newValue);
+	public void SetNonStrings(IReadOnlyList<KeyValuePair<string, object?>> values)
+	{
+		ArgumentNullException.ThrowIfNull(values);
+		var parsedValues = new (string PropertyName, JToken? Value)[values.Count];
+		for (var i = 0; i < values.Count; i++)
+		{
+			var value = values[i];
+			parsedValues[i] = (value.Key, value.Value is null ? null : JToken.FromObject(value.Value));
+		}
+		foreach (var value in parsedValues)
+			JsonObject[value.PropertyName] = value.Value;
+	}
 	public bool RemoveProperty(string propertyName)
 		=> JsonObject.Remove(propertyName);
 	public string? GetStringFromJsonPath(string jsonPath)

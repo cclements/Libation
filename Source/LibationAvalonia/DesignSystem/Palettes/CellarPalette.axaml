@@ -1,0 +1,29 @@
+<ResourceDictionary
+	xmlns="https://github.com/avaloniaui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+	<Color x:Key="Libation.Color.Canvas">#0F0B0D</Color>
+	<Color x:Key="Libation.Color.Sidebar">#171012</Color>
+	<Color x:Key="Libation.Color.Surface">#1C1517</Color>
+	<Color x:Key="Libation.Color.SurfaceRaised">#261B1F</Color>
+	<Color x:Key="Libation.Color.SurfaceSunken">#120D0F</Color>
+	<Color x:Key="Libation.Color.SurfaceInteractive">#302126</Color>
+	<Color x:Key="Libation.Color.TextPrimary">#F3E9D7</Color>
+	<Color x:Key="Libation.Color.TextSecondary">#C7B9A8</Color>
+	<Color x:Key="Libation.Color.TextTertiary">#A89A8D</Color>
+	<Color x:Key="Libation.Color.TextOnAccent">#FFF9F0</Color>
+	<Color x:Key="Libation.Color.BorderSubtle">#49353A</Color>
+	<Color x:Key="Libation.Color.BorderStrong">#80656C</Color>
+	<Color x:Key="Libation.Color.AccentPrimary">#8B2944</Color>
+	<Color x:Key="Libation.Color.AccentSecondary">#C2A46D</Color>
+	<Color x:Key="Libation.Color.AccentHover">#A83B5C</Color>
+	<Color x:Key="Libation.Color.AccentPressed">#6F1F36</Color>
+	<Color x:Key="Libation.Color.Focus">#F0C982</Color>
+	<Color x:Key="Libation.Color.Selection">#4D2130</Color>
+	<Color x:Key="Libation.Color.Success">#77A068</Color>
+	<Color x:Key="Libation.Color.Warning">#D5A34C</Color>
+	<Color x:Key="Libation.Color.Danger">#D3636B</Color>
+	<Color x:Key="Libation.Color.Info">#72A2C0</Color>
+	<Color x:Key="Libation.Color.ProgressTrack">#38292E</Color>
+	<Color x:Key="Libation.Color.ProgressFill">#C2A46D</Color>
+	<Color x:Key="Libation.Color.CoverPlaceholder">#2A2023</Color>
+</ResourceDictionary>

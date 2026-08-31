@@ -4,6 +4,7 @@ using LibationAvalonia.Views;
 using LibationFileManager;
 using LibationUiBase.ProcessQueue;
 using ReactiveUI;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -16,6 +17,14 @@ public partial class MainVM : ViewModelBase
 	public ProductsDisplayViewModel ProductsDisplay { get; } = new() { SearchEngine = MainSearchEngine.Instance };
 
 	public double? DownloadProgress { get => field; set => this.RaiseAndSetIfChanged(ref field, value); }
+	public DateTimeOffset? LastSuccessfulScan { get => field; set => this.RaiseAndSetIfChanged(ref field, value); }
+	public string ApplicationUpdateState
+	{
+		get => field;
+		set => this.RaiseAndSetIfChanged(ref field, value);
+	} = Configuration.Instance.CheckForUpgradesAtStartup
+		? "Update status has not been checked in this session."
+		: "Automatic update checks are off.";
 
 
 	private readonly MainWindow MainWindow;

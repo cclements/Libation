@@ -1,0 +1,228 @@
+{
+  "schemaVersion": 1,
+  "generatedOn": "2026-08-30",
+  "licenseDefinitions": {
+    "repo-gpl-3.0": {
+      "name": "GNU General Public License v3.0",
+      "file": "LICENSE"
+    }
+  },
+  "sourcePolicy": {
+    "runtimeRoot": "Source/LibationAvalonia/DesignSystem/Assets",
+    "referenceImagesShipped": false,
+    "externalGeometryUsed": false,
+    "embeddedIllustrationText": false
+  },
+  "vectorExportSets": [
+    {
+      "kind": "core-glyph",
+      "root": "Source/LibationAvalonia/DesignSystem/Assets/Source/Glyphs",
+      "format": "optimized-svg",
+      "coordinateSpace": "24x24",
+      "stroke": { "width": 1.75, "lineCap": "round", "lineJoin": "round", "color": "currentColor" },
+      "fileNameRule": "replace the glyph ID dot with a hyphen and append .svg",
+      "assetIds": [
+        "glyph.overview", "glyph.library", "glyph.downloads", "glyph.processing",
+        "glyph.history", "glyph.accounts", "glyph.settings", "glyph.tools",
+        "glyph.trash", "glyph.add-books", "glyph.scan", "glyph.flight",
+        "glyph.output-profile", "glyph.process", "glyph.completed", "glyph.failed",
+        "glyph.retry", "glyph.reveal-file", "glyph.metadata", "glyph.filter",
+        "glyph.gallery", "glyph.details", "glyph.queue-log", "glyph.marketplace"
+      ],
+      "fileCount": 24,
+      "licenseRef": "repo-gpl-3.0",
+      "provenance": "original-code-native"
+    }
+  ],
+  "evidenceArtifacts": [
+    {
+      "id": "glyph-status-contact-sheet",
+      "path": "docs/design/asset-contact-sheet.svg",
+      "shipping": false,
+      "sources": [
+        "Source/LibationAvalonia/DesignSystem/Assets/GlyphAssets.axaml",
+        "Source/LibationAvalonia/DesignSystem/Assets/StatusAssets.axaml"
+      ],
+      "assetCounts": { "glyph": 24, "status": 10 },
+      "renderSizes": [16, 20, 24, 32],
+      "profiles": ["cellar", "tasting-room", "high-contrast", "decoration-off"],
+      "renderInstanceCount": 544,
+      "stroke": { "width": 1.75, "lineCap": "round", "lineJoin": "round", "nonScaling": true },
+      "validation": {
+        "xmlWellFormed": true,
+        "temporaryRenderer": "macOS Quick Look",
+        "visuallyInspectedOn": "2026-08-30",
+        "result": "All panels, resource labels, target-size columns, strokes, and geometries visible; no clipping observed.",
+        "limitations": ["not-avalonia-runtime", "not-dpi-scale-proof", "not-installed-package-proof"]
+      }
+    }
+  ],
+  "assets": [
+    {
+      "id": "brand.app-icon",
+      "kind": "brand",
+      "source": "Source/LibationAvalonia/DesignSystem/Assets/Source/brand-app-icon.svg",
+	  "runtimeGeometrySource": "Source/LibationAvalonia/DesignSystem/Assets/BrandAssets.axaml",
+      "runtimeKey": "brand.app-icon",
+      "resourceType": "StreamGeometry",
+      "coordinateSpace": "24x24",
+      "profiles": ["shared"],
+      "exportTargets": {
+        "windowsIco": [16, 20, 24, 32, 40, 48, 64, 96, 128, 256],
+        "macosIcns": [16, 32, 64, 128, 256, 512, 1024],
+        "linuxSvg": ["scalable"]
+      },
+	  "exportFiles": {
+		"windowsIco": ["Source/LibationAvalonia/Assets/libation.ico", "Scripts/Windows/libation.ico", "Source/LibationWinForms/libation.ico", "Source/LibationWinForms/Resources/libation.ico", "Source/LibationWinForms/Resources/Libation icon/glass-with-glow.ico"],
+		"macosIcns": "Source/LoadByOS/MacOSConfigApp/libation.icns",
+		"linuxSvg": "Source/LoadByOS/LinuxConfigApp/libation_glass.svg"
+	  },
+      "status": "platform-exports-ready-file-verified",
+      "licenseRef": "repo-gpl-3.0",
+      "provenance": "original-code-native"
+    },
+    {
+      "id": "brand.mark.one-color",
+      "kind": "brand",
+      "source": "Source/LibationAvalonia/DesignSystem/Assets/BrandAssets.axaml",
+      "runtimeKey": "brand.mark.one-color",
+      "resourceType": "StreamGeometry",
+      "coordinateSpace": "24x24",
+      "profiles": ["shared"],
+      "renderSizes": [16, 20, 24, 32],
+      "exportTargets": ["svg", "avalonia"],
+      "status": "ready-code-master",
+      "licenseRef": "repo-gpl-3.0",
+      "provenance": "original-code-native"
+    },
+    {
+      "id": "brand.mark.light",
+      "kind": "brand",
+      "source": "Source/LibationAvalonia/DesignSystem/Assets/BrandAssets.axaml",
+      "runtimeKey": "brand.mark.light",
+      "resourceType": "StreamGeometry",
+      "coordinateSpace": "24x24",
+      "profiles": ["light-surfaces"],
+      "renderSizes": [16, 20, 24, 32],
+      "exportTargets": ["svg", "avalonia"],
+      "status": "ready-code-master",
+      "licenseRef": "repo-gpl-3.0",
+      "provenance": "original-code-native"
+    },
+    {
+      "id": "brand.mark.dark",
+      "kind": "brand",
+      "source": "Source/LibationAvalonia/DesignSystem/Assets/BrandAssets.axaml",
+      "runtimeKey": "brand.mark.dark",
+      "resourceType": "StreamGeometry",
+      "coordinateSpace": "24x24",
+      "profiles": ["dark-surfaces"],
+      "renderSizes": [16, 20, 24, 32],
+      "exportTargets": ["svg", "avalonia"],
+      "status": "ready-code-master",
+      "licenseRef": "repo-gpl-3.0",
+      "provenance": "original-code-native"
+    },
+    {
+      "id": "brand.wordmark.horizontal.light",
+      "kind": "brand",
+      "source": "Source/LibationAvalonia/DesignSystem/Assets/BrandAssets.axaml",
+      "runtimeKey": "brand.wordmark.horizontal.light",
+      "resourceType": "ControlTemplate",
+      "profiles": ["light-surfaces"],
+      "renderHeights": [24, 32, 40],
+      "exportTargets": ["avalonia-runtime"],
+      "status": "ready-runtime-lockup",
+      "staticExportRequired": false,
+      "staticExportRationale": "No shipping consumer needs outlined text; the runtime vector mark plus live text preserves scaling, fallback, and accessibility.",
+      "licenseRef": "repo-gpl-3.0",
+      "provenance": "original-code-native-live-system-text"
+    },
+    {
+      "id": "brand.wordmark.horizontal.dark",
+      "kind": "brand",
+      "source": "Source/LibationAvalonia/DesignSystem/Assets/BrandAssets.axaml",
+      "runtimeKey": "brand.wordmark.horizontal.dark",
+      "resourceType": "ControlTemplate",
+      "profiles": ["dark-surfaces"],
+      "renderHeights": [24, 32, 40],
+      "exportTargets": ["avalonia-runtime"],
+      "status": "ready-runtime-lockup",
+      "staticExportRequired": false,
+      "staticExportRationale": "No shipping consumer needs outlined text; the runtime vector mark plus live text preserves scaling, fallback, and accessibility.",
+      "licenseRef": "repo-gpl-3.0",
+      "provenance": "original-code-native-live-system-text"
+    },
+
+    { "id": "glyph.overview", "kind": "glyph", "source": "Source/LibationAvalonia/DesignSystem/Assets/GlyphAssets.axaml", "runtimeKey": "glyph.overview", "resourceType": "StreamGeometry", "coordinateSpace": "24x24", "renderSizes": [16, 20, 24, 32], "profiles": ["shared", "high-contrast"], "status": "ready-code-master", "licenseRef": "repo-gpl-3.0", "provenance": "original-code-native" },
+    { "id": "glyph.library", "kind": "glyph", "source": "Source/LibationAvalonia/DesignSystem/Assets/GlyphAssets.axaml", "runtimeKey": "glyph.library", "resourceType": "StreamGeometry", "coordinateSpace": "24x24", "renderSizes": [16, 20, 24, 32], "profiles": ["shared", "high-contrast"], "status": "ready-code-master", "licenseRef": "repo-gpl-3.0", "provenance": "original-code-native" },
+    { "id": "glyph.downloads", "kind": "glyph", "source": "Source/LibationAvalonia/DesignSystem/Assets/GlyphAssets.axaml", "runtimeKey": "glyph.downloads", "resourceType": "StreamGeometry", "coordinateSpace": "24x24", "renderSizes": [16, 20, 24, 32], "profiles": ["shared", "high-contrast"], "status": "ready-code-master", "licenseRef": "repo-gpl-3.0", "provenance": "original-code-native" },
+    { "id": "glyph.processing", "kind": "glyph", "source": "Source/LibationAvalonia/DesignSystem/Assets/GlyphAssets.axaml", "runtimeKey": "glyph.processing", "resourceType": "StreamGeometry", "coordinateSpace": "24x24", "renderSizes": [16, 20, 24, 32], "profiles": ["shared", "high-contrast"], "status": "ready-code-master", "licenseRef": "repo-gpl-3.0", "provenance": "original-code-native" },
+    { "id": "glyph.history", "kind": "glyph", "source": "Source/LibationAvalonia/DesignSystem/Assets/GlyphAssets.axaml", "runtimeKey": "glyph.history", "resourceType": "StreamGeometry", "coordinateSpace": "24x24", "renderSizes": [16, 20, 24, 32], "profiles": ["shared", "high-contrast"], "status": "ready-code-master", "licenseRef": "repo-gpl-3.0", "provenance": "original-code-native" },
+    { "id": "glyph.accounts", "kind": "glyph", "source": "Source/LibationAvalonia/DesignSystem/Assets/GlyphAssets.axaml", "runtimeKey": "glyph.accounts", "resourceType": "StreamGeometry", "coordinateSpace": "24x24", "renderSizes": [16, 20, 24, 32], "profiles": ["shared", "high-contrast"], "status": "ready-code-master", "licenseRef": "repo-gpl-3.0", "provenance": "original-code-native" },
+    { "id": "glyph.settings", "kind": "glyph", "source": "Source/LibationAvalonia/DesignSystem/Assets/GlyphAssets.axaml", "runtimeKey": "glyph.settings", "resourceType": "StreamGeometry", "coordinateSpace": "24x24", "renderSizes": [16, 20, 24, 32], "profiles": ["shared", "high-contrast"], "status": "ready-code-master", "licenseRef": "repo-gpl-3.0", "provenance": "original-code-native" },
+    { "id": "glyph.tools", "kind": "glyph", "source": "Source/LibationAvalonia/DesignSystem/Assets/GlyphAssets.axaml", "runtimeKey": "glyph.tools", "resourceType": "StreamGeometry", "coordinateSpace": "24x24", "renderSizes": [16, 20, 24, 32], "profiles": ["shared", "high-contrast"], "status": "ready-code-master", "licenseRef": "repo-gpl-3.0", "provenance": "original-code-native" },
+    { "id": "glyph.trash", "kind": "glyph", "source": "Source/LibationAvalonia/DesignSystem/Assets/GlyphAssets.axaml", "runtimeKey": "glyph.trash", "resourceType": "StreamGeometry", "coordinateSpace": "24x24", "renderSizes": [16, 20, 24, 32], "profiles": ["shared", "high-contrast"], "status": "ready-code-master", "licenseRef": "repo-gpl-3.0", "provenance": "original-code-native" },
+    { "id": "glyph.add-books", "kind": "glyph", "source": "Source/LibationAvalonia/DesignSystem/Assets/GlyphAssets.axaml", "runtimeKey": "glyph.add-books", "resourceType": "StreamGeometry", "coordinateSpace": "24x24", "renderSizes": [16, 20, 24, 32], "profiles": ["shared", "high-contrast"], "status": "ready-code-master", "licenseRef": "repo-gpl-3.0", "provenance": "original-code-native" },
+    { "id": "glyph.scan", "kind": "glyph", "source": "Source/LibationAvalonia/DesignSystem/Assets/GlyphAssets.axaml", "runtimeKey": "glyph.scan", "resourceType": "StreamGeometry", "coordinateSpace": "24x24", "renderSizes": [16, 20, 24, 32], "profiles": ["shared", "high-contrast"], "status": "ready-code-master", "licenseRef": "repo-gpl-3.0", "provenance": "original-code-native" },
+    { "id": "glyph.flight", "kind": "glyph", "source": "Source/LibationAvalonia/DesignSystem/Assets/GlyphAssets.axaml", "runtimeKey": "glyph.flight", "resourceType": "StreamGeometry", "coordinateSpace": "24x24", "renderSizes": [16, 20, 24, 32], "profiles": ["shared", "high-contrast"], "status": "ready-code-master", "licenseRef": "repo-gpl-3.0", "provenance": "original-code-native" },
+    { "id": "glyph.output-profile", "kind": "glyph", "source": "Source/LibationAvalonia/DesignSystem/Assets/GlyphAssets.axaml", "runtimeKey": "glyph.output-profile", "resourceType": "StreamGeometry", "coordinateSpace": "24x24", "renderSizes": [16, 20, 24, 32], "profiles": ["shared", "high-contrast"], "status": "ready-code-master", "licenseRef": "repo-gpl-3.0", "provenance": "original-code-native" },
+    { "id": "glyph.process", "kind": "glyph", "source": "Source/LibationAvalonia/DesignSystem/Assets/GlyphAssets.axaml", "runtimeKey": "glyph.process", "resourceType": "StreamGeometry", "coordinateSpace": "24x24", "renderSizes": [16, 20, 24, 32], "profiles": ["shared", "high-contrast"], "status": "ready-code-master", "licenseRef": "repo-gpl-3.0", "provenance": "original-code-native" },
+    { "id": "glyph.completed", "kind": "glyph", "source": "Source/LibationAvalonia/DesignSystem/Assets/GlyphAssets.axaml", "runtimeKey": "glyph.completed", "resourceType": "StreamGeometry", "coordinateSpace": "24x24", "renderSizes": [16, 20, 24, 32], "profiles": ["shared", "high-contrast"], "status": "ready-code-master", "licenseRef": "repo-gpl-3.0", "provenance": "original-code-native" },
+    { "id": "glyph.failed", "kind": "glyph", "source": "Source/LibationAvalonia/DesignSystem/Assets/GlyphAssets.axaml", "runtimeKey": "glyph.failed", "resourceType": "StreamGeometry", "coordinateSpace": "24x24", "renderSizes": [16, 20, 24, 32], "profiles": ["shared", "high-contrast"], "status": "ready-code-master", "licenseRef": "repo-gpl-3.0", "provenance": "original-code-native" },
+    { "id": "glyph.retry", "kind": "glyph", "source": "Source/LibationAvalonia/DesignSystem/Assets/GlyphAssets.axaml", "runtimeKey": "glyph.retry", "resourceType": "StreamGeometry", "coordinateSpace": "24x24", "renderSizes": [16, 20, 24, 32], "profiles": ["shared", "high-contrast"], "status": "ready-code-master", "licenseRef": "repo-gpl-3.0", "provenance": "original-code-native" },
+    { "id": "glyph.reveal-file", "kind": "glyph", "source": "Source/LibationAvalonia/DesignSystem/Assets/GlyphAssets.axaml", "runtimeKey": "glyph.reveal-file", "resourceType": "StreamGeometry", "coordinateSpace": "24x24", "renderSizes": [16, 20, 24, 32], "profiles": ["shared", "high-contrast"], "status": "ready-code-master", "licenseRef": "repo-gpl-3.0", "provenance": "original-code-native" },
+    { "id": "glyph.metadata", "kind": "glyph", "source": "Source/LibationAvalonia/DesignSystem/Assets/GlyphAssets.axaml", "runtimeKey": "glyph.metadata", "resourceType": "StreamGeometry", "coordinateSpace": "24x24", "renderSizes": [16, 20, 24, 32], "profiles": ["shared", "high-contrast"], "status": "ready-code-master", "licenseRef": "repo-gpl-3.0", "provenance": "original-code-native" },
+    { "id": "glyph.filter", "kind": "glyph", "source": "Source/LibationAvalonia/DesignSystem/Assets/GlyphAssets.axaml", "runtimeKey": "glyph.filter", "resourceType": "StreamGeometry", "coordinateSpace": "24x24", "renderSizes": [16, 20, 24, 32], "profiles": ["shared", "high-contrast"], "status": "ready-code-master", "licenseRef": "repo-gpl-3.0", "provenance": "original-code-native" },
+    { "id": "glyph.gallery", "kind": "glyph", "source": "Source/LibationAvalonia/DesignSystem/Assets/GlyphAssets.axaml", "runtimeKey": "glyph.gallery", "resourceType": "StreamGeometry", "coordinateSpace": "24x24", "renderSizes": [16, 20, 24, 32], "profiles": ["shared", "high-contrast"], "status": "ready-code-master", "licenseRef": "repo-gpl-3.0", "provenance": "original-code-native" },
+    { "id": "glyph.details", "kind": "glyph", "source": "Source/LibationAvalonia/DesignSystem/Assets/GlyphAssets.axaml", "runtimeKey": "glyph.details", "resourceType": "StreamGeometry", "coordinateSpace": "24x24", "renderSizes": [16, 20, 24, 32], "profiles": ["shared", "high-contrast"], "status": "ready-code-master", "licenseRef": "repo-gpl-3.0", "provenance": "original-code-native" },
+    { "id": "glyph.queue-log", "kind": "glyph", "source": "Source/LibationAvalonia/DesignSystem/Assets/GlyphAssets.axaml", "runtimeKey": "glyph.queue-log", "resourceType": "StreamGeometry", "coordinateSpace": "24x24", "renderSizes": [16, 20, 24, 32], "profiles": ["shared", "high-contrast"], "status": "ready-code-master", "licenseRef": "repo-gpl-3.0", "provenance": "original-code-native" },
+    { "id": "glyph.marketplace", "kind": "glyph", "source": "Source/LibationAvalonia/DesignSystem/Assets/GlyphAssets.axaml", "runtimeKey": "glyph.marketplace", "resourceType": "StreamGeometry", "coordinateSpace": "24x24", "renderSizes": [16, 20, 24, 32], "profiles": ["shared", "high-contrast"], "status": "ready-code-master", "licenseRef": "repo-gpl-3.0", "provenance": "original-code-native" },
+
+    { "id": "status.download-pending", "kind": "status", "source": "Source/LibationAvalonia/DesignSystem/Assets/StatusAssets.axaml", "runtimeKey": "status.download-pending", "resourceType": "StreamGeometry", "coordinateSpace": "24x24", "renderSizes": [16, 20, 24, 32], "profiles": ["shared", "high-contrast"], "status": "ready-code-master", "licenseRef": "repo-gpl-3.0", "provenance": "original-code-native" },
+    { "id": "status.downloading", "kind": "status", "source": "Source/LibationAvalonia/DesignSystem/Assets/StatusAssets.axaml", "runtimeKey": "status.downloading", "resourceType": "StreamGeometry", "coordinateSpace": "24x24", "renderSizes": [16, 20, 24, 32], "profiles": ["shared", "high-contrast"], "status": "ready-code-master", "licenseRef": "repo-gpl-3.0", "provenance": "original-code-native" },
+    { "id": "status.downloaded", "kind": "status", "source": "Source/LibationAvalonia/DesignSystem/Assets/StatusAssets.axaml", "runtimeKey": "status.downloaded", "resourceType": "StreamGeometry", "coordinateSpace": "24x24", "renderSizes": [16, 20, 24, 32], "profiles": ["shared", "high-contrast"], "status": "ready-code-master", "licenseRef": "repo-gpl-3.0", "provenance": "original-code-native" },
+    { "id": "status.processing", "kind": "status", "source": "Source/LibationAvalonia/DesignSystem/Assets/StatusAssets.axaml", "runtimeKey": "status.processing", "resourceType": "StreamGeometry", "coordinateSpace": "24x24", "renderSizes": [16, 20, 24, 32], "profiles": ["shared", "high-contrast"], "status": "ready-code-master", "licenseRef": "repo-gpl-3.0", "provenance": "original-code-native" },
+    { "id": "status.completed", "kind": "status", "source": "Source/LibationAvalonia/DesignSystem/Assets/StatusAssets.axaml", "runtimeKey": "status.completed", "resourceType": "StreamGeometry", "coordinateSpace": "24x24", "renderSizes": [16, 20, 24, 32], "profiles": ["shared", "high-contrast"], "status": "ready-code-master", "licenseRef": "repo-gpl-3.0", "provenance": "original-code-native" },
+    { "id": "status.failed", "kind": "status", "source": "Source/LibationAvalonia/DesignSystem/Assets/StatusAssets.axaml", "runtimeKey": "status.failed", "resourceType": "StreamGeometry", "coordinateSpace": "24x24", "renderSizes": [16, 20, 24, 32], "profiles": ["shared", "high-contrast"], "status": "ready-code-master", "licenseRef": "repo-gpl-3.0", "provenance": "original-code-native" },
+    { "id": "status.cancelled", "kind": "status", "source": "Source/LibationAvalonia/DesignSystem/Assets/StatusAssets.axaml", "runtimeKey": "status.cancelled", "resourceType": "StreamGeometry", "coordinateSpace": "24x24", "renderSizes": [16, 20, 24, 32], "profiles": ["shared", "high-contrast"], "status": "ready-code-master", "licenseRef": "repo-gpl-3.0", "provenance": "original-code-native" },
+    { "id": "status.unavailable", "kind": "status", "source": "Source/LibationAvalonia/DesignSystem/Assets/StatusAssets.axaml", "runtimeKey": "status.unavailable", "resourceType": "StreamGeometry", "coordinateSpace": "24x24", "renderSizes": [16, 20, 24, 32], "profiles": ["shared", "high-contrast"], "status": "ready-code-master", "licenseRef": "repo-gpl-3.0", "provenance": "original-code-native" },
+    { "id": "status.needs-attention", "kind": "status", "source": "Source/LibationAvalonia/DesignSystem/Assets/StatusAssets.axaml", "runtimeKey": "status.needs-attention", "resourceType": "StreamGeometry", "coordinateSpace": "24x24", "renderSizes": [16, 20, 24, 32], "profiles": ["shared", "high-contrast"], "status": "ready-code-master", "licenseRef": "repo-gpl-3.0", "provenance": "original-code-native" },
+    { "id": "status.connected", "kind": "status", "source": "Source/LibationAvalonia/DesignSystem/Assets/StatusAssets.axaml", "runtimeKey": "status.connected", "resourceType": "StreamGeometry", "coordinateSpace": "24x24", "renderSizes": [16, 20, 24, 32], "profiles": ["shared", "high-contrast"], "status": "ready-code-master", "licenseRef": "repo-gpl-3.0", "provenance": "original-code-native" },
+
+    { "id": "illustration.cellar.empty-library", "kind": "illustration", "source": "Source/LibationAvalonia/DesignSystem/Assets/IllustrationAssets.axaml", "runtimeKey": "illustration.cellar.empty-library", "resourceType": "ControlTemplate", "coordinateSpace": "96x72", "renderSizes": ["96x72", "192x144", "256x192"], "exportTargets": ["avalonia-runtime"], "profiles": ["cellar", "high-contrast"], "status": "ready-code-master", "licenseRef": "repo-gpl-3.0", "provenance": "original-code-native" },
+    { "id": "illustration.shared.account-connection", "kind": "illustration", "source": "Source/LibationAvalonia/DesignSystem/Assets/IllustrationAssets.axaml", "runtimeKey": "illustration.shared.account-connection", "resourceType": "ControlTemplate", "coordinateSpace": "96x72", "renderSizes": ["96x72", "192x144", "256x192"], "exportTargets": ["avalonia-runtime"], "profiles": ["shared", "high-contrast"], "status": "ready-code-master", "licenseRef": "repo-gpl-3.0", "provenance": "original-code-native" },
+    { "id": "illustration.cellar.add-books", "kind": "illustration", "source": "Source/LibationAvalonia/DesignSystem/Assets/IllustrationAssets.axaml", "runtimeKey": "illustration.cellar.add-books", "resourceType": "ControlTemplate", "coordinateSpace": "96x72", "renderSizes": ["96x72", "192x144", "256x192"], "exportTargets": ["avalonia-runtime"], "profiles": ["cellar", "high-contrast"], "status": "ready-code-master", "licenseRef": "repo-gpl-3.0", "provenance": "original-code-native" },
+    { "id": "illustration.tasting-room.add-books", "kind": "illustration", "source": "Source/LibationAvalonia/DesignSystem/Assets/IllustrationAssets.axaml", "runtimeKey": "illustration.tasting-room.add-books", "resourceType": "ControlTemplate", "coordinateSpace": "96x72", "renderSizes": ["96x72", "192x144", "256x192"], "exportTargets": ["avalonia-runtime"], "profiles": ["tasting-room", "high-contrast"], "status": "ready-code-master", "licenseRef": "repo-gpl-3.0", "provenance": "original-code-native" },
+    { "id": "illustration.cellar.empty-decanter", "kind": "illustration", "source": "Source/LibationAvalonia/DesignSystem/Assets/IllustrationAssets.axaml", "runtimeKey": "illustration.cellar.empty-decanter", "resourceType": "ControlTemplate", "coordinateSpace": "96x72", "renderSizes": ["96x72", "192x144", "256x192"], "exportTargets": ["avalonia-runtime"], "profiles": ["cellar", "high-contrast"], "status": "ready-code-master", "licenseRef": "repo-gpl-3.0", "provenance": "original-code-native" },
+    { "id": "illustration.tasting-room.empty-decanter", "kind": "illustration", "source": "Source/LibationAvalonia/DesignSystem/Assets/IllustrationAssets.axaml", "runtimeKey": "illustration.tasting-room.empty-decanter", "resourceType": "ControlTemplate", "coordinateSpace": "96x72", "renderSizes": ["96x72", "192x144", "256x192"], "exportTargets": ["avalonia-runtime"], "profiles": ["tasting-room", "high-contrast"], "status": "ready-code-master", "licenseRef": "repo-gpl-3.0", "provenance": "original-code-native" },
+    { "id": "illustration.shared.processing-complete", "kind": "illustration", "source": "Source/LibationAvalonia/DesignSystem/Assets/IllustrationAssets.axaml", "runtimeKey": "illustration.shared.processing-complete", "resourceType": "ControlTemplate", "coordinateSpace": "96x72", "renderSizes": ["96x72", "192x144", "256x192"], "exportTargets": ["avalonia-runtime"], "profiles": ["shared", "high-contrast"], "status": "ready-code-master", "licenseRef": "repo-gpl-3.0", "provenance": "original-code-native" },
+    { "id": "illustration.shared.no-search-results", "kind": "illustration", "source": "Source/LibationAvalonia/DesignSystem/Assets/IllustrationAssets.axaml", "runtimeKey": "illustration.shared.no-search-results", "resourceType": "ControlTemplate", "coordinateSpace": "96x72", "renderSizes": ["96x72", "192x144", "256x192"], "exportTargets": ["avalonia-runtime"], "profiles": ["shared", "high-contrast"], "status": "ready-code-master", "licenseRef": "repo-gpl-3.0", "provenance": "original-code-native" },
+    { "id": "illustration.shared.offline-auth-attention", "kind": "illustration", "source": "Source/LibationAvalonia/DesignSystem/Assets/IllustrationAssets.axaml", "runtimeKey": "illustration.shared.offline-auth-attention", "resourceType": "ControlTemplate", "coordinateSpace": "96x72", "renderSizes": ["96x72", "192x144", "256x192"], "exportTargets": ["avalonia-runtime"], "profiles": ["shared", "high-contrast"], "status": "ready-code-master", "licenseRef": "repo-gpl-3.0", "provenance": "original-code-native" },
+    { "id": "illustration.cellar.bottle-rack-motif", "kind": "illustration", "source": null, "runtimeKey": null, "exportSizes": [], "profiles": ["cellar"], "status": "deferred", "rationale": "Pure decoration is unnecessary for a complete layout and would increase first-release skeuomorphism.", "licenseRef": "repo-gpl-3.0", "provenance": "not-authored-deferred" },
+    { "id": "illustration.tasting-room.still-life", "kind": "illustration", "source": null, "runtimeKey": null, "exportSizes": [], "profiles": ["tasting-room"], "status": "deferred", "rationale": "Pure lifestyle decoration conveys no product state and adds avoidable alcohol-brand emphasis.", "licenseRef": "repo-gpl-3.0", "provenance": "not-authored-deferred" },
+
+    { "id": "texture.cellar.grain-seamless", "kind": "texture", "source": null, "runtimeKey": null, "exportSizes": [], "profiles": ["cellar"], "status": "deferred-optional", "rationale": "The contract marks this texture optional; semantic code-native surfaces already carry the material direction.", "licenseRef": "repo-gpl-3.0", "provenance": "not-authored-deferred" }
+  ],
+  "legacyExclusions": [
+    {
+      "paths": [
+        "Images/libation_glass.svg",
+        "public/libation_logo_light.svg",
+        "public/libation_logo_dark.svg"
+      ],
+      "reason": "Wine-glass family traces to a now-unavailable Flaticon source without a saved license record."
+    },
+    {
+      "paths": [
+        "Source/LibationWinForms/Resources/stoplight source.url",
+        "Source/LibationWinForms/Resources/pdf source.url"
+      ],
+      "reason": "Flaticon source references exist without a per-asset license record; geometry is not reused."
+    },
+    {
+      "runtimeKey": "DolbyAtmosLogoVertical",
+      "reason": "Third-party trademark artwork used only for its existing media badge."
+    }
+  ]
+}

@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
 
 namespace FileManager;
 
@@ -12,6 +13,7 @@ public interface IJsonBackedDictionary
 	object? GetObject(string propertyName);
 	void SetString(string propertyName, string? newValue);
 	void SetNonString(string propertyName, object? newValue);
+	void SetNonStrings(IReadOnlyList<KeyValuePair<string, object?>> values);
 	bool RemoveProperty(string propertyName);
 	bool SetWithJsonPath(string jsonPath, string propertyName, string? newValue, bool suppressLogging = false);
 	string? GetStringFromJsonPath(string jsonPath);
@@ -30,6 +32,8 @@ public interface IJsonBackedDictionary
 
 			return jValue.Value<T>();
 		}
+		if (obj is JToken jToken)
+			return jToken.ToObject<T>();
 		throw new InvalidCastException($"{obj.GetType()} is not convertible to {typeof(T)}");
 	}
 

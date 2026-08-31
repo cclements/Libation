@@ -1,0 +1,35 @@
+<ResourceDictionary
+	xmlns="https://github.com/avaloniaui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+	<!-- Shared semantic shapes. Profile wax/ring decoration is never part of these masters. -->
+	<StreamGeometry x:Key="status.download-pending">
+		M12,3 V13 M8,9 L12,13 L16,9 M4,17 H20 V21 H4 Z M18,3 V7 H22 M22,3 L18,7
+	</StreamGeometry>
+	<StreamGeometry x:Key="status.downloading">
+		M12,4 V14 M8,10 L12,14 L16,10 M5,18 H19 M18,6 A8,8 0 0 1 20,12 M6,6 A8,8 0 0 0 4,12
+	</StreamGeometry>
+	<StreamGeometry x:Key="status.downloaded">
+		M4,16 V20 H20 V16 M12,3 V13 M8,9 L12,13 L16,9 M15,17 L17,19 L21,15
+	</StreamGeometry>
+	<StreamGeometry x:Key="status.processing">
+		M19,8 A8,8 0 0 0 5,6 M5,6 V2 M5,6 H9 M5,16 A8,8 0 0 0 19,18 M19,18 V22 M19,18 H15 M12,15 A3,3 0 1 0 12,9 A3,3 0 1 0 12,15
+	</StreamGeometry>
+	<StreamGeometry x:Key="status.completed">
+		M12,21 A9,9 0 1 0 12,3 A9,9 0 1 0 12,21 M7.5,12 L10.5,15 L16.5,9
+	</StreamGeometry>
+	<StreamGeometry x:Key="status.failed">
+		M8,3 H16 L21,8 V16 L16,21 H8 L3,16 V8 Z M8.5,8.5 L15.5,15.5 M15.5,8.5 L8.5,15.5
+	</StreamGeometry>
+	<StreamGeometry x:Key="status.cancelled">
+		M12,21 A9,9 0 1 0 12,3 A9,9 0 1 0 12,21 M5.6,18.4 L18.4,5.6
+	</StreamGeometry>
+	<StreamGeometry x:Key="status.unavailable">
+		M4,4 H20 V20 H4 Z M7,17 L17,7
+	</StreamGeometry>
+	<StreamGeometry x:Key="status.needs-attention">
+		M12,3 L22,21 H2 Z M12,9 V14 M12,18 V18.1
+	</StreamGeometry>
+	<StreamGeometry x:Key="status.connected">
+		M6,15 A3,3 0 1 0 6,9 A3,3 0 1 0 6,15 M18,9 A3,3 0 1 0 18,3 A3,3 0 1 0 18,9 M18,21 A3,3 0 1 0 18,15 A3,3 0 1 0 18,21 M9,10 L15,7 M9,14 L15,17
+	</StreamGeometry>
+</ResourceDictionary>

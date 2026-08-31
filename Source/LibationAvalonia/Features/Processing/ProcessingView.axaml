@@ -1,0 +1,68 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:components="using:LibationAvalonia.DesignSystem.Components"
+			 xmlns:processing="using:LibationAvalonia.Features.Processing"
+			 xmlns:views="using:LibationAvalonia.Views"
+			 x:Class="LibationAvalonia.Features.Processing.ProcessingView"
+			 x:Name="Root"
+			 x:DataType="processing:ProcessingViewModel">
+	<Grid RowDefinitions="Auto,*" RowSpacing="{DynamicResource Libation.Space.4}">
+		<components:DecanterSummary
+			Title="The Decanter"
+			SummaryText="{Binding SummaryText}"
+			ActiveText="{Binding ActiveText}"
+			Progress="{Binding Progress}"
+			ShowProgress="{Binding ShowProgress}"
+			CancelCommand="{Binding CancelAllCommand}"
+			CanCancel="{Binding CanCancel}" />
+
+		<TabControl Grid.Row="1" SelectedIndex="{Binding SelectedTabIndex, Mode=TwoWay}">
+			<TabItem Header="Active">
+				<Grid>
+					<components:EmptyState IsVisible="{Binding !HasActive}"
+						Title="No active processing"
+						Explanation="Queued titles will appear here when processing begins."
+						IllustrationTemplate="{DynamicResource illustration.decanter.empty}" />
+					<ListBox ItemsSource="{Binding Active}" IsVisible="{Binding HasActive}">
+						<ListBox.ItemTemplate><DataTemplate x:DataType="processing:ProcessingQueueItemViewModel"><components:QueueItem Cover="{Binding Cover}" Title="{Binding Title}" Stage="{Binding Stage}" Message="{Binding Message}" Status="{Binding Status}" StatusText="{Binding StatusText}" Progress="{Binding Progress}" ShowProgress="{Binding ShowProgress}" ErrorDetails="{Binding ErrorDetails}" CancelCommand="{Binding CancelCommand}" /></DataTemplate></ListBox.ItemTemplate>
+					</ListBox>
+				</Grid>
+			</TabItem>
+			<TabItem Header="Waiting">
+				<Grid>
+					<components:EmptyState IsVisible="{Binding !HasWaiting}" Title="Nothing waiting" Explanation="New processing work will be listed here in queue order." />
+					<ListBox ItemsSource="{Binding Waiting}" IsVisible="{Binding HasWaiting}">
+						<ListBox.ItemTemplate><DataTemplate x:DataType="processing:ProcessingQueueItemViewModel"><components:QueueItem Cover="{Binding Cover}" Title="{Binding Title}" Stage="{Binding Stage}" Message="{Binding Message}" Status="{Binding Status}" StatusText="{Binding StatusText}" Progress="{Binding Progress}" ShowProgress="{Binding ShowProgress}" CancelCommand="{Binding CancelCommand}" /></DataTemplate></ListBox.ItemTemplate>
+					</ListBox>
+				</Grid>
+			</TabItem>
+			<TabItem Header="Completed">
+				<Grid RowDefinitions="Auto,*">
+					<Button HorizontalAlignment="Right" Margin="0,0,0,8" Content="Clear finished" Command="{Binding ClearFinishedCommand}" IsEnabled="{Binding HasFinished}" />
+					<components:EmptyState Grid.Row="1" IsVisible="{Binding !HasCompleted}" Title="No completed work" Explanation="Successfully processed titles remain here until finished work is cleared." />
+					<ListBox Grid.Row="1" ItemsSource="{Binding Completed}" IsVisible="{Binding HasCompleted}">
+						<ListBox.ItemTemplate><DataTemplate x:DataType="processing:ProcessingQueueItemViewModel"><components:QueueItem Cover="{Binding Cover}" Title="{Binding Title}" Stage="{Binding Stage}" Message="{Binding Message}" Status="{Binding Status}" StatusText="{Binding StatusText}" Progress="{Binding Progress}" ShowProgress="False" /></DataTemplate></ListBox.ItemTemplate>
+					</ListBox>
+				</Grid>
+			</TabItem>
+			<TabItem Header="Failed / cancelled">
+				<Grid RowDefinitions="Auto,*">
+					<Button HorizontalAlignment="Right" Margin="0,0,0,8" Content="Clear finished" Command="{Binding ClearFinishedCommand}" IsEnabled="{Binding HasFinished}" />
+					<components:EmptyState Grid.Row="1" IsVisible="{Binding !HasFailed}" Title="No failed or cancelled work" Explanation="Failures include literal status and a route to the queue log." />
+					<ListBox Grid.Row="1" ItemsSource="{Binding Failed}" IsVisible="{Binding HasFailed}">
+						<ListBox.ItemTemplate><DataTemplate x:DataType="processing:ProcessingQueueItemViewModel"><components:QueueItem Cover="{Binding Cover}" Title="{Binding Title}" Stage="{Binding Stage}" Message="{Binding Message}" Status="{Binding Status}" StatusText="{Binding StatusText}" Progress="{Binding Progress}" ShowProgress="False" ErrorDetails="{Binding ErrorDetails}" RetryCommand="{Binding RetryCommand}" OpenLogCommand="{Binding OpenLogCommand}" CopyTechnicalDetailsCommand="{Binding CopyTechnicalDetailsCommand}" /></DataTemplate></ListBox.ItemTemplate>
+					</ListBox>
+				</Grid>
+			</TabItem>
+			<TabItem Header="Queue controls &amp; log">
+				<Grid RowDefinitions="Auto,*" RowSpacing="8">
+					<TextBlock Text="{Binding LogSummary}" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+					<Border Grid.Row="1" BorderBrush="{DynamicResource Libation.Brush.BorderSubtle}" BorderThickness="1" CornerRadius="{DynamicResource Libation.Radius.Medium}" ClipToBounds="True">
+						<views:ProcessQueueControl DataContext="{Binding Source, Mode=OneTime}"
+							SelectedTabIndex="{Binding DataContext.QueueDetailTabIndex, ElementName=Root, Mode=TwoWay}" />
+					</Border>
+				</Grid>
+			</TabItem>
+		</TabControl>
+	</Grid>
+</UserControl>
