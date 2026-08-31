@@ -51,6 +51,7 @@ jobs:
       retention-days: ${{ inputs.retention-days }}
       architecture: ${{ matrix.architecture }}
       sign-app: ${{ inputs.release || vars.SIGN_MAC_APP_ON_VALIDATE == 'true' }}
+      release: ${{ inputs.release }}
     secrets: inherit
 
   linux:
@@ -67,6 +68,5 @@ jobs:
       retention-days: ${{ inputs.retention-days }}
       architecture: ${{ matrix.architecture }}
       OS: ${{ matrix.OS }}
-
 
 

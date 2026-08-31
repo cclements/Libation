@@ -43,7 +43,7 @@
     <None Update="Libation.entitlements">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Libation.entitlements.txt">
+    <None Update="Libation.adhoc.entitlements">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="libation.icns">

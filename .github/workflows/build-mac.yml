@@ -21,6 +21,10 @@ on:
       sign-app:
         type: boolean
         description: "Wheather to sign an notorize the app bundle and dmg."
+      release:
+        type: boolean
+        default: false
+        description: "Whether this artifact is being built for a release."
       architecture:
         type: string
         description: "CPU architecture targeted by the build."
@@ -32,7 +36,7 @@ jobs:
     runs-on: macos-latest
     env:
       RUNTIME_ID: "osx-${{ inputs.architecture }}"
-      WAIT_FOR_NOTARIZE: ${{ vars.WAIT_FOR_NOTARIZE == 'true' }}
+      WAIT_FOR_NOTARIZE: ${{ inputs.release || vars.WAIT_FOR_NOTARIZE == 'true' }}
     steps:    
       - uses: apple-actions/import-codesign-certs@v7
         if: ${{ inputs.sign-app }}
@@ -90,14 +94,15 @@ jobs:
       - name: Notarize bundle
         if: ${{ inputs.sign-app }}
         run: |          
-          if [ ${{ vars.WAIT_FOR_NOTARIZE == 'true' }} ]; then
-            WAIT="--wait"
+          WAIT_ARGS=()
+          if [ "${WAIT_FOR_NOTARIZE}" = "true" ]; then
+            WAIT_ARGS+=(--wait)
           fi
           echo "::debug::Submitting the disk image for notarization"
           # Capture stdout+stderr (2>&1). Use || true so that when notarytool fails (e.g. Apple TOS
           # agreement required), the script does not exit before we can print RESPONSE—otherwise the
           # job would fail with no visible error message in the workflow log.
-          RESPONSE=$(xcrun notarytool submit ./bundle/${{ steps.bundle.outputs.artifact }} $WAIT --no-progress --apple-id ${{ vars.APPLE_DEV_EMAIL }} --password ${{ secrets.APPLE_DEV_PASSWORD }} --team-id ${{ secrets.APPLE_TEAM_ID }} 2>&1) || true
+          RESPONSE=$(xcrun notarytool submit ./bundle/${{ steps.bundle.outputs.artifact }} "${WAIT_ARGS[@]}" --no-progress --apple-id ${{ vars.APPLE_DEV_EMAIL }} --password ${{ secrets.APPLE_DEV_PASSWORD }} --team-id ${{ secrets.APPLE_TEAM_ID }} 2>&1) || true
           echo "$RESPONSE"
           SUBMISSION_ID=$(echo "$RESPONSE" | awk '/id: / { print $2;exit; }')
           echo "::notice::Notary Submission Id: $SUBMISSION_ID"
@@ -109,9 +114,10 @@ jobs:
             exit 1
           fi
 
-          if [ ${{ vars.WAIT_FOR_NOTARIZE == 'true' }} ]; then
+          if [ "${WAIT_FOR_NOTARIZE}" = "true" ]; then
             echo "::debug::Stapling the notarization ticket to the disk image"
             xcrun stapler staple "./bundle/${{ steps.bundle.outputs.artifact }}"
+            xcrun stapler validate "./bundle/${{ steps.bundle.outputs.artifact }}"
           fi
 
       - uses: actions/upload-artifact@v7
