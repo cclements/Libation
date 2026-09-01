@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
 			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 			 xmlns:components="using:LibationAvalonia.DesignSystem.Components"
+			 xmlns:designSystem="using:LibationAvalonia.DesignSystem"
 			 xmlns:library="using:LibationAvalonia.Features.Library"
 			 xmlns:views="using:LibationAvalonia.Views"
 			 x:Class="LibationAvalonia.Features.Library.LibraryView"
@@ -17,7 +18,7 @@
 						<StackPanel Orientation="Horizontal" Spacing="{DynamicResource Libation.Space.3}">
 							<TextBlock Text="{Binding ResultStateText}" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
 							<TextBlock Text="{Binding SelectionStateText}" Foreground="{DynamicResource Libation.Brush.TextSecondary}"
-									   AutomationProperties.LiveSetting="Polite" />
+									   AutomationProperties.LiveSetting="{x:Static designSystem:PlatformAutomationPolicy.Polite}" />
 						</StackPanel>
 					</StackPanel>
 					<StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="{DynamicResource Libation.Density.ToolbarGap}">

@@ -1,5 +1,6 @@
 <UserControl xmlns="https://github.com/avaloniaui"
 			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:designSystem="using:LibationAvalonia.DesignSystem"
 			 x:Class="LibationAvalonia.DesignSystem.Components.FlightTray"
 			 x:Name="Root">
 	<Border Classes="card raised" AutomationProperties.Name="{Binding Title, ElementName=Root}">
@@ -25,7 +26,7 @@
 					   Focusable="{Binding FocusWarningOnShow, ElementName=Root}"
 					   Foreground="{DynamicResource Libation.Brush.Warning}" TextWrapping="Wrap"
 					   AutomationProperties.Name="Current Flight processing notice"
-					   AutomationProperties.LiveSetting="Polite" />
+					   AutomationProperties.LiveSetting="{x:Static designSystem:PlatformAutomationPolicy.Polite}" />
 			<ListBox Grid.Row="2" Classes="contemporary" ItemsSource="{Binding ItemsSource, ElementName=Root}"
 					 ItemTemplate="{Binding ItemTemplate, ElementName=Root}" MinHeight="96" MaxHeight="320"
 					 AutomationProperties.Name="Books in Flight" />

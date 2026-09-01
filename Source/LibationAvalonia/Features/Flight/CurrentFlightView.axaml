@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
 			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 			 xmlns:components="using:LibationAvalonia.DesignSystem.Components"
+			 xmlns:designSystem="using:LibationAvalonia.DesignSystem"
 			 xmlns:flight="using:LibationAvalonia.Features.Flight"
 			 x:Class="LibationAvalonia.Features.Flight.CurrentFlightView"
 			 x:DataType="flight:CurrentFlightViewModel">
@@ -47,6 +48,8 @@
 			<Button Classes="contemporary quiet compact" Margin="0,0,8,8" Content="Copy technical details"
 				Command="{Binding CopyTechnicalDetailsCommand}" IsVisible="{Binding HasError}" />
 		</WrapPanel>
-		<TextBlock Grid.Row="3" Text="{Binding Announcement}" AutomationProperties.LiveSetting="Polite" Opacity="0" Height="1" />
+		<TextBlock Grid.Row="3" Text="{Binding Announcement}"
+			AutomationProperties.LiveSetting="{x:Static designSystem:PlatformAutomationPolicy.Polite}"
+			Opacity="0" Height="1" />
 	</Grid>
 </UserControl>

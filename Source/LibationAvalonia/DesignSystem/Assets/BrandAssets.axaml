@@ -38,13 +38,21 @@
 					StrokeLineCap="Round"
 					StrokeJoin="Round" />
 			</Viewbox>
-			<TextBlock
-				VerticalAlignment="Center"
-				FontFamily="{DynamicResource Libation.Font.UI}"
-				FontSize="20"
-				FontWeight="SemiBold"
-				Foreground="{DynamicResource Libation.Brush.TextPrimary}"
-				Text="LIBATION" />
+			<StackPanel VerticalAlignment="Center" Spacing="1">
+				<TextBlock
+					FontFamily="{DynamicResource Libation.Font.Display}"
+					FontSize="20"
+					FontWeight="SemiBold"
+					LetterSpacing="2"
+					Foreground="{DynamicResource Libation.Brush.AccentSecondary}"
+					Text="LIBATION" />
+				<TextBlock
+					FontFamily="{DynamicResource Libation.Font.UI}"
+					FontSize="9"
+					LetterSpacing="1"
+					Foreground="{DynamicResource Libation.Brush.TextSecondary}"
+					Text="OPEN SOURCE AUDIOBOOKS" />
+			</StackPanel>
 		</StackPanel>
 	</ControlTemplate>
 	<ControlTemplate x:Key="brand.wordmark.horizontal.dark" TargetType="ContentControl">
@@ -57,13 +65,21 @@
 					StrokeLineCap="Round"
 					StrokeJoin="Round" />
 			</Viewbox>
-			<TextBlock
-				VerticalAlignment="Center"
-				FontFamily="{DynamicResource Libation.Font.UI}"
-				FontSize="20"
-				FontWeight="SemiBold"
-				Foreground="{DynamicResource Libation.Brush.TextPrimary}"
-				Text="LIBATION" />
+			<StackPanel VerticalAlignment="Center" Spacing="1">
+				<TextBlock
+					FontFamily="{DynamicResource Libation.Font.Display}"
+					FontSize="20"
+					FontWeight="SemiBold"
+					LetterSpacing="2"
+					Foreground="{DynamicResource Libation.Brush.AccentPrimary}"
+					Text="LIBATION" />
+				<TextBlock
+					FontFamily="{DynamicResource Libation.Font.UI}"
+					FontSize="9"
+					LetterSpacing="1"
+					Foreground="{DynamicResource Libation.Brush.TextSecondary}"
+					Text="AUDIOBOOKS, UNCORKED" />
+			</StackPanel>
 		</StackPanel>
 	</ControlTemplate>
 </ResourceDictionary>

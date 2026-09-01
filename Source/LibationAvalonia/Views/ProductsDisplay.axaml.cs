@@ -129,7 +129,9 @@ public partial class ProductsDisplay : UserControl
 
 	private void ProductsGrid_SelectionChanged(object? sender, SelectionChangedEventArgs e)
 	{
-		if (applyingSharedSelection)
+		// A route change hides the Library and Avalonia's DataGrid clears its visual
+		// selection. That is teardown state, not a request to clear the shell-owned Flight.
+		if (applyingSharedSelection || !IsEffectivelyVisible)
 			return;
 
 		var selected = productsGrid.SelectedItems

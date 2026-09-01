@@ -3,6 +3,35 @@
 			 xmlns:components="using:LibationAvalonia.DesignSystem.Components"
 			 x:Class="LibationAvalonia.DesignSystem.Components.LibationNavigationRail"
 			 x:Name="Root">
+	<UserControl.Resources>
+		<ControlTheme x:Key="LibationNavigationItemTheme" TargetType="ListBoxItem">
+			<Setter Property="MinHeight" Value="{DynamicResource Libation.Density.RowHeight}" />
+			<Setter Property="Padding" Value="0" />
+			<Setter Property="Margin" Value="0,2" />
+			<Setter Property="HorizontalContentAlignment" Value="Stretch" />
+			<Setter Property="Background" Value="Transparent" />
+			<Setter Property="Foreground" Value="{DynamicResource Libation.Brush.TextPrimary}" />
+			<Setter Property="BorderBrush" Value="Transparent" />
+			<Setter Property="BorderThickness" Value="1" />
+			<Setter Property="CornerRadius" Value="{DynamicResource Libation.Radius.Small}" />
+			<Setter Property="Template">
+				<ControlTemplate>
+					<Border
+						Background="Transparent"
+						BorderBrush="Transparent"
+						BorderThickness="0"
+						CornerRadius="{TemplateBinding CornerRadius}"
+						Padding="{TemplateBinding Padding}">
+						<ContentPresenter
+							Content="{TemplateBinding Content}"
+							ContentTemplate="{TemplateBinding ContentTemplate}"
+							HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+							VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+					</Border>
+				</ControlTemplate>
+			</Setter>
+		</ControlTheme>
+	</UserControl.Resources>
 	<UserControl.Styles>
 		<Style Selector="components|LibationNavigationRail Border#RailRoot">
 			<Setter Property="Width" Value="{DynamicResource Libation.Navigation.WidthExpanded}" />
@@ -23,6 +52,7 @@
 							AutomationProperties.AccessibilityView="Raw" />
 			<ListBox Grid.Row="1"
 					 Classes="contemporary"
+					 ItemContainerTheme="{StaticResource LibationNavigationItemTheme}"
 					 ItemsSource="{Binding ItemsSource, ElementName=Root}"
 					 ItemTemplate="{Binding ItemTemplate, ElementName=Root}"
 					 SelectedItem="{Binding SelectedItem, ElementName=Root, Mode=TwoWay}"

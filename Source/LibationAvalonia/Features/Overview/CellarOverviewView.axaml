@@ -3,7 +3,9 @@
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:overview="using:LibationAvalonia.Features.Overview"
 	xmlns:components="using:LibationAvalonia.DesignSystem.Components"
+	xmlns:designSystem="using:LibationAvalonia.DesignSystem"
 	xmlns:flight="using:LibationAvalonia.Features.Flight"
+	xmlns:library="using:LibationAvalonia.Features.Library"
 	x:Class="LibationAvalonia.Features.Overview.CellarOverviewView"
 	x:Name="Root"
 	x:DataType="overview:DashboardViewModel">
@@ -69,7 +71,7 @@
 			<components:PageHeader
 				Eyebrow="Library workspace"
 				Title="The Cellar"
-				SupportingText="Browse, search, and process the titles already in your Libation library."
+				SupportingText="Your curated audiobook collection, organized and ready for the next listen."
 				PrimaryActionText="Locate Audiobooks"
 				PrimaryCommand="{Binding LocateAudiobooksCommand}">
 				<components:PageHeader.StatusContent>
@@ -78,13 +80,10 @@
 						TextOverride="{Binding AccountHealthText}"
 						AccessibleName="{Binding AccountHealthText}" />
 				</components:PageHeader.StatusContent>
-				<components:PageHeader.HeroArt>
-					<ContentControl x:Name="CellarHeroArt" Width="112" Height="84"
-						Template="{StaticResource illustration.cellar.add-books}" />
-				</components:PageHeader.HeroArt>
 			</components:PageHeader>
 
-			<Border Classes="card" IsVisible="{Binding IsLoading}" AutomationProperties.LiveSetting="Polite">
+			<Border Classes="card" IsVisible="{Binding IsLoading}"
+				AutomationProperties.LiveSetting="{x:Static designSystem:PlatformAutomationPolicy.Polite}">
 				<StackPanel Spacing="{DynamicResource Libation.Space.3}">
 					<TextBlock Text="Loading your library overview…" FontWeight="SemiBold"
 						Foreground="{DynamicResource Libation.Brush.TextPrimary}" />
@@ -128,7 +127,7 @@
 					<components:MetricCard Margin="0,0,8,8" IconData="{StaticResource glyph.downloads}"
 						Value="{Binding DownloadPendingText}" Label="Download Pending"
 						Severity="{x:Static components:ComponentSeverity.Warning}"
-						CommandText="Open Library" Command="{Binding OpenLibraryCommand}" />
+						CommandText="Download pending titles" Command="{Binding DownloadPendingCommand}" />
 					<components:MetricCard Margin="0,0,8,8" IconData="{StaticResource glyph.processing}"
 						Value="{Binding ProcessingText}" Label="Processing Work"
 						Severity="{x:Static components:ComponentSeverity.Info}"
@@ -207,15 +206,13 @@
 							<Button Grid.Column="1" Classes="contemporary quiet" Content="Open full Library"
 								Command="{Binding OpenLibraryCommand}" />
 						</Grid>
-						<ListBox
-							ItemsSource="{Binding VisibleLibraryItems}"
-							ItemTemplate="{StaticResource CellarLibraryRow}"
-							MinHeight="240" MaxHeight="560"
-							AutomationProperties.Name="Visible library titles">
-							<ListBox.ItemsPanel>
-								<ItemsPanelTemplate><VirtualizingStackPanel /></ItemsPanelTemplate>
-							</ListBox.ItemsPanel>
-						</ListBox>
+						<Border Classes="card" Background="{DynamicResource Libation.Brush.SurfaceSunken}"
+							BorderBrush="{DynamicResource Libation.Brush.BorderStrong}"
+							Padding="{DynamicResource Libation.Thickness.3}" ClipToBounds="True">
+							<library:LibraryGalleryView
+								Height="448"
+								DataContext="{Binding Library, ElementName=Root}" />
+						</Border>
 						<Expander x:Name="CompactFlight" IsVisible="False" IsExpanded="{Binding IsFlightExpanded, Mode=TwoWay}">
 							<Expander.Header>
 								<Button Classes="contemporary quiet" Content="{Binding FlightCountText, StringFormat='Current Flight — {0}'}"
@@ -238,20 +235,6 @@
 						DataContext="{Binding CurrentFlight, Mode=OneTime}" />
 				</Grid>
 
-				<components:DecanterSummary
-					Title="The Decanter"
-					SummaryText="{Binding QueueSummaryText}"
-					ActiveText="{Binding QueueActiveText}"
-					Progress="{Binding QueueProgress}"
-					ShowProgress="{Binding HasActiveWork}"
-					IsExpanded="{Binding IsQueueExpanded, Mode=TwoWay}"
-					CancelCommand="{Binding CancelAllProcessingCommand}"
-					CanCancel="{Binding HasActiveWork}">
-					<components:DecanterSummary.DetailsContent>
-						<ListBox ItemsSource="{Binding ActiveQueueItems}" ItemTemplate="{StaticResource CellarQueueRow}"
-							MaxHeight="320" AutomationProperties.Name="Active processing work" />
-					</components:DecanterSummary.DetailsContent>
-				</components:DecanterSummary>
 			</StackPanel>
 		</StackPanel>
 	</ScrollViewer>

@@ -3,6 +3,7 @@
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:overview="using:LibationAvalonia.Features.Overview"
 	xmlns:components="using:LibationAvalonia.DesignSystem.Components"
+	xmlns:designSystem="using:LibationAvalonia.DesignSystem"
 	x:Class="LibationAvalonia.Features.Overview.TastingRoomOverviewView"
 	x:Name="Root"
 	x:DataType="overview:DashboardViewModel">
@@ -40,39 +41,63 @@
 		<Style Selector="overview|TastingRoomOverviewView:narrow UniformGrid#TastingMetrics">
 			<Setter Property="Columns" Value="1" />
 		</Style>
+		<Style Selector="overview|TastingRoomOverviewView:standard Image#TastingHeroArt">
+			<Setter Property="Width" Value="240" />
+			<Setter Property="Height" Value="144" />
+		</Style>
+		<Style Selector="overview|TastingRoomOverviewView:compact Image#TastingHeroArt">
+			<Setter Property="Width" Value="200" />
+			<Setter Property="Height" Value="120" />
+		</Style>
+		<Style Selector="overview|TastingRoomOverviewView:narrow Image#TastingHeroArt">
+			<Setter Property="IsVisible" Value="False" />
+		</Style>
+		<Style Selector="overview|TastingRoomOverviewView:wide components|DecanterSummary#TastingDecanter">
+			<Setter Property="Width" Value="420" />
+			<Setter Property="DockPanel.Dock" Value="Right" />
+			<Setter Property="Margin" Value="16,0,0,0" />
+		</Style>
+		<Style Selector="overview|TastingRoomOverviewView:standard components|DecanterSummary#TastingDecanter">
+			<Setter Property="Width" Value="360" />
+			<Setter Property="DockPanel.Dock" Value="Right" />
+			<Setter Property="Margin" Value="16,0,0,0" />
+		</Style>
 		<Style Selector="overview|TastingRoomOverviewView:compact components|DecanterSummary#TastingDecanter">
-			<Setter Property="Grid.Column" Value="0" />
-			<Setter Property="Grid.Row" Value="1" />
+			<Setter Property="DockPanel.Dock" Value="Bottom" />
 			<Setter Property="Margin" Value="0,16,0,0" />
 		</Style>
 		<Style Selector="overview|TastingRoomOverviewView:narrow components|DecanterSummary#TastingDecanter">
-			<Setter Property="Grid.Column" Value="0" />
-			<Setter Property="Grid.Row" Value="1" />
+			<Setter Property="DockPanel.Dock" Value="Bottom" />
 			<Setter Property="Margin" Value="0,16,0,0" />
 		</Style>
+		<Style Selector="overview|TastingRoomOverviewView:wide components|DropZone#TastingDropZone">
+			<Setter Property="Width" Value="380" />
+			<Setter Property="DockPanel.Dock" Value="Right" />
+			<Setter Property="Margin" Value="16,0,0,0" />
+		</Style>
+		<Style Selector="overview|TastingRoomOverviewView:standard components|DropZone#TastingDropZone">
+			<Setter Property="Width" Value="320" />
+			<Setter Property="DockPanel.Dock" Value="Right" />
+			<Setter Property="Margin" Value="16,0,0,0" />
+		</Style>
 		<Style Selector="overview|TastingRoomOverviewView:compact components|DropZone#TastingDropZone">
-			<Setter Property="Grid.Column" Value="0" />
-			<Setter Property="Grid.Row" Value="1" />
+			<Setter Property="DockPanel.Dock" Value="Bottom" />
 			<Setter Property="Margin" Value="0,16,0,0" />
 		</Style>
 		<Style Selector="overview|TastingRoomOverviewView:narrow components|DropZone#TastingDropZone">
-			<Setter Property="Grid.Column" Value="0" />
-			<Setter Property="Grid.Row" Value="1" />
+			<Setter Property="DockPanel.Dock" Value="Bottom" />
 			<Setter Property="Margin" Value="0,16,0,0" />
-		</Style>
-		<Style Selector="overview|TastingRoomOverviewView:narrow ContentControl#TastingHeroArt">
-			<Setter Property="IsVisible" Value="False" />
 		</Style>
 	</UserControl.Styles>
 
 	<ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
 		<StackPanel Margin="{DynamicResource Libation.Thickness.5}" Spacing="{DynamicResource Libation.Space.5}">
 			<components:PageHeader
-				Eyebrow="Overview"
+				x:Name="TastingHeader"
+				Classes="hero"
+				Eyebrow="Editorial library workspace"
 				Title="Today’s Selection"
-				SupportingText="Here is the current state of your library, selected titles, and processing work."
-				PrimaryActionText="Locate Audiobooks"
-				PrimaryCommand="{Binding LocateAudiobooksCommand}">
+				SupportingText="Welcome back. Here is what is happening in your library today.">
 				<components:PageHeader.StatusContent>
 					<components:StatusBadge
 						Status="{Binding AccountStatus}"
@@ -80,12 +105,13 @@
 						AccessibleName="{Binding AccountHealthText}" />
 				</components:PageHeader.StatusContent>
 				<components:PageHeader.HeroArt>
-					<ContentControl x:Name="TastingHeroArt" Width="144" Height="108"
-						Template="{StaticResource illustration.tasting-room.add-books}" />
+					<Image x:Name="TastingHeroArt" Width="320" Height="192" Stretch="Uniform"
+						Source="/Assets/ContemporaryCellar/tasting-room-still-life.png" />
 				</components:PageHeader.HeroArt>
 			</components:PageHeader>
 
-			<Border Classes="card" IsVisible="{Binding IsLoading}" AutomationProperties.LiveSetting="Polite">
+			<Border Classes="card" IsVisible="{Binding IsLoading}"
+				AutomationProperties.LiveSetting="{x:Static designSystem:PlatformAutomationPolicy.Polite}">
 				<StackPanel Spacing="{DynamicResource Libation.Space.3}">
 					<TextBlock Text="Loading today’s library overview…" FontWeight="SemiBold"
 						Foreground="{DynamicResource Libation.Brush.TextPrimary}" />
@@ -106,23 +132,25 @@
 				SecondaryActionCommand="{Binding CopyTechnicalDetailsCommand}" />
 
 			<StackPanel IsVisible="{Binding HasDashboardData}" Spacing="{DynamicResource Libation.Space.5}">
-				<UniformGrid x:Name="TastingMetrics" Columns="4" Rows="0">
-					<components:MetricCard Margin="0,0,12,12" IconData="{StaticResource glyph.library}"
-						Value="{Binding TotalTitlesText}" Label="Books in Library"
-						CommandText="Open Library" Command="{Binding OpenLibraryCommand}" />
-					<components:MetricCard Margin="0,0,12,12" IconData="{StaticResource glyph.downloads}"
-						Value="{Binding DownloadPendingText}" Label="Download Pending"
-						Severity="{x:Static components:ComponentSeverity.Warning}"
-						CommandText="Open Library" Command="{Binding OpenLibraryCommand}" />
-					<components:MetricCard Margin="0,0,12,12" IconData="{StaticResource glyph.processing}"
-						Value="{Binding ProcessingText}" Label="Processing"
-						Severity="{x:Static components:ComponentSeverity.Info}"
-						CommandText="Open Processing" Command="{Binding OpenProcessingCommand}" />
-					<components:MetricCard Margin="0,0,12,12" IconData="{StaticResource glyph.completed}"
-						Value="{Binding CompletedText}" Label="Completed"
-						Severity="{x:Static components:ComponentSeverity.Success}"
-						CommandText="Open Library" Command="{Binding OpenLibraryCommand}" />
-				</UniformGrid>
+				<Border Classes="card raised" Padding="0">
+					<UniformGrid x:Name="TastingMetrics" Columns="4" Rows="0">
+						<components:MetricCard Classes="strip" IconData="{StaticResource glyph.library}"
+							Value="{Binding TotalTitlesText}" Label="Books in Library"
+							CommandText="Open Library" Command="{Binding OpenLibraryCommand}" />
+						<components:MetricCard Classes="strip" IconData="{StaticResource glyph.downloads}"
+							Value="{Binding DownloadPendingText}" Label="Downloads"
+							Severity="{x:Static components:ComponentSeverity.Warning}"
+							CommandText="Download pending titles" Command="{Binding DownloadPendingCommand}" />
+						<components:MetricCard Classes="strip" IconData="{StaticResource glyph.processing}"
+							Value="{Binding ProcessingText}" Label="Processing"
+							Severity="{x:Static components:ComponentSeverity.Info}"
+							CommandText="Open Processing" Command="{Binding OpenProcessingCommand}" />
+						<components:MetricCard Classes="strip" IconData="{StaticResource glyph.completed}"
+							Value="{Binding CompletedText}" Label="Completed"
+							Severity="{x:Static components:ComponentSeverity.Success}"
+							CommandText="Open Library" Command="{Binding OpenLibraryCommand}" />
+					</UniformGrid>
+				</Border>
 
 				<StackPanel Spacing="{DynamicResource Libation.Space.3}">
 					<components:AttentionBanner
@@ -182,8 +210,28 @@
 					PrimaryActionText="Open Library"
 					PrimaryCommand="{Binding OpenLibraryCommand}" />
 
-				<Grid x:Name="TastingPrimaryRow" ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto"
-					ColumnSpacing="{DynamicResource Libation.Space.4}">
+				<DockPanel x:Name="TastingPrimaryRow" LastChildFill="True">
+					<components:DecanterSummary
+						x:Name="TastingDecanter"
+						Title="The Decanter"
+						SummaryText="{Binding QueueSummaryText}"
+						ActiveText="{Binding QueueActiveText}"
+						Progress="{Binding QueueProgress}"
+						ShowProgress="{Binding HasActiveWork}"
+						IsExpanded="{Binding IsQueueExpanded, Mode=TwoWay}"
+						IllustrationWidth="156"
+						IllustrationHeight="188"
+						CancelCommand="{Binding CancelAllProcessingCommand}"
+						CanCancel="{Binding HasActiveWork}">
+						<components:DecanterSummary.IllustrationContent>
+							<Image Width="156" Height="188" Stretch="Uniform"
+								Source="/Assets/ContemporaryCellar/tasting-room-decanter.png" />
+						</components:DecanterSummary.IllustrationContent>
+						<components:DecanterSummary.DetailsContent>
+							<ListBox ItemsSource="{Binding ActiveQueueItems}" ItemTemplate="{StaticResource TastingQueueRow}"
+								MaxHeight="320" AutomationProperties.Name="Active processing work" />
+						</components:DecanterSummary.DetailsContent>
+					</components:DecanterSummary>
 					<components:FlightTray
 						Title="Current Flight"
 						ItemsSource="{Binding CurrentFlightItems}"
@@ -198,33 +246,29 @@
 						ClearCommand="{Binding ClearFlightCommand}"
 						UndoActionText="{Binding FlightUndoActionText}"
 						UndoCommand="{Binding UndoFlightCommand}" />
-					<components:DecanterSummary
-						x:Name="TastingDecanter"
-						Grid.Column="1"
-						Title="The Decanter"
-						SummaryText="{Binding QueueSummaryText}"
-						ActiveText="{Binding QueueActiveText}"
-						Progress="{Binding QueueProgress}"
-						ShowProgress="{Binding HasActiveWork}"
-						IsExpanded="{Binding IsQueueExpanded, Mode=TwoWay}"
-						CancelCommand="{Binding CancelAllProcessingCommand}"
-						CanCancel="{Binding HasActiveWork}">
-						<components:DecanterSummary.DetailsContent>
-							<ListBox ItemsSource="{Binding ActiveQueueItems}" ItemTemplate="{StaticResource TastingQueueRow}"
-								MaxHeight="320" AutomationProperties.Name="Active processing work" />
-						</components:DecanterSummary.DetailsContent>
-					</components:DecanterSummary>
-				</Grid>
+				</DockPanel>
 
-				<Grid x:Name="TastingLowerRow" ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto"
-					ColumnSpacing="{DynamicResource Libation.Space.4}">
+				<DockPanel x:Name="TastingLowerRow" LastChildFill="True">
+					<components:DropZone
+						x:Name="TastingDropZone"
+						Title="Add books to your cellar"
+						Hint="Drag and drop audiobook files or folders, or choose them from this computer."
+						AcceptedTypesText="Uses Libation's existing file locator"
+						BrowseText="Browse Files"
+						BrowseCommand="{Binding LocateAudiobooksCommand}"
+						DropCommand="{Binding DropAudiobooksCommand}">
+						<components:DropZone.IllustrationContent>
+							<Image Width="180" Height="130" Stretch="Uniform"
+								Source="/Assets/ContemporaryCellar/tasting-room-book-crate.png" />
+						</components:DropZone.IllustrationContent>
+					</components:DropZone>
 					<Border Classes="card raised" IsVisible="{Binding HasLibrary}">
 						<StackPanel Spacing="{DynamicResource Libation.Space.3}">
 							<Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource Libation.Space.3}">
 								<StackPanel>
-									<TextBlock Text="Recent Additions" FontFamily="{DynamicResource Libation.Font.Display}"
+									<TextBlock Text="From Your Library" FontFamily="{DynamicResource Libation.Font.Display}"
 										FontSize="{DynamicResource Libation.FontSize.Section}" Foreground="{DynamicResource Libation.Brush.TextPrimary}" />
-									<TextBlock Text="Titles ordered by the date Libation added them."
+									<TextBlock Text="Recently added audiobooks, with their real library status."
 										Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
 								</StackPanel>
 								<Button Grid.Column="1" Classes="contemporary quiet" Content="Open Library"
@@ -247,15 +291,7 @@
 							</ListBox>
 						</StackPanel>
 					</Border>
-					<components:DropZone
-						x:Name="TastingDropZone"
-						Grid.Column="1"
-						Title="Add books to your cellar"
-						Hint="Choose audiobook files or folders already on this computer."
-							AcceptedTypesText="Uses Libation's existing file locator"
-							BrowseCommand="{Binding LocateAudiobooksCommand}"
-							DropCommand="{Binding DropAudiobooksCommand}" />
-				</Grid>
+				</DockPanel>
 
 				<Border Classes="card">
 					<Grid ColumnDefinitions="*,*,*" ColumnSpacing="{DynamicResource Libation.Space.4}">

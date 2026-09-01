@@ -5,12 +5,20 @@
 			 x:Name="Root">
 	<UserControl.Styles>
 		<Style Selector="components|MetricCard Path#MetricIcon"><Setter Property="Stroke" Value="{DynamicResource Libation.Brush.TextSecondary}" /></Style>
+		<Style Selector="components|MetricCard.strip Border#MetricSurface">
+			<Setter Property="Background" Value="Transparent" />
+			<Setter Property="BorderBrush" Value="Transparent" />
+			<Setter Property="BorderThickness" Value="0" />
+			<Setter Property="CornerRadius" Value="0" />
+			<Setter Property="BoxShadow" Value="{DynamicResource Libation.Shadow.None}" />
+			<Setter Property="Padding" Value="{DynamicResource Libation.Thickness.3}" />
+		</Style>
 		<Style Selector="components|MetricCard:info Path#MetricIcon"><Setter Property="Stroke" Value="{DynamicResource Libation.Brush.Info}" /></Style>
 		<Style Selector="components|MetricCard:success Path#MetricIcon"><Setter Property="Stroke" Value="{DynamicResource Libation.Brush.Success}" /></Style>
 		<Style Selector="components|MetricCard:warning Path#MetricIcon"><Setter Property="Stroke" Value="{DynamicResource Libation.Brush.Warning}" /></Style>
 		<Style Selector="components|MetricCard:danger Path#MetricIcon"><Setter Property="Stroke" Value="{DynamicResource Libation.Brush.Danger}" /></Style>
 	</UserControl.Styles>
-	<Border Classes="card raised" AutomationProperties.Name="{Binding Label, ElementName=Root}">
+	<Border x:Name="MetricSurface" Classes="card raised" AutomationProperties.Name="{Binding Label, ElementName=Root}">
 		<Grid ColumnDefinitions="Auto,*" ColumnSpacing="{DynamicResource Libation.Space.4}">
 			<Path x:Name="MetricIcon"
 				  Width="24" Height="24" Stretch="Uniform" StrokeThickness="1.75"

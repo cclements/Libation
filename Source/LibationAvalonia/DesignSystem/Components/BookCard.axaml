@@ -12,7 +12,7 @@
 	</UserControl.Styles>
 	<Border x:Name="CardRoot" Classes="card raised" AutomationProperties.Name="{Binding Title, ElementName=Root}">
 		<Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="{DynamicResource Libation.Space.3}">
-			<Grid Height="180">
+			<Grid Height="232">
 				<Border Background="{DynamicResource Libation.Brush.CoverPlaceholder}" CornerRadius="{DynamicResource Libation.Radius.Small}"
 						IsVisible="{Binding Cover, ElementName=Root, Converter={x:Static ObjectConverters.IsNull}}">
 					<Path Data="{DynamicResource glyph.library}" Stretch="Uniform" Width="64" Height="64"
@@ -29,7 +29,7 @@
 						AutomationProperties.Name="More book actions" />
 			</Grid>
 			<StackPanel Grid.Row="1" Spacing="{DynamicResource Libation.Space.1}">
-				<TextBlock Text="{Binding Title, ElementName=Root}" FontWeight="SemiBold" FontSize="{DynamicResource Libation.FontSize.BodyStrong}"
+				<TextBlock Text="{Binding Title, ElementName=Root}" FontFamily="{DynamicResource Libation.Font.Display}" FontWeight="SemiBold" FontSize="{DynamicResource Libation.FontSize.BodyStrong}"
 						   Foreground="{DynamicResource Libation.Brush.TextPrimary}" TextWrapping="Wrap" MaxLines="2" />
 				<TextBlock Text="{Binding Author, ElementName=Root}" Foreground="{DynamicResource Libation.Brush.TextSecondary}"
 						   FontSize="{DynamicResource Libation.FontSize.BodySmall}" TextTrimming="CharacterEllipsis" />
@@ -45,6 +45,7 @@
 			</StackPanel>
 			<Button Grid.Row="2" Classes="contemporary" Content="Open" Command="{Binding Command, ElementName=Root}"
 					CommandParameter="{Binding CommandParameter, ElementName=Root}" HorizontalAlignment="Stretch"
+					IsVisible="{Binding ShowOpenAction, ElementName=Root}"
 					AutomationProperties.Name="{Binding Title, ElementName=Root}" />
 		</Grid>
 	</Border>

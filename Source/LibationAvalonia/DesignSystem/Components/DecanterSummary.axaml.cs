@@ -13,6 +13,9 @@ public partial class DecanterSummary : UserControl
 	public static readonly StyledProperty<double> ProgressProperty = AvaloniaProperty.Register<DecanterSummary, double>(nameof(Progress));
 	public static readonly StyledProperty<bool> ShowProgressProperty = AvaloniaProperty.Register<DecanterSummary, bool>(nameof(ShowProgress));
 	public static readonly StyledProperty<bool> IsExpandedProperty = AvaloniaProperty.Register<DecanterSummary, bool>(nameof(IsExpanded), defaultBindingMode: BindingMode.TwoWay);
+	public static readonly StyledProperty<object?> IllustrationContentProperty = AvaloniaProperty.Register<DecanterSummary, object?>(nameof(IllustrationContent));
+	public static readonly StyledProperty<double> IllustrationWidthProperty = AvaloniaProperty.Register<DecanterSummary, double>(nameof(IllustrationWidth), 120);
+	public static readonly StyledProperty<double> IllustrationHeightProperty = AvaloniaProperty.Register<DecanterSummary, double>(nameof(IllustrationHeight), 92);
 	public static readonly StyledProperty<object?> DetailsContentProperty = AvaloniaProperty.Register<DecanterSummary, object?>(nameof(DetailsContent));
 	public static readonly StyledProperty<ICommand?> PauseCommandProperty = AvaloniaProperty.Register<DecanterSummary, ICommand?>(nameof(PauseCommand));
 	public static readonly StyledProperty<ICommand?> CancelCommandProperty = AvaloniaProperty.Register<DecanterSummary, ICommand?>(nameof(CancelCommand));
@@ -27,6 +30,9 @@ public partial class DecanterSummary : UserControl
 	public double Progress { get => GetValue(ProgressProperty); set => SetValue(ProgressProperty, value); }
 	public bool ShowProgress { get => GetValue(ShowProgressProperty); set => SetValue(ShowProgressProperty, value); }
 	public bool IsExpanded { get => GetValue(IsExpandedProperty); set => SetValue(IsExpandedProperty, value); }
+	public object? IllustrationContent { get => GetValue(IllustrationContentProperty); set => SetValue(IllustrationContentProperty, value); }
+	public double IllustrationWidth { get => GetValue(IllustrationWidthProperty); set => SetValue(IllustrationWidthProperty, value); }
+	public double IllustrationHeight { get => GetValue(IllustrationHeightProperty); set => SetValue(IllustrationHeightProperty, value); }
 	public object? DetailsContent { get => GetValue(DetailsContentProperty); set => SetValue(DetailsContentProperty, value); }
 	public ICommand? PauseCommand { get => GetValue(PauseCommandProperty); set => SetValue(PauseCommandProperty, value); }
 	public ICommand? CancelCommand { get => GetValue(CancelCommandProperty); set => SetValue(CancelCommandProperty, value); }

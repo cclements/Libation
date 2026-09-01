@@ -1,7 +1,13 @@
 <UserControl xmlns="https://github.com/avaloniaui"
 			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:components="using:LibationAvalonia.DesignSystem.Components"
 			 x:Class="LibationAvalonia.DesignSystem.Components.PageHeader"
 			 x:Name="Root">
+	<UserControl.Styles>
+		<Style Selector="components|PageHeader.hero TextBlock#TitleBlock">
+			<Setter Property="FontSize" Value="{DynamicResource Libation.FontSize.Hero}" />
+		</Style>
+	</UserControl.Styles>
 	<Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource Libation.Space.5}">
 		<Grid RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="{DynamicResource Libation.Space.2}">
 			<TextBlock Text="{Binding Eyebrow, ElementName=Root}"
@@ -11,7 +17,7 @@
 					   FontSize="{DynamicResource Libation.FontSize.Caption}"
 					   FontWeight="SemiBold" />
 			<StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="{DynamicResource Libation.Space.3}">
-				<TextBlock Text="{Binding Title, ElementName=Root}"
+				<TextBlock x:Name="TitleBlock" Text="{Binding Title, ElementName=Root}"
 						   Foreground="{DynamicResource Libation.Brush.TextPrimary}"
 						   FontFamily="{DynamicResource Libation.Font.Display}"
 						   FontSize="{DynamicResource Libation.FontSize.Page}"

@@ -1,13 +1,14 @@
 <UserControl xmlns="https://github.com/avaloniaui"
 			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 			 xmlns:components="using:LibationAvalonia.DesignSystem.Components"
+			 xmlns:designSystem="using:LibationAvalonia.DesignSystem"
 			 x:Class="LibationAvalonia.DesignSystem.Components.ToastHost"
 			 x:Name="Root"
 			 IsHitTestVisible="True">
 	<ItemsControl ItemsSource="{Binding ItemsSource, ElementName=Root}"
 				  ItemTemplate="{Binding ItemTemplate, ElementName=Root}"
 				  AutomationProperties.Name="Notifications"
-				  AutomationProperties.LiveSetting="Polite">
+				  AutomationProperties.LiveSetting="{x:Static designSystem:PlatformAutomationPolicy.Polite}">
 		<ItemsControl.ItemsPanel>
 			<ItemsPanelTemplate><StackPanel Spacing="{DynamicResource Libation.Space.2}" /></ItemsPanelTemplate>
 		</ItemsControl.ItemsPanel>
