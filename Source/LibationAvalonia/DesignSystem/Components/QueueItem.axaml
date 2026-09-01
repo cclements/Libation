@@ -1,10 +1,12 @@
 <UserControl xmlns="https://github.com/avaloniaui"
 			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 			 xmlns:components="using:LibationAvalonia.DesignSystem.Components"
+			 xmlns:designSystem="using:LibationAvalonia.DesignSystem"
 			 x:Class="LibationAvalonia.DesignSystem.Components.QueueItem"
 			 x:Name="Root">
 	<Border Classes="card" MinHeight="{DynamicResource Libation.Density.QueueItemHeight}"
-			AutomationProperties.Name="{Binding Title, ElementName=Root}" AutomationProperties.LiveSetting="Polite">
+			AutomationProperties.Name="{Binding Title, ElementName=Root}"
+			AutomationProperties.LiveSetting="{x:Static designSystem:PlatformAutomationPolicy.Polite}">
 		<Grid RowDefinitions="Auto,Auto" RowSpacing="{DynamicResource Libation.Space.2}">
 		<Expander IsExpanded="{Binding IsExpanded, ElementName=Root, Mode=TwoWay}">
 			<Expander.Header>

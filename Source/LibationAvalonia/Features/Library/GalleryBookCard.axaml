@@ -18,6 +18,7 @@
 			Status="{Binding Status}"
 			StatusText="{Binding StatusText}"
 			IsSelected="{Binding IsSelected}"
+			ShowOpenAction="False"
 			Command="{Binding OpenCommand, ElementName=Root}"
 			ContextCommand="{Binding ContextCommand, ElementName=Root}" />
 		<TextBlock Grid.Row="1"

@@ -38,10 +38,20 @@ public sealed class ShellNavigationItemViewModel(AppRoute route) : ViewModelBase
 			? value as Geometry
 			: null;
 	public string AccessibleDescription => Route.AccessibleDescription;
+	public IBrush SelectionBackground
+		=> IsSelected
+			&& App.Current.TryGetResource("Libation.Brush.AccentPrimary", App.Current.ActualThemeVariant, out var value)
+			&& value is IBrush brush
+				? brush
+				: Brushes.Transparent;
 	public bool IsSelected
 	{
 		get => isSelected;
-		internal set => this.RaiseAndSetIfChanged(ref isSelected, value);
+		internal set
+		{
+			this.RaiseAndSetIfChanged(ref isSelected, value);
+			this.RaisePropertyChanged(nameof(SelectionBackground));
+		}
 	}
 }
 

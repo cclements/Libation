@@ -18,12 +18,54 @@
 		x:Class="LibationAvalonia.Shell.AppShellView"
 		x:Name="Root"
 		x:DataType="shell:AppShellViewModel">
+	<UserControl.Styles>
+		<Style Selector="Button.nav">
+			<Setter Property="HorizontalAlignment" Value="Stretch" />
+			<Setter Property="HorizontalContentAlignment" Value="Left" />
+			<Setter Property="Padding" Value="12,8" />
+			<Setter Property="Background" Value="Transparent" />
+			<Setter Property="Foreground" Value="{DynamicResource Libation.Brush.TextPrimary}" />
+			<Setter Property="BorderBrush" Value="Transparent" />
+			<Setter Property="BorderThickness" Value="1" />
+			<Setter Property="CornerRadius" Value="{DynamicResource Libation.Radius.Small}" />
+		</Style>
+		<Style Selector="Button.nav:pointerover">
+			<Setter Property="Background" Value="{DynamicResource Libation.Brush.SurfaceInteractive}" />
+			<Setter Property="BorderBrush" Value="{DynamicResource Libation.Brush.BorderSubtle}" />
+		</Style>
+		<Style Selector="Button.nav:pressed">
+			<Setter Property="Background" Value="{DynamicResource Libation.Brush.Selection}" />
+		</Style>
+		<Style Selector="Button.nav:focus-visible">
+			<Setter Property="BorderBrush" Value="{DynamicResource Libation.Brush.Focus}" />
+			<Setter Property="BorderThickness" Value="2" />
+		</Style>
+		<Style Selector="Border.nav-item">
+			<Setter Property="MinHeight" Value="{DynamicResource Libation.Density.RowHeight}" />
+			<Setter Property="Padding" Value="12" />
+			<Setter Property="Background" Value="Transparent" />
+			<Setter Property="BorderBrush" Value="Transparent" />
+			<Setter Property="BorderThickness" Value="1" />
+			<Setter Property="CornerRadius" Value="{DynamicResource Libation.Radius.Small}" />
+		</Style>
+	</UserControl.Styles>
 	<Grid Background="{DynamicResource Libation.Brush.Canvas}"
 		  RowDefinitions="*,Auto,Auto">
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition Width="{Binding NavigationColumnWidth}" />
 			<ColumnDefinition Width="*" />
 		</Grid.ColumnDefinitions>
+		<!-- The rail spans both columns so it can become an overlay. Spanning
+		     children do not size an Auto column, so reserve the inline rail's
+		     design-token width explicitly in expanded and compact layouts. -->
+		<Border Grid.RowSpan="3"
+			Width="{DynamicResource Libation.Navigation.WidthExpanded}"
+			IsVisible="{Binding IsRailExpanded}"
+			IsHitTestVisible="False" />
+		<Border Grid.RowSpan="3"
+			Width="{DynamicResource Libation.Navigation.WidthCompact}"
+			IsVisible="{Binding IsRailCompact}"
+			IsHitTestVisible="False" />
 		<Button Grid.RowSpan="3" Grid.ColumnSpan="2" ZIndex="20"
 			IsVisible="{Binding ShowNavigationScrim}"
 			Command="{Binding CloseNavigationOverlayCommand}"
@@ -41,28 +83,34 @@
 			SelectedItem="{Binding SelectedPrimaryItem, Mode=TwoWay}"
 			IsExpanded="{Binding IsNavigationRailExpanded}">
 			<components:LibationNavigationRail.BrandContent>
-				<Viewbox Width="32" Height="32" Margin="0,4,0,8">
-					<Path Data="{StaticResource brand.mark.one-color}"
-						  Stroke="{DynamicResource Libation.Brush.AccentSecondary}"
-						  StrokeThickness="1.75"
-						  StrokeLineCap="Round"
-						  StrokeJoin="Round" />
-				</Viewbox>
+				<Grid Margin="0,4,0,8">
+					<ContentControl IsVisible="{Binding IsNavigationRailExpanded}"
+						Template="{DynamicResource brand.wordmark.horizontal.light}" />
+					<Viewbox Width="32" Height="32" IsVisible="{Binding !IsNavigationRailExpanded}">
+						<Path Data="{StaticResource brand.mark.one-color}"
+							  Stroke="{DynamicResource Libation.Brush.AccentSecondary}"
+							  StrokeThickness="1.75"
+							  StrokeLineCap="Round"
+							  StrokeJoin="Round" />
+					</Viewbox>
+				</Grid>
 			</components:LibationNavigationRail.BrandContent>
 			<components:LibationNavigationRail.ItemTemplate>
 				<DataTemplate x:DataType="shell:ShellNavigationItemViewModel">
-					<Grid ColumnDefinitions="24,*" ColumnSpacing="12" Margin="2,5">
-						<Path Width="20" Height="20"
+					<Border Classes="nav-item" Background="{Binding SelectionBackground}">
+						<Grid ColumnDefinitions="24,*" ColumnSpacing="12" Margin="2,5">
+							<Path Width="20" Height="20"
 							  Stretch="Uniform"
 							  Stroke="{DynamicResource Libation.Brush.TextPrimary}"
 							  StrokeThickness="1.75"
 							  StrokeLineCap="Round"
 							  StrokeJoin="Round"
 							  Data="{Binding IconData}" />
-						<TextBlock Grid.Column="1"
+							<TextBlock Grid.Column="1"
 								   VerticalAlignment="Center"
 								   Text="{Binding Label}" />
-					</Grid>
+						</Grid>
+					</Border>
 				</DataTemplate>
 			</components:LibationNavigationRail.ItemTemplate>
 			<components:LibationNavigationRail.FooterContent>
@@ -151,6 +199,7 @@
 			</Menu>
 
 			<Border x:Name="HeaderRegion" Grid.Row="1"
+					IsVisible="{Binding !IsOverviewRoute}"
 					Background="{DynamicResource Libation.Brush.Surface}"
 					BorderBrush="{DynamicResource Libation.Brush.BorderSubtle}"
 					BorderThickness="0,0,0,1"
@@ -252,7 +301,8 @@
 
 				<Grid IsVisible="{Binding IsOverviewRoute}">
 					<Grid IsVisible="{Binding IsCellarComposition}">
-						<overview:CellarOverviewView DataContext="{Binding Dashboard, Mode=OneTime}" />
+						<overview:CellarOverviewView Library="{Binding DataContext.Library, ElementName=Root, Mode=OneTime}"
+							DataContext="{Binding Dashboard, Mode=OneTime}" />
 					</Grid>
 					<Grid IsVisible="{Binding !IsCellarComposition}">
 						<overview:TastingRoomOverviewView DataContext="{Binding Dashboard, Mode=OneTime}" />
@@ -287,6 +337,10 @@
 			ShowProgress="{Binding Processing.ShowProgress}"
 			CancelCommand="{Binding Processing.CancelAllCommand}"
 			CanCancel="{Binding Processing.CanCancel}">
+			<components:DecanterSummary.IllustrationContent>
+				<Image Width="120" Height="92" Stretch="Uniform"
+					Source="/Assets/ContemporaryCellar/decanter-cellar.png" />
+			</components:DecanterSummary.IllustrationContent>
 			<components:DecanterSummary.DetailsContent>
 				<Button Classes="contemporary quiet" HorizontalAlignment="Left"
 					Command="{Binding NavigateCommand}"

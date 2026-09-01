@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
 			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 			 xmlns:components="using:LibationAvalonia.DesignSystem.Components"
+			 xmlns:designSystem="using:LibationAvalonia.DesignSystem"
 			 x:Class="LibationAvalonia.DesignSystem.Components.AttentionBanner"
 			 x:Name="Root">
 	<UserControl.Styles>
@@ -20,7 +21,7 @@
 			Focusable="{Binding FocusOnShow, ElementName=Root}"
 			AutomationProperties.Name="{Binding Title, ElementName=Root}"
 			AutomationProperties.HelpText="{Binding Message, ElementName=Root}"
-			AutomationProperties.LiveSetting="Polite">
+			AutomationProperties.LiveSetting="{x:Static designSystem:PlatformAutomationPolicy.Polite}">
 		<Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto" ColumnSpacing="{DynamicResource Libation.Space.3}">
 			<Path x:Name="BannerIcon" Width="24" Height="24" Stretch="Uniform" StrokeThickness="1.75"
 				  StrokeLineCap="Round" StrokeJoin="Round" Data="M12,3 L22,21 H2 Z M12,9 V14 M12,18 V18.1"

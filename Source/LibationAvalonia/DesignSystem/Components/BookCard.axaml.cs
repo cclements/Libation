@@ -17,6 +17,7 @@ public partial class BookCard : UserControl
 	public static readonly StyledProperty<bool> IsSelectedProperty = AvaloniaProperty.Register<BookCard, bool>(nameof(IsSelected));
 	public static readonly StyledProperty<bool> ShowProgressProperty = AvaloniaProperty.Register<BookCard, bool>(nameof(ShowProgress));
 	public static readonly StyledProperty<double> ProgressProperty = AvaloniaProperty.Register<BookCard, double>(nameof(Progress));
+	public static readonly StyledProperty<bool> ShowOpenActionProperty = AvaloniaProperty.Register<BookCard, bool>(nameof(ShowOpenAction), true);
 	public static readonly StyledProperty<ICommand?> CommandProperty = AvaloniaProperty.Register<BookCard, ICommand?>(nameof(Command));
 	public static readonly StyledProperty<object?> CommandParameterProperty = AvaloniaProperty.Register<BookCard, object?>(nameof(CommandParameter));
 	public static readonly StyledProperty<ICommand?> ContextCommandProperty = AvaloniaProperty.Register<BookCard, ICommand?>(nameof(ContextCommand));
@@ -38,6 +39,7 @@ public partial class BookCard : UserControl
 	public bool IsSelected { get => GetValue(IsSelectedProperty); set => SetValue(IsSelectedProperty, value); }
 	public bool ShowProgress { get => GetValue(ShowProgressProperty); set => SetValue(ShowProgressProperty, value); }
 	public double Progress { get => GetValue(ProgressProperty); set => SetValue(ProgressProperty, value); }
+	public bool ShowOpenAction { get => GetValue(ShowOpenActionProperty); set => SetValue(ShowOpenActionProperty, value); }
 	public ICommand? Command { get => GetValue(CommandProperty); set => SetValue(CommandProperty, value); }
 	public object? CommandParameter { get => GetValue(CommandParameterProperty); set => SetValue(CommandParameterProperty, value); }
 	public ICommand? ContextCommand { get => GetValue(ContextCommandProperty); set => SetValue(ContextCommandProperty, value); }

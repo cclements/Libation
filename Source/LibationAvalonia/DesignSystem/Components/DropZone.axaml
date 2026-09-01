@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
 			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 			 xmlns:components="using:LibationAvalonia.DesignSystem.Components"
+			 xmlns:designSystem="using:LibationAvalonia.DesignSystem"
 			 x:Class="LibationAvalonia.DesignSystem.Components.DropZone"
 			 x:Name="Root">
 	<UserControl.Styles>
@@ -18,9 +19,19 @@
 			AutomationProperties.Name="{Binding Title, ElementName=Root}"
 			AutomationProperties.HelpText="{Binding Hint, ElementName=Root}">
 		<StackPanel HorizontalAlignment="Center" Spacing="{DynamicResource Libation.Space.3}">
+			<ContentControl
+				Width="180"
+				Height="130"
+				Content="{Binding IllustrationContent, ElementName=Root}"
+				IsVisible="{Binding IllustrationContent, ElementName=Root, Converter={x:Static ObjectConverters.IsNotNull}}"
+				HorizontalContentAlignment="Center"
+				VerticalContentAlignment="Center"
+				AutomationProperties.IsControlElementOverride="False"
+				AutomationProperties.AccessibilityView="Raw" />
 			<Path Data="{DynamicResource glyph.add-books}" Width="40" Height="40" Stretch="Uniform"
 				  Stroke="{DynamicResource Libation.Brush.AccentSecondary}" StrokeThickness="1.75"
 				  StrokeLineCap="Round" StrokeJoin="Round"
+				  IsVisible="{Binding IllustrationContent, ElementName=Root, Converter={x:Static ObjectConverters.IsNull}}"
 				  AutomationProperties.IsControlElementOverride="False" AutomationProperties.AccessibilityView="Raw" />
 			<TextBlock Text="{Binding Title, ElementName=Root}" FontFamily="{DynamicResource Libation.Font.Display}"
 					   FontSize="{DynamicResource Libation.FontSize.Section}" Foreground="{DynamicResource Libation.Brush.TextPrimary}"
@@ -29,12 +40,12 @@
 					   TextWrapping="Wrap" TextAlignment="Center" />
 			<TextBlock Text="{Binding AcceptedTypesText, ElementName=Root}" Foreground="{DynamicResource Libation.Brush.TextTertiary}"
 					   FontSize="{DynamicResource Libation.FontSize.Caption}" TextAlignment="Center" />
-			<Button Classes="contemporary" Content="Browse" Command="{Binding BrowseCommand, ElementName=Root}"
+			<Button Classes="contemporary" Content="{Binding BrowseText, ElementName=Root}" Command="{Binding BrowseCommand, ElementName=Root}"
 					CommandParameter="{Binding BrowseCommandParameter, ElementName=Root}" HorizontalAlignment="Center" />
 			<TextBlock Text="{Binding ErrorText, ElementName=Root}"
 					   IsVisible="{Binding ErrorText, ElementName=Root, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
 					   Foreground="{DynamicResource Libation.Brush.Danger}" TextWrapping="Wrap" TextAlignment="Center"
-					   AutomationProperties.LiveSetting="Polite" />
+					   AutomationProperties.LiveSetting="{x:Static designSystem:PlatformAutomationPolicy.Polite}" />
 		</StackPanel>
 	</Border>
 </UserControl>

@@ -28,9 +28,9 @@ namespace LibationAvalonia.Features.Library;
 public sealed class LibraryViewModel : ViewModelBase, IDisposable
 {
 	private static readonly TimeSpan SearchDebounce = TimeSpan.FromMilliseconds(200);
-	private const double GalleryCardWidth = 220;
+	private const double GalleryCardWidth = 196;
 	private const double GalleryCardGap = 12;
-	private const double SmallCoverLogicalWidth = 180;
+	private const double SmallCoverLogicalWidth = 164;
 	private const double MediumCoverLogicalWidth = 300;
 
 	private readonly ProductsDisplayViewModel products;

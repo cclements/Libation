@@ -34,7 +34,7 @@
 					<ItemsControl.ItemTemplate>
 						<DataTemplate x:DataType="library:LibraryBookItemViewModel">
 							<library:GalleryBookCard
-								Width="220"
+								Width="196"
 								SelectionRequested="GalleryCard_SelectionRequested"
 								FocusRequested="GalleryCard_FocusRequested"
 								OpenRequested="GalleryCard_OpenRequested"

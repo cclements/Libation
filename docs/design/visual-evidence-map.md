@@ -1,6 +1,16 @@
 # Contemporary Cellar visual evidence map
 This report closes the visual-asset intake gate for the Contemporary Cellar work. Source paths are relative to `libation-contemporary-cellar-complete-agent-pack/`. Every image below was opened at original resolution on 2026-08-30, and every SHA-256 value was verified against `08-manifests/SHA256SUMS.txt`. The complete checksum manifest passed.
 
+## 2026-09-01 implementation status
+
+The installed-product audit invalidated the earlier implication that retaining a dark rail, metric strip, Flight pane, and Decanter surface meant the implementation was close to the references. It was not. The pre-repair build was miles away in layout correctness and reference fidelity; its rail covered primary content and made normal download actions unreachable.
+
+The current recovery slice reserves rail width, restores the pending-download path, improves the Cellar overview/gallery/Decanter hierarchy, and adds a purpose-built transparent decanter asset. It is a usable foundation, not visual parity. At that recovery checkpoint, major open reference deltas included the full Tasting Room composition and materials; the richer Cellar queue/flight spatial composition; bespoke icons, status seals, interaction states, textures/elevation, and accessibility polish; secondary-screen and Details/table composition; and complete cross-profile asset/licensing and visual-regression evidence.
+
+A subsequent source slice now gives Tasting Room its reference-owned editorial structure: a restrained still-life header, unified metric strip, wide Flight/Decanter relationship, From Your Library region, illustrated add-books drop zone, and compact/narrow stacking. The three new Tasting Room raster assets are original transparent production assets rather than board fragments. The Release source compile passes, but `design-qa.md` remains blocked because the exact implementation has not been launched or captured under the standing explicit-test-approval boundary. Tasting Room visual fidelity therefore remains unproved.
+
+No percentage or “close” label is assigned because the reference pack defines no quantitative parity metric. The unresolved gaps are visibly and structurally substantial. Runtime evidence and the exact package boundary are recorded in `../../../runtime-audit-2026-09-01/AUDIT.md` and the final local-build receipt.
+
 ## Files verified
 
 | Profile | Role | Source | Dimensions | SHA-256 |
@@ -96,3 +106,5 @@ The reference compositions describe a future shell, not the current control tree
 - All recorded dimensions are readable.
 - `08-manifests/SHA256SUMS.txt` verified without mismatch.
 - Blockers: none.
+
+This PASS applies only to reference intake and evidence identity. It is not an implementation-parity gate and must not be reported as one.

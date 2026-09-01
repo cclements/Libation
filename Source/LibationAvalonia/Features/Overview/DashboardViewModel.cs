@@ -93,6 +93,10 @@ public sealed class DashboardViewModel : ViewModelBase, IDisposable
 			"locate audiobooks",
 			commands.LocateAudiobooksAsync,
 			"Libation could not open the audiobook locator. Check the configured Books location and try again.")));
+		DownloadPendingCommand = Track(ReactiveCommand.CreateFromTask(() => RunActionAsync(
+			"download pending titles",
+			commands.DownloadPendingBooksAsync,
+			"Libation could not queue the pending titles. Open Downloads or Processing for title-level details.")));
 		DropAudiobooksCommand = Track(ReactiveCommand.CreateFromTask<IReadOnlyList<string>>(paths => RunActionAsync(
 			"locate dropped audiobooks",
 			() => commands.LocateAudiobooksFromDropAsync(paths),
@@ -253,6 +257,7 @@ public sealed class DashboardViewModel : ViewModelBase, IDisposable
 	public ICommand ManageAccountsCommand { get; }
 	public ICommand ScanLibraryCommand { get; }
 	public ICommand LocateAudiobooksCommand { get; }
+	public ICommand DownloadPendingCommand { get; }
 	public ICommand DropAudiobooksCommand { get; }
 	public ICommand ApplySearchCommand { get; }
 	public ICommand OpenLibraryCommand { get; }

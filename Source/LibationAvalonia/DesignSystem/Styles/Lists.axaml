@@ -15,6 +15,9 @@
 	</Style>
 	<Style Selector="ListBox.contemporary > ListBoxItem:selected">
 		<Setter Property="Background" Value="{DynamicResource Libation.Brush.Selection}" />
+		<Setter Property="Foreground" Value="{DynamicResource Libation.Brush.TextPrimary}" />
+		<Setter Property="BorderBrush" Value="{DynamicResource Libation.Brush.AccentPrimary}" />
+		<Setter Property="BorderThickness" Value="1" />
 	</Style>
 	<Style Selector="ListBox.contemporary > ListBoxItem:focus-visible">
 		<Setter Property="BorderBrush" Value="{DynamicResource Libation.Brush.Focus}" />

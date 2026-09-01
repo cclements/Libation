@@ -1,33 +1,44 @@
 <UserControl xmlns="https://github.com/avaloniaui"
 			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:designSystem="using:LibationAvalonia.DesignSystem"
 			 x:Class="LibationAvalonia.DesignSystem.Components.DecanterSummary"
 			 x:Name="Root">
-		<Border Classes="card raised" AutomationProperties.LiveSetting="Polite">
-		<Grid RowDefinitions="Auto,Auto" RowSpacing="{DynamicResource Libation.Space.2}">
-		<Expander IsExpanded="{Binding IsExpanded, ElementName=Root, Mode=TwoWay}">
-			<Expander.Header>
-				<StackPanel Spacing="{DynamicResource Libation.Space.1}">
-					<TextBlock Text="{Binding Title, ElementName=Root}" FontFamily="{DynamicResource Libation.Font.Display}"
-							   FontSize="{DynamicResource Libation.FontSize.Section}" Foreground="{DynamicResource Libation.Brush.TextPrimary}" />
-					<TextBlock Text="{Binding SummaryText, ElementName=Root}" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
-					<TextBlock Text="{Binding ActiveText, ElementName=Root}" Foreground="{DynamicResource Libation.Brush.TextPrimary}"
-							   FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+	<Border Classes="card raised" AutomationProperties.LiveSetting="{x:Static designSystem:PlatformAutomationPolicy.Polite}">
+		<Grid ColumnDefinitions="Auto,*" ColumnSpacing="{DynamicResource Libation.Space.4}">
+			<ContentControl
+				Width="{Binding IllustrationWidth, ElementName=Root}"
+				Height="{Binding IllustrationHeight, ElementName=Root}"
+				Content="{Binding IllustrationContent, ElementName=Root}"
+				IsVisible="{Binding IllustrationContent, ElementName=Root, Converter={x:Static ObjectConverters.IsNotNull}}"
+				VerticalAlignment="Center"
+				AutomationProperties.IsControlElementOverride="False"
+				AutomationProperties.AccessibilityView="Raw" />
+			<Grid Grid.Column="1" RowDefinitions="Auto,Auto" RowSpacing="{DynamicResource Libation.Space.2}">
+				<Expander IsExpanded="{Binding IsExpanded, ElementName=Root, Mode=TwoWay}">
+					<Expander.Header>
+						<StackPanel Spacing="{DynamicResource Libation.Space.1}">
+							<TextBlock Text="{Binding Title, ElementName=Root}" FontFamily="{DynamicResource Libation.Font.Display}"
+									   FontSize="{DynamicResource Libation.FontSize.Section}" Foreground="{DynamicResource Libation.Brush.TextPrimary}" />
+							<TextBlock Text="{Binding SummaryText, ElementName=Root}" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+							<TextBlock Text="{Binding ActiveText, ElementName=Root}" Foreground="{DynamicResource Libation.Brush.TextPrimary}"
+									   FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+						</StackPanel>
+					</Expander.Header>
+					<StackPanel Spacing="{DynamicResource Libation.Space.3}">
+						<ProgressBar Classes="contemporary prominent" Minimum="0" Maximum="100" Value="{Binding Progress, ElementName=Root}"
+									 IsVisible="{Binding ShowProgress, ElementName=Root}" AutomationProperties.Name="Overall processing progress" />
+						<ContentControl Content="{Binding DetailsContent, ElementName=Root}" />
+					</StackPanel>
+				</Expander>
+				<StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="{DynamicResource Libation.Space.2}" HorizontalAlignment="Right">
+					<Button Classes="contemporary quiet compact" Content="Pause" Command="{Binding PauseCommand, ElementName=Root}"
+							IsEnabled="{Binding CanPause, ElementName=Root}"
+							IsVisible="{Binding PauseCommand, ElementName=Root, Converter={x:Static ObjectConverters.IsNotNull}}" />
+					<Button Classes="contemporary danger compact" Content="Cancel" Command="{Binding CancelCommand, ElementName=Root}"
+							IsEnabled="{Binding CanCancel, ElementName=Root}"
+							IsVisible="{Binding CancelCommand, ElementName=Root, Converter={x:Static ObjectConverters.IsNotNull}}" />
 				</StackPanel>
-			</Expander.Header>
-			<StackPanel Spacing="{DynamicResource Libation.Space.3}">
-				<ProgressBar Classes="contemporary prominent" Minimum="0" Maximum="100" Value="{Binding Progress, ElementName=Root}"
-							 IsVisible="{Binding ShowProgress, ElementName=Root}" AutomationProperties.Name="Overall processing progress" />
-				<ContentControl Content="{Binding DetailsContent, ElementName=Root}" />
-			</StackPanel>
-		</Expander>
-		<StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="{DynamicResource Libation.Space.2}" HorizontalAlignment="Right">
-			<Button Classes="contemporary quiet compact" Content="Pause" Command="{Binding PauseCommand, ElementName=Root}"
-					IsEnabled="{Binding CanPause, ElementName=Root}"
-					IsVisible="{Binding PauseCommand, ElementName=Root, Converter={x:Static ObjectConverters.IsNotNull}}" />
-			<Button Classes="contemporary danger compact" Content="Cancel" Command="{Binding CancelCommand, ElementName=Root}"
-					IsEnabled="{Binding CanCancel, ElementName=Root}"
-					IsVisible="{Binding CancelCommand, ElementName=Root, Converter={x:Static ObjectConverters.IsNotNull}}" />
-		</StackPanel>
+			</Grid>
 		</Grid>
 	</Border>
 </UserControl>

@@ -137,6 +137,7 @@ public sealed class AppShellViewModel : ViewModelBase, IDisposable
 	public bool IsAboutRoute => CurrentRoute.Id == AppRouteId.About;
 	public bool UsesOverviewFlightSurface => IsOverviewRoute && IsCellarComposition;
 	public bool IsRailExpanded => Responsive.Current.NavigationRail == NavigationRailState.Expanded;
+	public bool IsRailCompact => Responsive.Current.NavigationRail == NavigationRailState.Compact;
 	public bool IsRailOverlay => Responsive.Current.NavigationRail == NavigationRailState.Overlay;
 	public bool IsNavigationRailExpanded => IsRailExpanded || IsRailOverlay;
 	public bool IsNavigationRailVisible => !IsRailOverlay || IsNavigationOverlayOpen;
@@ -146,8 +147,7 @@ public sealed class AppShellViewModel : ViewModelBase, IDisposable
 	public bool IsQueueCompact => Responsive.Current.QueueSurface is QueueSurfaceState.CompactBar or QueueSurfaceState.Drawer;
 	public bool ShowQueueDock => configuration.ShowDecanterDock
 		&& Responsive.Current.QueueSurface == QueueSurfaceState.Dock
-		&& !IsProcessingRoute
-		&& !IsOverviewRoute;
+		&& !IsProcessingRoute;
 	public bool ShowDecanterDrawer => IsDecanterDrawerOpen && !ShowQueueDock;
 	public bool IsNavigationOverlayOpen
 	{
@@ -240,6 +240,7 @@ public sealed class AppShellViewModel : ViewModelBase, IDisposable
 		if (e.PropertyName != nameof(ResponsiveLayoutService.Current))
 			return;
 		this.RaisePropertyChanged(nameof(IsRailExpanded));
+		this.RaisePropertyChanged(nameof(IsRailCompact));
 		this.RaisePropertyChanged(nameof(IsRailOverlay));
 		this.RaisePropertyChanged(nameof(IsNavigationRailExpanded));
 		this.RaisePropertyChanged(nameof(IsNavigationRailVisible));

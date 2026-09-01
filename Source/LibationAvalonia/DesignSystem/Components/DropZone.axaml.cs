@@ -14,6 +14,8 @@ public partial class DropZone : UserControl
 	public static readonly StyledProperty<string> TitleProperty = AvaloniaProperty.Register<DropZone, string>(nameof(Title), "Drop files here");
 	public static readonly StyledProperty<string?> HintProperty = AvaloniaProperty.Register<DropZone, string?>(nameof(Hint));
 	public static readonly StyledProperty<string?> AcceptedTypesTextProperty = AvaloniaProperty.Register<DropZone, string?>(nameof(AcceptedTypesText));
+	public static readonly StyledProperty<object?> IllustrationContentProperty = AvaloniaProperty.Register<DropZone, object?>(nameof(IllustrationContent));
+	public static readonly StyledProperty<string> BrowseTextProperty = AvaloniaProperty.Register<DropZone, string>(nameof(BrowseText), "Browse");
 	public static readonly StyledProperty<string?> ErrorTextProperty = AvaloniaProperty.Register<DropZone, string?>(nameof(ErrorText));
 	public static readonly StyledProperty<bool> IsDragOverProperty = AvaloniaProperty.Register<DropZone, bool>(nameof(IsDragOver));
 	public static readonly StyledProperty<ICommand?> BrowseCommandProperty = AvaloniaProperty.Register<DropZone, ICommand?>(nameof(BrowseCommand));
@@ -34,6 +36,8 @@ public partial class DropZone : UserControl
 	public string Title { get => GetValue(TitleProperty); set => SetValue(TitleProperty, value); }
 	public string? Hint { get => GetValue(HintProperty); set => SetValue(HintProperty, value); }
 	public string? AcceptedTypesText { get => GetValue(AcceptedTypesTextProperty); set => SetValue(AcceptedTypesTextProperty, value); }
+	public object? IllustrationContent { get => GetValue(IllustrationContentProperty); set => SetValue(IllustrationContentProperty, value); }
+	public string BrowseText { get => GetValue(BrowseTextProperty); set => SetValue(BrowseTextProperty, value); }
 	public string? ErrorText { get => GetValue(ErrorTextProperty); set => SetValue(ErrorTextProperty, value); }
 	public bool IsDragOver { get => GetValue(IsDragOverProperty); set => SetValue(IsDragOverProperty, value); }
 	public ICommand? BrowseCommand { get => GetValue(BrowseCommandProperty); set => SetValue(BrowseCommandProperty, value); }
