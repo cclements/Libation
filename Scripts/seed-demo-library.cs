@@ -23,7 +23,11 @@ const int Product = 1, Episode = 2, Parent = 4;
 const string AsinPrefix = "DEMO";
 
 var clean = args.Contains("--clean", StringComparer.OrdinalIgnoreCase);
-var pathArg = args.FirstOrDefault(a => !a.StartsWith("--"));
+var countIndex = Array.FindIndex(args, a => a.Equals("--count", StringComparison.OrdinalIgnoreCase));
+var generatedCount = countIndex >= 0 && countIndex + 1 < args.Length ? int.Parse(args[countIndex + 1]) : 0;
+var pathArg = args
+	.Where((a, i) => !a.StartsWith("--") && !(countIndex >= 0 && i == countIndex + 1))
+	.FirstOrDefault();
 
 if (FindLibationFiles(pathArg) is not string libationFiles)
 {
@@ -46,7 +50,7 @@ if (clean)
 	// but the Series and Contributors rows those pointed at are left behind.
 	var removed = Execute($"delete from Books where AudibleProductId like '{AsinPrefix}%'");
 	Execute($"delete from Series where AudibleSeriesId like '{AsinPrefix}%' and SeriesId not in (select SeriesId from SeriesBook)");
-	Execute("delete from Contributors where AudibleContributorId = 'DEMOAUTH' and ContributorId not in (select ContributorId from BookContributor)");
+	Execute("delete from Contributors where (AudibleContributorId = Name or AudibleContributorId = 'DEMOAUTH') and ContributorId not in (select ContributorId from BookContributor)");
 	transaction.Commit();
 
 	foreach (var partial in Directory.Exists(DownloadsInProgress())
@@ -59,11 +63,7 @@ if (clean)
 	return 0;
 }
 
-var books = BuildDemoBooks();
-var contributorId = GetOrCreateId(
-	"select ContributorId from Contributors where AudibleContributorId = $id",
-	"insert into Contributors (Name, AudibleContributorId) values ('Demo Author', $id)",
-	"DEMOAUTH");
+var books = generatedCount > 0 ? BuildGeneratedBooks(generatedCount) : BuildDemoBooks();
 
 var added = 0;
 var partials = new List<string>();
@@ -80,10 +80,11 @@ foreach (var book in books)
 		"""
 		insert into Books
 		 (AudibleProductId, ContentType, Description, IsAbridged, IsSpatial, LengthInMinutes,
-		  Locale, Rating_OverallRating, Rating_PerformanceRating, Rating_StoryRating, Subtitle, Title)
-		values ($asin, $contentType, 'Seeded by seed-demo-library.cs', 0, 0, 600, 'us', 0, 0, 0, $subtitle, $title)
+		  Locale, Rating_OverallRating, Rating_PerformanceRating, Rating_StoryRating, Subtitle, Title, PictureId)
+		values ($asin, $contentType, 'Seeded by seed-demo-library.cs', 0, 0, $length, 'us', 0, 0, 0, $subtitle, $title, $pictureId)
 		""",
-		("$asin", book.Asin), ("$contentType", book.ContentType), ("$title", book.Title), ("$subtitle", book.Subtitle));
+		("$asin", book.Asin), ("$contentType", book.ContentType), ("$title", book.Title), ("$subtitle", book.Subtitle),
+		("$length", book.LengthInMinutes), ("$pictureId", (object?)book.PictureId ?? DBNull.Value));
 
 	var bookId = Scalar("select BookId from Books where AudibleProductId = $asin", ("$asin", book.Asin));
 
@@ -101,17 +102,32 @@ foreach (var book in books)
 	Execute(
 		"""
 		insert into LibraryBooks (BookId, AbsentFromLastScan, Account, DateAdded, IncludedUntil, IsAudiblePlus, IsDeleted)
-		values ($bookId, $isAbsent, 'demo@example.com', '2026-08-13 00:00:00', $includedUntil, $isPlus, $isDeleted)
+		values ($bookId, $isAbsent, 'demo@example.com', $dateAdded, $includedUntil, $isPlus, $isDeleted)
 		""",
 		("$bookId", bookId),
 		("$isAbsent", book.IsAbsent ? 1 : 0),
+		("$dateAdded", book.DateAdded),
 		("$includedUntil", book.IsPlus ? "2027-01-31 00:00:00" : (object)DBNull.Value),
 		("$isPlus", book.IsPlus ? 1 : 0),
 		("$isDeleted", book.IsDeleted ? 1 : 0));
 
+	var authorId = GetOrCreateId(
+		"select ContributorId from Contributors where Name = $id",
+		"insert into Contributors (Name, AudibleContributorId) values ($id, $id)",
+		book.Author);
 	Execute(
 		"insert into BookContributor (BookId, ContributorId, Role, [Order]) values ($bookId, $contributorId, 1, 0)",
-		("$bookId", bookId), ("$contributorId", contributorId));
+		("$bookId", bookId), ("$contributorId", authorId));
+	if (book.Narrator is not null)
+	{
+		var narratorId = GetOrCreateId(
+			"select ContributorId from Contributors where Name = $id",
+			"insert into Contributors (Name, AudibleContributorId) values ($id, $id)",
+			book.Narrator);
+		Execute(
+			"insert into BookContributor (BookId, ContributorId, Role, [Order]) values ($bookId, $contributorId, 2, 0)",
+			("$bookId", bookId), ("$contributorId", narratorId));
+	}
 
 	// The PDF glyph itself keys off UserDefinedItem.PdfStatus, but Book.HasPdf - which drives the
 	// context menu and the "Has PDF" detail - needs an actual supplement.
@@ -155,12 +171,19 @@ if (partials.Count > 0)
 Console.WriteLine();
 Console.WriteLine("Filtering covers these books. Try  HasSubtitle ,  TitleHasColon , or  Trashed  for no matches.");
 Console.WriteLine();
-Console.WriteLine("Start Libation and sort by Title. Expected Liberate column, top to bottom:");
-foreach (var book in books.Where(b => !b.IsDeleted))
-	Console.WriteLine($"  {book.Title,-46} {book.Expectation}");
+if (generatedCount == 0)
+{
+	Console.WriteLine("Start Libation and sort by Title. Expected Liberate column, top to bottom:");
+	foreach (var book in books.Where(b => !b.IsDeleted))
+		Console.WriteLine($"  {book.Title,-46} {book.Expectation}");
+}
+else
+{
+	Console.WriteLine($"Seeded {added} generated titles.");
+}
 
 var trashed = books.Where(b => b.IsDeleted).ToList();
-if (trashed.Count > 0)
+if (trashed.Count > 0 && generatedCount == 0)
 {
 	Console.WriteLine();
 	Console.WriteLine($"{trashed.Count} seeded book(s) are in the trash, so they are NOT in the grid:");
@@ -170,6 +193,10 @@ if (trashed.Count > 0)
 	Console.WriteLine("  - the status bar should end with a clickable \"N in trash\"");
 	Console.WriteLine("  - Settings > Trash Bin should carry the same count");
 	Console.WriteLine("  - filtering for  Trashed  should find nothing and offer to open the trash bin");
+}
+else if (trashed.Count > 0)
+{
+	Console.WriteLine($"Seeded {trashed.Count} generated title(s) in the trash.");
 }
 
 Console.WriteLine();
@@ -346,6 +373,45 @@ static List<DemoBook> BuildDemoBooks()
 	return books;
 }
 
+/// <summary>Deterministic library of any size for layout and performance captures.</summary>
+static List<DemoBook> BuildGeneratedBooks(int count)
+{
+	string[] first = ["The Quiet", "A Distant", "Beneath the", "Letters from", "The Last", "Notes on", "Songs of", "The Long", "Return to", "Under a", "The Cartographer's", "An Atlas of"];
+	string[] second = ["Orchard", "Harbor", "Meridian", "Vineyard", "Winter", "Archive", "Tide", "Lantern", "Border", "Garden", "Mountain", "River", "Cellar", "Library", "Season"];
+	string[] authors = ["Mara Ellison", "Tobias Reinholt", "Ines Okafor", "Declan Marsh", "Yuki Amano", "Rosa Villanueva", "Henrik Solberg", "Amara Nwosu", "Léa Fontaine", "Søren Kjær", "Priya Raman", "Oskar Lindqvist"];
+	string[] narrators = ["Joanna Petrie", "Marcus Hale", "Adaeze Bello", "Simon Vance-Reed", "Kaori Ito", "Nadia Farouk", "Rob Inglis-Wynn", "Elena Sorokina"];
+	var books = new List<DemoBook>(count);
+	for (var i = 0; i < count; i++)
+	{
+		var asin = $"DEMOGEN{i:D6}";
+		var status = (i % 10) switch { < 6 => Liberated, < 9 => NotLiberated, _ => Error };
+		int? pdf = (i % 4) switch { 0 => Liberated, 1 => NotLiberated, _ => null };
+		var daysAgo = (i * 37) % 730;
+		var date = new DateTime(2026, 9, 1).AddDays(-daysAgo).ToString("yyyy-MM-dd HH:mm:ss");
+		var series = i % 5 == 0 ? $"DEMOSER{i / 5 % 40:D3}" : null;
+		books.Add(new DemoBook(
+			Asin: asin,
+			Title: $"{first[i % first.Length]} {second[(i * 7) % second.Length]}{(i % 17 == 0 ? ": A Novel" : "")}",
+			ContentType: Product,
+			BookStatus: status,
+			PdfStatus: pdf,
+			IsPlus: i % 7 == 0,
+			NeedsPartialDownload: false,
+			Expectation: "",
+			SeriesAsin: series,
+			SeriesOrder: series is null ? null : ((i / 5) % 3 + 1).ToString(),
+			IsAbsent: i % 41 == 0,
+			Subtitle: i % 11 == 0 ? "Book Two of the Demo Sequence" : "",
+			IsDeleted: i % 53 == 0,
+			Author: authors[(i * 3) % authors.Length],
+			Narrator: narrators[(i * 5) % narrators.Length],
+			LengthInMinutes: 180 + (i * 97) % 1500,
+			DateAdded: date,
+			PictureId: asin));
+	}
+	return books;
+}
+
 /// <summary>Locate the Libation files folder the same way Libation itself does.</summary>
 static string? FindLibationFiles(string? explicitPath)
 {
@@ -480,4 +546,9 @@ record DemoBook(
 	string? SeriesOrder = null,
 	bool IsAbsent = false,
 	string Subtitle = "",
-	bool IsDeleted = false);
+	bool IsDeleted = false,
+	string Author = "Demo Author",
+	string? Narrator = null,
+	int LengthInMinutes = 600,
+	string DateAdded = "2026-08-13 00:00:00",
+	string? PictureId = null);
