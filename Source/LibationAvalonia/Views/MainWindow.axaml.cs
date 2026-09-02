@@ -472,6 +472,7 @@ public partial class MainWindow : ReactiveWindow<MainVM>
 		}
 
 		ShowOnboarding(isManualReentry: false);
+		await RunCapturePlanIfRequestedAsync();
 	}
 
 	private void MainWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)

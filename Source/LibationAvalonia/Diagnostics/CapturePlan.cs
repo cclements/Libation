@@ -16,6 +16,7 @@ public static class CaptureEnvironment
 {
 	public const string PlanVariable = "LIBATION_CAPTURE_PLAN";
 	public const string OutputVariable = "LIBATION_CAPTURE_OUT";
+	public const string OsHandshakeVariable = "LIBATION_CAPTURE_OS_HANDSHAKE";
 
 	public static bool IsRequested
 		=> !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(PlanVariable));
@@ -27,6 +28,12 @@ public static class CaptureEnvironment
 	public static string OutputDirectory
 		=> Environment.GetEnvironmentVariable(OutputVariable)
 			?? Path.Combine(Path.GetDirectoryName(PlanPath) ?? ".", "captures");
+
+	public static string? OsHandshakeDirectory
+		=> Environment.GetEnvironmentVariable(OsHandshakeVariable) is { } directory
+			&& !string.IsNullOrWhiteSpace(directory)
+			? directory
+			: null;
 }
 
 public sealed record CaptureEntry(

@@ -9,6 +9,7 @@ using ReactiveUI;
 using System;
 using System.Reactive;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace LibationAvalonia.Features.Library;
 
@@ -73,6 +74,7 @@ public partial class GalleryBookCard : UserControl
 	public IImage? Cover { get => GetValue(CoverProperty); private set => SetValue(CoverProperty, value); }
 	public ReactiveCommand<Unit, Unit> OpenCommand { get; }
 	public ReactiveCommand<Unit, Unit> ContextCommand { get; }
+	internal Task CoverLoadTask { get; private set; } = Task.CompletedTask;
 
 	protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
 	{
@@ -90,14 +92,22 @@ public partial class GalleryBookCard : UserControl
 		base.OnDetachedFromVisualTree(e);
 	}
 
-	private async void RestartCoverLoad()
+	private void RestartCoverLoad()
 	{
 		CancelCoverLoad();
 		if (!isAttached || DataContext is not LibraryBookItemViewModel item)
+		{
+			CoverLoadTask = Task.CompletedTask;
 			return;
+		}
 
 		var cancellation = new CancellationTokenSource();
 		coverCancellation = cancellation;
+		CoverLoadTask = LoadCoverAsync(item, cancellation);
+	}
+
+	private async Task LoadCoverAsync(LibraryBookItemViewModel item, CancellationTokenSource cancellation)
+	{
 		try
 		{
 			var lease = await item.Owner.CoverCache.AcquireAsync(

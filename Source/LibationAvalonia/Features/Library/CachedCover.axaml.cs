@@ -4,6 +4,7 @@ using Avalonia.Media;
 using Avalonia.VisualTree;
 using System;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace LibationAvalonia.Features.Library;
 
@@ -32,6 +33,7 @@ public partial class CachedCover : UserControl
 	}
 
 	public IImage? Cover { get => GetValue(CoverProperty); private set => SetValue(CoverProperty, value); }
+	internal Task CoverLoadTask { get; private set; } = Task.CompletedTask;
 
 	protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
 	{
@@ -49,14 +51,22 @@ public partial class CachedCover : UserControl
 		base.OnDetachedFromVisualTree(e);
 	}
 
-	private async void RestartCoverLoad()
+	private void RestartCoverLoad()
 	{
 		CancelCoverLoad();
 		if (!isAttached || DataContext is not LibraryBookItemViewModel item)
+		{
+			CoverLoadTask = Task.CompletedTask;
 			return;
+		}
 
 		var cancellation = new CancellationTokenSource();
 		coverCancellation = cancellation;
+		CoverLoadTask = LoadCoverAsync(item, cancellation);
+	}
+
+	private async Task LoadCoverAsync(LibraryBookItemViewModel item, CancellationTokenSource cancellation)
+	{
 		try
 		{
 			var lease = await item.Owner.CoverCache.AcquireAsync(
