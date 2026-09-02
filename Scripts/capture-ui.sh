@@ -51,6 +51,8 @@ fi
 HANDSHAKE="$(mktemp -d "${TMPDIR:-/tmp}/libation-capture.XXXXXX")"
 MANIFEST="$HANDSHAKE/entries.tsv"
 CAPTURE_LOG="$HANDSHAKE/capture-log.txt"
+WINDOW_HELPER="$HANDSHAKE/macos-window-id"
+/usr/bin/xcrun swiftc "$ROOT/Scripts/macos-window-id.swift" -o "$WINDOW_HELPER"
 python3 - "$PLAN" "$MANIFEST" <<'PY'
 import json
 import sys
@@ -80,7 +82,8 @@ cleanup() {
 		kill "$CAFFEINATE_PID" 2>/dev/null || true
 		wait "$CAFFEINATE_PID" 2>/dev/null || true
 	fi
-	rm -f "$HANDSHAKE"/ready-*.txt "$HANDSHAKE"/ack-*.txt "$MANIFEST" "$CAPTURE_LOG"
+	rm -f "$HANDSHAKE"/ready-*.txt "$HANDSHAKE"/ack-*.txt \
+		"$HANDSHAKE"/window-*.png "$MANIFEST" "$CAPTURE_LOG" "$WINDOW_HELPER"
 	rmdir "$HANDSHAKE" 2>/dev/null || true
 }
 trap cleanup EXIT INT TERM
@@ -131,28 +134,46 @@ while IFS=$'\t' read -r INDEX NAME WIDTH HEIGHT; do
 		exit 1
 	fi
 
-	WINDOW_RAW="$(/usr/bin/osascript \
-		-e "tell application \"System Events\" to tell (first application process whose unix id is $APP_PID) to set frontmost to true" \
-		-e "tell application \"System Events\" to tell (first application process whose unix id is $APP_PID) to get {position, size} of front window")"
-	WINDOW_RAW="${WINDOW_RAW// /}"
-	IFS=',' read -r WINDOW_X WINDOW_Y WINDOW_WIDTH WINDOW_HEIGHT <<< "$WINDOW_RAW"
+	WINDOW_INFO=""
+	while [[ -z $WINDOW_INFO ]]; do
+		set +e
+		WINDOW_INFO="$("$WINDOW_HELPER" "$APP_PID" 2>/dev/null)"
+		WINDOW_STATUS=$?
+		set -e
+		if [[ $WINDOW_STATUS -eq 0 && -n $WINDOW_INFO ]]; then
+			break
+		fi
+		WINDOW_INFO=""
+		if ! kill -0 "$APP_PID" 2>/dev/null; then
+			echo "Libation exited before its ready window could be identified for $NAME." >&2
+			exit 1
+		fi
+		if ((SECONDS >= DEADLINE)); then
+			echo "capture plan exceeded its 900-second timeout while identifying the window for $NAME" >&2
+			exit 124
+		fi
+		sleep 0.05
+	done
+	IFS=$'\t' read -r WINDOW_ID WINDOW_WIDTH WINDOW_HEIGHT <<< "$WINDOW_INFO"
 	if [[ -z ${WINDOW_HEIGHT:-} || $WINDOW_WIDTH -lt $WIDTH || $WINDOW_HEIGHT -lt $HEIGHT ]]; then
-		echo "invalid Libation window rectangle for $NAME: $WINDOW_RAW" >&2
+		echo "invalid Libation window metadata for $NAME: $WINDOW_INFO" >&2
 		exit 1
 	fi
 
-	CAPTURE_X=$((WINDOW_X + (WINDOW_WIDTH - WIDTH) / 2))
-	CAPTURE_Y=$((WINDOW_Y + WINDOW_HEIGHT - HEIGHT))
 	TARGET="$OUT/$NAME"
+	RAW="$HANDSHAKE/window-$STEM.png"
 	mkdir -p "$(dirname "$TARGET")"
-	/usr/sbin/screencapture -x -R"$CAPTURE_X,$CAPTURE_Y,$WIDTH,$HEIGHT" "$TARGET"
+	/usr/sbin/screencapture -x -o -l"$WINDOW_ID" "$RAW"
+	python3 "$ROOT/Scripts/crop-macos-window.py" \
+		"$RAW" "$TARGET" "$WINDOW_WIDTH" "$WINDOW_HEIGHT" "$WIDTH" "$HEIGHT"
+	rm -f "$RAW"
 	if [[ ! -s $TARGET ]]; then
 		echo "screencapture did not write $TARGET" >&2
 		MISSING=$((MISSING + 1))
 	fi
 	PIXEL_WIDTH="$(/usr/bin/sips -g pixelWidth "$TARGET" 2>/dev/null | awk '/pixelWidth/ {print $2}')"
 	PIXEL_HEIGHT="$(/usr/bin/sips -g pixelHeight "$TARGET" 2>/dev/null | awk '/pixelHeight/ {print $2}')"
-	printf '%s\t%sx%s\trequested %sx%s\tmacOS screencapture\n' \
+	printf '%s\t%sx%s\trequested %sx%s\tmacOS direct-window screencapture\n' \
 		"$NAME" "$PIXEL_WIDTH" "$PIXEL_HEIGHT" "$WIDTH" "$HEIGHT" >> "$CAPTURE_LOG"
 	: > "$ACK"
 done < "$MANIFEST"
@@ -171,5 +192,5 @@ while IFS=$'\t' read -r _ NAME _ _; do
 	fi
 done < "$MANIFEST"
 
-echo "app exit $STATUS; $PLANNED planned; $MISSING missing; capture: macOS screencapture; output: $OUT"
+echo "app exit $STATUS; $PLANNED planned; $MISSING missing; capture: macOS direct-window screencapture; output: $OUT"
 [[ $STATUS -eq 0 && $MISSING -eq 0 ]]
