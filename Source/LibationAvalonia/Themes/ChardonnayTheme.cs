@@ -83,6 +83,21 @@ public class ChardonnayTheme : IUpdatable, ICloneable
 	public void ApplyTheme(LibationFileManager.Configuration.Theme themeVariant)
 		=> ApplyTheme(FromVariantName(themeVariant));
 
+	/// <summary>
+	/// Populate both Fluent palette variants and reload the theme once. Call this
+	/// before the main visual tree is created so later contemporary light/dark
+	/// profile switches only change the requested variant and never re-template
+	/// live scroll viewers.
+	/// </summary>
+	public void PrepareFluentVariants()
+	{
+		var requestedTheme = App.Current.RequestedThemeVariant;
+		foreach (var variant in FluentVariants)
+			ApplyTheme(variant, deferFluentReload: true);
+		App.Current.RequestedThemeVariant = requestedTheme;
+		ReloadDeferredFluentTheme();
+	}
+
 	/// <param name="deferFluentReload">
 	/// Whether to postpone reloading the fluent theme until <see cref="ReloadDeferredFluentTheme"/> is called.
 	/// Reloading it while a popup is open leaves the popup's contents parented to its old
@@ -141,6 +156,7 @@ public class ChardonnayTheme : IUpdatable, ICloneable
 		fluentReloadDeferred = false;
 
 		var oldFluent = App.Current.Styles.OfType<FluentTheme>().Single();
+		var fluentIndex = App.Current.Styles.IndexOf(oldFluent);
 		App.Current.Styles.Remove(oldFluent);
 
 		//We must make a new fluent theme and add it to the app for
@@ -151,7 +167,7 @@ public class ChardonnayTheme : IUpdatable, ICloneable
 		foreach (var kvp in ColorPalettes)
 			newFluent.Palettes[kvp.Key] = kvp.Value;
 
-		App.Current.Styles.Add(newFluent);
+		App.Current.Styles.Insert(fluentIndex, newFluent);
 	}
 
 	/// <summary> Get the currently-active theme colors. </summary>

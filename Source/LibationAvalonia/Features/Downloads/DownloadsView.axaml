@@ -3,6 +3,7 @@
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:downloads="using:LibationAvalonia.Features.Downloads"
 	xmlns:components="using:LibationAvalonia.DesignSystem.Components"
+	xmlns:properties="using:LibationAvalonia.Properties"
 	x:Class="LibationAvalonia.Features.Downloads.DownloadsView"
 	x:DataType="downloads:DownloadsViewModel">
 	<ScrollViewer HorizontalScrollBarVisibility="Disabled">
@@ -60,7 +61,7 @@
 							<components:StatusBadge Grid.Column="1" Status="{Binding PipelineStatus}"
 								TextOverride="{Binding PipelineBadgeText}" AccessibleName="{Binding PipelineText}" />
 						</Grid>
-						<TextBlock Text="Libation’s existing workflow may download and process a title in one queued operation. This page separates the states in its explanation without claiming a second downloader exists."
+						<TextBlock Text="{x:Static properties:Resources.DownloadsPipelineExplanation}"
 							TextWrapping="Wrap" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
 					</StackPanel>
 				</Border>
@@ -69,7 +70,7 @@
 					<Border Classes="card">
 						<StackPanel Spacing="{DynamicResource Libation.Space.3}">
 							<TextBlock Text="Find and acquire" FontFamily="{DynamicResource Libation.Font.Display}" FontSize="{DynamicResource Libation.FontSize.Section}" />
-							<TextBlock Text="Start the established pending-title workflow, download PDF supplements, or locate open files that already exist on this computer."
+							<TextBlock Text="{x:Static properties:Resources.DownloadsFindAcquireExplanation}"
 								TextWrapping="Wrap" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
 							<StackPanel Orientation="Horizontal" Spacing="8">
 								<Button Classes="contemporary primary" Content="Download pending titles" Command="{Binding DownloadPendingCommand}" />
@@ -81,7 +82,7 @@
 					<Border Grid.Column="1" Classes="card">
 						<StackPanel Spacing="{DynamicResource Libation.Space.3}">
 							<TextBlock Text="Long-running conversion" FontFamily="{DynamicResource Libation.Font.Display}" FontSize="{DynamicResource Libation.FontSize.Section}" />
-							<TextBlock Text="Convert all existing M4B titles to MP3. Original files are retained, and the operation can use substantial time and additional disk space. The established confirmation appears before work starts."
+							<TextBlock Text="{x:Static properties:Resources.DownloadsConvertExplanation}"
 								TextWrapping="Wrap" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
 							<Button Classes="contemporary" HorizontalAlignment="Left" Content="Convert all M4B titles to MP3"
 								Command="{Binding ConvertAllToMp3Command}" />

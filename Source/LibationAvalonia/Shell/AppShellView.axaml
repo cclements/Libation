@@ -82,6 +82,11 @@
 			ItemsSource="{Binding Navigation.PrimaryItems}"
 			SelectedItem="{Binding SelectedPrimaryItem, Mode=TwoWay}"
 			IsExpanded="{Binding IsNavigationRailExpanded}">
+			<components:LibationNavigationRail.Transitions>
+				<Transitions>
+					<TransformOperationsTransition Property="RenderTransform" Duration="{DynamicResource Libation.Motion.EffectiveDuration.Default}" />
+				</Transitions>
+			</components:LibationNavigationRail.Transitions>
 			<components:LibationNavigationRail.BrandContent>
 				<Grid Margin="0,4,0,8">
 					<ContentControl IsVisible="{Binding IsNavigationRailExpanded}"
@@ -97,17 +102,18 @@
 			</components:LibationNavigationRail.BrandContent>
 			<components:LibationNavigationRail.ItemTemplate>
 				<DataTemplate x:DataType="shell:ShellNavigationItemViewModel">
-					<Border Classes="nav-item" Background="{Binding SelectionBackground}">
+					<Border Classes="nav-item">
 						<Grid ColumnDefinitions="24,*" ColumnSpacing="12" Margin="2,5">
 							<Path Width="20" Height="20"
 							  Stretch="Uniform"
-							  Stroke="{DynamicResource Libation.Brush.TextPrimary}"
+							  Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ListBoxItem}}"
 							  StrokeThickness="1.75"
 							  StrokeLineCap="Round"
 							  StrokeJoin="Round"
 							  Data="{Binding IconData}" />
-							<TextBlock Grid.Column="1"
+							<TextBlock Grid.Column="1" Classes="nav-label"
 								   VerticalAlignment="Center"
+								   Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ListBoxItem}}"
 								   Text="{Binding Label}" />
 						</Grid>
 					</Border>
@@ -184,7 +190,7 @@
 					<MenuItem Command="{Binding Main.SetDownloadedAutoAsync}" Header="{x:Static properties:Resources.MenuSetDownloadedAutomaticallyHeader}" />
 					<MenuItem Command="{Binding Main.RemoveVisibleAsync}" Header="{x:Static properties:Resources.MenuRemoveFromLibraryHeader}" />
 				</MenuItem>
-				<MenuItem Header="{x:Static properties:Resources.MenuSettingsHeader}">
+				<MenuItem x:Name="ShellSettingsMenu" Header="{x:Static properties:Resources.MenuSettingsHeader}">
 					<MenuItem Command="{Binding Main.ShowAccountsAsync}" Header="{x:Static properties:Resources.MenuAccountsHeader}" InputGesture="ctrl+shift+A" />
 					<MenuItem Command="{Binding Main.ShowSettingsAsync}" Header="{x:Static properties:Resources.MenuOpenSettingsHeader}" InputGesture="ctrl+P" />
 					<Separator />
@@ -216,9 +222,6 @@
 								   FontWeight="SemiBold"
 								   Foreground="{DynamicResource Libation.Brush.TextPrimary}"
 								   Text="{Binding CurrentRoute.Label}" />
-						<TextBlock FontSize="{DynamicResource Libation.FontSize.BodySmall}"
-								   Foreground="{DynamicResource Libation.Brush.TextSecondary}"
-								   Text="{Binding CurrentRoute.AccessibleDescription}" />
 					</StackPanel>
 					<StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
 						<Border IsVisible="{Binding Main.ActivelyScanning}"
@@ -253,8 +256,15 @@
 				</Grid>
 			</Border>
 
-			<Grid x:Name="ContentRegion" Grid.Row="3" Margin="{DynamicResource Libation.Thickness.4}" ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource Libation.Space.4}">
-			<Panel Grid.Column="0">
+			<Grid x:Name="ContentRegion" Grid.Row="3" Margin="{DynamicResource Libation.Thickness.4}" ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource Libation.Space.4}"
+				Opacity="1" RenderTransform="translateY(0px)">
+				<Grid.Transitions>
+					<Transitions>
+						<DoubleTransition Property="Opacity" Duration="{DynamicResource Libation.Motion.EffectiveDuration.Fast}" />
+						<TransformOperationsTransition Property="RenderTransform" Duration="{DynamicResource Libation.Motion.EffectiveDuration.Default}" />
+					</Transitions>
+				</Grid.Transitions>
+				<Panel Grid.Column="0">
 				<Grid IsVisible="{Binding IsLibraryRoute}">
 					<library:LibraryView x:Name="LibraryDisplay"
 						DataContext="{Binding Library, Mode=OneTime}"
@@ -299,31 +309,33 @@
 					</StackPanel>
 				</ScrollViewer>
 
-				<Grid IsVisible="{Binding IsOverviewRoute}">
-					<Grid IsVisible="{Binding IsCellarComposition}">
-						<overview:CellarOverviewView Library="{Binding DataContext.Library, ElementName=Root, Mode=OneTime}"
-							DataContext="{Binding Dashboard, Mode=OneTime}" />
-					</Grid>
-					<Grid IsVisible="{Binding !IsCellarComposition}">
-						<overview:TastingRoomOverviewView DataContext="{Binding Dashboard, Mode=OneTime}" />
-					</Grid>
-				</Grid>
-			</Panel>
-			<Border x:Name="PersistentFlightPane" Grid.Column="1" Width="360" IsVisible="{Binding ShowPersistentFlightPane}"
+					<ContentControl x:Name="OverviewHost" IsVisible="{Binding IsOverviewRoute}" />
+				</Panel>
+				<Border x:Name="PersistentFlightPane" Grid.Column="1" Width="360" IsVisible="{Binding ShowPersistentFlightPane}"
 					Background="{DynamicResource Libation.Brush.SurfaceRaised}"
 					BorderBrush="{DynamicResource Libation.Brush.BorderSubtle}"
 					BorderThickness="1" CornerRadius="{DynamicResource Libation.Radius.Large}"
-					Padding="{DynamicResource Libation.Thickness.3}">
-				<flight:CurrentFlightView DataContext="{Binding CurrentFlight, Mode=OneTime}" />
-			</Border>
-			<Border x:Name="FlightOverlay" Grid.Column="0" Grid.ColumnSpan="2" Width="360" HorizontalAlignment="Right"
+					Padding="{DynamicResource Libation.Thickness.3}" RenderTransform="translateX(0px)">
+					<Border.Transitions>
+						<Transitions>
+							<TransformOperationsTransition Property="RenderTransform" Duration="{DynamicResource Libation.Motion.EffectiveDuration.Default}" />
+						</Transitions>
+					</Border.Transitions>
+					<flight:CurrentFlightView DataContext="{Binding CurrentFlight, Mode=OneTime}" />
+				</Border>
+				<Border x:Name="FlightOverlay" Grid.Column="0" Grid.ColumnSpan="2" Width="360" HorizontalAlignment="Right"
 					ZIndex="10" IsVisible="{Binding ShowFlightOverlay}"
 					Background="{DynamicResource Libation.Brush.SurfaceRaised}"
 					BorderBrush="{DynamicResource Libation.Brush.BorderStrong}"
 					BorderThickness="1" CornerRadius="{DynamicResource Libation.Radius.Large}"
-					Padding="{DynamicResource Libation.Thickness.3}">
-				<flight:CurrentFlightView DataContext="{Binding CurrentFlight, Mode=OneTime}" />
-			</Border>
+					Padding="{DynamicResource Libation.Thickness.3}" RenderTransform="translateX(0px)">
+					<Border.Transitions>
+						<Transitions>
+							<TransformOperationsTransition Property="RenderTransform" Duration="{DynamicResource Libation.Motion.EffectiveDuration.Default}" />
+						</Transitions>
+					</Border.Transitions>
+					<flight:CurrentFlightView DataContext="{Binding CurrentFlight, Mode=OneTime}" />
+				</Border>
 			</Grid>
 		</Grid>
 
@@ -386,7 +398,7 @@
 									TextTrimming="CharacterEllipsis"
 									Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
 							</StackPanel>
-							<ProgressBar Grid.Column="2" VerticalAlignment="Center"
+							<ProgressBar Grid.Column="2" Classes="contemporary" VerticalAlignment="Center"
 								Minimum="0" Maximum="100"
 								Value="{Binding Processing.Progress}"
 								IsVisible="{Binding Processing.ShowProgress}"
@@ -413,7 +425,13 @@
 			Background="{DynamicResource Libation.Brush.SurfaceRaised}"
 			BorderBrush="{DynamicResource Libation.Brush.BorderStrong}"
 			BorderThickness="1"
-			CornerRadius="{DynamicResource Libation.Radius.Large}">
+			CornerRadius="{DynamicResource Libation.Radius.Large}"
+			RenderTransform="translateX(0px)">
+			<Border.Transitions>
+				<Transitions>
+					<TransformOperationsTransition Property="RenderTransform" Duration="{DynamicResource Libation.Motion.EffectiveDuration.Default}" />
+				</Transitions>
+			</Border.Transitions>
 			<Grid RowDefinitions="Auto,*" RowSpacing="{DynamicResource Libation.Space.3}">
 				<Grid ColumnDefinitions="*,Auto">
 					<TextBlock Text="Processing summary" FontFamily="{DynamicResource Libation.Font.Display}"

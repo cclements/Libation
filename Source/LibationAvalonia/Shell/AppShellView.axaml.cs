@@ -1,9 +1,13 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Media.Transformation;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using DataLayer;
+using LibationAvalonia.DesignSystem.Components;
+using LibationAvalonia.Features.Overview;
+using LibationAvalonia.Properties;
 using LibationAvalonia.ViewModels;
 using LibationFileManager;
 using LibationUiBase.GridView;
@@ -21,22 +25,54 @@ public partial class AppShellView : UserControl
 	private Control? navigationReturnFocus;
 	private Control? flightReturnFocus;
 	private Control? decanterReturnFocus;
+	private CellarOverviewView? cellarOverview;
+	private TastingRoomOverviewView? tastingRoomOverview;
 
 	public AppShellView()
 	{
 		InitializeComponent();
+#if DEBUG
+		ConfigureDebugMenu();
+#endif
 		SizeChanged += (_, e) => ViewModel?.UpdateLayout(e.NewSize);
 		DataContextChanged += (_, _) => OnShellDataContextChanged();
 	}
+
+#if DEBUG
+	private void ConfigureDebugMenu()
+	{
+		var galleryItem = new MenuItem { Header = LibationAvalonia.Properties.Resources.MenuComponentGalleryHeader };
+		galleryItem.Click += (_, _) => ComponentGallery.ShowWindow(TopLevel.GetTopLevel(this) as Window);
+
+		var insertIndex = ShellSettingsMenu.Items.Count;
+		for (var index = 0; index < ShellSettingsMenu.Items.Count; index++)
+		{
+			if (ShellSettingsMenu.Items[index] is MenuItem menuItem
+				&& menuItem.Header?.ToString()?.Contains("Setup", StringComparison.OrdinalIgnoreCase) == true)
+			{
+				insertIndex = index;
+				break;
+			}
+		}
+		ShellSettingsMenu.Items.Insert(insertIndex, galleryItem);
+	}
+#endif
 
 	private void OnShellDataContextChanged()
 	{
 		if (subscribedViewModel is not null)
 			subscribedViewModel.PropertyChanged -= ViewModel_PropertyChanged;
+		if (!ReferenceEquals(subscribedViewModel, ViewModel))
+		{
+			cellarOverview = null;
+			tastingRoomOverview = null;
+			OverviewHost.Content = null;
+		}
 		subscribedViewModel = ViewModel;
 		if (subscribedViewModel is not null)
 			subscribedViewModel.PropertyChanged += ViewModel_PropertyChanged;
 		ViewModel?.UpdateLayout(Bounds.Size);
+		UpdateOverviewHost();
 	}
 
 	private void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -48,23 +84,89 @@ public partial class AppShellView : UserControl
 		{
 			case nameof(AppShellViewModel.IsNavigationOverlayOpen):
 				if (viewModel.IsNavigationOverlayOpen)
+				{
+					PlaySurfaceEntrance(NavigationRail, "translateX(-20px)");
 					EnterTransientSurface(NavigationRail, ref navigationReturnFocus);
+				}
 				else
 					RestoreTransientFocus(ref navigationReturnFocus);
 				break;
 			case nameof(AppShellViewModel.ShowFlightOverlay):
 				if (viewModel.ShowFlightOverlay)
+				{
+					PlaySurfaceEntrance(FlightOverlay, "translateX(20px)");
 					EnterTransientSurface(FlightOverlay, ref flightReturnFocus);
+				}
 				else
 					RestoreTransientFocus(ref flightReturnFocus);
 				break;
 			case nameof(AppShellViewModel.ShowDecanterDrawer):
 				if (viewModel.ShowDecanterDrawer)
+				{
+					PlaySurfaceEntrance(DecanterDrawer, "translateX(20px)");
 					EnterTransientSurface(DecanterDrawer, ref decanterReturnFocus);
+				}
 				else
 					RestoreTransientFocus(ref decanterReturnFocus);
 				break;
+			case nameof(AppShellViewModel.ShowPersistentFlightPane):
+				if (viewModel.ShowPersistentFlightPane)
+					PlaySurfaceEntrance(PersistentFlightPane, "translateX(20px)");
+				break;
+			case nameof(AppShellViewModel.CurrentRoute):
+				PlayRouteEntrance();
+				break;
+			case nameof(AppShellViewModel.IsCellarComposition):
+			case nameof(AppShellViewModel.IsTastingRoomComposition):
+				UpdateOverviewHost();
+				break;
 		}
+	}
+
+	private void UpdateOverviewHost()
+	{
+		if (ViewModel is not { } viewModel)
+		{
+			OverviewHost.Content = null;
+			return;
+		}
+
+		if (viewModel.IsCellarComposition)
+		{
+			cellarOverview ??= new CellarOverviewView
+			{
+				Library = viewModel.Library,
+				DataContext = viewModel.Dashboard,
+			};
+			OverviewHost.Content = cellarOverview;
+		}
+		else
+		{
+			tastingRoomOverview ??= new TastingRoomOverviewView
+			{
+				DataContext = viewModel.Dashboard,
+			};
+			OverviewHost.Content = tastingRoomOverview;
+		}
+	}
+
+	private void PlayRouteEntrance()
+	{
+		ContentRegion.Opacity = 0;
+		ContentRegion.RenderTransform = TransformOperations.Parse("translateY(10px)");
+		Dispatcher.UIThread.Post(() =>
+		{
+			ContentRegion.Opacity = 1;
+			ContentRegion.RenderTransform = TransformOperations.Parse("translateY(0px)");
+		}, DispatcherPriority.Render);
+	}
+
+	private static void PlaySurfaceEntrance(Control surface, string initialTransform)
+	{
+		surface.RenderTransform = TransformOperations.Parse(initialTransform);
+		Dispatcher.UIThread.Post(
+			() => surface.RenderTransform = TransformOperations.Parse("translateX(0px)"),
+			DispatcherPriority.Render);
 	}
 
 	private void EnterTransientSurface(Control surface, ref Control? returnFocus)

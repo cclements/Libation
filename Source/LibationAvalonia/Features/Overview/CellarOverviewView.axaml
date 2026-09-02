@@ -6,6 +6,7 @@
 	xmlns:designSystem="using:LibationAvalonia.DesignSystem"
 	xmlns:flight="using:LibationAvalonia.Features.Flight"
 	xmlns:library="using:LibationAvalonia.Features.Library"
+	xmlns:properties="using:LibationAvalonia.Properties"
 	x:Class="LibationAvalonia.Features.Overview.CellarOverviewView"
 	x:Name="Root"
 	x:DataType="overview:DashboardViewModel">
@@ -133,6 +134,7 @@
 						Severity="{x:Static components:ComponentSeverity.Info}"
 						CommandText="Open Processing" Command="{Binding OpenProcessingCommand}" />
 					<components:MetricCard Margin="0,0,8,8" IconData="{StaticResource glyph.metadata}"
+						IsVisible="{Binding HasLocalStorage}"
 						Value="{Binding LocalStorageText}" Label="Local Storage"
 						StatusText="{Binding StorageStatusText}" />
 				</UniformGrid>
@@ -223,7 +225,7 @@
 						<components:DropZone
 							Title="Locate audiobooks"
 							Hint="Choose audiobook files or folders already on this computer."
-							AcceptedTypesText="Uses Libation's existing file locator"
+							AcceptedTypesText="{x:Static properties:Resources.SupportedAudiobookFileTypes}"
 							BrowseCommand="{Binding LocateAudiobooksCommand}"
 							DropCommand="{Binding DropAudiobooksCommand}" />
 					</StackPanel>

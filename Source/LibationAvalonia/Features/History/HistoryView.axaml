@@ -3,6 +3,7 @@
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:history="using:LibationAvalonia.Features.History"
 	xmlns:components="using:LibationAvalonia.DesignSystem.Components"
+	xmlns:properties="using:LibationAvalonia.Properties"
 	x:Class="LibationAvalonia.Features.History.HistoryView"
 	x:DataType="history:HistoryViewModel">
 	<UserControl.Resources>
@@ -22,11 +23,11 @@
 	</UserControl.Resources>
 	<Grid Margin="{DynamicResource Libation.Thickness.5}" RowDefinitions="Auto,Auto,Auto,Auto,*"
 		RowSpacing="{DynamicResource Libation.Space.3}">
-			<components:PageHeader Grid.Row="0" Eyebrow="Available records" Title="History"
-				SupportingText="Review the timestamps and current-session outcomes Libation already records." />
+			<components:PageHeader Grid.Row="0" Eyebrow="{x:Static properties:Resources.HistoryEyebrow}" Title="History"
+				SupportingText="{x:Static properties:Resources.HistorySupportingText}" />
 			<components:AttentionBanner Grid.Row="1" Severity="{x:Static components:ComponentSeverity.Info}"
-				Title="History is currently a limited projection"
-				Message="This is not a comprehensive audit log. It includes library-added dates, recorded last-download dates, and retained processing-session messages. Scans, exports, metadata changes, removals, restores, retries, accounts, and marketplaces are shown only when an existing source records them." />
+				Title="{x:Static properties:Resources.HistoryScopeTitle}"
+				Message="{x:Static properties:Resources.HistoryScopeMessage}" />
 			<components:AttentionBanner Grid.Row="2" IsVisible="{Binding HasLoadError}" Severity="{x:Static components:ComponentSeverity.Danger}" FocusOnShow="True"
 				Title="History unavailable" Message="{Binding LoadError}" ActionText="Refresh" ActionCommand="{Binding RefreshCommand}"
 				SecondaryActionText="Copy technical details" SecondaryActionCommand="{Binding CopyTechnicalDetailsCommand}" />

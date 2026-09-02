@@ -5,12 +5,34 @@
 			 x:Name="Root">
 	<UserControl.Styles>
 		<Style Selector="components|MetricCard Path#MetricIcon"><Setter Property="Stroke" Value="{DynamicResource Libation.Brush.TextSecondary}" /></Style>
-		<Style Selector="components|MetricCard.strip Border#MetricSurface">
+		<Style Selector="components|MetricCard Button#MetricSurface">
+			<Setter Property="HorizontalAlignment" Value="Stretch" />
+			<Setter Property="HorizontalContentAlignment" Value="Stretch" />
+			<Setter Property="VerticalContentAlignment" Value="Stretch" />
+			<Setter Property="Padding" Value="{DynamicResource Libation.Density.CardPadding}" />
+			<Setter Property="Background" Value="{DynamicResource Libation.Brush.SurfaceRaised}" />
+			<Setter Property="BorderBrush" Value="{DynamicResource Libation.Brush.BorderSubtle}" />
+			<Setter Property="BorderThickness" Value="1" />
+			<Setter Property="CornerRadius" Value="{DynamicResource Libation.Radius.Medium}" />
+		</Style>
+		<Style Selector="components|MetricCard Button#MetricSurface:pointerover">
+			<Setter Property="Background" Value="{DynamicResource Libation.Brush.SurfaceInteractive}" />
+			<Setter Property="Foreground" Value="{DynamicResource Libation.Brush.TextPrimary}" />
+			<Setter Property="BorderBrush" Value="{DynamicResource Libation.Brush.AccentPrimary}" />
+		</Style>
+		<Style Selector="components|MetricCard Button#MetricSurface:pressed">
+			<Setter Property="Background" Value="{DynamicResource Libation.Brush.Selection}" />
+			<Setter Property="Foreground" Value="{DynamicResource Libation.Brush.TextOnAccent}" />
+		</Style>
+		<Style Selector="components|MetricCard Button#MetricSurface:focus-visible">
+			<Setter Property="BorderBrush" Value="{DynamicResource Libation.Brush.Focus}" />
+			<Setter Property="BorderThickness" Value="2" />
+		</Style>
+		<Style Selector="components|MetricCard.strip Button#MetricSurface">
 			<Setter Property="Background" Value="Transparent" />
 			<Setter Property="BorderBrush" Value="Transparent" />
 			<Setter Property="BorderThickness" Value="0" />
 			<Setter Property="CornerRadius" Value="0" />
-			<Setter Property="BoxShadow" Value="{DynamicResource Libation.Shadow.None}" />
 			<Setter Property="Padding" Value="{DynamicResource Libation.Thickness.3}" />
 		</Style>
 		<Style Selector="components|MetricCard:info Path#MetricIcon"><Setter Property="Stroke" Value="{DynamicResource Libation.Brush.Info}" /></Style>
@@ -18,7 +40,13 @@
 		<Style Selector="components|MetricCard:warning Path#MetricIcon"><Setter Property="Stroke" Value="{DynamicResource Libation.Brush.Warning}" /></Style>
 		<Style Selector="components|MetricCard:danger Path#MetricIcon"><Setter Property="Stroke" Value="{DynamicResource Libation.Brush.Danger}" /></Style>
 	</UserControl.Styles>
-	<Border x:Name="MetricSurface" Classes="card raised" AutomationProperties.Name="{Binding Label, ElementName=Root}">
+	<Button x:Name="MetricSurface" Classes="contemporary metric-card"
+		Command="{Binding Command, ElementName=Root}"
+		CommandParameter="{Binding CommandParameter, ElementName=Root}"
+		Focusable="{Binding Command, ElementName=Root, Converter={x:Static ObjectConverters.IsNotNull}}"
+		IsHitTestVisible="{Binding Command, ElementName=Root, Converter={x:Static ObjectConverters.IsNotNull}}"
+		AutomationProperties.Name="{Binding Label, ElementName=Root}"
+		AutomationProperties.HelpText="{Binding CommandText, ElementName=Root}">
 		<Grid ColumnDefinitions="Auto,*" ColumnSpacing="{DynamicResource Libation.Space.4}">
 			<Path x:Name="MetricIcon"
 				  Width="24" Height="24" Stretch="Uniform" StrokeThickness="1.75"
@@ -31,20 +59,16 @@
 						   FontSize="{DynamicResource Libation.FontSize.Section}" Foreground="{DynamicResource Libation.Brush.TextPrimary}" />
 				<TextBlock Text="{Binding Label, ElementName=Root}" FontSize="{DynamicResource Libation.FontSize.BodySmall}"
 						   Foreground="{DynamicResource Libation.Brush.TextSecondary}" TextWrapping="Wrap" />
-				<StackPanel Orientation="Horizontal" Spacing="{DynamicResource Libation.Space.2}">
+				<Grid ColumnDefinitions="Auto,*" ColumnSpacing="{DynamicResource Libation.Space.2}">
 					<TextBlock Text="{Binding DeltaText, ElementName=Root}"
 							   IsVisible="{Binding DeltaText, ElementName=Root, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
 							   Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
-					<TextBlock Text="{Binding StatusText, ElementName=Root}"
+					<TextBlock Grid.Column="1" Text="{Binding StatusText, ElementName=Root}"
 							   IsVisible="{Binding StatusText, ElementName=Root, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
-							   Foreground="{DynamicResource Libation.Brush.TextSecondary}" FontWeight="SemiBold" />
-				</StackPanel>
-				<Button Classes="contemporary quiet compact" HorizontalAlignment="Left"
-						Content="{Binding CommandText, ElementName=Root}"
-						Command="{Binding Command, ElementName=Root}"
-						CommandParameter="{Binding CommandParameter, ElementName=Root}"
-						IsVisible="{Binding CommandText, ElementName=Root, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+							   Foreground="{DynamicResource Libation.Brush.TextSecondary}" FontWeight="SemiBold"
+							   TextWrapping="Wrap" />
+				</Grid>
 			</StackPanel>
 		</Grid>
-	</Border>
+	</Button>
 </UserControl>

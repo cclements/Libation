@@ -244,4 +244,172 @@
   <data name="ShellDoneReviewingCommandLabel" xml:space="preserve">
     <value>Done reviewing</value>
   </data>
+  <data name="SupportedAudiobookFileTypes" xml:space="preserve">
+    <value>AAX, AA, M4B</value>
+  </data>
+  <data name="DownloadsPipelineExplanation" xml:space="preserve">
+    <value>Downloads and processing share one queue.</value>
+  </data>
+  <data name="DownloadsFindAcquireExplanation" xml:space="preserve">
+    <value>Download pending audiobooks or PDFs, or locate files already on this computer.</value>
+  </data>
+  <data name="DownloadsConvertExplanation" xml:space="preserve">
+    <value>Convert downloaded M4B files to MP3. Original files are kept; confirm before starting.</value>
+  </data>
+  <data name="DownloadsEmptyScanningExplanation" xml:space="preserve">
+    <value>The library is still empty while the account scan runs. Download actions will appear when titles arrive.</value>
+  </data>
+  <data name="DownloadsPendingExplanationFormat" xml:space="preserve">
+    <value>{0} titles need an open copy; {1} already have an Audible-format download.</value>
+  </data>
+  <data name="DownloadsPipelineActiveFormat" xml:space="preserve">
+    <value>{0} active and {1} queued.</value>
+  </data>
+  <data name="DownloadsPipelineIdle" xml:space="preserve">
+    <value>No downloads or processing are queued.</value>
+  </data>
+  <data name="DownloadsRefreshUnchangedError" xml:space="preserve">
+    <value>Libation could not refresh download counts. Your library was not changed.</value>
+  </data>
+  <data name="ToolsSupportingText" xml:space="preserve">
+    <value>Library, file, metadata, and maintenance tools.</value>
+  </data>
+  <data name="ToolsManualBookStatusDescription" xml:space="preserve">
+    <value>Preview and confirm status changes for visible audiobooks.</value>
+  </data>
+  <data name="ToolsManualPdfStatusDescription" xml:space="preserve">
+    <value>Preview and confirm PDF status changes for visible titles.</value>
+  </data>
+  <data name="ToolsTrashDescription" xml:space="preserve">
+    <value>Review and confirm before moving visible titles to Trash.</value>
+  </data>
+  <data name="ToolsFileDiscoveryDescription" xml:space="preserve">
+    <value>Match audiobook files on this computer with catalogued titles.</value>
+  </data>
+  <data name="ToolsLocateDescription" xml:space="preserve">
+    <value>Find processed audiobooks and update matching title status.</value>
+  </data>
+  <data name="ToolsQualityDescription" xml:space="preserve">
+    <value>Compare available audiobooks for source-quality improvements.</value>
+  </data>
+  <data name="ToolsImportExportDescription" xml:space="preserve">
+    <value>Export library metadata or maintain search shortcuts.</value>
+  </data>
+  <data name="ToolsEditFiltersDescription" xml:space="preserve">
+    <value>Edit saved quick filters.</value>
+  </data>
+  <data name="ToolsSaveFilterDescription" xml:space="preserve">
+    <value>Add the active Library filter to Quick Filters.</value>
+  </data>
+  <data name="ToolsFilterHelpDescription" xml:space="preserve">
+    <value>Show search and filter syntax.</value>
+  </data>
+  <data name="ToolsDiagnosticsDescription" xml:space="preserve">
+    <value>Open support information and companion utilities.</value>
+  </data>
+  <data name="ToolsAboutDescription" xml:space="preserve">
+    <value>Show version, release notes, acknowledgements, and update status.</value>
+  </data>
+  <data name="ToolsHangoverDescription" xml:space="preserve">
+    <value>Start the separate Hangover utility.</value>
+  </data>
+  <data name="SettingsSupportingText" xml:space="preserve">
+    <value>Search categories, review appearance, and open the full settings editor.</value>
+  </data>
+  <data name="SettingsEmptyExplanation" xml:space="preserve">
+    <value>Clear the search or open Settings to browse all categories.</value>
+  </data>
+  <data name="SettingsUpdatesDescription" xml:space="preserve">
+    <value>Startup update checks and About.</value>
+  </data>
+  <data name="SettingsClassicColorSummary" xml:space="preserve">
+    <value>Classic color overrides remain available in the current interface settings.</value>
+  </data>
+  <data name="OnboardingSupportingText" xml:space="preserve">
+    <value>Choose a profile now, or return to this setup from Settings.</value>
+  </data>
+  <data name="OnboardingWelcomeBody" xml:space="preserve">
+    <value>Libation catalogs your Audible library and creates local copies you can use outside Audible.</value>
+  </data>
+  <data name="OnboardingProfileChoiceWarning" xml:space="preserve">
+    <value>Select Follow System or another profile before continuing, or skip to keep the current interface.</value>
+  </data>
+  <data name="OnboardingHighContrastDescription" xml:space="preserve">
+    <value>Uses the contemporary layout with stronger semantic contrast.</value>
+  </data>
+  <data name="OnboardingAccountPrivacy" xml:space="preserve">
+    <value>Sign-in and marketplace details stay in your protected Libation account settings.</value>
+  </data>
+  <data name="OnboardingLocationExplanation" xml:space="preserve">
+    <value>Choose where Libation keeps original downloads and converted audiobooks. Locating files finds existing audiobooks without moving them.</value>
+  </data>
+  <data name="OnboardingStorageReminder" xml:space="preserve">
+    <value>Check the selected volume before starting a large library.</value>
+  </data>
+  <data name="OnboardingScanExplanation" xml:space="preserve">
+    <value>You can keep using Libation while the scan runs and follow progress from Overview or Processing.</value>
+  </data>
+  <data name="OnboardingFlightExplanation" xml:space="preserve">
+    <value>Choose books from Library and add the titles you want to process next.</value>
+  </data>
+  <data name="OnboardingStatusExplanation" xml:space="preserve">
+    <value>Download Pending has no completed local copy. Completed is ready in your chosen output location.</value>
+  </data>
+  <data name="OnboardingLibraryUnchangedTitle" xml:space="preserve">
+    <value>Your library stays unchanged</value>
+  </data>
+  <data name="OnboardingLibraryUnchangedMessage" xml:space="preserve">
+    <value>Finishing applies the profile you chose. It does not start a scan or processing.</value>
+  </data>
+  <data name="HistoryEyebrow" xml:space="preserve">
+    <value>Recorded activity</value>
+  </data>
+  <data name="HistorySupportingText" xml:space="preserve">
+    <value>Review recorded catalogue, download, and processing activity.</value>
+  </data>
+  <data name="HistoryScopeTitle" xml:space="preserve">
+    <value>Some actions may not appear</value>
+  </data>
+  <data name="HistoryScopeMessage" xml:space="preserve">
+    <value>History includes library-added dates, download dates, and retained processing messages when those records are available.</value>
+  </data>
+  <data name="AccountsScanIdle" xml:space="preserve">
+    <value>No scan is running. Start a scan to check account authorization.</value>
+  </data>
+  <data name="AccountsAuthorizationSummary" xml:space="preserve">
+    <value>Manage Accounts shows sign-in and marketplace settings. Credentials and tokens are not displayed here.</value>
+  </data>
+  <data name="AccountsReconcileExplanation" xml:space="preserve">
+    <value>Scan selected accounts, then review missing titles before moving their library records to Trash.</value>
+  </data>
+  <data name="TrashPermanentWarning" xml:space="preserve">
+    <value>Restore returns selected records to the Library. Permanently Delete removes selected Libation records immediately, so verify the selection first.</value>
+  </data>
+  <data name="TrashDeleteExplanation" xml:space="preserve">
+    <value>Removes selected Book and LibraryBook records without deleting audiobook files from disk.</value>
+  </data>
+  <data name="ProcessingNoFailuresExplanation" xml:space="preserve">
+    <value>Failed and cancelled work will appear here with details.</value>
+  </data>
+  <data name="ComponentGalleryQueueDetails" xml:space="preserve">
+    <value>2 active titles and 1 waiting title.</value>
+  </data>
+  <data name="FlightQueueAccepted" xml:space="preserve">
+    <value>At least one Current Flight title was added to Processing. Open Processing to review the queue.</value>
+  </data>
+  <data name="FlightQueueRejected" xml:space="preserve">
+    <value>No Current Flight titles were added. Review the queue message and selected titles.</value>
+  </data>
+  <data name="FlightDuplicateOutputFormat" xml:space="preserve">
+    <value>{0} selected title(s) already have local audio. Review the output before processing.</value>
+  </data>
+  <data name="FlightDiskSpaceWarningFormat" xml:space="preserve">
+    <value>Reported free space is below the {0} estimate for {1} title(s). Processing will check free space again before writing files.</value>
+  </data>
+  <data name="MenuComponentGalleryHeader" xml:space="preserve">
+    <value>Component _Gallery...</value>
+  </data>
+  <data name="ComponentGalleryWindowTitle" xml:space="preserve">
+    <value>Libation Component Gallery</value>
+  </data>
 </root>

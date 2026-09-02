@@ -1,21 +1,31 @@
 # Contemporary Cellar asset manifest
 
-This manifest records the production-safe code-native asset surface created for
-the Contemporary Cellar experience. All paths are relative to the repository
-root. The source PNG boards and crops remain visual evidence only and are not
-runtime inputs.
+This manifest records the production asset surface created for the Contemporary
+Cellar experience. All paths are relative to the repository root. Reference
+boards and crops remain visual evidence only; the four raster illustrations
+listed below are intentional runtime inputs.
 
 ## Provenance and license
 
 - Source: original geometry and templates authored in
   `Source/LibationAvalonia/DesignSystem/Assets/` on 2026-08-30.
 - License: GPL-3.0, matching the repository license.
-- External source material: none. The assets were drawn from functional meaning
-  and the written visual contract, not traced from the generated boards.
+- External source material for code-native geometry: none. The assets were drawn
+  from functional meaning and the written visual contract, not traced from the
+  generated boards.
 - Embedded text: none in geometry or illustration masters. The runtime wordmark
   template uses live text rendered by the platform UI font.
 - Intended profiles: shared unless an ID explicitly names Cellar or Tasting
   Room. High Contrast consumes the same geometry with semantic brushes.
+- Display font: Source Serif 4 Regular and Semibold from Adobe's official
+  `source-serif` release, bundled under `Assets/Fonts/` on 2026-09-01 under the
+  SIL Open Font License 1.1 copied to `Assets/Fonts/OFL.txt`.
+- Runtime rasters: generated for this project with OpenAI image generation on
+  2026-09-01 (the crate and Tasting Room decanter source files retained OpenAI
+  Media Service C2PA records before downsampling). They contain no third-party
+  source material identified by the project and are distributed with the
+  repository under GPL-3.0. The original-resolution versions remain recoverable
+  from Git commit `dda01092`.
 
 ## Source dictionaries
 
@@ -75,6 +85,7 @@ profile color and optional seal/ring decoration are supplemental.
 |---|---|---|
 | `status.download-pending`, `status.downloading`, `status.downloaded`, `status.processing`, `status.completed` | shared | Ready. |
 | `status.failed`, `status.cancelled`, `status.unavailable`, `status.needs-attention`, `status.connected` | shared | Ready. |
+| `status.series-collapsed`, `status.series-expanded` | shared | Ready; added in S1 for the contemporary Library grid. |
 
 ## Illustrations
 
@@ -90,7 +101,21 @@ profile color and optional seal/ring decoration are supplemental.
 | `illustration.shared.no-search-results` | `IllustrationAssets.axaml` | shared | Ready code-native template. |
 | `illustration.shared.offline-auth-attention` | `IllustrationAssets.axaml` | shared | Ready code-native template. |
 | `illustration.cellar.bottle-rack-motif` | none | Cellar | Deferred: pure decoration, unnecessary for a complete layout, and contrary to the restrained first-release material treatment. |
-| `illustration.tasting-room.still-life` | none | Tasting Room | Deferred: pure lifestyle decoration with no state meaning and avoidable alcohol-brand emphasis. |
+| `illustration.tasting-room.still-life` | `Source/LibationAvalonia/Assets/ContemporaryCellar/tasting-room-still-life.png` | Tasting Room | Runtime raster; 640 × 379 px for a 320 × 192 display box. |
+
+## Runtime raster illustrations
+
+All four files were downsampled with macOS `sips` on 2026-09-01 while
+preserving aspect ratio. Each resulting file fits within twice its largest
+declared logical display box. Decoration Off and High Contrast do not create or
+show their illustration hosts.
+
+| Asset ID | Runtime path | Generator/date | Largest display box | Runtime pixels | License basis |
+|---|---|---|---|---|---|
+| `illustration.cellar.decanter` | `Source/LibationAvalonia/Assets/ContemporaryCellar/decanter-cellar.png` | OpenAI image generation, 2026-09-01 | 120 × 92 | 240 × 160 | Project-generated; GPL-3.0 repository distribution. |
+| `illustration.tasting-room.add-books-raster` | `Source/LibationAvalonia/Assets/ContemporaryCellar/tasting-room-book-crate.png` | OpenAI Media Service C2PA, 2026-09-01 | 180 × 130 | 346 × 260 | Project-generated; GPL-3.0 repository distribution. |
+| `illustration.tasting-room.decanter-raster` | `Source/LibationAvalonia/Assets/ContemporaryCellar/tasting-room-decanter.png` | OpenAI Media Service C2PA, 2026-09-01 | 156 × 188 | 301 × 376 | Project-generated; GPL-3.0 repository distribution. |
+| `illustration.tasting-room.still-life` | `Source/LibationAvalonia/Assets/ContemporaryCellar/tasting-room-still-life.png` | OpenAI image generation, 2026-09-01 | 320 × 192 | 640 × 379 | Project-generated; GPL-3.0 repository distribution. |
 
 All functional templates use a 96 × 72 internal composition canvas and scale
 through a `Viewbox`. They contain no embedded copy, fake covers, or interaction.
@@ -104,7 +129,8 @@ the Cellar material language without a raster dependency.
 ## Non-shipping visual evidence
 
 `docs/design/asset-contact-sheet.svg` is a source-renderable evidence artifact,
-not an Avalonia or package resource. It defines all 24 glyph and 10 status masters
+not an Avalonia or package resource. It defines all 24 glyph and the 10 status masters
+that preceded the two S1 series-state additions
 from the production dictionaries and renders each at exact 16, 20, 24, and 32
 logical-pixel boxes in four panels:
 
@@ -114,7 +140,7 @@ logical-pixel boxes in four panels:
 - Decoration Off using the Cellar functional palette with decoration opacity
   explicitly recorded as zero.
 
-That is 544 visible asset/size/profile instances. Status colors mirror the current
+That is 544 visible asset/size/profile instances. Status colors mirror the original
 `StatusBadge` mapping, while geometry and literal resource IDs make color
 redundant. The SVG was XML-validated and rendered with macOS Quick Look into a
 temporary PNG for visual inspection on 2026-08-30. All four panels, labels, size
@@ -137,5 +163,7 @@ claim.
   package inputs, and `AssetResources.axaml` is wired into `App.axaml`.
   Installed taskbar, Dock, launcher, and installer presentation remains a
   separate runtime/package proof tier and is not asserted here.
+- The S1 series-state marks are covered by the runtime component/grid captures,
+  not the older 544-instance vector contact sheet.
 
 The machine-readable equivalent is `docs/design/asset-manifest.json`.

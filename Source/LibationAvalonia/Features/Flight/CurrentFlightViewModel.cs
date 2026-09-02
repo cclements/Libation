@@ -33,7 +33,7 @@ public sealed class CurrentFlightItemViewModel : ReactiveObject, IDisposable
 	public string Title => Source.Title;
 	public string Author => Source.Author;
 	public string DurationText => Source.DurationMinutes <= 0
-		? "Duration unavailable"
+		? string.Empty
 		: $"{Source.DurationMinutes / 60} hr {Source.DurationMinutes % 60} min";
 	public ReactiveCommand<Unit, Unit> RemoveCommand => removeCommand;
 
@@ -131,10 +131,10 @@ public sealed class CurrentFlightViewModel : ReactiveObject, IDisposable
 	public int Count => flight.Count;
 	public string CountText => Count == 1 ? "1 title" : $"{Count} titles";
 	public string DurationText => flight.TotalDurationMinutes <= 0
-		? "Duration unavailable"
+		? string.Empty
 		: $"{flight.TotalDurationMinutes / 60} hr {flight.TotalDurationMinutes % 60} min total";
 	public string EstimatedSizeText => Count == 0
-		? "Estimated size unavailable"
+		? string.Empty
 		: $"Estimated {DiskSpaceHelper.FormatBytes(flight.EstimatedBytes)}";
 	public string? WarningText
 	{

@@ -277,7 +277,11 @@ public partial class ProductsDisplay : UserControl
 
 	private void ProductsDisplay_LoadingRow(object sender, DataGridRowEventArgs e)
 	{
-		if (e.Row.DataContext is LibraryBookEntry entry && entry.Liberate?.IsEpisode is true)
+		bool isEpisode = e.Row.DataContext is LibraryBookEntry entry && entry.Liberate?.IsEpisode is true;
+		e.Row.Classes.Set("series", isEpisode);
+		if (Classes.Contains("contemporary"))
+			e.Row.ClearValue(DataGridRow.BackgroundProperty);
+		else if (isEpisode)
 			e.Row.DynamicResource(DataGridRow.BackgroundProperty, "SeriesEntryGridBackgroundBrush");
 		else
 			e.Row.DynamicResource(DataGridRow.BackgroundProperty, "SystemRegionColor");

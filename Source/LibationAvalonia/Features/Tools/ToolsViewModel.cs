@@ -1,4 +1,5 @@
 using LibationAvalonia.DesignSystem.Components;
+using LibationAvalonia.Properties;
 using LibationAvalonia.Shell;
 using System;
 using System.Collections.Generic;
@@ -48,13 +49,13 @@ public sealed class ToolsViewModel : SecondaryDestinationViewModel
 			[
 				new("Process visible titles", "Queues every visible title still awaiting an open local copy.", "Review scope", LibationStatusKind.NeedsAttention, processVisible),
 				new("Detect downloaded status", "Inspects files for visible titles, previews proposed status changes, and asks before applying them.", "Review scope", LibationStatusKind.NeedsAttention, detectStatus),
-				new("Set audiobook status manually", "Opens the established preview and confirmation before replacing audiobook status for visible titles.", "Review scope", LibationStatusKind.NeedsAttention, setBookStatus),
-				new("Set PDF status manually", "Opens the established preview and confirmation before replacing PDF status for visible titles.", "Review scope", LibationStatusKind.NeedsAttention, setPdfStatus),
-				new("Move visible titles to Trash", "Moves every title in the current Library filter to Trash only after the established confirmation.", "Destructive after confirmation", LibationStatusKind.NeedsAttention, removeVisible),
+				new("Set audiobook status manually", Resources.ToolsManualBookStatusDescription, "Review scope", LibationStatusKind.NeedsAttention, setBookStatus),
+				new("Set PDF status manually", Resources.ToolsManualPdfStatusDescription, "Review scope", LibationStatusKind.NeedsAttention, setPdfStatus),
+				new("Move visible titles to Trash", Resources.ToolsTrashDescription, "Destructive after confirmation", LibationStatusKind.NeedsAttention, removeVisible),
 			]),
-			new("File discovery", "Reconcile existing open audiobook files with catalogued titles.",
+			new("File discovery", Resources.ToolsFileDiscoveryDescription,
 			[
-				new("Locate previously processed audiobooks", "Opens the existing locator and explains how matching files affect title status.", "Low risk", LibationStatusKind.Completed, locate),
+				new("Locate previously processed audiobooks", Resources.ToolsLocateDescription, "Low risk", LibationStatusKind.Completed, locate),
 			]),
 			new("Metadata", "Change metadata for the current visible-title scope.",
 			[
@@ -62,20 +63,20 @@ public sealed class ToolsViewModel : SecondaryDestinationViewModel
 			]),
 			new("Quality", "Inspect the library for source-quality improvements without changing files immediately.",
 			[
-				new("Scan for better-quality audiobooks", "Opens the established quality comparison workflow.", "Low risk", LibationStatusKind.Completed, quality),
+				new("Scan for better-quality audiobooks", Resources.ToolsQualityDescription, "Low risk", LibationStatusKind.Completed, quality),
 			]),
-			new("Import, export, and filters", "Move library metadata out of Libation or maintain the existing search shortcuts.",
+			new("Import, export, and filters", Resources.ToolsImportExportDescription,
 			[
 				new("Export library", "Writes the current library catalogue to a user-selected XLSX, CSV, or JSON file.", "Writes selected file", LibationStatusKind.NeedsAttention, export),
-				new("Edit quick filters", "Opens the established quick-filter editor.", "Low risk", LibationStatusKind.Completed, editFilters),
-				new("Save current filter", "Adds the active Library filter to the existing quick-filter collection.", "Changes preferences", LibationStatusKind.NeedsAttention, addFilter),
+				new("Edit quick filters", Resources.ToolsEditFiltersDescription, "Low risk", LibationStatusKind.Completed, editFilters),
+				new("Save current filter", Resources.ToolsSaveFilterDescription, "Changes preferences", LibationStatusKind.NeedsAttention, addFilter),
 				new("Toggle first quick filter at startup", "Changes whether Libation applies the first saved quick filter when the application starts.", "Changes preferences", LibationStatusKind.NeedsAttention, toggleDefaultFilter),
-				new("Open filter syntax help", "Shows the existing filter language reference.", "No data change", LibationStatusKind.Completed, filterHelp),
+				new("Open filter syntax help", Resources.ToolsFilterHelpDescription, "No data change", LibationStatusKind.Completed, filterHelp),
 			]),
-			new("Diagnostics and legacy utilities", "Use established support and companion surfaces.",
+			new("Diagnostics and legacy utilities", Resources.ToolsDiagnosticsDescription,
 			[
-				new("About, version, and updates", "Shows the running Libation version, release notes, acknowledgements, and the existing update check.", "Network only on request", LibationStatusKind.Completed, about),
-				new("Launch Hangover", "Starts the separate Hangover companion utility. If it is unavailable, Libation shows the existing platform-specific recovery message.", "External application", LibationStatusKind.NeedsAttention, main.LaunchHangover),
+				new("About, version, and updates", Resources.ToolsAboutDescription, "Network only on request", LibationStatusKind.Completed, about),
+				new("Launch Hangover", Resources.ToolsHangoverDescription, "External application", LibationStatusKind.NeedsAttention, main.LaunchHangover),
 			]),
 		];
 	}

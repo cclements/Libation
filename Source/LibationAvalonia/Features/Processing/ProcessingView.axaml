@@ -3,6 +3,7 @@
 			 xmlns:components="using:LibationAvalonia.DesignSystem.Components"
 			 xmlns:processing="using:LibationAvalonia.Features.Processing"
 			 xmlns:views="using:LibationAvalonia.Views"
+			 xmlns:properties="using:LibationAvalonia.Properties"
 			 x:Class="LibationAvalonia.Features.Processing.ProcessingView"
 			 x:Name="Root"
 			 x:DataType="processing:ProcessingViewModel">
@@ -48,7 +49,7 @@
 			<TabItem Header="Failed / cancelled">
 				<Grid RowDefinitions="Auto,*">
 					<Button HorizontalAlignment="Right" Margin="0,0,0,8" Content="Clear finished" Command="{Binding ClearFinishedCommand}" IsEnabled="{Binding HasFinished}" />
-					<components:EmptyState Grid.Row="1" IsVisible="{Binding !HasFailed}" Title="No failed or cancelled work" Explanation="Failures include literal status and a route to the queue log." />
+					<components:EmptyState Grid.Row="1" IsVisible="{Binding !HasFailed}" Title="No failed or cancelled work" Explanation="{x:Static properties:Resources.ProcessingNoFailuresExplanation}" />
 					<ListBox Grid.Row="1" ItemsSource="{Binding Failed}" IsVisible="{Binding HasFailed}">
 						<ListBox.ItemTemplate><DataTemplate x:DataType="processing:ProcessingQueueItemViewModel"><components:QueueItem Cover="{Binding Cover}" Title="{Binding Title}" Stage="{Binding Stage}" Message="{Binding Message}" Status="{Binding Status}" StatusText="{Binding StatusText}" Progress="{Binding Progress}" ShowProgress="False" ErrorDetails="{Binding ErrorDetails}" RetryCommand="{Binding RetryCommand}" OpenLogCommand="{Binding OpenLogCommand}" CopyTechnicalDetailsCommand="{Binding CopyTechnicalDetailsCommand}" /></DataTemplate></ListBox.ItemTemplate>
 					</ListBox>

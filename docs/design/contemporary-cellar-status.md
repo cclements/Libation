@@ -6,6 +6,17 @@
 > `docs/superpowers/specs/2026-09-01-contemporary-cellar-replan-design.md`). A slice is complete only
 > when its capture review is marked Passed.
 
+## Evidence-based slice ledger
+
+| Slice | State | Admitted evidence | Remaining boundary |
+|---|---|---|---|
+| S0 — verification harness | Complete | Isolated 1,000-title demo profile; deterministic capture-plan parser/driver; 60 exact-size Cellar/Tasting Room route captures; contact-sheet generator; SHA-256 evidence set. Source commits `f5fa4888` through `da8821d4`; records commit `fe73761`. | Static/local macOS harness evidence only; it does not prove interaction, assistive technology, another OS, packaging, or release behavior. |
+| S1 — design-system hardening | Complete; visual review Passed | Contemporary styling reaches the real Library details grid; stateful navigation, filters, progress, MetricCard, and semantic Liberate status presentation; corrected Tasting Room contrast; bundled Source Serif 4 under OFL-1.1; effective reduced-motion resources; complete decoration gates; lazy Overview profile creation; downsampled/provenance-recorded rasters; product-copy sweep; DEBUG gallery; stable profile-switch capture host. Full Release source gate: 1,774 discovered, 1,751 passed, 23 platform skips, 0 failed. Release and Debug Avalonia builds: 0 warnings, 0 errors. Twelve isolated macOS captures at exact 2x wide/compact dimensions were inspected beside the supplied boards/mockups. Evidence: outer `runtime-audit-2026-09-01/S1/` and `docs/reviews/2026-09-01-S1-design-system-review.md`. | The S1 screenshots prove the named rendered states only. Keyboard/focus traversal, VoiceOver, 200% logical scaling, High Contrast runtime, reduced-motion animation behavior, Windows/Linux, installed packaging, and release remain unproven. S3 owns full Library modernization; S4 owns the dashboard hierarchy/composition differences visible against the supplied mockups. |
+
+The historical prompt ledger below is retained as the source-integration record.
+Its earlier “unverified” statements are superseded only where the slice ledger
+above names newer admitted evidence; no broader rollout claim is implied.
+
 Effective delivery baseline: `3e7191adc7f41f1dec252b95e505b3f318be3b34`.
 Measured UI intake baseline: `094e207c0b245f36592ce31000f693674b886057`.
 Integration branch: `codex/contemporary-cellar`.

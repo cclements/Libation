@@ -9,4 +9,11 @@
 	<Style Selector="ProgressBar.contemporary.prominent">
 		<Setter Property="Height" Value="10" />
 	</Style>
+	<Style Selector="ProgressBar.contemporary /template/ Border#PART_Indicator">
+		<Setter Property="Transitions">
+			<Transitions>
+				<DoubleTransition Property="Width" Duration="{DynamicResource Libation.Motion.EffectiveDuration.Default}" />
+			</Transitions>
+		</Setter>
+	</Style>
 </Styles>

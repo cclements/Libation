@@ -5,23 +5,45 @@
 			 x:Class="LibationAvalonia.DesignSystem.Components.ToastHost"
 			 x:Name="Root"
 			 IsHitTestVisible="True">
-	<ItemsControl ItemsSource="{Binding ItemsSource, ElementName=Root}"
-				  ItemTemplate="{Binding ItemTemplate, ElementName=Root}"
+	<UserControl.Styles>
+		<Style Selector="Border.toast-card">
+			<Setter Property="Opacity" Value="1" />
+			<Setter Property="RenderTransform" Value="translateY(0px)" />
+			<Setter Property="Transitions">
+				<Transitions>
+					<DoubleTransition Property="Opacity" Duration="{DynamicResource Libation.Motion.EffectiveDuration.Fast}" />
+					<TransformOperationsTransition Property="RenderTransform" Duration="{DynamicResource Libation.Motion.EffectiveDuration.Fast}" />
+				</Transitions>
+			</Setter>
+		</Style>
+		<Style Selector="Border.toast-card.entering">
+			<Setter Property="Opacity" Value="0" />
+			<Setter Property="RenderTransform" Value="translateY(8px)" />
+		</Style>
+		<Style Selector="Border.toast-card.exiting">
+			<Setter Property="Opacity" Value="0" />
+			<Setter Property="RenderTransform" Value="translateY(-8px)" />
+		</Style>
+	</UserControl.Styles>
+	<ItemsControl ItemsSource="{Binding Presentations, ElementName=Root}"
 				  AutomationProperties.Name="Notifications"
 				  AutomationProperties.LiveSetting="{x:Static designSystem:PlatformAutomationPolicy.Polite}">
 		<ItemsControl.ItemsPanel>
 			<ItemsPanelTemplate><StackPanel Spacing="{DynamicResource Libation.Space.2}" /></ItemsPanelTemplate>
 		</ItemsControl.ItemsPanel>
 		<ItemsControl.DataTemplates>
-			<DataTemplate x:DataType="components:ToastMessage" DataType="{x:Type components:ToastMessage}">
-				<Border Classes="card raised" MinWidth="280" MaxWidth="440">
+			<DataTemplate x:DataType="components:ToastPresentation" DataType="{x:Type components:ToastPresentation}">
+				<Border Classes="card raised toast-card"
+					Classes.entering="{Binding IsEntering}"
+					Classes.exiting="{Binding IsExiting}"
+					MinWidth="280" MaxWidth="440">
 					<Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{DynamicResource Libation.Space.2}">
-						<components:StatusBadge Status="{Binding Status}" />
-						<TextBlock Grid.Column="1" Text="{Binding Message}" Foreground="{DynamicResource Libation.Brush.TextPrimary}"
+						<components:StatusBadge Status="{Binding Message.Status}" />
+						<TextBlock Grid.Column="1" Text="{Binding Message.Message}" Foreground="{DynamicResource Libation.Brush.TextPrimary}"
 								   TextWrapping="Wrap" VerticalAlignment="Center" />
-						<Button Grid.Column="2" Classes="contemporary quiet compact" Content="{Binding ActionText}"
-								Command="{Binding ActionCommand}" CommandParameter="{Binding ActionCommandParameter}"
-								IsVisible="{Binding ActionText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+						<Button Grid.Column="2" Classes="contemporary quiet compact" Content="{Binding Message.ActionText}"
+								Command="{Binding Message.ActionCommand}" CommandParameter="{Binding Message.ActionCommandParameter}"
+								IsVisible="{Binding Message.ActionText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
 					</Grid>
 				</Border>
 			</DataTemplate>

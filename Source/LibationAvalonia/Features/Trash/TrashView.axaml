@@ -3,6 +3,7 @@
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:trash="using:LibationAvalonia.Features.Trash"
 	xmlns:components="using:LibationAvalonia.DesignSystem.Components"
+	xmlns:properties="using:LibationAvalonia.Properties"
 	x:Class="LibationAvalonia.Features.Trash.TrashView"
 	x:DataType="trash:TrashViewModel">
 	<ScrollViewer HorizontalScrollBarVisibility="Disabled">
@@ -24,7 +25,7 @@
 			<StackPanel IsVisible="{Binding HasItems}" Spacing="{DynamicResource Libation.Space.4}">
 				<components:AttentionBanner Severity="{x:Static components:ComponentSeverity.Warning}"
 					Title="Review the selected titles before permanent deletion"
-					Message="The established Trash dialog has separate Restore and Permanently Delete from Libation actions. Its permanent action removes selected database records immediately after activation, so verify the selection before using it." />
+					Message="{x:Static properties:Resources.TrashPermanentWarning}" />
 				<Grid ColumnDefinitions="*,*" ColumnSpacing="{DynamicResource Libation.Space.4}">
 					<Border Classes="card raised">
 						<StackPanel Spacing="{DynamicResource Libation.Space.3}">
@@ -36,7 +37,7 @@
 					<Border Grid.Column="1" Classes="card raised">
 						<StackPanel Spacing="{DynamicResource Libation.Space.3}">
 							<TextBlock Text="Permanently delete from Libation" FontFamily="{DynamicResource Libation.Font.Display}" FontSize="{DynamicResource Libation.FontSize.Section}" />
-							<TextBlock Text="This removes selected Book and LibraryBook database records. The current domain operation does not delete open audiobook files from disk."
+							<TextBlock Text="{x:Static properties:Resources.TrashDeleteExplanation}"
 								TextWrapping="Wrap" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
 						</StackPanel>
 					</Border>

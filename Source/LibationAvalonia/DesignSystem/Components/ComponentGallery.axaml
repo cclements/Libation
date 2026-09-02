@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
 			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 			 xmlns:components="using:LibationAvalonia.DesignSystem.Components"
+			 xmlns:properties="using:LibationAvalonia.Properties"
 			 x:Class="LibationAvalonia.DesignSystem.Components.ComponentGallery"
 			 x:Name="Gallery">
 	<UserControl.Styles>
@@ -77,8 +78,10 @@
 							<components:LibationNavigationRail.ItemTemplate>
 								<DataTemplate x:DataType="components:GalleryNavigationItem">
 									<Grid ColumnDefinitions="*,Auto">
-										<TextBlock Text="{Binding Label}" />
-										<TextBlock Grid.Column="1" Text="{Binding Badge}" FontWeight="SemiBold" />
+										<TextBlock Classes="nav-label" Text="{Binding Label}"
+											Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" />
+										<TextBlock Grid.Column="1" Classes="nav-label" Text="{Binding Badge}" FontWeight="SemiBold"
+											Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" />
 									</Grid>
 								</DataTemplate>
 							</components:LibationNavigationRail.ItemTemplate>
@@ -87,7 +90,7 @@
 							<components:LibationNavigationRail.BrandContent><TextBlock Text="L" FontWeight="Bold" /></components:LibationNavigationRail.BrandContent>
 							<components:LibationNavigationRail.FooterContent><TextBlock Text="⚙" /></components:LibationNavigationRail.FooterContent>
 							<components:LibationNavigationRail.ItemTemplate>
-								<DataTemplate x:DataType="components:GalleryNavigationItem"><TextBlock Text="{Binding Label}" TextTrimming="CharacterEllipsis" /></DataTemplate>
+								<DataTemplate x:DataType="components:GalleryNavigationItem"><TextBlock Classes="nav-label" Text="{Binding Label}" TextTrimming="CharacterEllipsis" /></DataTemplate>
 							</components:LibationNavigationRail.ItemTemplate>
 						</components:LibationNavigationRail>
 					</Grid>
@@ -163,7 +166,7 @@
 						<components:DecanterSummary SummaryText="2 active · 1 waiting" ActiveText="Cellar Notes" ShowProgress="True" Progress="62"
 										 IsExpanded="True" CanPause="True" CanCancel="True" PauseCommand="{Binding InertCommand, ElementName=Gallery}"
 										 CancelCommand="{Binding InertCommand, ElementName=Gallery}">
-							<components:DecanterSummary.DetailsContent><TextBlock Text="The authoritative queue remains owned by the host." /></components:DecanterSummary.DetailsContent>
+							<components:DecanterSummary.DetailsContent><TextBlock Text="{x:Static properties:Resources.ComponentGalleryQueueDetails}" /></components:DecanterSummary.DetailsContent>
 						</components:DecanterSummary>
 						<components:DecanterSummary SummaryText="Queue is collapsed" ActiveText="No active process" IsExpanded="False" />
 						<components:QueueItem Title="Cellar Notes" Stage="Decrypting chapter 8" Status="Processing" Progress="62" ShowProgress="True"

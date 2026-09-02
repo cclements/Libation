@@ -69,10 +69,11 @@
 				<library:BookDetailsPane DataContext="{Binding}" Margin="12,0,0,0" />
 			</SplitView.Pane>
 			<Grid>
-				<Grid IsVisible="{Binding HasResults}">
-					<Grid IsVisible="{Binding IsDetailsMode}">
-						<views:ProductsDisplay x:Name="DetailsDisplay"
-							DataContext="{Binding Products, Mode=OneTime}" />
+					<Grid IsVisible="{Binding HasResults}">
+						<Grid IsVisible="{Binding IsDetailsMode}">
+							<views:ProductsDisplay x:Name="DetailsDisplay"
+								Classes="contemporary"
+								DataContext="{Binding Products, Mode=OneTime}" />
 					</Grid>
 					<Grid IsVisible="{Binding IsGalleryMode}">
 						<library:LibraryGalleryView x:Name="GalleryDisplay"

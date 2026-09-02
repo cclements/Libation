@@ -72,7 +72,7 @@
 			<Setter Property="Foreground" Value="{DynamicResource HyperlinkNew}"/>
 			<Setter Property="ForegroundVisited" Value="{DynamicResource HyperlinkVisited}"/>
 		</Style>
-		<Style Selector="Button">
+		<Style Selector="Button:not(.contemporary)">
 			<Setter Property="VerticalContentAlignment" Value="Center"/>
 			<Style Selector="^">
 				<Setter Property="Foreground" Value="{DynamicResource SystemChromeAltLowColor}" />

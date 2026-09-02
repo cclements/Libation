@@ -1,6 +1,7 @@
 using ApplicationServices;
 using LibationAvalonia.DesignSystem.Components;
 using LibationAvalonia.Features.Tools;
+using LibationAvalonia.Properties;
 using LibationAvalonia.Shell;
 using LibationAvalonia.ViewModels;
 using LibationUiBase.ProcessQueue;
@@ -46,7 +47,7 @@ public sealed class DownloadsViewModel : SecondaryDestinationViewModel
 		RefreshCommand = CreateOwnerCommand(
 			() => main.SetBackupCountsAsync(null),
 			"refresh download counts",
-			"Libation could not refresh download counts. Existing library data was not changed.");
+			Resources.DownloadsRefreshUnchangedError);
 		OpenAccountsCommand = CreateOwnerCommand(
 			commands.ShowAccountsAsync,
 			"open account management from Downloads",
@@ -68,7 +69,7 @@ public sealed class DownloadsViewModel : SecondaryDestinationViewModel
 	public bool ShowEmptyLibrary => IsReady && !HasLibraryTitles;
 	public string EmptyLibraryExplanation => main.AnyAccounts
 		? main.ActivelyScanning
-			? "The library is still empty while the established account scan runs. Download actions will appear after catalogued titles arrive."
+			? Resources.DownloadsEmptyScanningExplanation
 			: "Scan the connected accounts to catalogue titles before starting a download workflow."
 		: "Add an Audible account, then scan it to catalogue titles before starting a download workflow.";
 	public string EmptyLibraryActionText => main.AnyAccounts && !main.ActivelyScanning ? "Scan accounts" : "Manage accounts";
@@ -79,15 +80,15 @@ public sealed class DownloadsViewModel : SecondaryDestinationViewModel
 	public string DownloadedText => Format(Stats?.booksDownloadedOnly ?? 0);
 	public string CompletedText => Format(Stats?.booksFullyBackedUp ?? 0);
 	public string AttentionText => Format(AttentionCount);
-	public string PendingExplanation => $"{PendingText} titles still need a completed open copy. {DownloadedText} of those already have an Audible-format file, so Download Pending and Downloaded are intentionally overlapping states.";
+	public string PendingExplanation => string.Format(CultureInfo.CurrentCulture, Resources.DownloadsPendingExplanationFormat, PendingText, DownloadedText);
 	public int TotalCount => Stats is null ? 0 : Stats.booksFullyBackedUp + Stats.booksDownloadedOnly + Stats.booksNoProgress + Stats.booksError + Stats.booksUnavailable;
 	public int AttentionCount => Stats is null ? 0 : Stats.booksError + Stats.booksUnavailable;
 	public int ActiveCount => main.ProcessQueue.Queue.GetAllItems().Count(item => item.Status == ProcessBookStatus.Working);
 	public int QueuedCount => main.ProcessQueue.Queue.GetAllItems().Count(item => item.Status == ProcessBookStatus.Queued);
 	public bool HasActivePipeline => ActiveCount + QueuedCount > 0;
 	public string PipelineText => HasActivePipeline
-		? $"{Format(ActiveCount)} active and {Format(QueuedCount)} queued in the existing combined download-and-processing pipeline."
-		: "No audiobook download or processing work is currently queued.";
+		? string.Format(CultureInfo.CurrentCulture, Resources.DownloadsPipelineActiveFormat, Format(ActiveCount), Format(QueuedCount))
+		: Resources.DownloadsPipelineIdle;
 	public string PipelineBadgeText => HasActivePipeline ? "Active" : "Idle";
 	public LibationStatusKind PipelineStatus => HasActivePipeline ? LibationStatusKind.Processing : LibationStatusKind.Completed;
 	public string AttentionExplanation => AttentionCount == 1

@@ -1,9 +1,11 @@
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using LibationAvalonia.Diagnostics;
+using LibationAvalonia.DesignSystem.Components;
 using LibationAvalonia.Features.Library;
 using LibationFileManager;
 using System;
@@ -32,10 +34,22 @@ public partial class MainWindow
 		{
 			var plan = CapturePlan.Load(CaptureEnvironment.PlanPath);
 			var outDir = Directory.CreateDirectory(CaptureEnvironment.OutputDirectory).FullName;
+			HorizontalContentAlignment = Avalonia.Layout.HorizontalAlignment.Stretch;
+			VerticalContentAlignment = Avalonia.Layout.VerticalAlignment.Stretch;
 			var osHandshake = CaptureEnvironment.OsHandshakeDirectory;
 			if (osHandshake is not null)
 				Directory.CreateDirectory(osHandshake);
 			await WaitForLibraryReadyAsync();
+			var routeContent = Content as Control
+				?? throw new InvalidOperationException("The contemporary shell was not available for capture.");
+			Content = null;
+			await Dispatcher.UIThread.InvokeAsync(() => { }, DispatcherPriority.Background);
+			var galleryContent = new ComponentGallery { IsVisible = false };
+			var captureHost = new Grid();
+			captureHost.Children.Add(routeContent);
+			captureHost.Children.Add(galleryContent);
+			Content = captureHost;
+			await Dispatcher.UIThread.InvokeAsync(() => { }, DispatcherPriority.Background);
 
 			for (var index = 0; index < plan.Entries.Count; index++)
 			{
@@ -46,14 +60,31 @@ public partial class MainWindow
 					ExperienceStyle = entry.Profile,
 					DensityMode = entry.Density,
 					DecorationLevel = entry.Decoration,
+					LibraryViewMode = entry.LibraryView ?? baseline.LibraryViewMode,
 					UseContemporaryShell = true,
 				});
 				await SettleAsync(plan.SettleMs / 2);
 
-				NavigateContemporary(entry.Route);
-				Width = entry.Width;
-				Height = entry.Height;
-				await WaitForRouteReadyAsync(entry.Route);
+				if (entry.Surface == CaptureSurface.ComponentGallery)
+				{
+					routeContent.IsVisible = false;
+					galleryContent.PreviewStyle = entry.Profile;
+					galleryContent.PreviewDensity = entry.Density;
+					galleryContent.PreviewDecoration = entry.Decoration;
+					galleryContent.PreviewMotion = ReducedMotionPreference.Full;
+					galleryContent.UseSystemTypography = false;
+					galleryContent.IsVisible = true;
+					ResizeForCapture(entry);
+					await Dispatcher.UIThread.InvokeAsync(() => { }, DispatcherPriority.Background);
+				}
+				else
+				{
+					galleryContent.IsVisible = false;
+					routeContent.IsVisible = true;
+					ResizeForCapture(entry);
+					NavigateContemporary(entry.Route);
+					await WaitForRouteReadyAsync(entry.Route);
+				}
 				await WaitForVisibleCoverLoadsAsync();
 				await SettleAsync(plan.SettleMs);
 
@@ -92,6 +123,22 @@ public partial class MainWindow
 			desktop.Shutdown(exitCode);
 		else
 			Environment.Exit(exitCode);
+	}
+
+	private void ResizeForCapture(CaptureEntry entry)
+	{
+		WindowState = WindowState.Normal;
+		MinWidth = 720;
+		MinHeight = 560;
+		MaxWidth = double.PositiveInfinity;
+		MaxHeight = double.PositiveInfinity;
+		Width = entry.Width;
+		Height = entry.Height;
+		MaxWidth = entry.Width;
+		MaxHeight = entry.Height;
+		MinWidth = entry.Width;
+		MinHeight = entry.Height;
+		ClientSize = new Size(entry.Width, entry.Height);
 	}
 
 	private async Task WaitForLibraryReadyAsync()

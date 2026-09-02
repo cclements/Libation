@@ -3,6 +3,7 @@
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:tools="using:LibationAvalonia.Features.Tools"
 	xmlns:components="using:LibationAvalonia.DesignSystem.Components"
+	xmlns:properties="using:LibationAvalonia.Properties"
 	x:Class="LibationAvalonia.Features.Tools.ToolsView"
 	x:DataType="tools:ToolsViewModel">
 	<UserControl.Resources>
@@ -37,7 +38,7 @@
 	<ScrollViewer HorizontalScrollBarVisibility="Disabled">
 		<StackPanel Margin="{DynamicResource Libation.Thickness.5}" Spacing="{DynamicResource Libation.Space.4}">
 			<components:PageHeader Eyebrow="Advanced operations" Title="Tools"
-				SupportingText="Each command uses its literal name, states its consequence, and delegates to Libation’s existing dialogs and confirmations." />
+				SupportingText="{x:Static properties:Resources.ToolsSupportingText}" />
 			<components:AttentionBanner IsVisible="{Binding HasError}" Severity="{x:Static components:ComponentSeverity.Danger}" FocusOnShow="True"
 				Title="Tool action unavailable" Message="{Binding ErrorMessage}"
 				ActionText="Copy technical details" ActionCommand="{Binding CopyTechnicalDetailsCommand}" />

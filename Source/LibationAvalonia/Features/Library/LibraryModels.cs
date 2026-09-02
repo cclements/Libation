@@ -47,15 +47,15 @@ public sealed class LibraryBookItemViewModel : ViewModelBase, IDisposable
 	public string Title => entry.Title ?? "Untitled audiobook";
 	public string Author => entry.Authors ?? string.Empty;
 	public string Narrator => entry.Narrators ?? string.Empty;
-	public string Duration => string.IsNullOrWhiteSpace(entry.Length) ? "Duration unavailable" : entry.Length;
+	public string Duration => entry.Length ?? string.Empty;
 	public string Series => entry.Series ?? string.Empty;
 	public string Description => entry.Description ?? string.Empty;
-	public string Account => entry.Account ?? "Account unavailable";
+	public string Account => entry.Account ?? string.Empty;
 	public string Category => entry.Category ?? string.Empty;
 	public string Tags => entry.BookTags ?? string.Empty;
 	public string PurchaseDate => entry.PurchaseDate ?? string.Empty;
 	public string DateAdded => entry.DateAdded == default
-		? "Date added unavailable"
+		? string.Empty
 		: entry.DateAdded.ToString("d", CultureInfo.CurrentCulture);
 	public string RatingText => entry.MyRating?.ToString() ?? "Not rated";
 	public string LocalStateText => LibraryBook.Book.AudioExists ? "Local audio available" : "Local audio not created";

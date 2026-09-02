@@ -36,13 +36,21 @@ public static class CaptureEnvironment
 			: null;
 }
 
+public enum CaptureSurface
+{
+	Route,
+	ComponentGallery,
+}
+
 public sealed record CaptureEntry(
 	ExperienceStyle Profile,
+	CaptureSurface Surface,
 	AppRouteId Route,
 	int Width,
 	int Height,
 	DensityMode Density,
 	DecorationLevel Decoration,
+	LibraryViewMode? LibraryView,
 	string? File)
 {
 	public string FileName => File ?? CapturePlan.DefaultFileName(this);
@@ -60,7 +68,12 @@ public sealed record CapturePlan(int SettleMs, IReadOnlyList<CaptureEntry> Entri
 	};
 
 	public static string DefaultFileName(CaptureEntry entry)
-		=> $"{entry.Profile.ToString().ToLowerInvariant()}-{entry.Route.ToString().ToLowerInvariant()}-{entry.Width}x{entry.Height}.png";
+	{
+		var surface = entry.Surface == CaptureSurface.ComponentGallery
+			? "componentgallery"
+			: entry.Route.ToString().ToLowerInvariant();
+		return $"{entry.Profile.ToString().ToLowerInvariant()}-{surface}-{entry.Width}x{entry.Height}.png";
+	}
 
 	public static CapturePlan Load(string path)
 		=> Parse(System.IO.File.ReadAllText(path));
@@ -85,10 +98,15 @@ public sealed record CapturePlan(int SettleMs, IReadOnlyList<CaptureEntry> Entri
 		{
 			if (!TryParseDefined(entry.Profile, out ExperienceStyle profile))
 				throw new CapturePlanException($"Unknown profile '{entry.Profile}'.");
-			if (!TryParseDefined(entry.Route, out AppRouteId route))
-				throw new CapturePlanException($"Unknown route '{entry.Route}'.");
+			var surface = entry.Surface is null ? CaptureSurface.Route
+				: TryParseDefined(entry.Surface, out CaptureSurface parsedSurface) ? parsedSurface
+				: throw new CapturePlanException($"Unknown surface '{entry.Surface}'.");
+			var route = entry.Route is null && surface == CaptureSurface.ComponentGallery
+				? AppRouteId.Overview
+				: TryParseDefined(entry.Route, out AppRouteId parsedRoute) ? parsedRoute
+				: throw new CapturePlanException($"Unknown route '{entry.Route}'.");
 			if (entry.Width < 720 || entry.Height < 560)
-				throw new CapturePlanException($"Entry {profile}/{route} is below the 720x560 minimum window.");
+				throw new CapturePlanException($"Entry {profile}/{surface} is below the 720x560 minimum window.");
 
 			var density = entry.Density is null ? DensityMode.Comfortable
 				: TryParseDefined(entry.Density, out DensityMode parsedDensity) ? parsedDensity
@@ -96,14 +114,19 @@ public sealed record CapturePlan(int SettleMs, IReadOnlyList<CaptureEntry> Entri
 			var decoration = entry.Decoration is null ? DecorationLevel.Full
 				: TryParseDefined(entry.Decoration, out DecorationLevel parsedDecoration) ? parsedDecoration
 				: throw new CapturePlanException($"Unknown decoration '{entry.Decoration}'.");
+			LibraryViewMode? libraryView = entry.LibraryView is null ? null
+				: TryParseDefined(entry.LibraryView, out LibraryViewMode parsedLibraryView) ? parsedLibraryView
+				: throw new CapturePlanException($"Unknown library view '{entry.LibraryView}'.");
 
 			entries.Add(new CaptureEntry(
 				profile,
+				surface,
 				route,
 				entry.Width,
 				entry.Height,
 				density,
 				decoration,
+				libraryView,
 				entry.File));
 		}
 
@@ -123,11 +146,13 @@ public sealed record CapturePlan(int SettleMs, IReadOnlyList<CaptureEntry> Entri
 	private sealed class RawEntry
 	{
 		[JsonPropertyName("profile")] public string? Profile { get; set; }
+		[JsonPropertyName("surface")] public string? Surface { get; set; }
 		[JsonPropertyName("route")] public string? Route { get; set; }
 		[JsonPropertyName("width")] public int Width { get; set; }
 		[JsonPropertyName("height")] public int Height { get; set; }
 		[JsonPropertyName("density")] public string? Density { get; set; }
 		[JsonPropertyName("decoration")] public string? Decoration { get; set; }
+		[JsonPropertyName("libraryView")] public string? LibraryView { get; set; }
 		[JsonPropertyName("file")] public string? File { get; set; }
 	}
 }

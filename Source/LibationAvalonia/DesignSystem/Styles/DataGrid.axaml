@@ -1,18 +1,51 @@
 <Styles xmlns="https://github.com/avaloniaui"
-		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-	<Style Selector="DataGrid.contemporary">
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:views="using:LibationAvalonia.Views">
+	<Style Selector="DataGrid.contemporary, views|ProductsDisplay.contemporary DataGrid">
 		<Setter Property="Background" Value="{DynamicResource Libation.Brush.Surface}" />
 		<Setter Property="Foreground" Value="{DynamicResource Libation.Brush.TextPrimary}" />
 		<Setter Property="BorderBrush" Value="{DynamicResource Libation.Brush.BorderSubtle}" />
+		<Setter Property="BorderThickness" Value="1" />
 		<Setter Property="RowBackground" Value="{DynamicResource Libation.Brush.Surface}" />
 		<Setter Property="HorizontalGridLinesBrush" Value="{DynamicResource Libation.Brush.BorderSubtle}" />
 		<Setter Property="VerticalGridLinesBrush" Value="{DynamicResource Libation.Brush.BorderSubtle}" />
 		<Setter Property="RowHeight" Value="{DynamicResource Libation.Density.RowHeight}" />
+		<Setter Property="ColumnHeaderHeight" Value="{DynamicResource Libation.ControlHeight.Default}" />
 	</Style>
-	<Style Selector="DataGrid.contemporary DataGridRow:selected">
+	<Style Selector="DataGrid.contemporary DataGridColumnHeader, views|ProductsDisplay.contemporary DataGrid DataGridColumnHeader">
+		<Setter Property="Background" Value="{DynamicResource Libation.Brush.SurfaceRaised}" />
+		<Setter Property="Foreground" Value="{DynamicResource Libation.Brush.TextPrimary}" />
+		<Setter Property="BorderBrush" Value="{DynamicResource Libation.Brush.BorderStrong}" />
+		<Setter Property="BorderThickness" Value="0,0,1,1" />
+		<Setter Property="FontWeight" Value="SemiBold" />
+		<Setter Property="Padding" Value="12,0" />
+	</Style>
+	<Style Selector="DataGrid.contemporary DataGridRow, views|ProductsDisplay.contemporary DataGrid DataGridRow">
+		<Setter Property="Background" Value="{DynamicResource Libation.Brush.Surface}" />
+		<Setter Property="Foreground" Value="{DynamicResource Libation.Brush.TextPrimary}" />
+	</Style>
+	<Style Selector="DataGrid.contemporary DataGridRow:nth-child(even), views|ProductsDisplay.contemporary DataGrid DataGridRow:nth-child(even)">
+		<Setter Property="Background" Value="{DynamicResource Libation.Brush.SurfaceSunken}" />
+	</Style>
+	<Style Selector="DataGrid.contemporary DataGridRow.series, views|ProductsDisplay.contemporary DataGrid DataGridRow.series">
+		<Setter Property="Background" Value="{DynamicResource Libation.Brush.SurfaceInteractive}" />
+	</Style>
+	<Style Selector="DataGrid.contemporary DataGridRow:pointerover, views|ProductsDisplay.contemporary DataGrid DataGridRow:pointerover">
+		<Setter Property="Background" Value="{DynamicResource Libation.Brush.SurfaceInteractive}" />
+	</Style>
+	<Style Selector="DataGrid.contemporary DataGridRow:selected, views|ProductsDisplay.contemporary DataGrid DataGridRow:selected">
 		<Setter Property="Background" Value="{DynamicResource Libation.Brush.Selection}" />
+		<Setter Property="Foreground" Value="{DynamicResource Libation.Brush.TextOnAccent}" />
 	</Style>
-	<Style Selector="DataGrid.contemporary DataGridCell:focus">
+	<Style Selector="DataGrid.contemporary DataGridCell, views|ProductsDisplay.contemporary DataGrid DataGridCell">
+		<Setter Property="Foreground" Value="{DynamicResource Libation.Brush.TextPrimary}" />
+		<Setter Property="BorderBrush" Value="{DynamicResource Libation.Brush.BorderSubtle}" />
+		<Setter Property="Padding" Value="8,4" />
+	</Style>
+	<Style Selector="DataGrid.contemporary DataGridRow:selected DataGridCell, views|ProductsDisplay.contemporary DataGrid DataGridRow:selected DataGridCell">
+		<Setter Property="Foreground" Value="{DynamicResource Libation.Brush.TextOnAccent}" />
+	</Style>
+	<Style Selector="DataGrid.contemporary DataGridCell:focus, DataGrid.contemporary DataGridCell:focus-visible, views|ProductsDisplay.contemporary DataGrid DataGridCell:focus, views|ProductsDisplay.contemporary DataGrid DataGridCell:focus-visible">
 		<Setter Property="BorderBrush" Value="{DynamicResource Libation.Brush.Focus}" />
 		<Setter Property="BorderThickness" Value="2" />
 	</Style>

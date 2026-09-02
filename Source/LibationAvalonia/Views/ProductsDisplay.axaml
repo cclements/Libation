@@ -6,9 +6,16 @@
 			 xmlns:vm="clr-namespace:LibationAvalonia.ViewModels"
 			 xmlns:uibase="clr-namespace:LibationUiBase.GridView;assembly=LibationUiBase"
 			 xmlns:controls="clr-namespace:LibationAvalonia.Controls"
-             mc:Ignorable="d" d:DesignWidth="1560" d:DesignHeight="400"
+			 mc:Ignorable="d" d:DesignWidth="1560" d:DesignHeight="400"
 			 x:DataType="vm:ProductsDisplayViewModel"
-             x:Class="LibationAvalonia.Views.ProductsDisplay">
+			 x:Class="LibationAvalonia.Views.ProductsDisplay"
+			 x:Name="Root">
+
+	<UserControl.Styles>
+		<Style Selector="views|ProductsDisplay.contemporary views|LiberateStatusButton">
+			<Setter Property="UseVectorStatus" Value="True" />
+		</Style>
+	</UserControl.Styles>
 
 	<Grid>
 
@@ -18,7 +25,7 @@
 			GridLinesVisibility="All"
 			AutoGenerateColumns="False"
 			ItemsSource="{Binding GridEntries}"
-			CanUserSortColumns="True" BorderThickness="3"
+			CanUserSortColumns="True"
 			CanUserResizeColumns="True"
 			LoadingRow="ProductsDisplay_LoadingRow"
 			CanUserReorderColumns="True">
@@ -110,6 +117,9 @@
 								BookStatus="{Binding Liberate.BookStatus}"
 								PdfStatus="{Binding Liberate.PdfStatus}"
 								IsUnavailable="{Binding Liberate.IsUnavailable}"
+								IsSeries="{Binding Liberate.IsSeries}"
+								IsExpanded="{Binding Liberate.Expanded}"
+								StatusText="{Binding Liberate.ToolTip}"
 								ButtonImage="{Binding Liberate.ButtonImage}"
 								Click="LiberateButton_Click" />
 						</DataTemplate>

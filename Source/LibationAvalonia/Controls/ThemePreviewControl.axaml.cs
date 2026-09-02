@@ -62,7 +62,7 @@ public partial class ThemePreviewControl : UserControl
 			return;
 		var preview = manager.CreatePreviewScope(style);
 		ExperienceScope.Resources = preview.Resources;
-		ExperienceScope.RequestedThemeVariant = preview.Host.RequestedThemeVariant;
+		ExperienceScope.RequestedThemeVariant = preview.RequestedThemeVariant;
 		PreviewStyle = style;
 	}
 

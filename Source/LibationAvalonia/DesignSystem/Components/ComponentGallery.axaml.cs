@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.VisualTree;
+using LibationAvalonia.Properties;
 using LibationFileManager;
 using System;
 using System.Collections.Generic;
@@ -67,6 +68,27 @@ public partial class ComponentGallery : UserControl
 		AttachedToVisualTree += ComponentGallery_AttachedToVisualTree;
 	}
 
+	public static void ShowWindow(Window? owner = null)
+	{
+		var window = new Window
+		{
+			Title = LibationAvalonia.Properties.Resources.ComponentGalleryWindowTitle,
+			Width = 1280,
+			Height = 900,
+			MinWidth = 720,
+			MinHeight = 560,
+			Content = new ComponentGallery(),
+			WindowStartupLocation = owner is null
+				? WindowStartupLocation.CenterScreen
+				: WindowStartupLocation.CenterOwner,
+		};
+
+		if (owner is null)
+			window.Show();
+		else
+			window.Show(owner);
+	}
+
 	public ExperienceStyle PreviewStyle { get => GetValue(PreviewStyleProperty); set => SetValue(PreviewStyleProperty, value); }
 	public DensityMode PreviewDensity { get => GetValue(PreviewDensityProperty); set => SetValue(PreviewDensityProperty, value); }
 	public DecorationLevel PreviewDecoration { get => GetValue(PreviewDecorationProperty); set => SetValue(PreviewDecorationProperty, value); }
@@ -105,7 +127,7 @@ public partial class ComponentGallery : UserControl
 			PreviewMotion,
 			UseSystemTypography);
 		PreviewScope.Resources = preview.Resources;
-		PreviewScope.RequestedThemeVariant = preview.Host.RequestedThemeVariant;
+		PreviewScope.RequestedThemeVariant = preview.RequestedThemeVariant;
 		PreviewDescription.Text = $"{preview.Profile.DisplayName} · {PreviewDensity} · {PreviewDecoration} decoration · {PreviewMotion} motion";
 	}
 
@@ -117,7 +139,10 @@ public partial class ComponentGallery : UserControl
 	}
 }
 
-public sealed record GalleryNavigationItem(string Label, string? Badge);
+public sealed record GalleryNavigationItem(string Label, string? Badge)
+{
+	public override string ToString() => Label;
+}
 
 public sealed record GalleryBook(
 	string Title,

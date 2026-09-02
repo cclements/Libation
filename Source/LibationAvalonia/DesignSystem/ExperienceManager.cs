@@ -72,6 +72,8 @@ public sealed class ExperienceManager : IDisposable
 	public void Initialize()
 	{
 		ObjectDisposedException.ThrowIf(disposed, this);
+		if (configuration.UseContemporaryShell)
+			App.DefaultThemeColors?.PrepareFluentVariants();
 		configuration.PropertyChanged += Configuration_PropertyChanged;
 		application.ActualThemeVariantChanged += Application_ActualThemeVariantChanged;
 		reducedMotionResolver.PreferenceChanged += ReducedMotionResolver_PreferenceChanged;
@@ -99,13 +101,9 @@ public sealed class ExperienceManager : IDisposable
 			: application.ActualThemeVariant;
 		var profile = ExperienceCatalog.Resolve(requestedStyle, resolutionTheme);
 		var resources = CreateExperienceResources(profile, density, decoration, motion, useSystemTypography);
-		var host = new ThemeVariantScope
-		{
-			RequestedThemeVariant = PreviewTheme(profile),
-			Resources = resources,
-		};
-		validator.ValidateResources(host.Resources, host.RequestedThemeVariant, profile.Style);
-		return new ExperiencePreviewScope(profile, host);
+		var requestedTheme = PreviewTheme(profile);
+		validator.ValidateResources(resources, requestedTheme, profile.Style);
+		return new ExperiencePreviewScope(profile, resources, requestedTheme);
 	}
 
 	private ThemeVariant GetPlatformThemeVariant()
@@ -331,7 +329,14 @@ public sealed class ExperienceManager : IDisposable
 		validator.ValidatePalette(GetLoadedPalette(palette), PreviewTheme(profile), profile.Style);
 		resources.MergedDictionaries.Add(palette);
 		resources.MergedDictionaries.Add(CreateProfileAssetAliases(profile));
-		resources.MergedDictionaries.Add(CreatePreferenceResources(profile, density, decoration, motion, useSystemTypography));
+		resources.MergedDictionaries.Add(CreatePreferenceResources(
+			profile,
+			density,
+			decoration,
+			motion,
+			useSystemTypography,
+			resources,
+			PreviewTheme(profile)));
 		return resources;
 	}
 
@@ -362,7 +367,9 @@ public sealed class ExperienceManager : IDisposable
 		DensityMode density,
 		DecorationLevel decoration,
 		ReducedMotionPreference motion,
-		bool useSystemTypography)
+		bool useSystemTypography,
+		IResourceNode sharedResources,
+		ThemeVariant theme)
 	{
 		bool compact = density == DensityMode.Compact;
 		bool forceAccessiblePresentation = profile.Style == ExperienceStyle.HighContrast;
@@ -379,6 +386,9 @@ public sealed class ExperienceManager : IDisposable
 			_ => reducedMotionResolver.IsReducedMotionPreferred ?? false,
 		};
 		double motionScale = reduceMotion ? 0 : 1;
+		double fastDuration = ResolveDoubleToken(sharedResources, theme, "Libation.Motion.Duration.Fast");
+		double defaultDuration = ResolveDoubleToken(sharedResources, theme, "Libation.Motion.Duration.Default");
+		double deliberateDuration = ResolveDoubleToken(sharedResources, theme, "Libation.Motion.Duration.Deliberate");
 
 		var resources = new ResourceDictionary
 		{
@@ -390,9 +400,12 @@ public sealed class ExperienceManager : IDisposable
 			["Libation.Decoration.Opacity"] = decorationOpacity,
 			["Libation.Decoration.Visible"] = !forceAccessiblePresentation && decoration != DecorationLevel.Off,
 			["Libation.Motion.Scale"] = motionScale,
+			["Libation.Motion.EffectiveDuration.Fast"] = TimeSpan.FromMilliseconds(fastDuration * motionScale),
+			["Libation.Motion.EffectiveDuration.Default"] = TimeSpan.FromMilliseconds(defaultDuration * motionScale),
+			["Libation.Motion.EffectiveDuration.Deliberate"] = TimeSpan.FromMilliseconds(deliberateDuration * motionScale),
 			["Libation.Font.Display"] = useSystemTypography
 				? FontFamily.Default
-				: new FontFamily("Georgia, Times New Roman, Noto Serif"),
+				: new FontFamily("avares://Libation/Assets/Fonts#Source Serif 4, Georgia, Times New Roman, Noto Serif"),
 		};
 
 		if (forceAccessiblePresentation)
@@ -402,6 +415,13 @@ public sealed class ExperienceManager : IDisposable
 		}
 
 		return resources;
+	}
+
+	private static double ResolveDoubleToken(IResourceNode resources, ThemeVariant theme, string key)
+	{
+		if (resources.TryGetResource(key, theme, out var value) && value is double number)
+			return number;
+		throw new InvalidOperationException($"The shared motion token '{key}' is missing or is not a Double.");
 	}
 
 	private IResourceProvider CreatePalette(ExperienceProfile profile)

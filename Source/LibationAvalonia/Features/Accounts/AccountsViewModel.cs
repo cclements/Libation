@@ -1,5 +1,6 @@
 using LibationAvalonia.DesignSystem.Components;
 using LibationAvalonia.Features.Tools;
+using LibationAvalonia.Properties;
 using LibationAvalonia.Shell;
 using LibationAvalonia.ViewModels;
 using ReactiveUI;
@@ -76,10 +77,10 @@ public sealed class AccountsViewModel : SecondaryDestinationViewModel
 	public string ScanStateText => IsScanning
 		? main.ScanningText
 		: HasAccounts
-			? "No account scan is currently running. The existing scan workflow reports authorization failures when a scan is attempted."
+			? Resources.AccountsScanIdle
 			: "Connect an account before scanning.";
 	public string AuthorizationSummary => HasAccounts
-		? "Authorization details are intentionally hidden here. Use Manage Accounts to review the established controls; the scan and sign-in owners request authorization when required. No credentials or tokens are displayed on this page."
+		? Resources.AccountsAuthorizationSummary
 		: "No account authorization is configured.";
 	public string AutoScanText => main.AutoScanChecked ? "Automatic scanning is on" : "Automatic scanning is off";
 	public string AutoScanActionText => main.AutoScanChecked ? "Turn automatic scanning off" : "Turn automatic scanning on";

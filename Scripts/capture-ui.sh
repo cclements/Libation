@@ -62,8 +62,10 @@ with open(plan_path, encoding="utf-8") as source:
     plan = json.load(source)
 with open(manifest_path, "w", encoding="utf-8") as target:
     for index, entry in enumerate(plan["entries"]):
+        surface = entry.get("surface", "Route").lower()
+        subject = "componentgallery" if surface == "componentgallery" else entry["route"].lower()
         name = entry.get("file") or (
-            f"{entry['profile'].lower()}-{entry['route'].lower()}-"
+            f"{entry['profile'].lower()}-{subject}-"
             f"{entry['width']}x{entry['height']}.png"
         )
         if any(character in name for character in ("\t", "\n")):
@@ -173,8 +175,9 @@ while IFS=$'\t' read -r INDEX NAME WIDTH HEIGHT; do
 	fi
 	PIXEL_WIDTH="$(/usr/bin/sips -g pixelWidth "$TARGET" 2>/dev/null | awk '/pixelWidth/ {print $2}')"
 	PIXEL_HEIGHT="$(/usr/bin/sips -g pixelHeight "$TARGET" 2>/dev/null | awk '/pixelHeight/ {print $2}')"
-	printf '%s\t%sx%s\trequested %sx%s\tmacOS direct-window screencapture\n' \
-		"$NAME" "$PIXEL_WIDTH" "$PIXEL_HEIGHT" "$WIDTH" "$HEIGHT" >> "$CAPTURE_LOG"
+	printf '%s\t%sx%s\trequested %sx%s\twindow %sx%s\tmacOS direct-window screencapture\n' \
+		"$NAME" "$PIXEL_WIDTH" "$PIXEL_HEIGHT" "$WIDTH" "$HEIGHT" \
+		"$WINDOW_WIDTH" "$WINDOW_HEIGHT" >> "$CAPTURE_LOG"
 	: > "$ACK"
 done < "$MANIFEST"
 

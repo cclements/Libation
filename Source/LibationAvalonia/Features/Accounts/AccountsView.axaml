@@ -3,6 +3,7 @@
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:accounts="using:LibationAvalonia.Features.Accounts"
 	xmlns:components="using:LibationAvalonia.DesignSystem.Components"
+	xmlns:properties="using:LibationAvalonia.Properties"
 	x:Class="LibationAvalonia.Features.Accounts.AccountsView"
 	x:DataType="accounts:AccountsViewModel">
 	<ScrollViewer HorizontalScrollBarVisibility="Disabled">
@@ -58,7 +59,7 @@
 				<StackPanel Spacing="{DynamicResource Libation.Space.3}">
 					<TextBlock Text="Review titles missing from account scans" FontFamily="{DynamicResource Libation.Font.Display}"
 						FontSize="{DynamicResource Libation.FontSize.Section}" />
-					<TextBlock Text="This starts Libation’s established removed-title review. It first scans the selected accounts and then lets you choose library records to move to Trash; it does not expose or remove account credentials."
+					<TextBlock Text="{x:Static properties:Resources.AccountsReconcileExplanation}"
 						TextWrapping="Wrap" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
 					<components:AttentionBanner Severity="{x:Static components:ComponentSeverity.Warning}" Title="Review before removing records"
 						Message="Moving a library record to Trash hides it from the library. Restore and permanent record deletion remain in the protected Trash workflow." />

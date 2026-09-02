@@ -1,0 +1,105 @@
+{
+  "settleMs": 900,
+  "entries": [
+    {
+      "profile": "Cellar",
+      "surface": "Route",
+      "route": "Library",
+      "libraryView": "Details",
+      "width": 1456,
+      "height": 1060,
+      "file": "cellar-library-details-1456x1060.png"
+    },
+    {
+      "profile": "Cellar",
+      "surface": "Route",
+      "route": "Library",
+      "libraryView": "Details",
+      "width": 960,
+      "height": 720,
+      "file": "cellar-library-details-960x720.png"
+    },
+    {
+      "profile": "Cellar",
+      "surface": "ComponentGallery",
+      "width": 1456,
+      "height": 1060,
+      "file": "cellar-component-gallery-1456x1060.png"
+    },
+    {
+      "profile": "Cellar",
+      "surface": "ComponentGallery",
+      "width": 960,
+      "height": 720,
+      "file": "cellar-component-gallery-960x720.png"
+    },
+    {
+      "profile": "Cellar",
+      "surface": "Route",
+      "route": "Overview",
+      "decoration": "Off",
+      "width": 1456,
+      "height": 1060,
+      "file": "cellar-overview-decoration-off-1456x1060.png"
+    },
+    {
+      "profile": "Cellar",
+      "surface": "Route",
+      "route": "Overview",
+      "decoration": "Off",
+      "width": 960,
+      "height": 720,
+      "file": "cellar-overview-decoration-off-960x720.png"
+    },
+    {
+      "profile": "TastingRoom",
+      "surface": "Route",
+      "route": "Library",
+      "libraryView": "Details",
+      "width": 1456,
+      "height": 1060,
+      "file": "tastingroom-library-details-1456x1060.png"
+    },
+    {
+      "profile": "TastingRoom",
+      "surface": "Route",
+      "route": "Library",
+      "libraryView": "Details",
+      "width": 960,
+      "height": 720,
+      "file": "tastingroom-library-details-960x720.png"
+    },
+    {
+      "profile": "TastingRoom",
+      "surface": "ComponentGallery",
+      "width": 1456,
+      "height": 1060,
+      "file": "tastingroom-component-gallery-1456x1060.png"
+    },
+    {
+      "profile": "TastingRoom",
+      "surface": "ComponentGallery",
+      "width": 960,
+      "height": 720,
+      "file": "tastingroom-component-gallery-960x720.png"
+    },
+    {
+      "profile": "TastingRoom",
+      "surface": "Route",
+      "route": "Overview",
+      "decoration": "Off",
+      "width": 1456,
+      "height": 1060,
+      "file": "tastingroom-overview-decoration-off-1456x1060.png"
+    },
+    {
+      "profile": "TastingRoom",
+      "surface": "Route",
+      "route": "Overview",
+      "decoration": "Off",
+      "width": 960,
+      "height": 720,
+      "file": "tastingroom-overview-decoration-off-960x720.png"
+    }
+  ]
+}

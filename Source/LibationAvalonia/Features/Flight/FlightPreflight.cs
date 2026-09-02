@@ -1,6 +1,7 @@
 using DataLayer;
 using AudibleUtilities;
 using LibationAvalonia.ViewModels;
+using LibationAvalonia.Properties;
 using LibationFileManager;
 using LibationUiBase.ProcessQueue;
 using System;
@@ -82,8 +83,8 @@ public sealed class FlightProcessAdapter(MainVM main, Configuration configuratio
 		}
 		bool queued = await main.QueueBooksAsync(books.ToArray(), effective);
 		return queued
-			? new(true, "Processing accepted at least one eligible Current Flight title. Review Processing for the exact queued items; existing queue rules may skip titles that no longer need work.")
-			: new(false, "No Current Flight titles were added to Processing. Review the queue message and the selected titles.");
+			? new(true, Resources.FlightQueueAccepted)
+			: new(false, Resources.FlightQueueRejected);
 	}
 }
 
@@ -130,7 +131,7 @@ public static class FlightPreflight
 
 		int alreadyComplete = books.Count(book => book.Book.AudioExists);
 		if (alreadyComplete > 0)
-			issues.Add(new(FlightPreflightSeverity.Warning, $"Duplicate output detected for {alreadyComplete} selected title(s) that already have local audio. Existing Libation overwrite and reveal-file rules will apply."));
+			issues.Add(new(FlightPreflightSeverity.Warning, string.Format(Resources.FlightDuplicateOutputFormat, alreadyComplete)));
 
 		AddDiskSpaceIssues(books.Length, configuration, issues);
 
@@ -186,7 +187,7 @@ public static class FlightPreflight
 		{
 			issues.Add(new(
 				FlightPreflightSeverity.Warning,
-				$"Reported free space is below the conservative {estimate} estimate for {bookCount} title(s). The processing queue will perform its existing final disk-space check."));
+				string.Format(Resources.FlightDiskSpaceWarningFormat, estimate, bookCount)));
 		}
 	}
 }

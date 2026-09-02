@@ -1,10 +1,14 @@
 {
-  "schemaVersion": 1,
-  "generatedOn": "2026-08-30",
+  "schemaVersion": 2,
+  "generatedOn": "2026-09-01",
   "licenseDefinitions": {
     "repo-gpl-3.0": {
       "name": "GNU General Public License v3.0",
       "file": "LICENSE"
+    },
+    "source-serif-ofl-1.1": {
+      "name": "SIL Open Font License 1.1",
+      "file": "Source/LibationAvalonia/Assets/Fonts/OFL.txt"
     }
   },
   "sourcePolicy": {
@@ -53,7 +57,7 @@
         "temporaryRenderer": "macOS Quick Look",
         "visuallyInspectedOn": "2026-08-30",
         "result": "All panels, resource labels, target-size columns, strokes, and geometries visible; no clipping observed.",
-        "limitations": ["not-avalonia-runtime", "not-dpi-scale-proof", "not-installed-package-proof"]
+        "limitations": ["not-avalonia-runtime", "not-dpi-scale-proof", "not-installed-package-proof", "predates-two-s1-series-status-marks"]
       }
     }
   ],
@@ -189,6 +193,8 @@
     { "id": "status.unavailable", "kind": "status", "source": "Source/LibationAvalonia/DesignSystem/Assets/StatusAssets.axaml", "runtimeKey": "status.unavailable", "resourceType": "StreamGeometry", "coordinateSpace": "24x24", "renderSizes": [16, 20, 24, 32], "profiles": ["shared", "high-contrast"], "status": "ready-code-master", "licenseRef": "repo-gpl-3.0", "provenance": "original-code-native" },
     { "id": "status.needs-attention", "kind": "status", "source": "Source/LibationAvalonia/DesignSystem/Assets/StatusAssets.axaml", "runtimeKey": "status.needs-attention", "resourceType": "StreamGeometry", "coordinateSpace": "24x24", "renderSizes": [16, 20, 24, 32], "profiles": ["shared", "high-contrast"], "status": "ready-code-master", "licenseRef": "repo-gpl-3.0", "provenance": "original-code-native" },
     { "id": "status.connected", "kind": "status", "source": "Source/LibationAvalonia/DesignSystem/Assets/StatusAssets.axaml", "runtimeKey": "status.connected", "resourceType": "StreamGeometry", "coordinateSpace": "24x24", "renderSizes": [16, 20, 24, 32], "profiles": ["shared", "high-contrast"], "status": "ready-code-master", "licenseRef": "repo-gpl-3.0", "provenance": "original-code-native" },
+    { "id": "status.series-collapsed", "kind": "status", "source": "Source/LibationAvalonia/DesignSystem/Assets/StatusAssets.axaml", "runtimeKey": "status.series-collapsed", "resourceType": "StreamGeometry", "coordinateSpace": "24x24", "renderSizes": [16, 20, 24, 32], "profiles": ["shared", "high-contrast"], "status": "ready-code-master", "licenseRef": "repo-gpl-3.0", "provenance": "original-code-native" },
+    { "id": "status.series-expanded", "kind": "status", "source": "Source/LibationAvalonia/DesignSystem/Assets/StatusAssets.axaml", "runtimeKey": "status.series-expanded", "resourceType": "StreamGeometry", "coordinateSpace": "24x24", "renderSizes": [16, 20, 24, 32], "profiles": ["shared", "high-contrast"], "status": "ready-code-master", "licenseRef": "repo-gpl-3.0", "provenance": "original-code-native" },
 
     { "id": "illustration.cellar.empty-library", "kind": "illustration", "source": "Source/LibationAvalonia/DesignSystem/Assets/IllustrationAssets.axaml", "runtimeKey": "illustration.cellar.empty-library", "resourceType": "ControlTemplate", "coordinateSpace": "96x72", "renderSizes": ["96x72", "192x144", "256x192"], "exportTargets": ["avalonia-runtime"], "profiles": ["cellar", "high-contrast"], "status": "ready-code-master", "licenseRef": "repo-gpl-3.0", "provenance": "original-code-native" },
     { "id": "illustration.shared.account-connection", "kind": "illustration", "source": "Source/LibationAvalonia/DesignSystem/Assets/IllustrationAssets.axaml", "runtimeKey": "illustration.shared.account-connection", "resourceType": "ControlTemplate", "coordinateSpace": "96x72", "renderSizes": ["96x72", "192x144", "256x192"], "exportTargets": ["avalonia-runtime"], "profiles": ["shared", "high-contrast"], "status": "ready-code-master", "licenseRef": "repo-gpl-3.0", "provenance": "original-code-native" },
@@ -200,7 +206,13 @@
     { "id": "illustration.shared.no-search-results", "kind": "illustration", "source": "Source/LibationAvalonia/DesignSystem/Assets/IllustrationAssets.axaml", "runtimeKey": "illustration.shared.no-search-results", "resourceType": "ControlTemplate", "coordinateSpace": "96x72", "renderSizes": ["96x72", "192x144", "256x192"], "exportTargets": ["avalonia-runtime"], "profiles": ["shared", "high-contrast"], "status": "ready-code-master", "licenseRef": "repo-gpl-3.0", "provenance": "original-code-native" },
     { "id": "illustration.shared.offline-auth-attention", "kind": "illustration", "source": "Source/LibationAvalonia/DesignSystem/Assets/IllustrationAssets.axaml", "runtimeKey": "illustration.shared.offline-auth-attention", "resourceType": "ControlTemplate", "coordinateSpace": "96x72", "renderSizes": ["96x72", "192x144", "256x192"], "exportTargets": ["avalonia-runtime"], "profiles": ["shared", "high-contrast"], "status": "ready-code-master", "licenseRef": "repo-gpl-3.0", "provenance": "original-code-native" },
     { "id": "illustration.cellar.bottle-rack-motif", "kind": "illustration", "source": null, "runtimeKey": null, "exportSizes": [], "profiles": ["cellar"], "status": "deferred", "rationale": "Pure decoration is unnecessary for a complete layout and would increase first-release skeuomorphism.", "licenseRef": "repo-gpl-3.0", "provenance": "not-authored-deferred" },
-    { "id": "illustration.tasting-room.still-life", "kind": "illustration", "source": null, "runtimeKey": null, "exportSizes": [], "profiles": ["tasting-room"], "status": "deferred", "rationale": "Pure lifestyle decoration conveys no product state and adds avoidable alcohol-brand emphasis.", "licenseRef": "repo-gpl-3.0", "provenance": "not-authored-deferred" },
+    { "id": "font.source-serif-4.regular", "kind": "font", "source": "Source/LibationAvalonia/Assets/Fonts/SourceSerif4-Regular.otf", "family": "Source Serif 4", "weight": "Regular", "profiles": ["shared"], "status": "bundled", "licenseRef": "source-serif-ofl-1.1", "provenance": "adobe-source-serif-official-release" },
+    { "id": "font.source-serif-4.semibold", "kind": "font", "source": "Source/LibationAvalonia/Assets/Fonts/SourceSerif4-Semibold.otf", "family": "Source Serif 4", "weight": "Semibold", "profiles": ["shared"], "status": "bundled", "licenseRef": "source-serif-ofl-1.1", "provenance": "adobe-source-serif-official-release" },
+
+    { "id": "illustration.cellar.decanter", "kind": "raster-illustration", "source": "Source/LibationAvalonia/Assets/ContemporaryCellar/decanter-cellar.png", "generator": "OpenAI image generation", "generatedOn": "2026-09-01", "largestDisplayBox": "120x92", "pixelSize": "240x160", "profiles": ["cellar"], "status": "runtime-downsampled-2x", "licenseRef": "repo-gpl-3.0", "provenance": "project-generated" },
+    { "id": "illustration.tasting-room.add-books-raster", "kind": "raster-illustration", "source": "Source/LibationAvalonia/Assets/ContemporaryCellar/tasting-room-book-crate.png", "generator": "OpenAI Media Service", "generatedOn": "2026-09-01", "largestDisplayBox": "180x130", "pixelSize": "346x260", "profiles": ["tasting-room"], "status": "runtime-downsampled-2x", "licenseRef": "repo-gpl-3.0", "provenance": "project-generated-c2pa-source" },
+    { "id": "illustration.tasting-room.decanter-raster", "kind": "raster-illustration", "source": "Source/LibationAvalonia/Assets/ContemporaryCellar/tasting-room-decanter.png", "generator": "OpenAI Media Service", "generatedOn": "2026-09-01", "largestDisplayBox": "156x188", "pixelSize": "301x376", "profiles": ["tasting-room"], "status": "runtime-downsampled-2x", "licenseRef": "repo-gpl-3.0", "provenance": "project-generated-c2pa-source" },
+    { "id": "illustration.tasting-room.still-life", "kind": "raster-illustration", "source": "Source/LibationAvalonia/Assets/ContemporaryCellar/tasting-room-still-life.png", "generator": "OpenAI image generation", "generatedOn": "2026-09-01", "largestDisplayBox": "320x192", "pixelSize": "640x379", "profiles": ["tasting-room"], "status": "runtime-downsampled-2x", "licenseRef": "repo-gpl-3.0", "provenance": "project-generated" },
 
     { "id": "texture.cellar.grain-seamless", "kind": "texture", "source": null, "runtimeKey": null, "exportSizes": [], "profiles": ["cellar"], "status": "deferred-optional", "rationale": "The contract marks this texture optional; semantic code-native surfaces already carry the material direction.", "licenseRef": "repo-gpl-3.0", "provenance": "not-authored-deferred" }
   ],

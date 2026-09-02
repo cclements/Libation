@@ -29,7 +29,7 @@ public sealed class DashboardViewModel : ViewModelBase, IDisposable
 	[
 		nameof(Snapshot), nameof(HasDashboardData), nameof(IsLoading), nameof(ShowInitialError),
 		nameof(TotalTitlesText), nameof(VisibleTitlesText), nameof(DownloadPendingText), nameof(DownloadedText),
-		nameof(CompletedText), nameof(ProcessingText), nameof(LocalStorageText), nameof(StorageSavedText),
+		nameof(CompletedText), nameof(ProcessingText), nameof(HasLocalStorage), nameof(HasStorageSaved), nameof(LocalStorageText), nameof(StorageSavedText),
 		nameof(StorageStatusText), nameof(AccountHealthText), nameof(AccountStatus), nameof(ScanStateText),
 		nameof(ScanStatus), nameof(IsScanning), nameof(ShowNoAccount), nameof(ShowNeedsScan),
 		nameof(ShowScanningEmpty), nameof(HasLibrary), nameof(HasCatalogWithoutLocalCopies),
@@ -190,8 +190,10 @@ public sealed class DashboardViewModel : ViewModelBase, IDisposable
 	public string DownloadedText => FormatCount(Snapshot.DownloadedCount);
 	public string CompletedText => FormatCount(Snapshot.CompletedCount);
 	public string ProcessingText => FormatCount(Snapshot.ActiveProcessingCount + Snapshot.QueuedProcessingCount);
-	public string LocalStorageText => Snapshot.Supplement.TotalLocalStorageBytes is long bytes ? DiskSpaceHelper.FormatBytes(bytes) : "Not available";
-	public string StorageSavedText => Snapshot.Supplement.StorageSavedBytes is long bytes ? DiskSpaceHelper.FormatBytes(bytes) : "Not available";
+	public bool HasLocalStorage => Snapshot.Supplement.TotalLocalStorageBytes.HasValue;
+	public bool HasStorageSaved => Snapshot.Supplement.StorageSavedBytes.HasValue;
+	public string LocalStorageText => Snapshot.Supplement.TotalLocalStorageBytes is long bytes ? DiskSpaceHelper.FormatBytes(bytes) : string.Empty;
+	public string StorageSavedText => Snapshot.Supplement.StorageSavedBytes is long bytes ? DiskSpaceHelper.FormatBytes(bytes) : string.Empty;
 	public string StorageStatusText => Snapshot.Supplement.TotalLocalStorageBytes.HasValue ? "Local audiobook storage" : "Storage has not been measured";
 	public string AccountHealthText => Snapshot.AccountCount switch
 	{
@@ -208,7 +210,7 @@ public sealed class DashboardViewModel : ViewModelBase, IDisposable
 				? $"Last successful scan: {scanned.ToLocalTime():g}"
 				: Snapshot.AccountCount > 0 && Snapshot.TotalTitles == 0
 					? "Ready to scan"
-					: "Last scan time is not available";
+					: string.Empty;
 	public LibationStatusKind ScanStatus => Snapshot.IsScanning
 		? LibationStatusKind.Processing
 		: IsScanStale || Snapshot.AccountCount == 0

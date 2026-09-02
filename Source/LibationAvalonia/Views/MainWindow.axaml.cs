@@ -7,6 +7,7 @@ using DataLayer;
 using FileManager;
 using LibationAvalonia.Dialogs;
 using LibationAvalonia.DesignSystem;
+using LibationAvalonia.DesignSystem.Components;
 using LibationAvalonia.Features.Onboarding;
 using LibationAvalonia.Shell;
 using LibationAvalonia.ViewModels;
@@ -346,6 +347,8 @@ public partial class MainWindow : ReactiveWindow<MainVM>
 #if DEBUG
 	private void Configure_DebugMenu()
 	{
+		var galleryItem = new MenuItem { Header = Properties.Resources.MenuComponentGalleryHeader };
+		galleryItem.Click += (_, _) => ComponentGallery.ShowWindow(this);
 		var simulateItem = new MenuItem { Header = "Simulate bad book failures (test dialog)..." };
 		simulateItem.Click += async (_, _) =>
 		{
@@ -369,6 +372,7 @@ public partial class MainWindow : ReactiveWindow<MainVM>
 		if (insertIndex < 0)
 			insertIndex = items.Count;
 
+		items.Insert(insertIndex++, galleryItem);
 		items.Insert(insertIndex, simulateItem);
 	}
 #endif
@@ -605,7 +609,7 @@ public partial class MainWindow : ReactiveWindow<MainVM>
 			await upgrader.CheckForUpgradeAtStartupAsync(upgradeAvailable);
 			if (Configuration.Instance.CheckForUpgradesAtStartup
 				&& ViewModel?.ApplicationUpdateState == "Update status has not been checked in this session.")
-				ViewModel.ApplicationUpdateState = "No application update was reported by the startup check.";
+				ViewModel.ApplicationUpdateState = string.Empty;
 		};
 #endif
 	}

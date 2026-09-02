@@ -1,4 +1,5 @@
 using LibationAvalonia.Features.Tools;
+using LibationAvalonia.Properties;
 using LibationAvalonia.Shell;
 using LibationFileManager;
 using ReactiveUI;
@@ -55,7 +56,7 @@ public sealed class SettingsViewModel : SecondaryDestinationViewModel
 			new("Naming and folders", "Books location, temporary files, templates, and file naming.", "path folder books location template filename", OpenSettingsCommand),
 			new("Metadata", "Tags, cover art, metadata files, and file metadata behavior.", "tag cover metadata", OpenSettingsCommand),
 			new("Automation", "Automatic scans and post-scan processing behavior.", "auto scan automatic schedule", OpenSettingsCommand),
-			new("Updates", "Startup update checks and the established About/update workflow.", "upgrade version release", OpenSettingsCommand),
+			new("Updates", Resources.SettingsUpdatesDescription, "upgrade version release", OpenSettingsCommand),
 			new("Privacy", "Logging, account storage, and integrations that may send library information elsewhere.", "credential token log telemetry service", OpenSettingsCommand),
 			new("Advanced", "Legacy palette editor, integrations, and expert settings.", "advanced chardonnay audiobook shelf legacy", OpenSettingsCommand),
 		];
@@ -102,7 +103,7 @@ public sealed class SettingsViewModel : SecondaryDestinationViewModel
 	public string LibraryViewText => configuration.LibraryViewMode.ToString();
 	public string NavigationText => configuration.NavigationRailPreference.ToString();
 	public string AppearanceSummary => $"{AppearanceProfileText} · {DensityText} density · {DecorationText} decoration · {MotionText}";
-	public string LegacyThemeSummary => "The established Settings dialog remains the owner of Chardonnay palette overrides. Profile defaults and legacy overrides are not rewritten by this category index.";
+	public string LegacyThemeSummary => Resources.SettingsClassicColorSummary;
 
 	public ICommand OpenSettingsCommand { get; }
 	public ICommand OpenAccountsCommand { get; }

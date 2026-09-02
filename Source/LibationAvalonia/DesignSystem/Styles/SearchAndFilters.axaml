@@ -24,7 +24,7 @@
 	</Style>
 	<Style Selector="Button.filter.selected">
 		<Setter Property="Background" Value="{DynamicResource Libation.Brush.Selection}" />
-		<Setter Property="Foreground" Value="{DynamicResource Libation.Brush.TextPrimary}" />
+		<Setter Property="Foreground" Value="{DynamicResource Libation.Brush.TextOnAccent}" />
 		<Setter Property="BorderBrush" Value="{DynamicResource Libation.Brush.AccentPrimary}" />
 	</Style>
 	<Style Selector="Button.filter:focus-visible">

@@ -5,14 +5,17 @@
 			 x:Name="Root">
 	<Border Classes="card raised" AutomationProperties.LiveSetting="{x:Static designSystem:PlatformAutomationPolicy.Polite}">
 		<Grid ColumnDefinitions="Auto,*" ColumnSpacing="{DynamicResource Libation.Space.4}">
-			<ContentControl
-				Width="{Binding IllustrationWidth, ElementName=Root}"
-				Height="{Binding IllustrationHeight, ElementName=Root}"
-				Content="{Binding IllustrationContent, ElementName=Root}"
-				IsVisible="{Binding IllustrationContent, ElementName=Root, Converter={x:Static ObjectConverters.IsNotNull}}"
-				VerticalAlignment="Center"
-				AutomationProperties.IsControlElementOverride="False"
-				AutomationProperties.AccessibilityView="Raw" />
+			<Grid IsVisible="{DynamicResource Libation.Decoration.Visible}"
+				Opacity="{DynamicResource Libation.Decoration.Opacity}">
+				<ContentControl
+					Width="{Binding IllustrationWidth, ElementName=Root}"
+					Height="{Binding IllustrationHeight, ElementName=Root}"
+					Content="{Binding IllustrationContent, ElementName=Root}"
+					IsVisible="{Binding IllustrationContent, ElementName=Root, Converter={x:Static ObjectConverters.IsNotNull}}"
+					VerticalAlignment="Center"
+					AutomationProperties.IsControlElementOverride="False"
+					AutomationProperties.AccessibilityView="Raw" />
+			</Grid>
 			<Grid Grid.Column="1" RowDefinitions="Auto,Auto" RowSpacing="{DynamicResource Libation.Space.2}">
 				<Expander IsExpanded="{Binding IsExpanded, ElementName=Root, Mode=TwoWay}">
 					<Expander.Header>

@@ -2,17 +2,25 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-			 xmlns:vm="clr-namespace:LibationAvalonia.ViewModels"
+			 xmlns:views="clr-namespace:LibationAvalonia.Views"
              mc:Ignorable="d" d:DesignWidth="200" d:DesignHeight="200" MinWidth="37" MinHeight="40"
 			 Background="Transparent"
-			 x:DataType="vm:LiberateStatusButtonViewModel"
-             x:Class="LibationAvalonia.Views.LiberateStatusButton">
+			 x:DataType="views:LiberateStatusButton"
+			 x:Class="LibationAvalonia.Views.LiberateStatusButton"
+			 x:Name="Root">
 
 	<UserControl.Styles>
 		<Style Selector="Button:disabled /template/ ContentPresenter#PART_ContentPresenter">
 			<Setter Property="Background" Value="{DynamicResource SystemChromeDisabledLowColor}" />
 			<Setter Property="BorderBrush" Value="{DynamicResource SystemChromeDisabledLowColor}" />
 		</Style>
+		<Style Selector="views|LiberateStatusButton:download-pending Path#StatusGlyph"><Setter Property="Data" Value="{DynamicResource status.download-pending}" /></Style>
+		<Style Selector="views|LiberateStatusButton:downloading Path#StatusGlyph"><Setter Property="Data" Value="{DynamicResource status.downloading}" /></Style>
+		<Style Selector="views|LiberateStatusButton:downloaded Path#StatusGlyph"><Setter Property="Data" Value="{DynamicResource status.downloaded}" /></Style>
+		<Style Selector="views|LiberateStatusButton:failed Path#StatusGlyph"><Setter Property="Data" Value="{DynamicResource status.failed}" /><Setter Property="Stroke" Value="{DynamicResource Libation.Brush.Danger}" /></Style>
+		<Style Selector="views|LiberateStatusButton:unavailable Path#StatusGlyph"><Setter Property="Data" Value="{DynamicResource status.unavailable}" /><Setter Property="Stroke" Value="{DynamicResource Libation.Brush.Warning}" /></Style>
+		<Style Selector="views|LiberateStatusButton:series-collapsed Path#StatusGlyph"><Setter Property="Data" Value="{DynamicResource status.series-collapsed}" /></Style>
+		<Style Selector="views|LiberateStatusButton:series-expanded Path#StatusGlyph"><Setter Property="Data" Value="{DynamicResource status.series-expanded}" /></Style>
 	</UserControl.Styles>
 
 	<Button
@@ -20,14 +28,32 @@
 		HorizontalAlignment="Stretch"
 		VerticalAlignment="Stretch"
 		Padding="0"
-		IsEnabled="{Binding	IsButtonEnabled}" Click="Button_Click" >
+		IsEnabled="{Binding IsButtonEnabled, ElementName=Root}"
+		AutomationProperties.Name="{Binding StatusText, ElementName=Root}"
+		ToolTip.Tip="{Binding StatusText, ElementName=Root}"
+		Click="Button_Click" >
 
 		<Grid RowDefinitions="*,8*,*">
 			<Image
+				x:Name="LegacyStatusIcon"
 				Grid.Row="1"
 				Stretch="Uniform"
 				RenderOptions.BitmapInterpolationMode="HighQuality"
-				Source="{Binding ButtonImage}" />
+				IsVisible="{Binding !UseVectorStatus, ElementName=Root}"
+				Source="{Binding ButtonImage, ElementName=Root}" />
+			<Path x:Name="StatusGlyph"
+				Grid.Row="1"
+				Width="24" Height="24"
+				HorizontalAlignment="Center" VerticalAlignment="Center"
+				Stretch="Uniform"
+				Data="{DynamicResource status.download-pending}"
+				Stroke="{DynamicResource Libation.Brush.AccentPrimary}"
+				StrokeThickness="1.75"
+				StrokeLineCap="Round"
+				StrokeJoin="Round"
+				IsVisible="{Binding UseVectorStatus, ElementName=Root}"
+				AutomationProperties.IsControlElementOverride="False"
+				AutomationProperties.AccessibilityView="Raw" />
 		</Grid>
 	</Button>
 </UserControl>

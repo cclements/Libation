@@ -17,9 +17,9 @@
 			<Setter Property="Template">
 				<ControlTemplate>
 					<Border
-						Background="Transparent"
-						BorderBrush="Transparent"
-						BorderThickness="0"
+						Background="{TemplateBinding Background}"
+						BorderBrush="{TemplateBinding BorderBrush}"
+						BorderThickness="{TemplateBinding BorderThickness}"
 						CornerRadius="{TemplateBinding CornerRadius}"
 						Padding="{TemplateBinding Padding}">
 						<ContentPresenter
@@ -38,6 +38,9 @@
 		</Style>
 		<Style Selector="components|LibationNavigationRail:compact Border#RailRoot">
 			<Setter Property="Width" Value="{DynamicResource Libation.Navigation.WidthCompact}" />
+		</Style>
+		<Style Selector="components|LibationNavigationRail:compact TextBlock.nav-label">
+			<Setter Property="IsVisible" Value="False" />
 		</Style>
 	</UserControl.Styles>
 	<Border x:Name="RailRoot"

@@ -12,10 +12,16 @@
 	</Style>
 	<Style Selector="ListBox.contemporary > ListBoxItem:pointerover">
 		<Setter Property="Background" Value="{DynamicResource Libation.Brush.SurfaceInteractive}" />
+		<Setter Property="BorderBrush" Value="{DynamicResource Libation.Brush.BorderSubtle}" />
+		<Setter Property="BorderThickness" Value="1" />
+	</Style>
+	<Style Selector="ListBox.contemporary > ListBoxItem:pressed">
+		<Setter Property="Background" Value="{DynamicResource Libation.Brush.AccentPressed}" />
+		<Setter Property="Foreground" Value="{DynamicResource Libation.Brush.TextOnAccent}" />
 	</Style>
 	<Style Selector="ListBox.contemporary > ListBoxItem:selected">
 		<Setter Property="Background" Value="{DynamicResource Libation.Brush.Selection}" />
-		<Setter Property="Foreground" Value="{DynamicResource Libation.Brush.TextPrimary}" />
+		<Setter Property="Foreground" Value="{DynamicResource Libation.Brush.TextOnAccent}" />
 		<Setter Property="BorderBrush" Value="{DynamicResource Libation.Brush.AccentPrimary}" />
 		<Setter Property="BorderThickness" Value="1" />
 	</Style>

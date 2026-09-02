@@ -62,6 +62,6 @@ public partial class ProfileChoicePreview : UserControl
 			return;
 		var preview = manager.CreatePreviewScope(ProfileStyle);
 		PreviewScope.Resources = preview.Resources;
-		PreviewScope.RequestedThemeVariant = preview.Host.RequestedThemeVariant;
+		PreviewScope.RequestedThemeVariant = preview.RequestedThemeVariant;
 	}
 }

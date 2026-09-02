@@ -4,6 +4,7 @@
 	xmlns:overview="using:LibationAvalonia.Features.Overview"
 	xmlns:components="using:LibationAvalonia.DesignSystem.Components"
 	xmlns:designSystem="using:LibationAvalonia.DesignSystem"
+	xmlns:properties="using:LibationAvalonia.Properties"
 	x:Class="LibationAvalonia.Features.Overview.TastingRoomOverviewView"
 	x:Name="Root"
 	x:DataType="overview:DashboardViewModel">
@@ -253,7 +254,7 @@
 						x:Name="TastingDropZone"
 						Title="Add books to your cellar"
 						Hint="Drag and drop audiobook files or folders, or choose them from this computer."
-						AcceptedTypesText="Uses Libation's existing file locator"
+						AcceptedTypesText="{x:Static properties:Resources.SupportedAudiobookFileTypes}"
 						BrowseText="Browse Files"
 						BrowseCommand="{Binding LocateAudiobooksCommand}"
 						DropCommand="{Binding DropAudiobooksCommand}">
@@ -311,9 +312,9 @@
 						</StackPanel>
 						<StackPanel Grid.Column="2" Spacing="{DynamicResource Libation.Space.2}">
 							<TextBlock Text="Storage and updates" FontWeight="SemiBold" Foreground="{DynamicResource Libation.Brush.TextPrimary}" />
-							<TextBlock Text="{Binding LocalStorageText, StringFormat='Local storage: {0}'}"
+							<TextBlock IsVisible="{Binding HasLocalStorage}" Text="{Binding LocalStorageText, StringFormat='Local storage: {0}'}"
 								Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
-							<TextBlock Text="{Binding StorageSavedText, StringFormat='Storage saved: {0}'}"
+							<TextBlock IsVisible="{Binding HasStorageSaved}" Text="{Binding StorageSavedText, StringFormat='Storage saved: {0}'}"
 								Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
 							<TextBlock Text="{Binding UpdateStateText}" IsVisible="{Binding HasUpdateState}"
 								Foreground="{DynamicResource Libation.Brush.TextSecondary}" TextWrapping="Wrap" />
