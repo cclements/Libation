@@ -55,6 +55,16 @@ dotnet run Scripts/<script-name>.cs -- --some-flag
 
 Forgetting the `--` is the usual reason a flag appears to be ignored.
 
+### demo-profile.cs
+
+Creates an isolated Libation profile for UI verification. Point `LIBATION_FILES_DIR` at the folder when launching, and the app never sees your real library, accounts, or settings:
+
+```bash
+dotnet run Scripts/demo-profile.cs -- ../.demo/cellar --style Cellar --accounts 1
+```
+
+Follow with `seed-demo-library.cs -- --count 1000 <folder>` and `python3 Scripts/seed-demo-covers.py <folder>` for a populated library with cover placeholders. The folder carries its own `libation-master.key`, so token storage never prompts the OS keychain.
+
 ### seed-demo-library.cs
 
 Fills a Libation library with fake books covering every icon the grid's **Liberate** column can draw, so a change to those icons can be checked at a glance instead of by hunting for a real book in the right state.
