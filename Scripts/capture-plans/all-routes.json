@@ -1,0 +1,365 @@
+{
+  "settleMs": 900,
+  "entries": [
+    {
+      "profile": "Cellar",
+      "route": "Overview",
+      "width": 1456,
+      "height": 1060
+    },
+    {
+      "profile": "Cellar",
+      "route": "Overview",
+      "width": 960,
+      "height": 720
+    },
+    {
+      "profile": "Cellar",
+      "route": "Overview",
+      "width": 720,
+      "height": 560
+    },
+    {
+      "profile": "Cellar",
+      "route": "Library",
+      "width": 1456,
+      "height": 1060
+    },
+    {
+      "profile": "Cellar",
+      "route": "Library",
+      "width": 960,
+      "height": 720
+    },
+    {
+      "profile": "Cellar",
+      "route": "Library",
+      "width": 720,
+      "height": 560
+    },
+    {
+      "profile": "Cellar",
+      "route": "Downloads",
+      "width": 1456,
+      "height": 1060
+    },
+    {
+      "profile": "Cellar",
+      "route": "Downloads",
+      "width": 960,
+      "height": 720
+    },
+    {
+      "profile": "Cellar",
+      "route": "Downloads",
+      "width": 720,
+      "height": 560
+    },
+    {
+      "profile": "Cellar",
+      "route": "Processing",
+      "width": 1456,
+      "height": 1060
+    },
+    {
+      "profile": "Cellar",
+      "route": "Processing",
+      "width": 960,
+      "height": 720
+    },
+    {
+      "profile": "Cellar",
+      "route": "Processing",
+      "width": 720,
+      "height": 560
+    },
+    {
+      "profile": "Cellar",
+      "route": "History",
+      "width": 1456,
+      "height": 1060
+    },
+    {
+      "profile": "Cellar",
+      "route": "History",
+      "width": 960,
+      "height": 720
+    },
+    {
+      "profile": "Cellar",
+      "route": "History",
+      "width": 720,
+      "height": 560
+    },
+    {
+      "profile": "Cellar",
+      "route": "Accounts",
+      "width": 1456,
+      "height": 1060
+    },
+    {
+      "profile": "Cellar",
+      "route": "Accounts",
+      "width": 960,
+      "height": 720
+    },
+    {
+      "profile": "Cellar",
+      "route": "Accounts",
+      "width": 720,
+      "height": 560
+    },
+    {
+      "profile": "Cellar",
+      "route": "Settings",
+      "width": 1456,
+      "height": 1060
+    },
+    {
+      "profile": "Cellar",
+      "route": "Settings",
+      "width": 960,
+      "height": 720
+    },
+    {
+      "profile": "Cellar",
+      "route": "Settings",
+      "width": 720,
+      "height": 560
+    },
+    {
+      "profile": "Cellar",
+      "route": "Tools",
+      "width": 1456,
+      "height": 1060
+    },
+    {
+      "profile": "Cellar",
+      "route": "Tools",
+      "width": 960,
+      "height": 720
+    },
+    {
+      "profile": "Cellar",
+      "route": "Tools",
+      "width": 720,
+      "height": 560
+    },
+    {
+      "profile": "Cellar",
+      "route": "Trash",
+      "width": 1456,
+      "height": 1060
+    },
+    {
+      "profile": "Cellar",
+      "route": "Trash",
+      "width": 960,
+      "height": 720
+    },
+    {
+      "profile": "Cellar",
+      "route": "Trash",
+      "width": 720,
+      "height": 560
+    },
+    {
+      "profile": "Cellar",
+      "route": "About",
+      "width": 1456,
+      "height": 1060
+    },
+    {
+      "profile": "Cellar",
+      "route": "About",
+      "width": 960,
+      "height": 720
+    },
+    {
+      "profile": "Cellar",
+      "route": "About",
+      "width": 720,
+      "height": 560
+    },
+    {
+      "profile": "TastingRoom",
+      "route": "Overview",
+      "width": 1456,
+      "height": 1060
+    },
+    {
+      "profile": "TastingRoom",
+      "route": "Overview",
+      "width": 960,
+      "height": 720
+    },
+    {
+      "profile": "TastingRoom",
+      "route": "Overview",
+      "width": 720,
+      "height": 560
+    },
+    {
+      "profile": "TastingRoom",
+      "route": "Library",
+      "width": 1456,
+      "height": 1060
+    },
+    {
+      "profile": "TastingRoom",
+      "route": "Library",
+      "width": 960,
+      "height": 720
+    },
+    {
+      "profile": "TastingRoom",
+      "route": "Library",
+      "width": 720,
+      "height": 560
+    },
+    {
+      "profile": "TastingRoom",
+      "route": "Downloads",
+      "width": 1456,
+      "height": 1060
+    },
+    {
+      "profile": "TastingRoom",
+      "route": "Downloads",
+      "width": 960,
+      "height": 720
+    },
+    {
+      "profile": "TastingRoom",
+      "route": "Downloads",
+      "width": 720,
+      "height": 560
+    },
+    {
+      "profile": "TastingRoom",
+      "route": "Processing",
+      "width": 1456,
+      "height": 1060
+    },
+    {
+      "profile": "TastingRoom",
+      "route": "Processing",
+      "width": 960,
+      "height": 720
+    },
+    {
+      "profile": "TastingRoom",
+      "route": "Processing",
+      "width": 720,
+      "height": 560
+    },
+    {
+      "profile": "TastingRoom",
+      "route": "History",
+      "width": 1456,
+      "height": 1060
+    },
+    {
+      "profile": "TastingRoom",
+      "route": "History",
+      "width": 960,
+      "height": 720
+    },
+    {
+      "profile": "TastingRoom",
+      "route": "History",
+      "width": 720,
+      "height": 560
+    },
+    {
+      "profile": "TastingRoom",
+      "route": "Accounts",
+      "width": 1456,
+      "height": 1060
+    },
+    {
+      "profile": "TastingRoom",
+      "route": "Accounts",
+      "width": 960,
+      "height": 720
+    },
+    {
+      "profile": "TastingRoom",
+      "route": "Accounts",
+      "width": 720,
+      "height": 560
+    },
+    {
+      "profile": "TastingRoom",
+      "route": "Settings",
+      "width": 1456,
+      "height": 1060
+    },
+    {
+      "profile": "TastingRoom",
+      "route": "Settings",
+      "width": 960,
+      "height": 720
+    },
+    {
+      "profile": "TastingRoom",
+      "route": "Settings",
+      "width": 720,
+      "height": 560
+    },
+    {
+      "profile": "TastingRoom",
+      "route": "Tools",
+      "width": 1456,
+      "height": 1060
+    },
+    {
+      "profile": "TastingRoom",
+      "route": "Tools",
+      "width": 960,
+      "height": 720
+    },
+    {
+      "profile": "TastingRoom",
+      "route": "Tools",
+      "width": 720,
+      "height": 560
+    },
+    {
+      "profile": "TastingRoom",
+      "route": "Trash",
+      "width": 1456,
+      "height": 1060
+    },
+    {
+      "profile": "TastingRoom",
+      "route": "Trash",
+      "width": 960,
+      "height": 720
+    },
+    {
+      "profile": "TastingRoom",
+      "route": "Trash",
+      "width": 720,
+      "height": 560
+    },
+    {
+      "profile": "TastingRoom",
+      "route": "About",
+      "width": 1456,
+      "height": 1060
+    },
+    {
+      "profile": "TastingRoom",
+      "route": "About",
+      "width": 960,
+      "height": 720
+    },
+    {
+      "profile": "TastingRoom",
+      "route": "About",
+      "width": 720,
+      "height": 560
+    }
+  ]
+}

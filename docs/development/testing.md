@@ -65,6 +65,18 @@ dotnet run Scripts/demo-profile.cs -- ../.demo/cellar --style Cellar --accounts 
 
 Follow with `seed-demo-library.cs -- --count 1000 <folder>` and `python3 Scripts/seed-demo-covers.py <folder>` for a populated library with cover placeholders. The folder carries its own `libation-master.key`, so token storage never prompts the OS keychain.
 
+### capture-ui.sh
+
+Captures every contemporary route in both profiles from an isolated demo profile, without touching your real library:
+
+```bash
+Scripts/capture-ui.sh ../.demo/cellar Scripts/capture-plans/all-routes.json ../runtime-audit-$(date +%F)/captures
+```
+
+Plans are JSON under `Scripts/capture-plans/`; regenerate the standard set with `python3 Scripts/capture-plans/make-plans.py`. Each entry names a profile, route, and window size. The app applies each entry and signals when its data, visible covers, bindings, and layout are ready; the macOS driver then captures the live window content with `screencapture`. This OS path is intentional: Avalonia 12's macOS `RenderTargetBitmap` omits some composed control contents even though the live window is complete.
+
+The command builds a framework-dependent apphost in the records repository's ignored `.demo/capture-app` folder, launches only against the supplied profile, writes one PNG per entry plus `capture-log.txt`, and exits nonzero if the app fails or any planned file is missing. Use `--no-build` only after that dedicated apphost has already been built from the current source.
+
 ### seed-demo-library.cs
 
 Fills a Libation library with fake books covering every icon the grid's **Liberate** column can draw, so a change to those icons can be checked at a glance instead of by hunting for a real book in the right state.

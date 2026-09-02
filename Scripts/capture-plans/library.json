@@ -1,0 +1,29 @@
+{
+  "settleMs": 900,
+  "entries": [
+    {
+      "profile": "Cellar",
+      "route": "Library",
+      "width": 1456,
+      "height": 1060
+    },
+    {
+      "profile": "Cellar",
+      "route": "Library",
+      "width": 960,
+      "height": 720
+    },
+    {
+      "profile": "TastingRoom",
+      "route": "Library",
+      "width": 1456,
+      "height": 1060
+    },
+    {
+      "profile": "TastingRoom",
+      "route": "Library",
+      "width": 960,
+      "height": 720
+    }
+  ]
+}
