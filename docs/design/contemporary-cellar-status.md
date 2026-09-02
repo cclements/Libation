@@ -1,5 +1,11 @@
 # Contemporary Cellar workstream status
 
+> Re-planned 2026-09-01. The rows below describe source integration only and are superseded by the
+> evidence-based slice records in the libation-patch records repository
+> (`docs/reviews/2026-09-01-contemporary-cellar-gap-review.md`,
+> `docs/superpowers/specs/2026-09-01-contemporary-cellar-replan-design.md`). A slice is complete only
+> when its capture review is marked Passed.
+
 Effective delivery baseline: `3e7191adc7f41f1dec252b95e505b3f318be3b34`.
 Measured UI intake baseline: `094e207c0b245f36592ce31000f693674b886057`.
 Integration branch: `codex/contemporary-cellar`.
