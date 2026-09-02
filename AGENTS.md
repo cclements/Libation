@@ -7,7 +7,8 @@ audiobooks. The core product is the Avalonia GUI (`LibationAvalonia`, assembly n
 plus a headless CLI (`LibationCli`) that shares the same config and SQLite library database.
 
 ### Toolchain / environment
-- Requires the **.NET 10 SDK** pinned by `global.json` (`10.0.101`). It is preinstalled at
+- Requires the **.NET 10 SDK**. `global.json` sets a `10.0.101` floor with `rollForward: latestFeature`,
+  so any newer 10.0.x SDK is used as-is. It is preinstalled at
   `~/.dotnet`; `~/.bashrc` exports `DOTNET_ROOT` and adds `~/.dotnet` (and `~/.dotnet/tools`) to
   `PATH`. New non-login shells may not have it — use `dotnet` after a login shell, or call
   `~/.dotnet/dotnet` directly.
@@ -19,9 +20,8 @@ plus a headless CLI (`LibationCli`) that shares the same config and SQLite libra
 - `dotnet build Source/Libation.slnx` succeeds on Linux with 0 errors. So do
   `LibationWinForms`, `HangoverWinForms` and the `LoadByOS/{Windows,MacOS}ConfigApp` helpers,
   individually: they target `net10.0-windows7.0` but set `EnableWindowsTargeting`, which is what makes
-  a non-Windows SDK build them. **Always compile-check a change to the WinForms projects** — an earlier
-  version of this file said they could not be built here, and a whole PR's worth of WinForms edits went
-  out unverified on the strength of that.
+  a non-Windows SDK build them. Compile-check every change to the WinForms projects here; a Linux
+  build is the only automated check those projects get before a human on Windows sees them.
 - Compiling is not running. WinForms has no Linux runtime, so behaviour and layout in
   `LibationWinForms` / `HangoverWinForms` still need a human on Windows. Say so explicitly rather than
   implying a WinForms change was tested.
