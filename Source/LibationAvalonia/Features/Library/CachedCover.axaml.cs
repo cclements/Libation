@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.VisualTree;
+using DataLayer;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,6 +13,16 @@ public partial class CachedCover : UserControl
 {
 	public static readonly StyledProperty<IImage?> CoverProperty =
 		AvaloniaProperty.Register<CachedCover, IImage?>(nameof(Cover));
+	public static readonly StyledProperty<LibraryBook?> BookProperty =
+		AvaloniaProperty.Register<CachedCover, LibraryBook?>(nameof(Book));
+	public static readonly StyledProperty<CoverImageCache?> CacheProperty =
+		AvaloniaProperty.Register<CachedCover, CoverImageCache?>(nameof(Cache));
+	public static readonly StyledProperty<CoverVariant> VariantProperty =
+		AvaloniaProperty.Register<CachedCover, CoverVariant>(nameof(Variant), CoverVariant.Medium);
+	public static readonly StyledProperty<int> DecodePixelWidthProperty =
+		AvaloniaProperty.Register<CachedCover, int>(nameof(DecodePixelWidth));
+	public static readonly StyledProperty<string?> AccessibleNameProperty =
+		AvaloniaProperty.Register<CachedCover, string?>(nameof(AccessibleName));
 
 	private CancellationTokenSource? coverCancellation;
 	private CoverImageCache.CoverLease? coverLease;
@@ -33,7 +44,24 @@ public partial class CachedCover : UserControl
 	}
 
 	public IImage? Cover { get => GetValue(CoverProperty); private set => SetValue(CoverProperty, value); }
+	public LibraryBook? Book { get => GetValue(BookProperty); set => SetValue(BookProperty, value); }
+	public CoverImageCache? Cache { get => GetValue(CacheProperty); set => SetValue(CacheProperty, value); }
+	public CoverVariant Variant { get => GetValue(VariantProperty); set => SetValue(VariantProperty, value); }
+	public int DecodePixelWidth { get => GetValue(DecodePixelWidthProperty); set => SetValue(DecodePixelWidthProperty, value); }
+	public string? AccessibleName { get => GetValue(AccessibleNameProperty); set => SetValue(AccessibleNameProperty, value); }
 	internal Task CoverLoadTask { get; private set; } = Task.CompletedTask;
+
+	protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
+	{
+		base.OnPropertyChanged(change);
+		if (change.Property != BookProperty
+			&& change.Property != CacheProperty
+			&& change.Property != VariantProperty
+			&& change.Property != DecodePixelWidthProperty)
+			return;
+		if (isAttached)
+			RestartCoverLoad();
+	}
 
 	protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
 	{
@@ -54,7 +82,15 @@ public partial class CachedCover : UserControl
 	private void RestartCoverLoad()
 	{
 		CancelCoverLoad();
-		if (!isAttached || DataContext is not LibraryBookItemViewModel item)
+		var item = DataContext as LibraryBookItemViewModel;
+		var book = Book ?? item?.LibraryBook;
+		var cache = Cache ?? item?.Owner.CoverCache;
+		int decodePixelWidth = DecodePixelWidth > 0
+			? DecodePixelWidth
+			: Variant == CoverVariant.Small
+				? item?.Owner.SmallCoverDecodePixelWidth ?? 160
+				: item?.Owner.MediumCoverDecodePixelWidth ?? 300;
+		if (!isAttached || book is null || cache is null)
 		{
 			CoverLoadTask = Task.CompletedTask;
 			return;
@@ -62,19 +98,24 @@ public partial class CachedCover : UserControl
 
 		var cancellation = new CancellationTokenSource();
 		coverCancellation = cancellation;
-		CoverLoadTask = LoadCoverAsync(item, cancellation);
+		CoverLoadTask = LoadCoverAsync(book, cache, Variant, decodePixelWidth, cancellation);
 	}
 
-	private async Task LoadCoverAsync(LibraryBookItemViewModel item, CancellationTokenSource cancellation)
+	private async Task LoadCoverAsync(
+		LibraryBook book,
+		CoverImageCache cache,
+		CoverVariant variant,
+		int decodePixelWidth,
+		CancellationTokenSource cancellation)
 	{
 		try
 		{
-			var lease = await item.Owner.CoverCache.AcquireAsync(
-				item.LibraryBook,
-				CoverVariant.Medium,
-				item.Owner.MediumCoverDecodePixelWidth,
+			var lease = await cache.AcquireAsync(
+				book,
+				variant,
+				Math.Max(1, decodePixelWidth),
 				cancellation.Token);
-			if (cancellation.IsCancellationRequested || !ReferenceEquals(DataContext, item))
+			if (cancellation.IsCancellationRequested)
 			{
 				lease?.Dispose();
 				return;
@@ -90,7 +131,7 @@ public partial class CachedCover : UserControl
 		}
 		catch (Exception ex)
 		{
-			Serilog.Log.Logger.Warning(ex, "Unable to load the details cover for {ProductId}.", item.ProductId);
+			Serilog.Log.Logger.Warning(ex, "Unable to load the cached cover for {ProductId}.", book.Book.AudibleProductId);
 		}
 	}
 

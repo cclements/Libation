@@ -36,10 +36,12 @@
 							<library:GalleryBookCard
 								Width="196"
 								SelectionRequested="GalleryCard_SelectionRequested"
+								ToggleRequested="GalleryCard_ToggleRequested"
 								FocusRequested="GalleryCard_FocusRequested"
 								OpenRequested="GalleryCard_OpenRequested"
 								ContextMenuRequested="GalleryCard_ContextMenuRequested"
-								NavigationRequested="GalleryCard_NavigationRequested" />
+								NavigationRequested="GalleryCard_NavigationRequested"
+								SelectAllRequested="GalleryCard_SelectAllRequested" />
 						</DataTemplate>
 					</ItemsControl.ItemTemplate>
 				</ItemsControl>

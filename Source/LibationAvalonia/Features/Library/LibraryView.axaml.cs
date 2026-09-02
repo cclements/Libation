@@ -20,6 +20,11 @@ public partial class LibraryView : UserControl
 		InitializeComponent();
 		DetailsDisplay.LibrarySelectionChanged += DetailsDisplay_LibrarySelectionChanged;
 		GalleryDisplay.ContextMenuRequested += GalleryDisplay_ContextMenuRequested;
+		DetailsPane.ProcessRequested += (_, _) => subscribedViewModel?.ProcessFocusedItem();
+		DetailsPane.DownloadRequested += (_, item) => DetailsDisplay.CreateLibraryContextCommands(item.Entry).Download();
+		DetailsPane.RevealRequested += (_, item) => DetailsDisplay.CreateLibraryContextCommands(item.Entry).Reveal();
+		DetailsPane.EditTagsRequested += (_, item) => DetailsDisplay.CreateLibraryContextCommands(item.Entry).EditTags();
+		DetailsPane.ViewSeriesRequested += (_, item) => DetailsDisplay.CreateLibraryContextCommands(item.Entry).ViewSeries();
 		DataContextChanged += (_, _) => SubscribeViewModel(DataContext as LibraryViewModel);
 	}
 
@@ -93,6 +98,12 @@ public partial class LibraryView : UserControl
 
 	private void DetailsDisplay_LibrarySelectionChanged(object? sender, ProductsDisplaySelectionChangedEventArgs e)
 		=> subscribedViewModel?.SynchronizeDetailsSelection(e);
+
+	private void DetailsDisplay_DoubleTapped(object? sender, TappedEventArgs e)
+	{
+		if (subscribedViewModel?.FocusedItem is { } item)
+			subscribedViewModel.OpenItem(item);
+	}
 
 	private void GalleryDisplay_ContextMenuRequested(object? sender, LibraryGalleryContextMenuRequestedEventArgs e)
 	{

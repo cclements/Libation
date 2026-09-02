@@ -2,6 +2,7 @@ using DataLayer;
 using LibationAvalonia.DesignSystem.Components;
 using LibationAvalonia.Features.Flight;
 using LibationAvalonia.ViewModels;
+using LibationFileManager;
 using LibationUiBase.GridView;
 using ReactiveUI;
 using System;
@@ -17,9 +18,27 @@ public sealed record LibrarySortOption(
 	string? MemberName,
 	ListSortDirection Direction);
 
-public sealed record GalleryRowViewModel(
-	int Index,
-	IReadOnlyList<LibraryBookItemViewModel> Items);
+public sealed class GalleryRowViewModel : ViewModelBase
+{
+	private IReadOnlyList<LibraryBookItemViewModel> items;
+
+	public GalleryRowViewModel(int index, IReadOnlyList<LibraryBookItemViewModel> items)
+	{
+		Index = index;
+		this.items = items;
+	}
+
+	public int Index { get; }
+	public IReadOnlyList<LibraryBookItemViewModel> Items => items;
+
+	internal void ReplaceItems(IReadOnlyList<LibraryBookItemViewModel> replacement)
+	{
+		if (items.SequenceEqual(replacement))
+			return;
+		items = replacement;
+		this.RaisePropertyChanged(nameof(Items));
+	}
+}
 
 /// <summary>
 /// Presentation wrapper over the existing GridEntry. It owns no metadata or selection;
@@ -58,13 +77,23 @@ public sealed class LibraryBookItemViewModel : ViewModelBase, IDisposable
 		? string.Empty
 		: entry.DateAdded.ToString("d", CultureInfo.CurrentCulture);
 	public string RatingText => entry.MyRating?.ToString() ?? "Not rated";
+	public string MarketplaceText => string.IsNullOrWhiteSpace(LibraryBook.Book.Locale)
+		? "Not recorded"
+		: LibraryBook.Book.Locale;
+	public string ReleaseDateText => LibraryBook.Book.DatePublished?.ToString("d", CultureInfo.CurrentCulture) ?? "Not recorded";
+	public string QualityVersionText => BuildQualityVersionText(entry.LastDownload);
+	public string OutputPathText => AudibleFileStorage.Audio.GetPath(ProductId)?.ShortPathName ?? "Not created yet";
 	public string LocalStateText => LibraryBook.Book.AudioExists ? "Local audio available" : "Local audio not created";
 	public string PdfStateText => LibraryBook.Book.HasPdf ? "PDF available from Audible" : "No PDF is associated with this title";
+	public bool CanDownload => new GridContextMenu([entry], '_').DownloadBookEnabled;
+	public bool CanReveal => LibraryBook.Book.AudioExists;
+	public bool CanViewSeries => LibraryBook.Book.SeriesLink.Any();
 	public LibationStatusKind Status => LibraryBook.AbsentFromLastScan
 		? LibationStatusKind.Unavailable
 		: LibraryBook.Book.UserDefinedItem.BookStatus switch
 		{
 			LiberatedStatus.Liberated => LibationStatusKind.Completed,
+			LiberatedStatus.PartialDownload => LibationStatusKind.Downloaded,
 			LiberatedStatus.Error => LibationStatusKind.Failed,
 			_ => LibationStatusKind.DownloadPending,
 		};
@@ -72,6 +101,7 @@ public sealed class LibraryBookItemViewModel : ViewModelBase, IDisposable
 	{
 		LibationStatusKind.Unavailable => "Unavailable after the latest scan",
 		LibationStatusKind.Completed => "Completed",
+		LibationStatusKind.Downloaded => "Downloaded; processing pending",
 		LibationStatusKind.Failed => "Needs attention",
 		_ => "Download pending",
 	};
@@ -106,6 +136,18 @@ public sealed class LibraryBookItemViewModel : ViewModelBase, IDisposable
 		=> string.Join(", ", new[] { Title, Author, StatusText, IsSelected ? "selected" : null, IsFocused ? "focused" : null }
 			.Where(value => !string.IsNullOrWhiteSpace(value)));
 
+	private static string BuildQualityVersionText(LastDownloadStatus? download)
+	{
+		if (download?.IsValid is not true)
+			return "No completed download recorded";
+		var format = download.LastDownloadedFormat?.ToString() ?? "Audio";
+		var fileVersion = string.IsNullOrWhiteSpace(download.LastDownloadedFileVersion)
+			? null
+			: $"file v{download.LastDownloadedFileVersion}";
+		return string.Join(" · ", new[] { format, fileVersion, $"Libation {download.LastDownloadedVersion}" }
+			.Where(value => !string.IsNullOrWhiteSpace(value)));
+	}
+
 	internal void ReplaceEntry(LibraryBookEntry replacement)
 	{
 		if (ReferenceEquals(entry, replacement))
@@ -134,8 +176,15 @@ public sealed class LibraryBookItemViewModel : ViewModelBase, IDisposable
 		this.RaisePropertyChanged(nameof(PurchaseDate));
 		this.RaisePropertyChanged(nameof(DateAdded));
 		this.RaisePropertyChanged(nameof(RatingText));
+		this.RaisePropertyChanged(nameof(MarketplaceText));
+		this.RaisePropertyChanged(nameof(ReleaseDateText));
+		this.RaisePropertyChanged(nameof(QualityVersionText));
+		this.RaisePropertyChanged(nameof(OutputPathText));
 		this.RaisePropertyChanged(nameof(LocalStateText));
 		this.RaisePropertyChanged(nameof(PdfStateText));
+		this.RaisePropertyChanged(nameof(CanDownload));
+		this.RaisePropertyChanged(nameof(CanReveal));
+		this.RaisePropertyChanged(nameof(CanViewSeries));
 		this.RaisePropertyChanged(nameof(Status));
 		this.RaisePropertyChanged(nameof(StatusText));
 		this.RaisePropertyChanged(nameof(AccessibleName));

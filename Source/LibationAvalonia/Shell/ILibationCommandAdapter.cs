@@ -1,5 +1,6 @@
 using LibationAvalonia.ViewModels;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace LibationAvalonia.Shell;
@@ -30,7 +31,7 @@ public interface ILibationCommandAdapter
 	Task SetVisiblePdfStatusAsync();
 	Task DetectVisibleStatusAsync();
 	Task RemoveVisibleAsync();
-	Task ApplyFilterAsync(string filter);
+	Task ApplyFilterAsync(string filter, CancellationToken cancellationToken = default);
 	Task EditQuickFiltersAsync();
 	Task StartWalkthroughAsync();
 	void AddCurrentFilter();
@@ -62,7 +63,7 @@ public sealed class LibationCommandAdapter(MainVM main) : ILibationCommandAdapte
 	public Task SetVisiblePdfStatusAsync() => Main.SetPdfDownloadedAsync();
 	public Task DetectVisibleStatusAsync() => Main.SetDownloadedAutoAsync();
 	public Task RemoveVisibleAsync() => Main.RemoveVisibleAsync();
-	public Task ApplyFilterAsync(string filter) => Main.FilterBtn(filter);
+	public Task ApplyFilterAsync(string filter, CancellationToken cancellationToken = default) => Main.FilterBtn(filter, cancellationToken);
 	public Task EditQuickFiltersAsync() => Main.EditQuickFiltersAsync();
 	public Task StartWalkthroughAsync() => Main.StartWalkthroughAsync();
 	public void AddCurrentFilter() => Main.AddQuickFilterBtn();

@@ -3,6 +3,7 @@
 			 xmlns:components="using:LibationAvalonia.DesignSystem.Components"
 			 xmlns:designSystem="using:LibationAvalonia.DesignSystem"
 			 xmlns:flight="using:LibationAvalonia.Features.Flight"
+			 xmlns:library="using:LibationAvalonia.Features.Library"
 			 x:Class="LibationAvalonia.Features.Flight.CurrentFlightView"
 			 x:DataType="flight:CurrentFlightViewModel">
 	<Grid RowDefinitions="*,Auto,Auto,Auto" RowSpacing="{DynamicResource Libation.Space.3}">
@@ -21,17 +22,43 @@
 			UndoCommand="{Binding UndoCommand}">
 			<components:FlightTray.ItemTemplate>
 				<DataTemplate x:DataType="flight:CurrentFlightItemViewModel">
-					<Grid ColumnDefinitions="*,Auto" ColumnSpacing="8" Margin="2,4">
-						<StackPanel>
+					<Border DragDrop.AllowDrop="True" DragDrop.DragOver="FlightRow_DragOver" DragDrop.Drop="FlightRow_Drop">
+					<Grid ColumnDefinitions="Auto,Auto,*,Auto" ColumnSpacing="8" Margin="2,4">
+						<Border Width="20" Height="40" Cursor="SizeNorthSouth" PointerPressed="DragHandle_PointerPressed"
+								Focusable="True" KeyDown="DragHandle_KeyDown"
+								ToolTip.Tip="Drag to reorder Current Flight"
+								AutomationProperties.Name="Drag handle for Current Flight title">
+							<Path Data="M 3,13 L 17,13 M 3,20 L 17,20 M 3,27 L 17,27"
+								  Stroke="{DynamicResource Libation.Brush.TextTertiary}" StrokeThickness="1.5" />
+						</Border>
+						<library:CachedCover Grid.Column="1" Width="40" Height="40"
+							Book="{Binding Source.LibraryBook}"
+							Cache="{Binding CoverCache}"
+							Variant="Small"
+							DecodePixelWidth="40"
+							AccessibleName="{Binding Title}" />
+						<StackPanel Grid.Column="2" MinWidth="0">
 							<TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
 							<TextBlock Text="{Binding Author}" Foreground="{DynamicResource Libation.Brush.TextSecondary}" TextTrimming="CharacterEllipsis" />
 							<TextBlock Text="{Binding DurationText}" FontSize="{DynamicResource Libation.FontSize.Caption}" Foreground="{DynamicResource Libation.Brush.TextTertiary}" />
 						</StackPanel>
-						<Button Grid.Column="1" Classes="contemporary quiet compact" Content="Remove" Command="{Binding RemoveCommand}" AutomationProperties.Name="Remove title from Current Flight" />
+						<Button Grid.Column="3" Classes="contemporary quiet compact" Content="Remove" Command="{Binding RemoveCommand}" AutomationProperties.Name="Remove title from Current Flight" />
 					</Grid>
+					</Border>
 				</DataTemplate>
 			</components:FlightTray.ItemTemplate>
 		</components:FlightTray>
+		<StackPanel Panel.ZIndex="1"
+			HorizontalAlignment="Center"
+			VerticalAlignment="Center"
+			Spacing="6"
+			Margin="16,56"
+			IsHitTestVisible="False">
+			<TextBlock Text="{Binding EmptyStateTitle}" FontWeight="SemiBold" HorizontalAlignment="Center" />
+			<TextBlock Text="{Binding EmptyStateText}"
+				TextAlignment="Center" TextWrapping="Wrap"
+				Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+		</StackPanel>
 
 		<Grid Grid.Row="1" ColumnDefinitions="Auto,*" ColumnSpacing="8">
 			<TextBlock VerticalAlignment="Center" Text="Output profile" />

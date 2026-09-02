@@ -33,6 +33,15 @@ public sealed class ProductsDisplaySelectionChangedEventArgs(
 	public LibraryBookEntry? FocusedEntry { get; } = focusedEntry;
 }
 
+public sealed record LibraryContextCommandSet(
+	bool CanDownload,
+	bool CanReveal,
+	bool CanViewSeries,
+	Action Download,
+	Action Reveal,
+	Action EditTags,
+	Action ViewSeries);
+
 public partial class ProductsDisplay : UserControl
 {
 	public event LiberateClickedHandler? LiberateClicked;
@@ -174,7 +183,9 @@ public partial class ProductsDisplay : UserControl
 				_ => false,
 			});
 
-			productsGrid.SelectedItems.Clear();
+			var selectedSet = selectedRows.ToHashSet();
+			foreach (var row in productsGrid.SelectedItems.OfType<GridEntry>().Where(row => !selectedSet.Contains(row)).ToArray())
+				productsGrid.SelectedItems.Remove(row);
 			if (focusedRow is not null)
 				productsGrid.SelectedItem = focusedRow;
 			foreach (var row in selectedRows.Where(row => !productsGrid.SelectedItems.Contains(row)))
@@ -394,6 +405,58 @@ public partial class ProductsDisplay : UserControl
 		menu.ItemsSource = items;
 		PopulateLibraryContextMenu(items, entries.Cast<GridEntry>().ToArray(), null);
 		return menu;
+	}
+
+	/// <summary>
+	/// Builds the single-book actions shared by the grid context surface and the
+	/// contemporary details pane. The actions continue through the established events.
+	/// </summary>
+	public LibraryContextCommandSet CreateLibraryContextCommands(LibraryBookEntry entry)
+	{
+		ArgumentNullException.ThrowIfNull(entry);
+		return new(
+			new GridContextMenu([entry], '_').DownloadBookEnabled,
+			entry.Book.AudioExists,
+			entry.Book.SeriesLink.Any(),
+			() => DownloadBook(entry),
+			() => RevealBook(entry),
+			() => EditBookTags(entry),
+			() => ViewBookSeries(entry));
+	}
+
+	/// <summary>Invokes the established Details/Grid download path for a single book.</summary>
+	public bool DownloadBook(LibraryBookEntry entry)
+	{
+		ArgumentNullException.ThrowIfNull(entry);
+		if (!new GridContextMenu([entry], '_').DownloadBookEnabled)
+			return false;
+		LiberateClicked?.Invoke(this, [entry.LibraryBook], Configuration.Instance);
+		return true;
+	}
+
+	/// <summary>Uses the existing liberated-book action, which reveals the current audio path.</summary>
+	public bool RevealBook(LibraryBookEntry entry)
+	{
+		ArgumentNullException.ThrowIfNull(entry);
+		if (!entry.Book.AudioExists)
+			return false;
+		LiberateClicked?.Invoke(this, [entry.LibraryBook], Configuration.Instance);
+		return true;
+	}
+
+	public void EditBookTags(LibraryBookEntry entry)
+	{
+		ArgumentNullException.ThrowIfNull(entry);
+		TagsButtonClicked?.Invoke(this, entry.LibraryBook);
+	}
+
+	public bool ViewBookSeries(LibraryBookEntry entry)
+	{
+		ArgumentNullException.ThrowIfNull(entry);
+		if (!entry.Book.SeriesLink.Any())
+			return false;
+		new SeriesViewDialog(entry.LibraryBook).Show();
+		return true;
 	}
 
 	private void PopulateLibraryContextMenu(

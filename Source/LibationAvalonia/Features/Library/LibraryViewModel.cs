@@ -40,6 +40,7 @@ public sealed class LibraryViewModel : ViewModelBase, IDisposable, IRoutePresent
 	private readonly ILibationCommandAdapter commands;
 	private readonly ResponsiveLayoutService responsive;
 	private readonly Dictionary<FlightItemId, LibraryBookItemViewModel> itemMap = new();
+	private readonly List<GalleryRowViewModel> galleryRowPool = new();
 	private CancellationTokenSource? searchCancellation;
 	private IReadOnlyList<LibraryBookItemViewModel> visibleItems = Array.Empty<LibraryBookItemViewModel>();
 	private IReadOnlyList<GalleryRowViewModel> galleryRows = Array.Empty<GalleryRowViewModel>();
@@ -63,7 +64,8 @@ public sealed class LibraryViewModel : ViewModelBase, IDisposable, IRoutePresent
 		Configuration configuration,
 		ILibationCommandAdapter commands,
 		ResponsiveLayoutService responsive,
-		ICommand? processSelectionCommand = null)
+		ICommand? processSelectionCommand = null,
+		ICommand? toggleFlightCommand = null)
 	{
 		this.products = products ?? throw new ArgumentNullException(nameof(products));
 		this.flight = flight ?? throw new ArgumentNullException(nameof(flight));
@@ -71,6 +73,7 @@ public sealed class LibraryViewModel : ViewModelBase, IDisposable, IRoutePresent
 		this.commands = commands ?? throw new ArgumentNullException(nameof(commands));
 		this.responsive = responsive ?? throw new ArgumentNullException(nameof(responsive));
 		ProcessSelectionCommand = processSelectionCommand;
+		ToggleFlightCommand = toggleFlightCommand;
 		CoverCache = new CoverImageCache();
 		SortOptions =
 		[
@@ -87,14 +90,18 @@ public sealed class LibraryViewModel : ViewModelBase, IDisposable, IRoutePresent
 		ShowGalleryCommand = ReactiveCommand.Create(() => { ViewMode = LibraryViewMode.Gallery; });
 		ClearSearchCommand = ReactiveCommand.Create(() => { SearchText = string.Empty; });
 		OpenFilterHelpCommand = ReactiveCommand.Create(commands.OpenFilterHelp);
+		AddBooksCommand = ReactiveCommand.CreateFromTask(commands.LocateAudiobooksAsync);
 		AddAccountCommand = ReactiveCommand.CreateFromTask(commands.AddAccountAsync);
 		ScanLibraryCommand = ReactiveCommand.CreateFromTask(commands.ScanLibraryAsync);
 		OpenTrashCommand = ReactiveCommand.CreateFromTask(commands.ShowTrashAsync);
 		AddVisibleToFlightCommand = ReactiveCommand.CreateFromTask(AddVisibleToFlightAsync);
 		EmptyPrimaryCommand = ReactiveCommand.CreateFromTask(InvokeEmptyPrimaryAsync);
 		CloseDetailsCommand = ReactiveCommand.Create(() => { IsDetailsPaneOpen = false; });
+		ToggleDetailsPaneCommand = ReactiveCommand.Create(() => { IsDetailsPaneOpen = !IsDetailsPaneOpen; });
+		SelectAllVisibleCommand = ReactiveCommand.Create(SelectAllVisible);
 
 		products.VisibleLibraryEntriesChanged += Products_VisibleLibraryEntriesChanged;
+		products.PresentationSortChanged += Products_PresentationSortChanged;
 		flight.SelectionChanged += Flight_SelectionChanged;
 		commands.Main.PropertyChanged += Main_PropertyChanged;
 		responsive.PropertyChanged += Responsive_PropertyChanged;
@@ -110,27 +117,32 @@ public sealed class LibraryViewModel : ViewModelBase, IDisposable, IRoutePresent
 	public IReadOnlyList<LibraryBookItemViewModel> VisibleItems => visibleItems;
 	public IReadOnlyList<GalleryRowViewModel> GalleryRows => galleryRows;
 	public ICommand? ProcessSelectionCommand { get; }
+	public ICommand? ToggleFlightCommand { get; }
 	public ReactiveCommand<Unit, Unit> ShowDetailsCommand { get; }
 	public ReactiveCommand<Unit, Unit> ShowGalleryCommand { get; }
 	public ReactiveCommand<Unit, Unit> ClearSearchCommand { get; }
 	public ReactiveCommand<Unit, Unit> OpenFilterHelpCommand { get; }
+	public ReactiveCommand<Unit, Unit> AddBooksCommand { get; }
 	public ReactiveCommand<Unit, Unit> AddAccountCommand { get; }
 	public ReactiveCommand<Unit, Unit> ScanLibraryCommand { get; }
 	public ReactiveCommand<Unit, Unit> OpenTrashCommand { get; }
 	public ReactiveCommand<Unit, Unit> AddVisibleToFlightCommand { get; }
 	public ReactiveCommand<Unit, Unit> EmptyPrimaryCommand { get; }
 	public ReactiveCommand<Unit, Unit> CloseDetailsCommand { get; }
+	public ReactiveCommand<Unit, Unit> ToggleDetailsPaneCommand { get; }
+	public ReactiveCommand<Unit, Unit> SelectAllVisibleCommand { get; }
+	public IEnumerable<Control> QuickFilterMenuItems => commands.Main.ContemporaryQuickFilterMenuItems;
 	public string RouteEyebrow => "Library workspace";
-	public string RouteTitle => "Library";
-	public string RouteSubtitle => "Search, select, and prepare titles without leaving the shared library.";
+	public string RouteTitle => VisibleCount == 1 ? "Library — 1 title" : $"Library — {VisibleCount} titles";
+	public string RouteSubtitle => SelectionStateText;
 	public RouteCommandPresentation? RoutePrimaryCommand => ProcessSelectionCommand is null
 		? null
 		: new("Process selected", ProcessSelectionCommand);
 	public IReadOnlyList<RouteCommandPresentation> RouteSecondaryCommands =>
 	[
 		new("Scan library", ScanLibraryCommand),
-		new("Add account", AddAccountCommand),
-		new("Add shown to Flight", AddVisibleToFlightCommand),
+		new("Add books", AddBooksCommand),
+		.. (ToggleFlightCommand is null ? [] : new[] { new RouteCommandPresentation(FlightToggleText, ToggleFlightCommand) }),
 	];
 	public RouteStatusPresentation RouteStatusBadge => new(SelectionStateText, SelectedCount > 0
 		? LibationStatusKind.Processing
@@ -195,6 +207,8 @@ public sealed class LibraryViewModel : ViewModelBase, IDisposable, IRoutePresent
 				transientFocusedItem = null;
 			}
 			this.RaisePropertyChanged(nameof(HasFocusedItem));
+			this.RaisePropertyChanged(nameof(ShowDetailsPane));
+			this.RaisePropertyChanged(nameof(DetailsPaneToggleText));
 			PublishSelectionProjection();
 		}
 	}
@@ -209,10 +223,13 @@ public sealed class LibraryViewModel : ViewModelBase, IDisposable, IRoutePresent
 				return;
 			this.RaiseAndSetIfChanged(ref isDetailsPaneOpen, value);
 			this.RaisePropertyChanged(nameof(ShowDetailsPane));
+			this.RaisePropertyChanged(nameof(DetailsPaneToggleText));
 			UpdateCoverBudget();
 		}
 	}
 	public bool ShowDetailsPane => IsDetailsPaneOpen && HasFocusedItem;
+	public string DetailsPaneToggleText => ShowDetailsPane ? "Hide details" : "Show details";
+	public string FlightToggleText => SelectedCount == 1 ? "Current Flight (1)" : $"Current Flight ({SelectedCount})";
 	public SplitViewDisplayMode DetailsPaneDisplayMode { get; private set; } = SplitViewDisplayMode.Overlay;
 	public bool IsDetailsPanePersistent => DetailsPaneDisplayMode == SplitViewDisplayMode.Inline;
 
@@ -230,6 +247,7 @@ public sealed class LibraryViewModel : ViewModelBase, IDisposable, IRoutePresent
 	public string NoResultsTrashHint => commands.Main.NoMatchesTrashHintText;
 	public int VisibleCount => VisibleItems.Count;
 	public int SelectedCount => flight.Count;
+	public bool HasSelection => SelectedCount > 0;
 	public int HiddenSelectedCount => flight.HiddenCount;
 	public string ResultStateText => VisibleCount == 1 ? "1 title shown" : $"{VisibleCount} titles shown";
 	public string SelectionStateText => flight.Count switch
@@ -313,6 +331,27 @@ public sealed class LibraryViewModel : ViewModelBase, IDisposable, IRoutePresent
 		FocusedItem = item;
 	}
 
+	public void ToggleGalleryItem(LibraryBookItemViewModel item)
+	{
+		ArgumentNullException.ThrowIfNull(item);
+		flight.Toggle(item.LibraryBook);
+		FocusedItem = item;
+		selectionAnchor = item.Id;
+	}
+
+	public void SelectAllVisible()
+	{
+		var hiddenIds = flight.Items
+			.Select(item => item.Id)
+			.Where(id => IndexOf(id) < 0);
+		flight.Replace(hiddenIds.Concat(VisibleItems.Select(item => item.Id)).ToArray());
+		if (VisibleItems.Count > 0)
+		{
+			FocusedItem = VisibleItems[0];
+			selectionAnchor = VisibleItems[0].Id;
+		}
+	}
+
 	public void SynchronizeDetailsSelection(ProductsDisplaySelectionChangedEventArgs selection)
 	{
 		ArgumentNullException.ThrowIfNull(selection);
@@ -329,6 +368,15 @@ public sealed class LibraryViewModel : ViewModelBase, IDisposable, IRoutePresent
 		ArgumentNullException.ThrowIfNull(item);
 		FocusedItem = item;
 		IsDetailsPaneOpen = true;
+	}
+
+	public void ProcessFocusedItem()
+	{
+		if (FocusedItem is not { } item || ProcessSelectionCommand is null)
+			return;
+		flight.Add(item.LibraryBook);
+		if (ProcessSelectionCommand.CanExecute(null))
+			ProcessSelectionCommand.Execute(null);
 	}
 
 	/// <summary>
@@ -367,11 +415,13 @@ public sealed class LibraryViewModel : ViewModelBase, IDisposable, IRoutePresent
 	private void ReplaceVisibleSelection(IReadOnlySet<FlightItemId> desiredVisibleIds)
 	{
 		var visibleIds = VisibleItems.Select(item => item.Id).ToHashSet();
-		foreach (var selected in flight.Items.Where(item => visibleIds.Contains(item.Id) && !desiredVisibleIds.Contains(item.Id)).ToArray())
-			flight.Remove(selected.Id);
-		foreach (var item in VisibleItems.Where(item => desiredVisibleIds.Contains(item.Id)))
-			flight.Add(item.LibraryBook);
-		RefreshSelectionState();
+		var desired = flight.Items
+			.Select(item => item.Id)
+			.Where(id => !visibleIds.Contains(id))
+			.Concat(VisibleItems.Where(item => desiredVisibleIds.Contains(item.Id)).Select(item => item.Id))
+			.ToArray();
+		if (!flight.Replace(desired))
+			RefreshSelectionState();
 	}
 
 	private async Task AddVisibleToFlightAsync()
@@ -414,10 +464,11 @@ public sealed class LibraryViewModel : ViewModelBase, IDisposable, IRoutePresent
 		{
 			await Task.Delay(SearchDebounce, next.Token);
 			next.Token.ThrowIfCancellationRequested();
-			if (Dispatcher.UIThread.CheckAccess())
-				await commands.ApplyFilterAsync(requestedText);
-			else
-				Dispatcher.UIThread.Post(() => _ = commands.ApplyFilterAsync(requestedText));
+			await commands.ApplyFilterAsync(requestedText, next.Token);
+			if (ReferenceEquals(searchCancellation, next))
+			{
+				searchCancellation = null;
+			}
 		}
 		catch (OperationCanceledException) when (next.IsCancellationRequested)
 		{
@@ -425,6 +476,11 @@ public sealed class LibraryViewModel : ViewModelBase, IDisposable, IRoutePresent
 		catch (Exception ex)
 		{
 			Serilog.Log.Logger.Error(ex, "Unable to apply the Library filter.");
+		}
+		finally
+		{
+			Interlocked.CompareExchange(ref searchCancellation, null, next);
+			next.Dispose();
 		}
 	}
 
@@ -435,7 +491,7 @@ public sealed class LibraryViewModel : ViewModelBase, IDisposable, IRoutePresent
 			Dispatcher.UIThread.Post(() => Products_VisibleLibraryEntriesChanged(sender, e));
 			return;
 		}
-		if (!string.Equals(searchText, e.FilterText, StringComparison.Ordinal))
+		if (searchCancellation is null && !string.Equals(searchText, e.FilterText, StringComparison.Ordinal))
 		{
 			searchText = e.FilterText;
 			this.RaisePropertyChanged(nameof(SearchText));
@@ -472,10 +528,20 @@ public sealed class LibraryViewModel : ViewModelBase, IDisposable, IRoutePresent
 
 	private void RebuildGalleryRows()
 	{
-		galleryRows = VisibleItems
+		var chunks = VisibleItems
 			.Chunk(Math.Max(1, GalleryColumnCount))
-			.Select((items, index) => new GalleryRowViewModel(index, items))
+			.Select(items => (IReadOnlyList<LibraryBookItemViewModel>)items)
 			.ToArray();
+		for (int index = 0; index < chunks.Length; index++)
+		{
+			if (index < galleryRowPool.Count)
+				galleryRowPool[index].ReplaceItems(chunks[index]);
+			else
+				galleryRowPool.Add(new GalleryRowViewModel(index, chunks[index]));
+		}
+		if (galleryRowPool.Count > chunks.Length)
+			galleryRowPool.RemoveRange(chunks.Length, galleryRowPool.Count - chunks.Length);
+		galleryRows = galleryRowPool.ToArray();
 		this.RaisePropertyChanged(nameof(GalleryRows));
 	}
 
@@ -493,9 +559,13 @@ public sealed class LibraryViewModel : ViewModelBase, IDisposable, IRoutePresent
 		foreach (var item in VisibleItems)
 			item.IsSelected = selected.Contains(item.Id);
 		this.RaisePropertyChanged(nameof(SelectedCount));
+		this.RaisePropertyChanged(nameof(HasSelection));
 		this.RaisePropertyChanged(nameof(HiddenSelectedCount));
 		this.RaisePropertyChanged(nameof(SelectionStateText));
 		this.RaisePropertyChanged(nameof(RouteStatusBadge));
+		this.RaisePropertyChanged(nameof(RouteSubtitle));
+		this.RaisePropertyChanged(nameof(RouteSecondaryCommands));
+		this.RaisePropertyChanged(nameof(FlightToggleText));
 		this.RaisePropertyChanged(nameof(CanAddVisibleToFlight));
 		PublishSelectionProjection();
 	}
@@ -532,8 +602,19 @@ public sealed class LibraryViewModel : ViewModelBase, IDisposable, IRoutePresent
 		this.RaisePropertyChanged(nameof(ShowNoResultsTrashHint));
 		this.RaisePropertyChanged(nameof(NoResultsTrashHint));
 		this.RaisePropertyChanged(nameof(VisibleCount));
+		this.RaisePropertyChanged(nameof(RouteTitle));
 		this.RaisePropertyChanged(nameof(ResultStateText));
 		this.RaisePropertyChanged(nameof(CanAddVisibleToFlight));
+	}
+
+	private void Products_PresentationSortChanged(object? sender, LibrarySortChangedEventArgs e)
+	{
+		var match = SortOptions.FirstOrDefault(option => string.Equals(option.MemberName, e.MemberName, StringComparison.Ordinal)
+			&& option.Direction == e.Direction) ?? SortOptions[0];
+		if (Equals(selectedSort, match))
+			return;
+		selectedSort = match;
+		this.RaisePropertyChanged(nameof(SelectedSort));
 	}
 
 	private void Responsive_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -549,6 +630,7 @@ public sealed class LibraryViewModel : ViewModelBase, IDisposable, IRoutePresent
 			: SplitViewDisplayMode.Overlay;
 		this.RaisePropertyChanged(nameof(DetailsPaneDisplayMode));
 		this.RaisePropertyChanged(nameof(IsDetailsPanePersistent));
+		this.RaisePropertyChanged(nameof(DetailsPaneToggleText));
 		UpdateCoverBudget();
 	}
 
@@ -585,6 +667,7 @@ public sealed class LibraryViewModel : ViewModelBase, IDisposable, IRoutePresent
 		searchCancellation?.Cancel();
 		searchCancellation?.Dispose();
 		products.VisibleLibraryEntriesChanged -= Products_VisibleLibraryEntriesChanged;
+		products.PresentationSortChanged -= Products_PresentationSortChanged;
 		flight.SelectionChanged -= Flight_SelectionChanged;
 		commands.Main.PropertyChanged -= Main_PropertyChanged;
 		responsive.PropertyChanged -= Responsive_PropertyChanged;
@@ -599,11 +682,14 @@ public sealed class LibraryViewModel : ViewModelBase, IDisposable, IRoutePresent
 		ShowGalleryCommand.Dispose();
 		ClearSearchCommand.Dispose();
 		OpenFilterHelpCommand.Dispose();
+		AddBooksCommand.Dispose();
 		AddAccountCommand.Dispose();
 		ScanLibraryCommand.Dispose();
 		OpenTrashCommand.Dispose();
 		AddVisibleToFlightCommand.Dispose();
 		EmptyPrimaryCommand.Dispose();
 		CloseDetailsCommand.Dispose();
+		ToggleDetailsPaneCommand.Dispose();
+		SelectAllVisibleCommand.Dispose();
 	}
 }

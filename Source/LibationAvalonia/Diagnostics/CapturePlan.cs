@@ -51,6 +51,9 @@ public sealed record CaptureEntry(
 	DensityMode Density,
 	DecorationLevel Decoration,
 	LibraryViewMode? LibraryView,
+	int FlightSelectionCount,
+	bool OpenFlight,
+	bool OpenDetails,
 	string? File)
 {
 	public string FileName => File ?? CapturePlan.DefaultFileName(this);
@@ -107,6 +110,8 @@ public sealed record CapturePlan(int SettleMs, IReadOnlyList<CaptureEntry> Entri
 				: throw new CapturePlanException($"Unknown route '{entry.Route}'.");
 			if (entry.Width < 720 || entry.Height < 560)
 				throw new CapturePlanException($"Entry {profile}/{surface} is below the 720x560 minimum window.");
+			if (entry.FlightSelectionCount < 0)
+				throw new CapturePlanException($"Entry {profile}/{surface} has a negative Flight selection count.");
 
 			var density = entry.Density is null ? DensityMode.Comfortable
 				: TryParseDefined(entry.Density, out DensityMode parsedDensity) ? parsedDensity
@@ -127,6 +132,9 @@ public sealed record CapturePlan(int SettleMs, IReadOnlyList<CaptureEntry> Entri
 				density,
 				decoration,
 				libraryView,
+				entry.FlightSelectionCount,
+				entry.OpenFlight,
+				entry.OpenDetails,
 				entry.File));
 		}
 
@@ -153,6 +161,9 @@ public sealed record CapturePlan(int SettleMs, IReadOnlyList<CaptureEntry> Entri
 		[JsonPropertyName("density")] public string? Density { get; set; }
 		[JsonPropertyName("decoration")] public string? Decoration { get; set; }
 		[JsonPropertyName("libraryView")] public string? LibraryView { get; set; }
+		[JsonPropertyName("flightSelectionCount")] public int FlightSelectionCount { get; set; }
+		[JsonPropertyName("openFlight")] public bool OpenFlight { get; set; }
+		[JsonPropertyName("openDetails")] public bool OpenDetails { get; set; }
 		[JsonPropertyName("file")] public string? File { get; set; }
 	}
 }

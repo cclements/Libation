@@ -54,13 +54,16 @@ public sealed class AppShellViewModel : ViewModelBase, IDisposable
 		profile = experienceManager.CurrentProfile;
 		Navigation = new NavigationService(configuration, Profile);
 		Responsive = new ResponsiveLayoutService();
+		ToggleFlightCommand = ReactiveCommand.Create(ToggleFlight);
 		Library = new LibraryViewModel(
 			main.ProductsDisplay,
 			Flight,
 			configuration,
 			CommandAdapter,
 			Responsive,
-			CurrentFlight.ProcessCommand);
+			CurrentFlight.ProcessCommand,
+			ToggleFlightCommand);
+		CurrentFlight.CoverCache = Library.CoverCache;
 		Downloads = new DownloadsViewModel(CommandAdapter);
 		History = new HistoryViewModel(main);
 		Accounts = new AccountsViewModel(CommandAdapter);
@@ -76,7 +79,6 @@ public sealed class AppShellViewModel : ViewModelBase, IDisposable
 			DashboardSupplement);
 		Dashboard.SetProfile(Profile);
 		NavigateCommand = ReactiveCommand.Create<AppRouteId>(Navigation.Navigate);
-		ToggleFlightCommand = ReactiveCommand.Create(ToggleFlight);
 		ToggleNavigationOverlayCommand = ReactiveCommand.Create(ToggleNavigationOverlay);
 		CloseNavigationOverlayCommand = ReactiveCommand.Create(CloseNavigationOverlay);
 		ToggleDecanterDrawerCommand = ReactiveCommand.Create(ToggleDecanterDrawer);
@@ -157,6 +159,7 @@ public sealed class AppShellViewModel : ViewModelBase, IDisposable
 	public bool IsToolsRoute => CurrentRoute.Id == AppRouteId.Tools;
 	public bool IsTrashRoute => CurrentRoute.Id == AppRouteId.Trash;
 	public bool IsAboutRoute => CurrentRoute.Id == AppRouteId.About;
+	public bool ShowRouteHeader => !IsLibraryRoute;
 	public bool HasUpdateAvailable => Main.ApplicationUpdateState.Contains("available", StringComparison.OrdinalIgnoreCase);
 	public TransientSurface ActiveTransientSurface
 	{
@@ -246,6 +249,7 @@ public sealed class AppShellViewModel : ViewModelBase, IDisposable
 		this.RaisePropertyChanged(nameof(IsToolsRoute));
 		this.RaisePropertyChanged(nameof(IsTrashRoute));
 		this.RaisePropertyChanged(nameof(IsAboutRoute));
+		this.RaisePropertyChanged(nameof(ShowRouteHeader));
 		this.RaisePropertyChanged(nameof(SelectedNavigationItem));
 		ActiveTransientSurface = TransientSurface.None;
 		this.RaisePropertyChanged(nameof(Layout));
@@ -331,6 +335,7 @@ public sealed class AppShellViewModel : ViewModelBase, IDisposable
 	{
 		this.RaisePropertyChanged(nameof(Layout));
 		if (Flight.Count == 0
+			&& e.Kind is FlightChangeKind.Clear or FlightChangeKind.Remove
 			&& Responsive.Current.ContextualPane != ContextualPaneState.Persistent
 			&& ActiveTransientSurface == TransientSurface.Flight)
 			ActiveTransientSurface = TransientSurface.None;

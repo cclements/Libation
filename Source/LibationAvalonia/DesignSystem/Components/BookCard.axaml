@@ -4,10 +4,22 @@
 			 x:Class="LibationAvalonia.DesignSystem.Components.BookCard"
 			 x:Name="Root">
 	<UserControl.Styles>
+		<Style Selector="TextBlock.book-card-title">
+			<Setter Property="Foreground" Value="{DynamicResource Libation.Brush.TextPrimary}" />
+		</Style>
+		<Style Selector="TextBlock.book-card-author">
+			<Setter Property="Foreground" Value="{DynamicResource Libation.Brush.TextSecondary}" />
+		</Style>
+		<Style Selector="TextBlock.book-card-metadata">
+			<Setter Property="Foreground" Value="{DynamicResource Libation.Brush.TextTertiary}" />
+		</Style>
 		<Style Selector="components|BookCard:selected Border#CardRoot">
 			<Setter Property="Background" Value="{DynamicResource Libation.Brush.Selection}" />
 			<Setter Property="BorderBrush" Value="{DynamicResource Libation.Brush.AccentPrimary}" />
 			<Setter Property="BorderThickness" Value="2" />
+		</Style>
+		<Style Selector="components|BookCard:selected TextBlock.book-card-copy">
+			<Setter Property="Foreground" Value="{DynamicResource Libation.Brush.TextOnAccent}" />
 		</Style>
 	</UserControl.Styles>
 	<Border x:Name="CardRoot" Classes="card raised" AutomationProperties.Name="{Binding Title, ElementName=Root}">
@@ -29,14 +41,14 @@
 						AutomationProperties.Name="More book actions" />
 			</Grid>
 			<StackPanel Grid.Row="1" Spacing="{DynamicResource Libation.Space.1}">
-				<TextBlock Text="{Binding Title, ElementName=Root}" FontFamily="{DynamicResource Libation.Font.Display}" FontWeight="SemiBold" FontSize="{DynamicResource Libation.FontSize.BodyStrong}"
-						   Foreground="{DynamicResource Libation.Brush.TextPrimary}" TextWrapping="Wrap" MaxLines="2" />
-				<TextBlock Text="{Binding Author, ElementName=Root}" Foreground="{DynamicResource Libation.Brush.TextSecondary}"
+				<TextBlock Classes="book-card-copy book-card-title" Text="{Binding Title, ElementName=Root}" FontFamily="{DynamicResource Libation.Font.Display}" FontWeight="SemiBold" FontSize="{DynamicResource Libation.FontSize.BodyStrong}"
+						   TextWrapping="Wrap" MaxLines="2" />
+				<TextBlock Classes="book-card-copy book-card-author" Text="{Binding Author, ElementName=Root}"
 						   FontSize="{DynamicResource Libation.FontSize.BodySmall}" TextTrimming="CharacterEllipsis" />
-				<TextBlock Text="{Binding Narrator, ElementName=Root}" Foreground="{DynamicResource Libation.Brush.TextTertiary}"
+				<TextBlock Classes="book-card-copy book-card-metadata" Text="{Binding Narrator, ElementName=Root}"
 						   FontSize="{DynamicResource Libation.FontSize.Caption}" TextTrimming="CharacterEllipsis"
 						   IsVisible="{Binding Narrator, ElementName=Root, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
-				<TextBlock Text="{Binding Duration, ElementName=Root}" Foreground="{DynamicResource Libation.Brush.TextTertiary}"
+				<TextBlock Classes="book-card-copy book-card-metadata" Text="{Binding Duration, ElementName=Root}"
 						   FontSize="{DynamicResource Libation.FontSize.Caption}" />
 				<components:StatusBadge Status="{Binding Status, ElementName=Root}" TextOverride="{Binding StatusText, ElementName=Root}"
 									HorizontalAlignment="Left" />

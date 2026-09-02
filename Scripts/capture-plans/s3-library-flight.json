@@ -1,0 +1,13 @@
+{
+  "entries": [
+    { "profile": "Cellar", "route": "Library", "width": 960, "height": 720, "libraryView": "Details", "flightSelectionCount": 3, "openFlight": true, "file": "cellar-library-details-compact.png" },
+    { "profile": "Cellar", "route": "Library", "width": 960, "height": 720, "libraryView": "Gallery", "flightSelectionCount": 3, "openFlight": true, "file": "cellar-library-gallery-compact.png" },
+    { "profile": "TastingRoom", "route": "Library", "width": 960, "height": 720, "libraryView": "Details", "flightSelectionCount": 3, "openFlight": true, "file": "tastingroom-library-details-compact.png" },
+    { "profile": "TastingRoom", "route": "Library", "width": 960, "height": 720, "libraryView": "Gallery", "flightSelectionCount": 3, "openFlight": true, "file": "tastingroom-library-gallery-compact.png" },
+    { "profile": "Cellar", "route": "Library", "width": 1456, "height": 1060, "libraryView": "Details", "flightSelectionCount": 3, "openFlight": true, "file": "cellar-library-details-wide.png" },
+    { "profile": "Cellar", "route": "Library", "width": 1456, "height": 1060, "libraryView": "Gallery", "flightSelectionCount": 3, "openFlight": true, "file": "cellar-library-gallery-wide.png" },
+    { "profile": "TastingRoom", "route": "Library", "width": 1456, "height": 1060, "libraryView": "Details", "flightSelectionCount": 3, "openFlight": true, "file": "tastingroom-library-details-wide.png" },
+    { "profile": "TastingRoom", "route": "Library", "width": 1456, "height": 1060, "libraryView": "Gallery", "flightSelectionCount": 3, "openFlight": true, "file": "tastingroom-library-gallery-wide.png" },
+    { "profile": "TastingRoom", "route": "Library", "width": 1456, "height": 1060, "libraryView": "Details", "flightSelectionCount": 3, "openDetails": true, "file": "tastingroom-library-details-pane-wide.png" }
+  ]
+}

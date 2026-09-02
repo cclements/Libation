@@ -1,6 +1,7 @@
 using Avalonia.Input.Platform;
 using LibationAvalonia.DesignSystem;
 using LibationAvalonia.DesignSystem.Components;
+using LibationAvalonia.Features.Library;
 using LibationAvalonia.ViewModels;
 using LibationFileManager;
 using LibationUiBase.ProcessQueue;
@@ -20,12 +21,22 @@ public sealed record FlightOutputProfileOption(FlightOutputProfile Value, string
 public sealed class CurrentFlightItemViewModel : ReactiveObject, IDisposable
 {
 	private readonly ReactiveCommand<Unit, Unit> removeCommand;
+	private readonly ReactiveCommand<Unit, Unit> moveUpCommand;
+	private readonly ReactiveCommand<Unit, Unit> moveDownCommand;
+	private CoverImageCache? coverCache;
 	private bool disposed;
 
-	internal CurrentFlightItemViewModel(FlightItemViewModel source, Action<FlightItemId> remove)
+	internal CurrentFlightItemViewModel(
+		FlightItemViewModel source,
+		Action<FlightItemId> remove,
+		Action<FlightItemId, int> moveBy,
+		CoverImageCache? coverCache)
 	{
 		Source = source;
+		this.coverCache = coverCache;
 		removeCommand = ReactiveCommand.Create(() => remove(Source.Id));
+		moveUpCommand = ReactiveCommand.Create(() => moveBy(Source.Id, -1));
+		moveDownCommand = ReactiveCommand.Create(() => moveBy(Source.Id, 1));
 		Source.PropertyChanged += Source_PropertyChanged;
 	}
 
@@ -35,7 +46,14 @@ public sealed class CurrentFlightItemViewModel : ReactiveObject, IDisposable
 	public string DurationText => Source.DurationMinutes <= 0
 		? string.Empty
 		: $"{Source.DurationMinutes / 60} hr {Source.DurationMinutes % 60} min";
+	public CoverImageCache? CoverCache
+	{
+		get => coverCache;
+		internal set => this.RaiseAndSetIfChanged(ref coverCache, value);
+	}
 	public ReactiveCommand<Unit, Unit> RemoveCommand => removeCommand;
+	public ReactiveCommand<Unit, Unit> MoveUpCommand => moveUpCommand;
+	public ReactiveCommand<Unit, Unit> MoveDownCommand => moveDownCommand;
 
 	private void Source_PropertyChanged(object? sender, PropertyChangedEventArgs e)
 	{
@@ -54,6 +72,8 @@ public sealed class CurrentFlightItemViewModel : ReactiveObject, IDisposable
 		disposed = true;
 		Source.PropertyChanged -= Source_PropertyChanged;
 		removeCommand.Dispose();
+		moveUpCommand.Dispose();
+		moveDownCommand.Dispose();
 	}
 }
 
@@ -77,6 +97,7 @@ public sealed class CurrentFlightViewModel : ReactiveObject, IDisposable
 	private string processActionText = "Process";
 	private string announcement = "Current Flight is empty.";
 	private UserFacingError? currentError;
+	private CoverImageCache? coverCache;
 	private bool focusWarning;
 	private bool disposed;
 
@@ -129,13 +150,28 @@ public sealed class CurrentFlightViewModel : ReactiveObject, IDisposable
 	public ReactiveCommand<Unit, Unit> CopyTechnicalDetailsCommand { get; }
 	public ReactiveCommand<Unit, Unit> ProcessCommand { get; }
 	public int Count => flight.Count;
+	public bool IsEmpty => Count == 0;
 	public string CountText => Count == 1 ? "1 title" : $"{Count} titles";
+	public string EmptyStateTitle => IsEmpty ? "Current Flight is empty" : string.Empty;
+	public string EmptyStateText => IsEmpty ? "Select titles in the Library to build a Flight" : string.Empty;
 	public string DurationText => flight.TotalDurationMinutes <= 0
 		? string.Empty
 		: $"{flight.TotalDurationMinutes / 60} hr {flight.TotalDurationMinutes % 60} min total";
-	public string EstimatedSizeText => Count == 0
+	public string EstimatedSizeText => flight.EstimatedBytes <= 0
 		? string.Empty
-		: $"Estimated {DiskSpaceHelper.FormatBytes(flight.EstimatedBytes)}";
+		: $"about {DiskSpaceHelper.FormatBytes(flight.EstimatedBytes)}";
+	public CoverImageCache? CoverCache
+	{
+		get => coverCache;
+		set
+		{
+			if (ReferenceEquals(coverCache, value))
+				return;
+			this.RaiseAndSetIfChanged(ref coverCache, value);
+			foreach (var item in Items)
+				item.CoverCache = value;
+		}
+	}
 	public string? WarningText
 	{
 		get => warningText;
@@ -210,19 +246,31 @@ public sealed class CurrentFlightViewModel : ReactiveObject, IDisposable
 		foreach (var item in flight.Items)
 		{
 			if (!itemMap.ContainsKey(item.Id))
-				itemMap.Add(item.Id, new CurrentFlightItemViewModel(item, Remove));
+				itemMap.Add(item.Id, new CurrentFlightItemViewModel(item, Remove, MoveBy, CoverCache));
 		}
 
 		var ordered = flight.Items.Select(item => itemMap[item.Id]).ToArray();
-		if (!Items.SequenceEqual(ordered))
+		var orderedSet = ordered.ToHashSet();
+		for (int index = Items.Count - 1; index >= 0; index--)
+			if (!orderedSet.Contains(Items[index]))
+				Items.RemoveAt(index);
+		for (int index = 0; index < ordered.Length; index++)
 		{
-			Items.Clear();
-			foreach (var item in ordered)
-				Items.Add(item);
+			var desired = ordered[index];
+			if (index < Items.Count && ReferenceEquals(Items[index], desired))
+				continue;
+			int currentIndex = Items.IndexOf(desired);
+			if (currentIndex >= 0)
+				Items.Move(currentIndex, index);
+			else
+				Items.Insert(index, desired);
 		}
 
 		this.RaisePropertyChanged(nameof(Count));
+		this.RaisePropertyChanged(nameof(IsEmpty));
 		this.RaisePropertyChanged(nameof(CountText));
+		this.RaisePropertyChanged(nameof(EmptyStateTitle));
+		this.RaisePropertyChanged(nameof(EmptyStateText));
 		this.RaisePropertyChanged(nameof(DurationText));
 		this.RaisePropertyChanged(nameof(EstimatedSizeText));
 		if (flight.HiddenCount > 0)
@@ -233,6 +281,20 @@ public sealed class CurrentFlightViewModel : ReactiveObject, IDisposable
 	{
 		undoToken = flight.Remove(id);
 		ShowUndo("Removed a title from Current Flight.");
+	}
+
+	private void MoveBy(FlightItemId id, int offset)
+	{
+		int currentIndex = flight.Items.ToList().FindIndex(item => item.Id == id);
+		if (currentIndex >= 0)
+			flight.Move(id, currentIndex + offset);
+	}
+
+	public void MoveTo(FlightItemId id, FlightItemId targetId)
+	{
+		int targetIndex = flight.Items.ToList().FindIndex(item => item.Id == targetId);
+		if (targetIndex >= 0)
+			flight.Move(id, targetIndex);
 	}
 
 	private void Clear()

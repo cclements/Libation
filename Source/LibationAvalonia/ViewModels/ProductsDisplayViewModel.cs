@@ -12,6 +12,7 @@ using LibationUiBase.GridView;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -33,6 +34,12 @@ public sealed class VisibleLibraryEntriesChangedEventArgs(
 	public string FilterText { get; } = filterText ?? string.Empty;
 }
 
+public sealed class LibrarySortChangedEventArgs(string? memberName, ListSortDirection direction) : EventArgs
+{
+	public string? MemberName { get; } = memberName;
+	public ListSortDirection Direction { get; } = direction;
+}
+
 public class ProductsDisplayViewModel : ViewModelBase
 {
 	/// <summary>Number of visible rows has changed</summary>
@@ -42,12 +49,14 @@ public class ProductsDisplayViewModel : ViewModelBase
 	/// instead of creating a second filter/search owner.
 	/// </summary>
 	public event EventHandler<VisibleLibraryEntriesChangedEventArgs>? VisibleLibraryEntriesChanged;
+	public event EventHandler<LibrarySortChangedEventArgs>? PresentationSortChanged;
 	public event EventHandler<int>? RemovableCountChanged;
 
 	/// <summary>Backing list of all grid entries</summary>
 	private readonly AvaloniaList<GridEntry> SOURCE = new();
 	/// <summary>Grid entries included in the filter set. If null, all grid entries are shown</summary>
 	private HashSet<GridEntry>? FilteredInGridEntries;
+	private bool applyingPresentationSort;
 	public string? FilterString { get; private set; }
 
 	public DataGridCollectionView? GridEntries { get => field; private set => this.RaiseAndSetIfChanged(ref field, value); }
@@ -101,8 +110,27 @@ public class ProductsDisplayViewModel : ViewModelBase
 			return;
 		}
 
-		GridEntries.SortDescriptions.Clear();
-		GridEntries.SortDescriptions.Add(DataGridSortDescription.FromPath(memberName, direction));
+		applyingPresentationSort = true;
+		try
+		{
+			GridEntries.SortDescriptions.Clear();
+			GridEntries.SortDescriptions.Add(DataGridSortDescription.FromPath(memberName, direction));
+		}
+		finally
+		{
+			applyingPresentationSort = false;
+		}
+		PresentationSortChanged?.Invoke(this, new(memberName, direction));
+	}
+
+	private void SortDescriptions_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+	{
+		if (applyingPresentationSort)
+			return;
+		if (GridEntries?.SortDescriptions.FirstOrDefault() is { } sort)
+			PresentationSortChanged?.Invoke(this, new(sort.PropertyPath, sort.Direction));
+		else
+			PresentationSortChanged?.Invoke(this, new(null, ListSortDirection.Ascending));
 	}
 
 	private IEnumerable<LibraryBookEntry> GetAllBookEntries() => SOURCE.BookEntries();
@@ -193,6 +221,7 @@ public class ProductsDisplayViewModel : ViewModelBase
 		{
 			GridEntries = new(SOURCE) { Filter = CollectionFilter };
 			GridEntries.CollectionChanged += GridEntries_CollectionChanged;
+			GridEntries.SortDescriptions.CollectionChanged += SortDescriptions_CollectionChanged;
 		});
 
 		GridEntries_CollectionChanged();
@@ -416,15 +445,22 @@ public class ProductsDisplayViewModel : ViewModelBase
 
 	#region Filtering
 
-	public async Task Filter(string? searchString)
+	public async Task Filter(string? searchString, System.Threading.CancellationToken cancellationToken = default)
 	{
 		FilterString = searchString;
 
 		if (SOURCE.Count == 0)
 			return;
 
-		var results = SearchEngine?.GetSearchResultSet(searchString);
-		FilteredInGridEntries = SOURCE.FilterEntries(results);
+		var sourceSnapshot = SOURCE.ToArray();
+		FilteredInGridEntries = await Task.Run(() =>
+		{
+			cancellationToken.ThrowIfCancellationRequested();
+			var results = SearchEngine?.GetSearchResultSet(searchString);
+			cancellationToken.ThrowIfCancellationRequested();
+			return sourceSnapshot.FilterEntries(results);
+		}, cancellationToken);
+		cancellationToken.ThrowIfCancellationRequested();
 
 		await refreshGrid();
 	}

@@ -27,22 +27,24 @@
 					   Foreground="{DynamicResource Libation.Brush.Warning}" TextWrapping="Wrap"
 					   AutomationProperties.Name="Current Flight processing notice"
 					   AutomationProperties.LiveSetting="{x:Static designSystem:PlatformAutomationPolicy.Polite}" />
-			<ListBox Grid.Row="2" Classes="contemporary" ItemsSource="{Binding ItemsSource, ElementName=Root}"
-					 ItemTemplate="{Binding ItemTemplate, ElementName=Root}" MinHeight="96" MaxHeight="320"
-					 AutomationProperties.Name="Books in Flight" />
+			<Grid Grid.Row="2" MinHeight="96">
+				<ListBox Classes="contemporary" ItemsSource="{Binding ItemsSource, ElementName=Root}"
+						 ItemTemplate="{Binding ItemTemplate, ElementName=Root}" MaxHeight="320"
+						 AutomationProperties.Name="Books in Flight" />
+			</Grid>
 			<Grid Grid.Row="3" ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="{DynamicResource Libation.Density.ToolbarGap}">
-				<StackPanel Orientation="Horizontal" Spacing="{DynamicResource Libation.Space.2}" VerticalAlignment="Center">
+				<Grid ColumnDefinitions="Auto,*" ColumnSpacing="{DynamicResource Libation.Space.2}" VerticalAlignment="Center" MinWidth="0">
 					<Path Data="{DynamicResource glyph.output-profile}" Width="18" Height="18" Stretch="Uniform"
 						  Stroke="{DynamicResource Libation.Brush.TextSecondary}" StrokeThickness="1.75" />
-					<TextBlock Text="{Binding OutputProfileText, ElementName=Root}" Foreground="{DynamicResource Libation.Brush.TextSecondary}"
+					<TextBlock Grid.Column="1" Text="{Binding OutputProfileText, ElementName=Root}" Foreground="{DynamicResource Libation.Brush.TextSecondary}"
 							   TextTrimming="CharacterEllipsis" />
-				</StackPanel>
+				</Grid>
 				<Button Grid.Column="1" Classes="contemporary quiet" Content="{Binding UndoActionText, ElementName=Root}"
 						Command="{Binding UndoCommand, ElementName=Root}"
 						IsVisible="{Binding UndoActionText, ElementName=Root, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
-				<Button Grid.Column="2" Classes="contemporary quiet" Content="Clear" Command="{Binding ClearCommand, ElementName=Root}"
+				<Button Grid.Column="2" Classes="contemporary quiet compact" Content="Clear" Command="{Binding ClearCommand, ElementName=Root}"
 						CommandParameter="{Binding ClearCommandParameter, ElementName=Root}" />
-				<Button Grid.Column="3" Classes="contemporary primary" Content="{Binding ProcessActionText, ElementName=Root}" Command="{Binding ProcessCommand, ElementName=Root}"
+				<Button Grid.Column="3" Classes="contemporary primary compact" Content="{Binding ProcessActionText, ElementName=Root}" Command="{Binding ProcessCommand, ElementName=Root}"
 						CommandParameter="{Binding ProcessCommandParameter, ElementName=Root}" />
 			</Grid>
 		</Grid>

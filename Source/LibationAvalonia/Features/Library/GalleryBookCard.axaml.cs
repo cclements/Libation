@@ -66,10 +66,12 @@ public partial class GalleryBookCard : UserControl
 	}
 
 	public event EventHandler<GalleryCardInteractionEventArgs>? SelectionRequested;
+	public event EventHandler<GalleryCardInteractionEventArgs>? ToggleRequested;
 	public event EventHandler<GalleryCardInteractionEventArgs>? FocusRequested;
 	public event EventHandler<GalleryCardInteractionEventArgs>? OpenRequested;
 	public event EventHandler<GalleryCardInteractionEventArgs>? ContextMenuRequested;
 	public event EventHandler<GalleryNavigationRequestedEventArgs>? NavigationRequested;
+	public event EventHandler? SelectAllRequested;
 
 	public IImage? Cover { get => GetValue(CoverProperty); private set => SetValue(CoverProperty, value); }
 	public ReactiveCommand<Unit, Unit> OpenCommand { get; }
@@ -165,6 +167,8 @@ public partial class GalleryBookCard : UserControl
 	{
 		if (DataContext is not LibraryBookItemViewModel item)
 			return;
+		if (e.Source is Control source && (source is CheckBox || source.FindAncestorOfType<CheckBox>() is not null))
+			return;
 		var point = e.GetCurrentPoint(this);
 		bool contextGesture = point.Properties.IsRightButtonPressed
 			|| (Configuration.IsMacOs && point.Properties.IsLeftButtonPressed && e.KeyModifiers.HasFlag(KeyModifiers.Control));
@@ -194,6 +198,12 @@ public partial class GalleryBookCard : UserControl
 		// normal button semantics instead of bubbling into a second card action.
 		if (!ReferenceEquals(e.Source, this) || DataContext is not LibraryBookItemViewModel item)
 			return;
+		if (e.Key == Key.A && e.KeyModifiers.HasFlag(KeyGestureHelper.CommandModifier))
+		{
+			SelectAllRequested?.Invoke(this, EventArgs.Empty);
+			e.Handled = true;
+			return;
+		}
 		int? offset = e.Key switch
 		{
 			Key.Left => -1,
@@ -234,5 +244,12 @@ public partial class GalleryBookCard : UserControl
 	{
 		if (DataContext is LibraryBookItemViewModel item)
 			ContextMenuRequested?.Invoke(this, new(item, KeyModifiers.None, this));
+	}
+
+	private void FlightCheckBox_Click(object? sender, RoutedEventArgs e)
+	{
+		if (DataContext is LibraryBookItemViewModel item)
+			ToggleRequested?.Invoke(this, new(item, KeyModifiers.None, this));
+		e.Handled = true;
 	}
 }

@@ -1,8 +1,6 @@
 <UserControl xmlns="https://github.com/avaloniaui"
 			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-			 xmlns:library="using:LibationAvalonia.Features.Library"
 			 x:Class="LibationAvalonia.Features.Library.CachedCover"
-			 x:DataType="library:LibraryBookItemViewModel"
 			 x:Name="Root">
 	<Grid>
 		<Border Background="{DynamicResource Libation.Brush.CoverPlaceholder}"
@@ -20,6 +18,6 @@
 		<Image Source="{Binding Cover, ElementName=Root}"
 			   Stretch="UniformToFill"
 			   IsVisible="{Binding Cover, ElementName=Root, Converter={x:Static ObjectConverters.IsNotNull}}"
-			   AutomationProperties.Name="{Binding Title}" />
+			   AutomationProperties.Name="{Binding AccessibleName, ElementName=Root}" />
 	</Grid>
 </UserControl>

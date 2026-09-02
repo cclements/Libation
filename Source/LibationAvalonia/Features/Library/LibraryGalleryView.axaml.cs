@@ -19,9 +19,19 @@ public sealed class LibraryGalleryContextMenuRequestedEventArgs(
 
 public partial class LibraryGalleryView : UserControl
 {
+	private bool clearingHostSelection;
+
 	public LibraryGalleryView()
 	{
 		InitializeComponent();
+		GalleryRowsControl.SelectionChanged += (_, _) =>
+		{
+			if (clearingHostSelection || GalleryRowsControl.SelectedItems is not { Count: > 0 } selectedItems)
+				return;
+			clearingHostSelection = true;
+			selectedItems.Clear();
+			clearingHostSelection = false;
+		};
 		SizeChanged += (_, _) => UpdateViewport();
 		DataContextChanged += (_, _) => UpdateViewport();
 	}
@@ -39,6 +49,12 @@ public partial class LibraryGalleryView : UserControl
 
 	private void GalleryCard_SelectionRequested(object? sender, GalleryCardInteractionEventArgs e)
 		=> ViewModel?.SelectGalleryItem(e.Item, e.Modifiers);
+
+	private void GalleryCard_ToggleRequested(object? sender, GalleryCardInteractionEventArgs e)
+		=> ViewModel?.ToggleGalleryItem(e.Item);
+
+	private void GalleryCard_SelectAllRequested(object? sender, EventArgs e)
+		=> ViewModel?.SelectAllVisible();
 
 	private void GalleryCard_FocusRequested(object? sender, GalleryCardInteractionEventArgs e)
 		=> ViewModel?.FocusGalleryItem(e.Item);

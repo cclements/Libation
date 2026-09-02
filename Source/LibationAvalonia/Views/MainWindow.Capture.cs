@@ -84,6 +84,7 @@ public partial class MainWindow
 					ResizeForCapture(entry);
 					NavigateContemporary(entry.Route);
 					await WaitForRouteReadyAsync(entry.Route);
+					PrepareFlightForCapture(entry);
 				}
 				await WaitForVisibleCoverLoadsAsync();
 				await SettleAsync(plan.SettleMs);
@@ -123,6 +124,26 @@ public partial class MainWindow
 			desktop.Shutdown(exitCode);
 		else
 			Environment.Exit(exitCode);
+	}
+
+	private void PrepareFlightForCapture(CaptureEntry entry)
+	{
+		if (contemporaryShellViewModel is not { } shell)
+			return;
+		if (shell.Flight.Count > 0)
+			shell.Flight.Clear();
+		shell.Library.IsDetailsPaneOpen = false;
+		if (entry.FlightSelectionCount > 0)
+			shell.Flight.AddRange(shell.Library.VisibleItems
+				.Take(entry.FlightSelectionCount)
+				.Select(item => item.LibraryBook));
+
+		bool overlayIsOpen = shell.Layout.ShowFlightOverlay;
+		bool flightIsAlreadyVisible = overlayIsOpen || shell.Layout.ShowPersistentFlight || shell.Layout.HostFlightInOverview;
+		if (entry.OpenFlight != flightIsAlreadyVisible && !shell.Layout.ShowPersistentFlight && !shell.Layout.HostFlightInOverview)
+			((System.Windows.Input.ICommand)shell.ToggleFlightCommand).Execute(null);
+		if (entry.OpenDetails && shell.Library.VisibleItems.FirstOrDefault() is { } first)
+			shell.Library.OpenItem(first);
 	}
 
 	private void ResizeForCapture(CaptureEntry entry)

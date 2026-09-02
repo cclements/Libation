@@ -24,7 +24,7 @@
 					<ContentControl.ContentTemplate>
 						<DataTemplate x:DataType="library:LibraryBookItemViewModel">
 							<StackPanel Spacing="{DynamicResource Libation.Space.3}">
-					<library:CachedCover Width="300" Height="300" HorizontalAlignment="Center" />
+					<library:CachedCover Width="300" Height="300" HorizontalAlignment="Center" AccessibleName="{Binding Title}" />
 					<TextBlock Text="{Binding Title}"
 							   FontFamily="{DynamicResource Libation.Font.Display}"
 							   FontSize="{DynamicResource Libation.FontSize.Section}"
@@ -36,6 +36,8 @@
 					<components:StatusBadge Status="{Binding Status}" TextOverride="{Binding StatusText}" HorizontalAlignment="Left" />
 					<Separator />
 					<TextBlock Text="Metadata" FontWeight="SemiBold" />
+					<TextBlock Text="{Binding MarketplaceText, StringFormat='Marketplace: {0}'}" TextWrapping="Wrap" />
+					<TextBlock Text="{Binding ReleaseDateText, StringFormat='Release date: {0}'}" />
 					<TextBlock Text="{Binding Series, StringFormat='Series: {0}'}" TextWrapping="Wrap" />
 					<TextBlock Text="{Binding Duration, StringFormat='Duration: {0}'}" />
 					<TextBlock Text="{Binding Account, StringFormat='Account: {0}'}" TextWrapping="Wrap" />
@@ -47,6 +49,18 @@
 					<TextBlock Text="Local state" FontWeight="SemiBold" />
 					<TextBlock Text="{Binding LocalStateText}" TextWrapping="Wrap" />
 					<TextBlock Text="{Binding PdfStateText}" TextWrapping="Wrap" />
+					<TextBlock Text="{Binding QualityVersionText, StringFormat='Quality and version: {0}'}" TextWrapping="Wrap" />
+					<TextBlock Text="Output path" FontWeight="SemiBold" />
+					<TextBlock Text="{Binding OutputPathText}" TextWrapping="Wrap" FontFamily="{DynamicResource Libation.Font.Mono}" />
+					<Separator />
+					<TextBlock Text="Actions" FontWeight="SemiBold" />
+					<WrapPanel Orientation="Horizontal">
+						<Button Classes="contemporary primary compact" Content="Process" Click="Process_Click" Margin="0,0,8,8" />
+						<Button Classes="contemporary quiet compact" Content="Download" Click="Download_Click" IsEnabled="{Binding CanDownload}" Margin="0,0,8,8" />
+						<Button Classes="contemporary quiet compact" Content="Reveal" Click="Reveal_Click" IsEnabled="{Binding CanReveal}" Margin="0,0,8,8" />
+						<Button Classes="contemporary quiet compact" Content="Edit tags" Click="EditTags_Click" Margin="0,0,8,8" />
+						<Button Classes="contemporary quiet compact" Content="View series" Click="ViewSeries_Click" IsEnabled="{Binding CanViewSeries}" Margin="0,0,0,8" />
+					</WrapPanel>
 					<Separator />
 					<TextBlock Text="Description" FontWeight="SemiBold" />
 					<TextBlock Text="{Binding Description}" TextWrapping="Wrap" />

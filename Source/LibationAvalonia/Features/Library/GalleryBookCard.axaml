@@ -21,6 +21,14 @@
 			ShowOpenAction="False"
 			Command="{Binding OpenCommand, ElementName=Root}"
 			ContextCommand="{Binding ContextCommand, ElementName=Root}" />
+		<CheckBox Classes="contemporary"
+				  HorizontalAlignment="Left"
+				  VerticalAlignment="Top"
+				  Margin="8"
+				  IsChecked="{Binding IsSelected, Mode=OneWay}"
+				  Click="FlightCheckBox_Click"
+				  AutomationProperties.Name="Add or remove title from Current Flight"
+				  AutomationProperties.HelpText="This checkbox changes only this title and preserves the rest of Current Flight." />
 		<TextBlock Grid.Row="1"
 				   Text="{Binding SelectionText}"
 				   FontWeight="SemiBold"

@@ -10,6 +10,7 @@ using LibationUiBase.Forms;
 using ReactiveUI;
 using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
@@ -72,15 +73,15 @@ partial class MainVM
 		};
 
 	public void AddQuickFilterBtn() { if (SelectedNamedFilter != null) QuickFilters.Add(SelectedNamedFilter); }
-	public async Task FilterBtn(string filterString) => await PerformFilter(new(filterString, null));
+	public async Task FilterBtn(string filterString, CancellationToken cancellationToken = default) => await PerformFilter(new(filterString, null), cancellationToken);
 	public void FilterHelpBtn() => MainWindow.ShowSearchSyntaxDialog();
 	public void ToggleFirstFilterIsDefault() => FirstFilterIsDefault = !FirstFilterIsDefault;
 	public async Task EditQuickFiltersAsync() => await new LibationAvalonia.Dialogs.EditQuickFilters().ShowDialog(MainWindow);
-	public async Task PerformFilter(QuickFilters.NamedFilter? namedFilter)
+	public async Task PerformFilter(QuickFilters.NamedFilter? namedFilter, CancellationToken cancellationToken = default)
 	{
 		var tryFilter = namedFilter?.Filter;
 
-		var failure = await applyFilterAsync(namedFilter);
+		var failure = await applyFilterAsync(namedFilter, cancellationToken);
 		if (failure is null)
 			return;
 
@@ -94,23 +95,27 @@ partial class MainVM
 		// Restore the last filter that worked, then give up on filtering entirely. Recursing into PerformFilter
 		// here never terminated when the search index rather than the query was at fault, because that fails for
 		// every filter including the one being restored. An empty filter never reaches the search engine.
-		if (lastGoodSearch.Length > 0 && await applyFilterAsync(lastGoodFilter) is null)
+		if (lastGoodSearch.Length > 0 && await applyFilterAsync(lastGoodFilter, cancellationToken) is null)
 			return;
 
-		await applyFilterAsync(new(string.Empty, null));
+		await applyFilterAsync(new(string.Empty, null), cancellationToken);
 	}
 
 	/// <summary>Applies a filter, returning the exception that stopped it, or null when it worked.</summary>
-	private async Task<Exception?> applyFilterAsync(QuickFilters.NamedFilter? namedFilter)
+	private async Task<Exception?> applyFilterAsync(QuickFilters.NamedFilter? namedFilter, CancellationToken cancellationToken = default)
 	{
 		SelectedNamedFilter = namedFilter;
 
 		try
 		{
-			await ProductsDisplay.Filter(namedFilter?.Filter);
+			await ProductsDisplay.Filter(namedFilter?.Filter, cancellationToken);
 			lastGoodSearch = namedFilter?.Filter ?? "";
 			await RefreshNoMatchesStateAsync(namedFilter?.Filter);
 			return null;
+		}
+		catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+		{
+			throw;
 		}
 		catch (Exception ex)
 		{

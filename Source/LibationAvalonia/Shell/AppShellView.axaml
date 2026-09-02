@@ -193,6 +193,7 @@
 			</Border>
 
 			<Border x:Name="HeaderRegion" Grid.Row="2"
+					IsVisible="{Binding ShowRouteHeader}"
 					Background="{DynamicResource Libation.Brush.Surface}"
 					BorderBrush="{DynamicResource Libation.Brush.BorderSubtle}"
 					BorderThickness="0,0,0,1"

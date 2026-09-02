@@ -8,18 +8,41 @@
 			 x:DataType="library:LibraryViewModel">
 	<Grid RowDefinitions="Auto,*" RowSpacing="{DynamicResource Libation.Space.3}">
 		<Border Classes="card" Padding="{DynamicResource Libation.Thickness.4}">
-			<Grid>
-				<WrapPanel Orientation="Horizontal" VerticalAlignment="Center">
+			<Grid RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="{DynamicResource Libation.Space.2}">
+				<TextBlock Text="{Binding RouteEyebrow}"
+						   Foreground="{DynamicResource Libation.Brush.AccentSecondary}"
+						   FontSize="{DynamicResource Libation.FontSize.Caption}"
+						   FontWeight="SemiBold" />
+				<WrapPanel Grid.Row="1" Orientation="Horizontal" VerticalAlignment="Center">
+					<TextBlock Text="{Binding RouteTitle}"
+							   FontFamily="{DynamicResource Libation.Font.Display}"
+							   FontSize="{DynamicResource Libation.FontSize.Page}"
+							   Foreground="{DynamicResource Libation.Brush.TextPrimary}"
+							   TextWrapping="Wrap" />
+					<components:StatusBadge Margin="12,0,0,0"
+									Status="{Binding RouteStatusBadge.Status}"
+									TextOverride="{Binding RouteStatusBadge.Text}"
+									AccessibleName="{Binding RouteStatusBadge.Text}" />
+				</WrapPanel>
+				<TextBlock Grid.Row="2" Text="{Binding RouteSubtitle}"
+						   Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+				<Grid Grid.Row="3" RowDefinitions="Auto,Auto" RowSpacing="{DynamicResource Libation.Space.2}">
+				<Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="{DynamicResource Libation.Space.2}">
 					<TextBox x:Name="SearchBox"
 							 Classes="contemporary search"
-							 Width="360"
 							 PlaceholderText="Search titles, authors, narrators, series, tags, or use a filter expression"
 							 Text="{Binding SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
 							 AutomationProperties.Name="Search and filter the Library" />
-					<Button Classes="contemporary quiet" Content="Clear search" Command="{Binding ClearSearchCommand}" Margin="8,0,0,0" />
-					<Button x:Name="FilterHelpButton" Classes="contemporary quiet" Content="Filter help" Command="{Binding OpenFilterHelpCommand}" Margin="8,0,0,0" />
+					<Button Grid.Column="1" Classes="contemporary quiet compact" Content="Clear" Command="{Binding ClearSearchCommand}"
+							AutomationProperties.Name="Clear Library search" />
+					<Menu Grid.Column="2" Background="Transparent">
+						<MenuItem Header="Quick filters" ItemsSource="{Binding QuickFilterMenuItems}" />
+					</Menu>
+				</Grid>
+				<WrapPanel Grid.Row="1" Orientation="Horizontal" VerticalAlignment="Center">
+					<Button x:Name="FilterHelpButton" Classes="contemporary quiet compact" Content="Filter help" Command="{Binding OpenFilterHelpCommand}" Margin="0,0,8,8" />
 					<ComboBox Width="190"
-							  Margin="8,0,0,0"
+							  Margin="0,0,8,8"
 							  ItemsSource="{Binding SortOptions}"
 							  SelectedItem="{Binding SelectedSort, Mode=TwoWay}"
 							  AutomationProperties.Name="Sort Library">
@@ -29,11 +52,19 @@
 							</DataTemplate>
 						</ComboBox.ItemTemplate>
 					</ComboBox>
-					<Button Classes="contemporary" Content="Details view" Command="{Binding ShowDetailsCommand}" Margin="8,0,0,0" />
-					<Button Classes="contemporary" Content="Gallery view" Command="{Binding ShowGalleryCommand}" Margin="8,0,0,0" />
-					<Button Classes="contemporary quiet" Content="Choose columns" Click="ColumnChooser_Click" Margin="8,0,0,0"
+					<Button Classes="contemporary compact" Content="Details" Command="{Binding ShowDetailsCommand}" Margin="0,0,4,8" />
+					<Button Classes="contemporary compact" Content="Gallery" Command="{Binding ShowGalleryCommand}" Margin="0,0,8,8" />
+					<Button Classes="contemporary quiet compact" Content="Columns" Click="ColumnChooser_Click" Margin="0,0,8,8"
 							IsVisible="{Binding IsDetailsMode}" />
+					<Button Classes="contemporary quiet compact" Content="{Binding DetailsPaneToggleText}" Command="{Binding ToggleDetailsPaneCommand}"
+							IsEnabled="{Binding HasFocusedItem}" Margin="0,0,8,8" />
+					<Button Classes="contemporary quiet compact" Content="{Binding FlightToggleText}" Command="{Binding ToggleFlightCommand}" Margin="0,0,8,8" />
+					<Button Classes="contemporary quiet compact" Content="Scan" Command="{Binding ScanLibraryCommand}" Margin="0,0,8,8" />
+					<Button Classes="contemporary quiet compact" Content="Add books" Command="{Binding AddBooksCommand}" Margin="0,0,8,8" />
+					<Button Classes="contemporary primary compact" Content="Process selected" Command="{Binding ProcessSelectionCommand}"
+							IsEnabled="{Binding HasSelection}" Margin="0,0,0,8" />
 				</WrapPanel>
+				</Grid>
 			</Grid>
 		</Border>
 
@@ -44,13 +75,14 @@
 				   OpenPaneLength="360"
 				   CompactPaneLength="0">
 			<SplitView.Pane>
-				<library:BookDetailsPane DataContext="{Binding}" Margin="12,0,0,0" />
+				<library:BookDetailsPane x:Name="DetailsPane" DataContext="{Binding}" Margin="12,0,0,0" />
 			</SplitView.Pane>
 			<Grid>
 					<Grid IsVisible="{Binding HasResults}">
 						<Grid IsVisible="{Binding IsDetailsMode}">
 							<views:ProductsDisplay x:Name="DetailsDisplay"
 								Classes="contemporary"
+								DoubleTapped="DetailsDisplay_DoubleTapped"
 								DataContext="{Binding Products, Mode=OneTime}" />
 					</Grid>
 					<Grid IsVisible="{Binding IsGalleryMode}">
