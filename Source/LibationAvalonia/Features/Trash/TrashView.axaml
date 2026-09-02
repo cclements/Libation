@@ -8,13 +8,6 @@
 	x:DataType="trash:TrashViewModel">
 	<ScrollViewer HorizontalScrollBarVisibility="Disabled">
 		<StackPanel Margin="{DynamicResource Libation.Thickness.5}" Spacing="{DynamicResource Libation.Space.4}">
-			<components:PageHeader Eyebrow="Removed library records" Title="Trash"
-				SupportingText="Review titles hidden from the Library, restore them, or explicitly remove their records from Libation."
-				PrimaryActionText="Open protected Trash workflow" PrimaryCommand="{Binding OpenTrashCommand}">
-				<components:PageHeader.StatusContent>
-					<components:StatusBadge Status="{Binding Status}" TextOverride="{Binding CountText}" AccessibleName="{Binding CountText}" />
-				</components:PageHeader.StatusContent>
-			</components:PageHeader>
 			<components:AttentionBanner IsVisible="{Binding HasError}" Severity="{x:Static components:ComponentSeverity.Danger}" FocusOnShow="True"
 				Title="Trash unavailable" Message="{Binding ErrorMessage}"
 				ActionText="Copy technical details" ActionCommand="{Binding CopyTechnicalDetailsCommand}" />

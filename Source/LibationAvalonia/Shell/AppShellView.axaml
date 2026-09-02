@@ -49,39 +49,28 @@
 			<Setter Property="CornerRadius" Value="{DynamicResource Libation.Radius.Small}" />
 		</Style>
 	</UserControl.Styles>
-	<Grid Background="{DynamicResource Libation.Brush.Canvas}"
-		  RowDefinitions="*,Auto,Auto">
-		<Grid.ColumnDefinitions>
-			<ColumnDefinition Width="{Binding NavigationColumnWidth}" />
-			<ColumnDefinition Width="*" />
-		</Grid.ColumnDefinitions>
-		<!-- The rail spans both columns so it can become an overlay. Spanning
-		     children do not size an Auto column, so reserve the inline rail's
-		     design-token width explicitly in expanded and compact layouts. -->
-		<Border Grid.RowSpan="3"
-			Width="{DynamicResource Libation.Navigation.WidthExpanded}"
-			IsVisible="{Binding IsRailExpanded}"
-			IsHitTestVisible="False" />
-		<Border Grid.RowSpan="3"
-			Width="{DynamicResource Libation.Navigation.WidthCompact}"
-			IsVisible="{Binding IsRailCompact}"
-			IsHitTestVisible="False" />
-		<Button Grid.RowSpan="3" Grid.ColumnSpan="2" ZIndex="20"
-			IsVisible="{Binding ShowNavigationScrim}"
-			Command="{Binding CloseNavigationOverlayCommand}"
-			Background="{DynamicResource Libation.Brush.Canvas}"
-			Opacity="0.72"
-			AutomationProperties.Name="{x:Static properties:Resources.ShellCloseNavigationOverlayAutomationName}" />
-		<components:LibationNavigationRail
-			x:Name="NavigationRail"
-			Grid.RowSpan="3"
-			Grid.ColumnSpan="2"
-			ZIndex="30"
-			HorizontalAlignment="Left"
-			IsVisible="{Binding IsNavigationRailVisible}"
-			ItemsSource="{Binding Navigation.PrimaryItems}"
-			SelectedItem="{Binding SelectedPrimaryItem, Mode=TwoWay}"
-			IsExpanded="{Binding IsNavigationRailExpanded}">
+	<UserControl.Resources>
+		<DataTemplate x:Key="RouteHeaderAction" x:DataType="shell:RouteCommandPresentation">
+			<Button Classes="contemporary" Margin="0,0,8,8"
+				Content="{Binding Text}" Command="{Binding Command}" CommandParameter="{Binding Parameter}" />
+		</DataTemplate>
+	</UserControl.Resources>
+	<Grid Background="{DynamicResource Libation.Brush.Canvas}">
+		<SplitView x:Name="ShellSplitView"
+			DisplayMode="{Binding Layout.NavigationDisplayMode}"
+			IsPaneOpen="{Binding Layout.IsNavigationPaneOpen, Mode=OneWay}"
+			OpenPaneLength="{DynamicResource Libation.Navigation.WidthExpanded}"
+			CompactPaneLength="{DynamicResource Libation.Navigation.WidthCompact}"
+			UseLightDismissOverlayMode="True"
+			PaneClosing="ShellSplitView_PaneClosing"
+			PanePlacement="Left">
+			<SplitView.Pane>
+			<components:LibationNavigationRail
+				x:Name="NavigationRail"
+				ItemsSource="{Binding Navigation.PrimaryItems}"
+				UtilityItemsSource="{Binding Navigation.UtilityItems}"
+				SelectedItem="{Binding SelectedNavigationItem, Mode=TwoWay}"
+				IsExpanded="{Binding Layout.IsNavigationExpanded}">
 			<components:LibationNavigationRail.Transitions>
 				<Transitions>
 					<TransformOperationsTransition Property="RenderTransform" Duration="{DynamicResource Libation.Motion.EffectiveDuration.Default}" />
@@ -89,9 +78,13 @@
 			</components:LibationNavigationRail.Transitions>
 			<components:LibationNavigationRail.BrandContent>
 				<Grid Margin="0,4,0,8">
-					<ContentControl IsVisible="{Binding IsNavigationRailExpanded}"
-						Template="{DynamicResource brand.wordmark.horizontal.light}" />
-					<Viewbox Width="32" Height="32" IsVisible="{Binding !IsNavigationRailExpanded}">
+					<Grid IsVisible="{Binding Layout.IsNavigationExpanded}">
+						<ContentControl IsVisible="{Binding IsCellarComposition}"
+							Template="{DynamicResource brand.wordmark.horizontal.light}" />
+						<ContentControl IsVisible="{Binding IsTastingRoomComposition}"
+							Template="{DynamicResource brand.wordmark.horizontal.dark}" />
+					</Grid>
+					<Viewbox Width="32" Height="32" IsVisible="{Binding !Layout.IsNavigationExpanded}">
 						<Path Data="{StaticResource brand.mark.one-color}"
 							  Stroke="{DynamicResource Libation.Brush.AccentSecondary}"
 							  StrokeThickness="1.75"
@@ -119,43 +112,12 @@
 					</Border>
 				</DataTemplate>
 			</components:LibationNavigationRail.ItemTemplate>
-			<components:LibationNavigationRail.FooterContent>
-				<StackPanel Spacing="4">
-					<Button Classes="nav" Command="{Binding NavigateCommand}" CommandParameter="{x:Static shell:AppRouteId.Accounts}" ToolTip.Tip="{x:Static properties:Resources.RouteAccountsLabel}" AutomationProperties.Name="{x:Static properties:Resources.RouteAccountsLabel}">
-						<StackPanel Orientation="Horizontal" Spacing="12">
-							<Path Width="20" Height="20" Data="{StaticResource glyph.accounts}" Stroke="{DynamicResource Libation.Brush.TextPrimary}" StrokeThickness="1.75" />
-							<TextBlock IsVisible="{Binding IsNavigationRailExpanded}" Text="{x:Static properties:Resources.RouteAccountsLabel}" />
-						</StackPanel>
-					</Button>
-					<Button Classes="nav" Command="{Binding NavigateCommand}" CommandParameter="{x:Static shell:AppRouteId.Settings}" ToolTip.Tip="{x:Static properties:Resources.RouteSettingsLabel}" AutomationProperties.Name="{x:Static properties:Resources.RouteSettingsLabel}">
-						<StackPanel Orientation="Horizontal" Spacing="12">
-							<Path Width="20" Height="20" Data="{StaticResource glyph.settings}" Stroke="{DynamicResource Libation.Brush.TextPrimary}" StrokeThickness="1.75" />
-							<TextBlock IsVisible="{Binding IsNavigationRailExpanded}" Text="{x:Static properties:Resources.RouteSettingsLabel}" />
-						</StackPanel>
-					</Button>
-					<Button Classes="nav" Command="{Binding NavigateCommand}" CommandParameter="{x:Static shell:AppRouteId.Tools}" ToolTip.Tip="{x:Static properties:Resources.RouteToolsLabel}" AutomationProperties.Name="{x:Static properties:Resources.RouteToolsLabel}">
-						<StackPanel Orientation="Horizontal" Spacing="12">
-							<Path Width="20" Height="20" Data="{StaticResource glyph.tools}" Stroke="{DynamicResource Libation.Brush.TextPrimary}" StrokeThickness="1.75" />
-							<TextBlock IsVisible="{Binding IsNavigationRailExpanded}" Text="{x:Static properties:Resources.RouteToolsLabel}" />
-						</StackPanel>
-					</Button>
-					<Button Classes="nav" Command="{Binding NavigateCommand}" CommandParameter="{x:Static shell:AppRouteId.Trash}" ToolTip.Tip="{x:Static properties:Resources.RouteTrashLabel}" AutomationProperties.Name="{x:Static properties:Resources.RouteTrashLabel}">
-						<StackPanel Orientation="Horizontal" Spacing="12">
-							<Path Width="20" Height="20" Data="{StaticResource glyph.trash}" Stroke="{DynamicResource Libation.Brush.TextPrimary}" StrokeThickness="1.75" />
-							<TextBlock IsVisible="{Binding IsNavigationRailExpanded}" Text="{x:Static properties:Resources.RouteTrashLabel}" />
-						</StackPanel>
-					</Button>
-					<Button Classes="nav" Command="{Binding NavigateCommand}" CommandParameter="{x:Static shell:AppRouteId.About}" ToolTip.Tip="{x:Static properties:Resources.RouteAboutLabel}" AutomationProperties.Name="{x:Static properties:Resources.ShellAboutPageTitle}">
-						<StackPanel Orientation="Horizontal" Spacing="12">
-							<Path Width="20" Height="20" Data="{StaticResource brand.mark.one-color}" Stroke="{DynamicResource Libation.Brush.TextPrimary}" StrokeThickness="1.75" />
-							<TextBlock IsVisible="{Binding IsNavigationRailExpanded}" Text="{x:Static properties:Resources.RouteAboutLabel}" />
-						</StackPanel>
-					</Button>
-				</StackPanel>
-			</components:LibationNavigationRail.FooterContent>
 		</components:LibationNavigationRail>
+			</SplitView.Pane>
 
-		<Grid Grid.Column="1" RowDefinitions="Auto,Auto,Auto,*" MinWidth="0">
+		<Grid RowDefinitions="*,Auto,Auto">
+
+		<Grid RowDefinitions="Auto,Auto,Auto,Auto,*" MinWidth="0">
 			<Menu Grid.Row="0" IsVisible="{Binding Main.MenuBarVisible}">
 				<MenuItem Header="{x:Static properties:Resources.MenuImportHeader}">
 					<MenuItem IsVisible="{Binding Main.AnyAccounts}" Command="{Binding Main.ToggleAutoScan}" Header="{x:Static properties:Resources.MenuAutoScanLibraryHeader}">
@@ -204,38 +166,56 @@
 				</MenuItem>
 			</Menu>
 
-			<Border x:Name="HeaderRegion" Grid.Row="1"
-					IsVisible="{Binding !IsOverviewRoute}"
+			<Border x:Name="ShellToolbar" Grid.Row="1"
+				Background="{DynamicResource Libation.Brush.SurfaceRaised}"
+				BorderBrush="{DynamicResource Libation.Brush.BorderSubtle}"
+				BorderThickness="0,0,0,1"
+				Padding="{DynamicResource Libation.Thickness.2}">
+				<Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="{DynamicResource Libation.Space.2}">
+					<Button Classes="contemporary quiet compact"
+						IsVisible="{Binding Layout.ShowNavigationCommand}"
+						Command="{Binding ToggleNavigationOverlayCommand}"
+						Content="Navigation"
+						AutomationProperties.Name="{x:Static properties:Resources.ShellOpenPrimaryNavigationAutomationName}" />
+					<StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="{DynamicResource Libation.Space.2}" VerticalAlignment="Center">
+						<ProgressBar Width="120" Minimum="0" Maximum="100" Value="{Binding Main.DownloadProgress}"
+							IsVisible="{Binding Main.DownloadProgress, Converter={x:Static ObjectConverters.IsNotNull}}"
+							AutomationProperties.Name="Application update progress" />
+						<TextBlock IsVisible="{Binding Main.ActivelyScanning}" Text="{Binding Main.ScanningText}"
+							VerticalAlignment="Center" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+					</StackPanel>
+					<Button Grid.Column="2" Classes="contemporary quiet" Click="SearchShortcut_Click"
+						Content="Search Library" AutomationProperties.Name="Search the Library" />
+					<Button Grid.Column="3" Classes="contemporary quiet compact"
+						Command="{Binding NavigateCommand}" CommandParameter="{x:Static shell:AppRouteId.Settings}"
+						Content="Settings" />
+				</Grid>
+			</Border>
+
+			<Border x:Name="HeaderRegion" Grid.Row="2"
 					Background="{DynamicResource Libation.Brush.Surface}"
 					BorderBrush="{DynamicResource Libation.Brush.BorderSubtle}"
 					BorderThickness="0,0,0,1"
 					Padding="{DynamicResource Libation.Thickness.4}">
-				<Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
-					<Button Classes="contemporary quiet compact"
-						IsVisible="{Binding IsRailOverlay}"
-						Command="{Binding ToggleNavigationOverlayCommand}"
-						Content="{x:Static properties:Resources.ShellNavigationCommandLabel}"
-						AutomationProperties.Name="{x:Static properties:Resources.ShellOpenPrimaryNavigationAutomationName}" />
-					<StackPanel Grid.Column="1">
-						<TextBlock FontFamily="{DynamicResource Libation.Font.Display}"
-								   FontSize="{DynamicResource Libation.FontSize.Section}"
-								   FontWeight="SemiBold"
-								   Foreground="{DynamicResource Libation.Brush.TextPrimary}"
-								   Text="{Binding CurrentRoute.Label}" />
-					</StackPanel>
-					<StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-						<Border IsVisible="{Binding Main.ActivelyScanning}"
-								Padding="10,5"
-								Background="{DynamicResource Libation.Brush.Info}"
-								CornerRadius="{DynamicResource Libation.Radius.Small}">
-							<TextBlock Foreground="{DynamicResource Libation.Brush.TextOnAccent}" Text="{Binding Main.ScanningText}" />
-						</Border>
-						<Button Command="{Binding NavigateCommand}" CommandParameter="{x:Static shell:AppRouteId.Settings}" Content="{x:Static properties:Resources.RouteSettingsLabel}" />
-					</StackPanel>
-				</Grid>
+				<components:PageHeader
+					Eyebrow="{Binding CurrentRoutePresentation.RouteEyebrow}"
+					Title="{Binding CurrentRoutePresentation.RouteTitle}"
+					SupportingText="{Binding CurrentRoutePresentation.RouteSubtitle}"
+					PrimaryActionText="{Binding CurrentRoutePresentation.RoutePrimaryCommand.Text}"
+					PrimaryCommand="{Binding CurrentRoutePresentation.RoutePrimaryCommand.Command}"
+					PrimaryCommandParameter="{Binding CurrentRoutePresentation.RoutePrimaryCommand.Parameter}"
+					SecondaryActions="{Binding CurrentRoutePresentation.RouteSecondaryCommands}"
+					SecondaryActionTemplate="{StaticResource RouteHeaderAction}">
+					<components:PageHeader.StatusContent>
+						<components:StatusBadge IsVisible="{Binding HasRouteStatusBadge}"
+							Status="{Binding CurrentRoutePresentation.RouteStatusBadge.Status}"
+							TextOverride="{Binding CurrentRoutePresentation.RouteStatusBadge.Text}"
+							AccessibleName="{Binding CurrentRoutePresentation.RouteStatusBadge.Text}" />
+					</components:PageHeader.StatusContent>
+				</components:PageHeader>
 			</Border>
 
-			<Border Grid.Row="2"
+			<Border Grid.Row="3"
 				IsVisible="{Binding Main.RemoveButtonsVisible}"
 				Background="{DynamicResource Libation.Brush.SurfaceRaised}"
 				BorderBrush="{DynamicResource Libation.Brush.Warning}"
@@ -256,7 +236,7 @@
 				</Grid>
 			</Border>
 
-			<Grid x:Name="ContentRegion" Grid.Row="3" Margin="{DynamicResource Libation.Thickness.4}" ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource Libation.Space.4}"
+			<Grid x:Name="ContentRegion" Grid.Row="4" Margin="{DynamicResource Libation.Thickness.4}" ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource Libation.Space.4}"
 				Opacity="1" RenderTransform="translateY(0px)">
 				<Grid.Transitions>
 					<Transitions>
@@ -302,16 +282,9 @@
 					<trash:TrashView DataContext="{Binding Trash, Mode=OneTime}" />
 				</Grid>
 
-				<ScrollViewer IsVisible="{Binding IsAboutRoute}">
-					<StackPanel Spacing="16" MaxWidth="900">
-						<components:PageHeader Title="{x:Static properties:Resources.ShellAboutPageTitle}" SupportingText="{x:Static properties:Resources.ShellAboutPageDescription}" />
-						<Button HorizontalAlignment="Left" Content="{x:Static properties:Resources.ShellOpenAboutCommandLabel}" Command="{Binding Settings.OpenAboutCommand}" />
-					</StackPanel>
-				</ScrollViewer>
-
 					<ContentControl x:Name="OverviewHost" IsVisible="{Binding IsOverviewRoute}" />
 				</Panel>
-				<Border x:Name="PersistentFlightPane" Grid.Column="1" Width="360" IsVisible="{Binding ShowPersistentFlightPane}"
+				<Border x:Name="PersistentFlightPane" Grid.Column="1" Width="360" IsVisible="{Binding Layout.ShowPersistentFlight}"
 					Background="{DynamicResource Libation.Brush.SurfaceRaised}"
 					BorderBrush="{DynamicResource Libation.Brush.BorderSubtle}"
 					BorderThickness="1" CornerRadius="{DynamicResource Libation.Radius.Large}"
@@ -321,10 +294,10 @@
 							<TransformOperationsTransition Property="RenderTransform" Duration="{DynamicResource Libation.Motion.EffectiveDuration.Default}" />
 						</Transitions>
 					</Border.Transitions>
-					<flight:CurrentFlightView DataContext="{Binding CurrentFlight, Mode=OneTime}" />
+					<ContentControl x:Name="PersistentFlightHost" />
 				</Border>
 				<Border x:Name="FlightOverlay" Grid.Column="0" Grid.ColumnSpan="2" Width="360" HorizontalAlignment="Right"
-					ZIndex="10" IsVisible="{Binding ShowFlightOverlay}"
+					ZIndex="10" IsVisible="{Binding Layout.ShowFlightOverlay}"
 					Background="{DynamicResource Libation.Brush.SurfaceRaised}"
 					BorderBrush="{DynamicResource Libation.Brush.BorderStrong}"
 					BorderThickness="1" CornerRadius="{DynamicResource Libation.Radius.Large}"
@@ -334,89 +307,39 @@
 							<TransformOperationsTransition Property="RenderTransform" Duration="{DynamicResource Libation.Motion.EffectiveDuration.Default}" />
 						</Transitions>
 					</Border.Transitions>
-					<flight:CurrentFlightView DataContext="{Binding CurrentFlight, Mode=OneTime}" />
+					<ContentControl x:Name="FlightOverlayHost" />
 				</Border>
 			</Grid>
 		</Grid>
 
-		<components:DecanterSummary x:Name="QueueDock" Grid.Row="1" Grid.Column="1"
+		<ContentControl x:Name="QueueDock" Grid.Row="1"
 			Margin="{DynamicResource Libation.Thickness.3}"
-			IsVisible="{Binding ShowQueueDock}"
-			Title="The Decanter"
-			SummaryText="{Binding Processing.SummaryText}"
-			ActiveText="{Binding Processing.ActiveText}"
-			Progress="{Binding Processing.Progress}"
-			ShowProgress="{Binding Processing.ShowProgress}"
-			CancelCommand="{Binding Processing.CancelAllCommand}"
-			CanCancel="{Binding Processing.CanCancel}">
-			<components:DecanterSummary.IllustrationContent>
-				<Image Width="120" Height="92" Stretch="Uniform"
-					Source="/Assets/ContemporaryCellar/decanter-cellar.png" />
-			</components:DecanterSummary.IllustrationContent>
-			<components:DecanterSummary.DetailsContent>
-				<Button Classes="contemporary quiet" HorizontalAlignment="Left"
-					Command="{Binding NavigateCommand}"
-					CommandParameter="{x:Static shell:AppRouteId.Processing}"
-					Content="{x:Static properties:Resources.ShellOpenProcessingWorkspaceCommandLabel}" />
-			</components:DecanterSummary.DetailsContent>
-		</components:DecanterSummary>
+			IsVisible="{Binding Layout.ShowQueueDock}" />
 
-		<Border x:Name="ShellStatusBar" Grid.Row="2" Grid.Column="1"
-				Background="{DynamicResource Libation.Brush.SurfaceRaised}"
-				BorderBrush="{DynamicResource Libation.Brush.BorderSubtle}"
-				BorderThickness="0,1,0,0"
-				Padding="12,6">
-			<Panel>
-				<Grid IsVisible="{Binding !IsQueueCompact}"
-					ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="16">
-					<TextBlock VerticalAlignment="Center" Text="{Binding Main.VisibleCountText}" />
-					<TextBlock Grid.Column="1" VerticalAlignment="Center" Text="{Binding Main.LibraryStats.StatusString}" />
-					<Button Grid.Column="2" IsVisible="{Binding ShowFlightToggle}"
-							Command="{Binding ToggleFlightCommand}"
-							Content="{Binding Flight.Count, StringFormat={x:Static properties:Resources.ShellCurrentFlightCountFormat}}" />
-					<Button Grid.Column="3"
-							Command="{Binding ToggleDecanterDrawerCommand}"
-							Content="{Binding Processing.SummaryText}"
-							AutomationProperties.Name="{x:Static properties:Resources.ShellOpenProcessingSummaryAutomationName}" />
-				</Grid>
-				<Grid IsVisible="{Binding IsQueueCompact}" ColumnDefinitions="Auto,*" ColumnSpacing="12">
-					<Button IsVisible="{Binding ShowFlightToggle}"
-						Command="{Binding ToggleFlightCommand}"
-						Content="{Binding Flight.Count, StringFormat={x:Static properties:Resources.ShellCompactFlightCountFormat}}"
-						AutomationProperties.Name="{x:Static properties:Resources.ShellOpenCurrentFlightAutomationName}" />
-					<Button Grid.Column="1" MinHeight="64"
-						Command="{Binding ToggleDecanterDrawerCommand}"
-						AutomationProperties.Name="{x:Static properties:Resources.ShellOpenCompactProcessingBarAutomationName}">
-						<Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
-							<Path Width="24" Height="24" VerticalAlignment="Center"
-								Data="{StaticResource glyph.processing}"
-								Stroke="{DynamicResource Libation.Brush.TextPrimary}"
-								StrokeThickness="1.75" />
-							<StackPanel Grid.Column="1">
-								<TextBlock Text="The Decanter" FontWeight="SemiBold" />
-								<TextBlock Text="{Binding Processing.SummaryText}"
-									TextTrimming="CharacterEllipsis"
-									Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
-							</StackPanel>
-							<ProgressBar Grid.Column="2" Classes="contemporary" VerticalAlignment="Center"
-								Minimum="0" Maximum="100"
-								Value="{Binding Processing.Progress}"
-								IsVisible="{Binding Processing.ShowProgress}"
-								AutomationProperties.Name="Overall processing progress" />
-						</Grid>
-					</Button>
-				</Grid>
-			</Panel>
-		</Border>
+		<components:ShellStatusBar x:Name="ShellStatusBar" Grid.Row="2"
+			VisibleText="{Binding Library.ResultStateText}"
+			SelectedText="{Binding Library.SelectionStateText}"
+			TrashText="{Binding Main.TrashBinStatusText}"
+			FlightText="{Binding Flight.Count, StringFormat={x:Static properties:Resources.ShellCurrentFlightCountFormat}}"
+			QueueText="{Binding Processing.SummaryText}"
+			ScanText="{Binding Main.ScanningText}"
+			UpdateText="{Binding Main.ApplicationUpdateState}"
+			UpgradeProgress="{Binding Main.DownloadProgress}"
+			IsScanning="{Binding Main.ActivelyScanning}"
+			ShowFlight="{Binding Layout.ShowFlightToggle}"
+			HasUpdateAvailable="{Binding HasUpdateAvailable}"
+			FlightCommand="{Binding ToggleFlightCommand}"
+			QueueCommand="{Binding ToggleDecanterDrawerCommand}"
+			UpdateCommand="{Binding Settings.OpenAboutCommand}" />
 
-		<Button Grid.Column="1" ZIndex="40"
-			IsVisible="{Binding ShowDecanterDrawer}"
+		<Button ZIndex="40"
+			IsVisible="{Binding Layout.ShowDecanterDrawer}"
 			Command="{Binding CloseDecanterDrawerCommand}"
 			Background="{DynamicResource Libation.Brush.Canvas}"
 			Opacity="0.72"
 			AutomationProperties.Name="{x:Static properties:Resources.ShellCloseProcessingDrawerAutomationName}" />
-		<Border x:Name="DecanterDrawer" Grid.Column="1" ZIndex="50"
-			IsVisible="{Binding ShowDecanterDrawer}"
+		<Border x:Name="DecanterDrawer" ZIndex="50"
+			IsVisible="{Binding Layout.ShowDecanterDrawer}"
 			HorizontalAlignment="Right"
 			VerticalAlignment="Stretch"
 			MaxWidth="{DynamicResource Libation.Content.MaxReadingWidth}"
@@ -441,14 +364,7 @@
 						Content="{x:Static properties:Resources.ShellCloseCommandLabel}" />
 				</Grid>
 				<StackPanel Grid.Row="1" Spacing="{DynamicResource Libation.Space.3}">
-					<components:DecanterSummary
-						Title="The Decanter"
-						SummaryText="{Binding Processing.SummaryText}"
-						ActiveText="{Binding Processing.ActiveText}"
-						Progress="{Binding Processing.Progress}"
-						ShowProgress="{Binding Processing.ShowProgress}"
-						CancelCommand="{Binding Processing.CancelAllCommand}"
-						CanCancel="{Binding Processing.CanCancel}" />
+					<ContentControl x:Name="DecanterDrawerHost" />
 					<Button Classes="contemporary primary" HorizontalAlignment="Left"
 						Command="{Binding NavigateCommand}"
 						CommandParameter="{x:Static shell:AppRouteId.Processing}"
@@ -456,9 +372,30 @@
 				</StackPanel>
 			</Grid>
 		</Border>
-		<components:ToastHost Grid.Column="1" Grid.RowSpan="3" ZIndex="60"
+		<Panel x:Name="SurfaceParkingHost" IsVisible="False">
+			<ContentControl x:Name="FlightParkingHost">
+				<flight:CurrentFlightView x:Name="SharedFlightSurface" DataContext="{Binding CurrentFlight, Mode=OneTime}" />
+			</ContentControl>
+			<ContentControl x:Name="DecanterParkingHost">
+			<components:DecanterSummary x:Name="SharedDecanterSurface"
+				Title="The Decanter"
+				SummaryText="{Binding Processing.SummaryText}"
+				ActiveText="{Binding Processing.ActiveText}"
+				Progress="{Binding Processing.Progress}"
+				ShowProgress="{Binding Processing.ShowProgress}"
+				CancelCommand="{Binding Processing.CancelAllCommand}"
+				CanCancel="{Binding Processing.CanCancel}">
+				<components:DecanterSummary.IllustrationContent>
+					<Image Width="120" Height="92" Stretch="Uniform" Source="/Assets/ContemporaryCellar/decanter-cellar.png" />
+				</components:DecanterSummary.IllustrationContent>
+			</components:DecanterSummary>
+			</ContentControl>
+		</Panel>
+		<components:ToastHost Grid.RowSpan="3" ZIndex="60"
 			HorizontalAlignment="Right" VerticalAlignment="Bottom"
 			Margin="{DynamicResource Libation.Thickness.4}"
 			ItemsSource="{Binding CurrentFlight.Notifications}" />
+		</Grid>
+		</SplitView>
 	</Grid>
 </UserControl>

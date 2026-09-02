@@ -4,6 +4,7 @@ using DataLayer;
 using LibationAvalonia.DesignSystem;
 using LibationAvalonia.DesignSystem.Components;
 using LibationAvalonia.Features.Tools;
+using LibationAvalonia.Shell;
 using LibationAvalonia.ViewModels;
 using LibationUiBase.ProcessQueue;
 using ReactiveUI;
@@ -24,7 +25,7 @@ namespace LibationAvalonia.Features.History;
 	/// log: library-added and last-downloaded dates can be shown, while queue log rows
 /// cover only the current retained processing session.
 /// </summary>
-public sealed class HistoryViewModel : SecondaryDestinationViewModel
+public sealed class HistoryViewModel : SecondaryDestinationViewModel, IRoutePresentation
 {
 	private readonly MainVM main;
 	private readonly CancellationTokenSource lifetime = new();
@@ -81,6 +82,13 @@ public sealed class HistoryViewModel : SecondaryDestinationViewModel
 	public string? LoadError => CurrentError?.PrimaryMessage;
 	public bool HasLoadError => CurrentError is not null;
 	public ICommand RefreshCommand { get; }
+	public string RouteEyebrow => LibationAvalonia.Properties.Resources.HistoryEyebrow;
+	public string RouteTitle => "History";
+	public string RouteSubtitle => LibationAvalonia.Properties.Resources.HistorySupportingText;
+	public RouteCommandPresentation RoutePrimaryCommand => new("Refresh", RefreshCommand);
+	public IReadOnlyList<RouteCommandPresentation> RouteSecondaryCommands => [];
+	public RouteStatusPresentation RouteStatusBadge => new(ResultSummary,
+		HasLoadError ? LibationStatusKind.NeedsAttention : LibationStatusKind.Completed);
 
 	public async Task RefreshAsync()
 	{
@@ -194,12 +202,14 @@ public sealed class HistoryViewModel : SecondaryDestinationViewModel
 		this.RaisePropertyChanged(nameof(HasItems));
 		this.RaisePropertyChanged(nameof(ShowEmpty));
 		this.RaisePropertyChanged(nameof(ResultSummary));
+		this.RaisePropertyChanged(nameof(RouteStatusBadge));
 	}
 
 	private void RaiseLoadErrorState()
 	{
 		this.RaisePropertyChanged(nameof(LoadError));
 		this.RaisePropertyChanged(nameof(HasLoadError));
+		this.RaisePropertyChanged(nameof(RouteStatusBadge));
 	}
 
 	private void Main_PropertyChanged(object? sender, PropertyChangedEventArgs e)

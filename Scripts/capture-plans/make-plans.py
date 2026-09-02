@@ -34,6 +34,7 @@ def entries(routes, sizes):
 
 PLANS = {
     "all-routes.json": entries(ROUTES, SIZES + [NARROW]),
+    "s2-shell.json": entries(ROUTES, SIZES + [NARROW]),
     "overview.json": entries(["Overview"], SIZES),
     "library.json": entries(["Library"], SIZES),
     "processing.json": entries(["Processing"], SIZES),

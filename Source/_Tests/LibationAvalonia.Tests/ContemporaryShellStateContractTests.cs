@@ -87,9 +87,17 @@ public class ContemporaryShellStateContractTests
 			Assert.IsNotNull(window);
 			Assert.IsNotNull(shell);
 			Assert.IsNotNull(viewModel);
-			Assert.AreSame(shell, window.Content);
-			Assert.IsTrue(viewModel.History.IsActive);
-			Assert.AreEqual(AppRouteId.History, viewModel.Navigation.CurrentRoute.Id);
+			var replacementShell = window.Content as AppShellView;
+			Assert.IsNotNull(replacementShell);
+			var replacementViewModel = replacementShell.DataContext as AppShellViewModel;
+			Assert.IsNotNull(replacementViewModel);
+			Assert.AreNotSame(shell, replacementShell);
+			Assert.AreNotSame(viewModel, replacementViewModel);
+			Assert.IsNull(shell.DataContext);
+			Assert.IsFalse(viewModel.History.IsActive);
+			Assert.IsFalse(viewModel.Dashboard.IsActive);
+			Assert.IsTrue(replacementViewModel.History.IsActive);
+			Assert.AreEqual(AppRouteId.History, replacementViewModel.Navigation.CurrentRoute.Id);
 			window.Close();
 		});
 	}

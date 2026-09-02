@@ -53,21 +53,21 @@
 		<Style Selector="overview|TastingRoomOverviewView:narrow Image#TastingHeroArt">
 			<Setter Property="IsVisible" Value="False" />
 		</Style>
-		<Style Selector="overview|TastingRoomOverviewView:wide components|DecanterSummary#TastingDecanter">
+		<Style Selector="overview|TastingRoomOverviewView:wide ContentControl#DecanterSurfaceHost">
 			<Setter Property="Width" Value="420" />
 			<Setter Property="DockPanel.Dock" Value="Right" />
 			<Setter Property="Margin" Value="16,0,0,0" />
 		</Style>
-		<Style Selector="overview|TastingRoomOverviewView:standard components|DecanterSummary#TastingDecanter">
+		<Style Selector="overview|TastingRoomOverviewView:standard ContentControl#DecanterSurfaceHost">
 			<Setter Property="Width" Value="360" />
 			<Setter Property="DockPanel.Dock" Value="Right" />
 			<Setter Property="Margin" Value="16,0,0,0" />
 		</Style>
-		<Style Selector="overview|TastingRoomOverviewView:compact components|DecanterSummary#TastingDecanter">
+		<Style Selector="overview|TastingRoomOverviewView:compact ContentControl#DecanterSurfaceHost">
 			<Setter Property="DockPanel.Dock" Value="Bottom" />
 			<Setter Property="Margin" Value="0,16,0,0" />
 		</Style>
-		<Style Selector="overview|TastingRoomOverviewView:narrow components|DecanterSummary#TastingDecanter">
+		<Style Selector="overview|TastingRoomOverviewView:narrow ContentControl#DecanterSurfaceHost">
 			<Setter Property="DockPanel.Dock" Value="Bottom" />
 			<Setter Property="Margin" Value="0,16,0,0" />
 		</Style>
@@ -93,24 +93,6 @@
 
 	<ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
 		<StackPanel Margin="{DynamicResource Libation.Thickness.5}" Spacing="{DynamicResource Libation.Space.5}">
-			<components:PageHeader
-				x:Name="TastingHeader"
-				Classes="hero"
-				Eyebrow="Editorial library workspace"
-				Title="Today’s Selection"
-				SupportingText="Welcome back. Here is what is happening in your library today.">
-				<components:PageHeader.StatusContent>
-					<components:StatusBadge
-						Status="{Binding AccountStatus}"
-						TextOverride="{Binding AccountHealthText}"
-						AccessibleName="{Binding AccountHealthText}" />
-				</components:PageHeader.StatusContent>
-				<components:PageHeader.HeroArt>
-					<Image x:Name="TastingHeroArt" Width="320" Height="192" Stretch="Uniform"
-						Source="/Assets/ContemporaryCellar/tasting-room-still-life.png" />
-				</components:PageHeader.HeroArt>
-			</components:PageHeader>
-
 			<Border Classes="card" IsVisible="{Binding IsLoading}"
 				AutomationProperties.LiveSetting="{x:Static designSystem:PlatformAutomationPolicy.Polite}">
 				<StackPanel Spacing="{DynamicResource Libation.Space.3}">
@@ -212,27 +194,7 @@
 					PrimaryCommand="{Binding OpenLibraryCommand}" />
 
 				<DockPanel x:Name="TastingPrimaryRow" LastChildFill="True">
-					<components:DecanterSummary
-						x:Name="TastingDecanter"
-						Title="The Decanter"
-						SummaryText="{Binding QueueSummaryText}"
-						ActiveText="{Binding QueueActiveText}"
-						Progress="{Binding QueueProgress}"
-						ShowProgress="{Binding HasActiveWork}"
-						IsExpanded="{Binding IsQueueExpanded, Mode=TwoWay}"
-						IllustrationWidth="156"
-						IllustrationHeight="188"
-						CancelCommand="{Binding CancelAllProcessingCommand}"
-						CanCancel="{Binding HasActiveWork}">
-						<components:DecanterSummary.IllustrationContent>
-							<Image Width="156" Height="188" Stretch="Uniform"
-								Source="/Assets/ContemporaryCellar/tasting-room-decanter.png" />
-						</components:DecanterSummary.IllustrationContent>
-						<components:DecanterSummary.DetailsContent>
-							<ListBox ItemsSource="{Binding ActiveQueueItems}" ItemTemplate="{StaticResource TastingQueueRow}"
-								MaxHeight="320" AutomationProperties.Name="Active processing work" />
-						</components:DecanterSummary.DetailsContent>
-					</components:DecanterSummary>
+					<ContentControl x:Name="DecanterSurfaceHost" />
 					<components:FlightTray
 						Title="Current Flight"
 						ItemsSource="{Binding CurrentFlightItems}"

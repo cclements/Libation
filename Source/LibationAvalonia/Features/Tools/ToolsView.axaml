@@ -37,8 +37,6 @@
 	</UserControl.Resources>
 	<ScrollViewer HorizontalScrollBarVisibility="Disabled">
 		<StackPanel Margin="{DynamicResource Libation.Thickness.5}" Spacing="{DynamicResource Libation.Space.4}">
-			<components:PageHeader Eyebrow="Advanced operations" Title="Tools"
-				SupportingText="{x:Static properties:Resources.ToolsSupportingText}" />
 			<components:AttentionBanner IsVisible="{Binding HasError}" Severity="{x:Static components:ComponentSeverity.Danger}" FocusOnShow="True"
 				Title="Tool action unavailable" Message="{Binding ErrorMessage}"
 				ActionText="Copy technical details" ActionCommand="{Binding CopyTechnicalDetailsCommand}" />

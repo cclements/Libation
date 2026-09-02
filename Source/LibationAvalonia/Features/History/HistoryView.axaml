@@ -21,17 +21,15 @@
 			</Border>
 		</DataTemplate>
 	</UserControl.Resources>
-	<Grid Margin="{DynamicResource Libation.Thickness.5}" RowDefinitions="Auto,Auto,Auto,Auto,*"
+	<Grid Margin="{DynamicResource Libation.Thickness.5}" RowDefinitions="Auto,Auto,Auto,*"
 		RowSpacing="{DynamicResource Libation.Space.3}">
-			<components:PageHeader Grid.Row="0" Eyebrow="{x:Static properties:Resources.HistoryEyebrow}" Title="History"
-				SupportingText="{x:Static properties:Resources.HistorySupportingText}" />
-			<components:AttentionBanner Grid.Row="1" Severity="{x:Static components:ComponentSeverity.Info}"
+			<components:AttentionBanner Grid.Row="0" Severity="{x:Static components:ComponentSeverity.Info}"
 				Title="{x:Static properties:Resources.HistoryScopeTitle}"
 				Message="{x:Static properties:Resources.HistoryScopeMessage}" />
-			<components:AttentionBanner Grid.Row="2" IsVisible="{Binding HasLoadError}" Severity="{x:Static components:ComponentSeverity.Danger}" FocusOnShow="True"
+			<components:AttentionBanner Grid.Row="1" IsVisible="{Binding HasLoadError}" Severity="{x:Static components:ComponentSeverity.Danger}" FocusOnShow="True"
 				Title="History unavailable" Message="{Binding LoadError}" ActionText="Refresh" ActionCommand="{Binding RefreshCommand}"
 				SecondaryActionText="Copy technical details" SecondaryActionCommand="{Binding CopyTechnicalDetailsCommand}" />
-			<Border Grid.Row="3" Classes="card">
+			<Border Grid.Row="2" Classes="card">
 				<Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource Libation.Space.3}">
 					<StackPanel Spacing="{DynamicResource Libation.Space.1}">
 						<TextBox Text="{Binding SearchText, Mode=TwoWay}" PlaceholderText="Search date, title, action, result, or recorded detail"
@@ -41,7 +39,7 @@
 					<Button Grid.Column="1" Classes="contemporary quiet" Content="Refresh" Command="{Binding RefreshCommand}" />
 				</Grid>
 			</Border>
-			<Grid Grid.Row="4">
+			<Grid Grid.Row="3">
 				<Border Classes="card" IsVisible="{Binding IsLoading}" VerticalAlignment="Top">
 					<StackPanel Spacing="{DynamicResource Libation.Space.2}">
 						<TextBlock Text="Loading available history…" FontWeight="SemiBold" />

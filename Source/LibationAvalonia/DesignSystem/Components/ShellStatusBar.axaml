@@ -1,0 +1,66 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:components="using:LibationAvalonia.DesignSystem.Components"
+			 x:Class="LibationAvalonia.DesignSystem.Components.ShellStatusBar"
+			 x:Name="Root">
+	<UserControl.Styles>
+		<Style Selector="Border.status-chip">
+			<Setter Property="Padding" Value="10,5" />
+			<Setter Property="CornerRadius" Value="{DynamicResource Libation.Radius.Round}" />
+			<Setter Property="Background" Value="{DynamicResource Libation.Brush.SurfaceInteractive}" />
+			<Setter Property="BorderBrush" Value="{DynamicResource Libation.Brush.BorderSubtle}" />
+			<Setter Property="BorderThickness" Value="1" />
+		</Style>
+		<Style Selector="Button.status-chip">
+			<Setter Property="Padding" Value="10,5" />
+			<Setter Property="CornerRadius" Value="{DynamicResource Libation.Radius.Round}" />
+		</Style>
+		<Style Selector="Button.contemporary.quiet.status-chip">
+			<Setter Property="Background" Value="{DynamicResource Libation.Brush.SurfaceInteractive}" />
+			<Setter Property="BorderBrush" Value="{DynamicResource Libation.Brush.BorderSubtle}" />
+			<Setter Property="BorderThickness" Value="1" />
+			<Setter Property="Foreground" Value="{DynamicResource Libation.Brush.TextPrimary}" />
+		</Style>
+	</UserControl.Styles>
+	<Border Background="{DynamicResource Libation.Brush.SurfaceRaised}"
+			BorderBrush="{DynamicResource Libation.Brush.BorderSubtle}"
+			BorderThickness="0,1,0,0"
+			Padding="12,6">
+		<WrapPanel Orientation="Horizontal" VerticalAlignment="Center">
+			<Border Classes="status-chip" Margin="0,0,8,0">
+				<TextBlock Text="{Binding VisibleText, ElementName=Root}" />
+			</Border>
+			<Border Classes="status-chip" Margin="0,0,8,0">
+				<TextBlock Text="{Binding SelectedText, ElementName=Root}" />
+			</Border>
+			<Border Classes="status-chip" Margin="0,0,8,0" IsVisible="{Binding IsScanning, ElementName=Root}">
+				<StackPanel Orientation="Horizontal" Spacing="8">
+					<ProgressBar Width="72" IsIndeterminate="True" />
+					<TextBlock Text="{Binding ScanText, ElementName=Root}" />
+				</StackPanel>
+			</Border>
+			<Border Classes="status-chip" Margin="0,0,8,0"
+				IsVisible="{Binding UpgradeProgress, ElementName=Root, Converter={x:Static ObjectConverters.IsNotNull}}">
+				<StackPanel Orientation="Horizontal" Spacing="8">
+					<ProgressBar Width="72" Minimum="0" Maximum="100" Value="{Binding UpgradeProgress, ElementName=Root}" />
+					<TextBlock Text="Update" />
+				</StackPanel>
+			</Border>
+			<Border Classes="status-chip" Margin="0,0,8,0">
+				<TextBlock Text="{Binding TrashText, ElementName=Root}" />
+			</Border>
+			<Button Classes="contemporary quiet status-chip" Margin="0,0,8,0"
+				IsVisible="{Binding ShowFlight, ElementName=Root}"
+				Command="{Binding FlightCommand, ElementName=Root}"
+				Content="{Binding FlightText, ElementName=Root}" />
+			<Button Classes="contemporary quiet status-chip" Margin="0,0,8,0"
+				Command="{Binding QueueCommand, ElementName=Root}"
+				Content="{Binding QueueText, ElementName=Root}"
+				AutomationProperties.Name="Open processing summary" />
+			<Button Classes="contemporary quiet status-chip"
+				IsVisible="{Binding HasUpdateAvailable, ElementName=Root}"
+				Command="{Binding UpdateCommand, ElementName=Root}"
+				Content="{Binding UpdateText, ElementName=Root}" />
+		</WrapPanel>
+	</Border>
+</UserControl>

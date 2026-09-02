@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using System.Collections;
+using System.Linq;
 
 namespace LibationAvalonia.DesignSystem.Components;
 
@@ -10,6 +11,8 @@ public partial class LibationNavigationRail : UserControl
 {
 	public static readonly StyledProperty<IEnumerable?> ItemsSourceProperty =
 		AvaloniaProperty.Register<LibationNavigationRail, IEnumerable?>(nameof(ItemsSource));
+	public static readonly StyledProperty<IEnumerable?> UtilityItemsSourceProperty =
+		AvaloniaProperty.Register<LibationNavigationRail, IEnumerable?>(nameof(UtilityItemsSource));
 	public static readonly StyledProperty<object?> SelectedItemProperty =
 		AvaloniaProperty.Register<LibationNavigationRail, object?>(nameof(SelectedItem), defaultBindingMode: BindingMode.TwoWay);
 	public static readonly StyledProperty<IDataTemplate?> ItemTemplateProperty =
@@ -30,6 +33,7 @@ public partial class LibationNavigationRail : UserControl
 	}
 
 	public IEnumerable? ItemsSource { get => GetValue(ItemsSourceProperty); set => SetValue(ItemsSourceProperty, value); }
+	public IEnumerable? UtilityItemsSource { get => GetValue(UtilityItemsSourceProperty); set => SetValue(UtilityItemsSourceProperty, value); }
 	public object? SelectedItem { get => GetValue(SelectedItemProperty); set => SetValue(SelectedItemProperty, value); }
 	public IDataTemplate? ItemTemplate { get => GetValue(ItemTemplateProperty); set => SetValue(ItemTemplateProperty, value); }
 	public bool IsExpanded { get => GetValue(IsExpandedProperty); set => SetValue(IsExpandedProperty, value); }
@@ -42,7 +46,39 @@ public partial class LibationNavigationRail : UserControl
 		base.OnPropertyChanged(change);
 		if (change.Property == IsExpandedProperty)
 			UpdateCompactState();
+		if (change.Property == SelectedItemProperty
+			|| change.Property == ItemsSourceProperty
+			|| change.Property == UtilityItemsSourceProperty)
+			UpdateSelection();
 	}
 
 	private void UpdateCompactState() => PseudoClasses.Set(":compact", !IsExpanded);
+
+	private bool synchronizingSelection;
+	private void RouteList_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+	{
+		if (synchronizingSelection || sender is not ListBox list || list.SelectedItem is null)
+			return;
+		SetCurrentValue(SelectedItemProperty, list.SelectedItem);
+		UpdateSelection();
+	}
+
+	private void UpdateSelection()
+	{
+		if (PrimaryRoutes is null || UtilityRoutes is null)
+			return;
+		try
+		{
+			synchronizingSelection = true;
+			PrimaryRoutes.SelectedItem = Contains(ItemsSource, SelectedItem) ? SelectedItem : null;
+			UtilityRoutes.SelectedItem = Contains(UtilityItemsSource, SelectedItem) ? SelectedItem : null;
+		}
+		finally
+		{
+			synchronizingSelection = false;
+		}
+	}
+
+	private static bool Contains(IEnumerable? source, object? item)
+		=> item is not null && source?.Cast<object>().Contains(item) == true;
 }

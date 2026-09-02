@@ -1,5 +1,7 @@
 using Avalonia.Threading;
 using DataLayer;
+using LibationAvalonia.DesignSystem.Components;
+using LibationAvalonia.Shell;
 using LibationFileManager;
 using LibationUiBase.ProcessQueue;
 using ReactiveUI;
@@ -18,7 +20,7 @@ namespace LibationAvalonia.Features.Processing;
 /// Groups and summarizes the existing queue for the contemporary presentation.
 /// <see cref="Source"/> remains the only queue and execution owner.
 /// </summary>
-public sealed class ProcessingViewModel : ReactiveObject, IDisposable
+public sealed class ProcessingViewModel : ReactiveObject, IDisposable, IRoutePresentation
 {
 	private readonly Dictionary<ProcessBookViewModel, ProcessingQueueItemViewModel> items = new();
 	private readonly Func<LibraryBook, Configuration, Task<bool>>? retryDownload;
@@ -67,6 +69,18 @@ public sealed class ProcessingViewModel : ReactiveObject, IDisposable
 	public string ActiveText => Active.FirstOrDefault()?.Title ?? "No active processing";
 	public string SummaryText => $"{Active.Count} active · {Waiting.Count} waiting · {Completed.Count} completed · {Failed.Count} failed or cancelled";
 	public string LogSummary => Source.LogEntries.Count == 1 ? "1 queue log entry" : $"{Source.LogEntries.Count} queue log entries";
+	public string RouteEyebrow => "Processing workspace";
+	public string RouteTitle => "The Decanter";
+	public string RouteSubtitle => "Follow the existing processing queue from waiting through completion.";
+	public RouteCommandPresentation? RoutePrimaryCommand => CanCancel ? new("Cancel all", CancelAllCommand) : null;
+	public IReadOnlyList<RouteCommandPresentation> RouteSecondaryCommands =>
+	[
+		new("Clear finished", ClearFinishedCommand),
+		new("Open queue log", OpenLogCommand),
+	];
+	public RouteStatusPresentation RouteStatusBadge => new(SummaryText, HasFailed
+		? LibationStatusKind.NeedsAttention
+		: HasActive || HasWaiting ? LibationStatusKind.Processing : LibationStatusKind.Completed);
 
 	internal bool CanRetry(ProcessBookViewModel item)
 		=> retryDownload is not null
@@ -145,6 +159,8 @@ public sealed class ProcessingViewModel : ReactiveObject, IDisposable
 		this.RaisePropertyChanged(nameof(Progress));
 		this.RaisePropertyChanged(nameof(ActiveText));
 		this.RaisePropertyChanged(nameof(SummaryText));
+		this.RaisePropertyChanged(nameof(RoutePrimaryCommand));
+		this.RaisePropertyChanged(nameof(RouteStatusBadge));
 	}
 
 	private static void Replace(

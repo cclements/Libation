@@ -38,6 +38,10 @@
 		</Style>
 		<Style Selector="components|LibationNavigationRail:compact Border#RailRoot">
 			<Setter Property="Width" Value="{DynamicResource Libation.Navigation.WidthCompact}" />
+			<Setter Property="Padding" Value="8" />
+		</Style>
+		<Style Selector="components|LibationNavigationRail:compact Border.nav-item">
+			<Setter Property="Padding" Value="0" />
 		</Style>
 		<Style Selector="components|LibationNavigationRail:compact TextBlock.nav-label">
 			<Setter Property="IsVisible" Value="False" />
@@ -49,19 +53,28 @@
 			BorderThickness="0,0,1,0"
 			Padding="12"
 			AutomationProperties.Name="{Binding AccessibleName, ElementName=Root}">
-		<Grid RowDefinitions="Auto,*,Auto" RowSpacing="{DynamicResource Libation.Space.4}">
+		<Grid RowDefinitions="Auto,*" RowSpacing="{DynamicResource Libation.Space.4}">
 			<ContentControl Content="{Binding BrandContent, ElementName=Root}"
 							HorizontalContentAlignment="Center"
 							AutomationProperties.AccessibilityView="Raw" />
-			<ListBox Grid.Row="1"
-					 Classes="contemporary"
+			<Grid Grid.Row="1" RowDefinitions="*,Auto" RowSpacing="{DynamicResource Libation.Space.2}">
+			<ListBox x:Name="PrimaryRoutes"
+				 Classes="contemporary"
 					 ItemContainerTheme="{StaticResource LibationNavigationItemTheme}"
 					 ItemsSource="{Binding ItemsSource, ElementName=Root}"
 					 ItemTemplate="{Binding ItemTemplate, ElementName=Root}"
-					 SelectedItem="{Binding SelectedItem, ElementName=Root, Mode=TwoWay}"
-					 SelectionMode="Single"
-					 AutomationProperties.Name="{Binding AccessibleName, ElementName=Root}" />
-			<ContentControl Grid.Row="2" Content="{Binding FooterContent, ElementName=Root}" />
+				 SelectionChanged="RouteList_SelectionChanged"
+				 SelectionMode="Single"
+				 AutomationProperties.Name="{Binding AccessibleName, ElementName=Root}" />
+			<ListBox x:Name="UtilityRoutes" Grid.Row="1"
+				 Classes="contemporary"
+				 ItemContainerTheme="{StaticResource LibationNavigationItemTheme}"
+				 ItemsSource="{Binding UtilityItemsSource, ElementName=Root}"
+				 ItemTemplate="{Binding ItemTemplate, ElementName=Root}"
+				 SelectionChanged="RouteList_SelectionChanged"
+				 SelectionMode="Single"
+				 AutomationProperties.Name="Utility navigation" />
+			</Grid>
 		</Grid>
 	</Border>
 </UserControl>

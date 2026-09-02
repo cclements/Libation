@@ -12,4 +12,5 @@ public partial class CellarOverviewView : OverviewViewBase
 	public CellarOverviewView() => InitializeComponent();
 
 	public LibraryViewModel? Library { get => GetValue(LibraryProperty); set => SetValue(LibraryProperty, value); }
+	internal ContentControl FlightHost => FlightSurfaceHost;
 }

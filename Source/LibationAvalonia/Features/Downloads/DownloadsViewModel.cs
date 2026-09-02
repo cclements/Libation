@@ -20,7 +20,7 @@ namespace LibationAvalonia.Features.Downloads;
 /// queue. It deliberately does not create a second downloader or infer unavailable
 /// account/marketplace/quality facts.
 /// </summary>
-public sealed class DownloadsViewModel : SecondaryDestinationViewModel
+public sealed class DownloadsViewModel : SecondaryDestinationViewModel, IRoutePresentation
 {
 	private readonly MainVM main;
 
@@ -102,6 +102,18 @@ public sealed class DownloadsViewModel : SecondaryDestinationViewModel
 	public ICommand RefreshCommand { get; }
 	public ICommand OpenAccountsCommand { get; }
 	public ICommand ScanLibraryCommand { get; }
+	public string RouteEyebrow => "Acquisition";
+	public string RouteTitle => "Downloads";
+	public string RouteSubtitle => "See which titles are pending, downloaded, processed, or need attention.";
+	public RouteCommandPresentation RoutePrimaryCommand => new("Download pending titles", DownloadPendingCommand);
+	public System.Collections.Generic.IReadOnlyList<RouteCommandPresentation> RouteSecondaryCommands =>
+	[
+		new("Download PDFs", DownloadPdfsCommand),
+		new("Locate files", LocateFilesCommand),
+		new("Refresh", RefreshCommand),
+	];
+	public RouteStatusPresentation RouteStatusBadge => new(HasAttention ? AttentionExplanation : PipelineText,
+		HasAttention ? LibationStatusKind.NeedsAttention : PipelineStatus);
 
 	private void Main_PropertyChanged(object? sender, PropertyChangedEventArgs e)
 	{
@@ -121,7 +133,7 @@ public sealed class DownloadsViewModel : SecondaryDestinationViewModel
 			nameof(EmptyLibraryExplanation), nameof(EmptyLibraryActionText), nameof(EmptyLibraryCommand),
 			nameof(HasAttention), nameof(TotalText), nameof(PendingText), nameof(PendingExplanation),
 			nameof(DownloadedText), nameof(CompletedText), nameof(AttentionText), nameof(TotalCount),
-			nameof(AttentionCount), nameof(AttentionExplanation),
+			nameof(AttentionCount), nameof(AttentionExplanation), nameof(RouteStatusBadge),
 		})
 			this.RaisePropertyChanged(property);
 	}
@@ -134,6 +146,7 @@ public sealed class DownloadsViewModel : SecondaryDestinationViewModel
 		this.RaisePropertyChanged(nameof(PipelineText));
 		this.RaisePropertyChanged(nameof(PipelineBadgeText));
 		this.RaisePropertyChanged(nameof(PipelineStatus));
+		this.RaisePropertyChanged(nameof(RouteStatusBadge));
 	}
 
 	private static string Format(int value) => value.ToString("N0", CultureInfo.CurrentCulture);

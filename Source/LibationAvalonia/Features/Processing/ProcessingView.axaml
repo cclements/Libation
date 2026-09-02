@@ -7,17 +7,8 @@
 			 x:Class="LibationAvalonia.Features.Processing.ProcessingView"
 			 x:Name="Root"
 			 x:DataType="processing:ProcessingViewModel">
-	<Grid RowDefinitions="Auto,*" RowSpacing="{DynamicResource Libation.Space.4}">
-		<components:DecanterSummary
-			Title="The Decanter"
-			SummaryText="{Binding SummaryText}"
-			ActiveText="{Binding ActiveText}"
-			Progress="{Binding Progress}"
-			ShowProgress="{Binding ShowProgress}"
-			CancelCommand="{Binding CancelAllCommand}"
-			CanCancel="{Binding CanCancel}" />
-
-		<TabControl Grid.Row="1" SelectedIndex="{Binding SelectedTabIndex, Mode=TwoWay}">
+	<Grid>
+		<TabControl SelectedIndex="{Binding SelectedTabIndex, Mode=TwoWay}">
 			<TabItem Header="Active">
 				<Grid>
 					<components:EmptyState IsVisible="{Binding !HasActive}"

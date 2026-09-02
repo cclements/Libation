@@ -1,3 +1,4 @@
+using Avalonia.Controls;
 using LibationAvalonia.DesignSystem;
 using LibationAvalonia.ViewModels;
 using LibationFileManager;
@@ -43,6 +44,34 @@ public sealed record ResponsiveLayout(
 	ContextualPaneState ContextualPane,
 	QueueSurfaceState QueueSurface,
 	bool ShowDecorativeHero,
+	bool IsBelowSupportedMinimum);
+
+public enum TransientSurface
+{
+	None,
+	Navigation,
+	Flight,
+	Decanter,
+}
+
+/// <summary>
+/// One immutable shell projection. Views bind this record instead of recomputing
+/// partially-overlapping layout and transient-surface booleans.
+/// </summary>
+public sealed record ShellLayout(
+	DesktopLayoutClass LayoutClass,
+	SplitViewDisplayMode NavigationDisplayMode,
+	bool IsNavigationPaneOpen,
+	bool IsNavigationExpanded,
+	bool ShowNavigationCommand,
+	bool ShowPersistentFlight,
+	bool ShowFlightOverlay,
+	bool ShowFlightToggle,
+	bool ShowQueueDock,
+	bool ShowDecanterDrawer,
+	bool IsQueueCompact,
+	bool HostFlightInOverview,
+	bool HostDecanterInOverview,
 	bool IsBelowSupportedMinimum);
 
 /// <summary>

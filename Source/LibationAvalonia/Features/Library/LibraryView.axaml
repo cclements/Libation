@@ -8,30 +8,8 @@
 			 x:DataType="library:LibraryViewModel">
 	<Grid RowDefinitions="Auto,*" RowSpacing="{DynamicResource Libation.Space.3}">
 		<Border Classes="card" Padding="{DynamicResource Libation.Thickness.4}">
-			<Grid RowDefinitions="Auto,Auto" RowSpacing="{DynamicResource Libation.Space.3}">
-				<Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource Libation.Space.3}">
-					<StackPanel>
-						<TextBlock Text="The Cellar"
-								   FontFamily="{DynamicResource Libation.Font.Display}"
-								   FontSize="{DynamicResource Libation.FontSize.Page}"
-								   Foreground="{DynamicResource Libation.Brush.TextPrimary}" />
-						<StackPanel Orientation="Horizontal" Spacing="{DynamicResource Libation.Space.3}">
-							<TextBlock Text="{Binding ResultStateText}" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
-							<TextBlock Text="{Binding SelectionStateText}" Foreground="{DynamicResource Libation.Brush.TextSecondary}"
-									   AutomationProperties.LiveSetting="{x:Static designSystem:PlatformAutomationPolicy.Polite}" />
-						</StackPanel>
-					</StackPanel>
-					<StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="{DynamicResource Libation.Density.ToolbarGap}">
-						<Button Classes="contemporary" Content="Add Audible account" Command="{Binding AddAccountCommand}" />
-						<Button Classes="contemporary" Content="Scan library" Command="{Binding ScanLibraryCommand}" />
-						<Button Classes="contemporary" Content="Add shown to Flight"
-							Command="{Binding AddVisibleToFlightCommand}"
-							IsEnabled="{Binding CanAddVisibleToFlight}" />
-						<Button Classes="contemporary primary" Content="Process selected" Command="{Binding ProcessSelectionCommand}" />
-					</StackPanel>
-				</Grid>
-
-				<WrapPanel Grid.Row="1" Orientation="Horizontal" VerticalAlignment="Center">
+			<Grid>
+				<WrapPanel Orientation="Horizontal" VerticalAlignment="Center">
 					<TextBox x:Name="SearchBox"
 							 Classes="contemporary search"
 							 Width="360"

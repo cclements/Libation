@@ -1,4 +1,5 @@
 using LibationAvalonia.Features.Tools;
+using LibationAvalonia.DesignSystem.Components;
 using LibationAvalonia.Properties;
 using LibationAvalonia.Shell;
 using LibationFileManager;
@@ -23,7 +24,7 @@ public sealed record SettingsCategoryItem(
 /// dialog and Configuration owner. It does not duplicate the established editor's
 /// validation, preview/cancel, or legacy Chardonnay override behavior.
 /// </summary>
-public sealed class SettingsViewModel : SecondaryDestinationViewModel
+public sealed class SettingsViewModel : SecondaryDestinationViewModel, IRoutePresentation
 {
 	private readonly Configuration configuration;
 	private readonly IReadOnlyList<SettingsCategoryItem> allCategories;
@@ -109,6 +110,16 @@ public sealed class SettingsViewModel : SecondaryDestinationViewModel
 	public ICommand OpenAccountsCommand { get; }
 	public ICommand OpenAboutCommand { get; }
 	public ICommand RequestOnboardingCommand { get; }
+	public string RouteEyebrow => "Preferences";
+	public string RouteTitle => "Settings";
+	public string RouteSubtitle => Resources.SettingsSupportingText;
+	public RouteCommandPresentation RoutePrimaryCommand => new("Open Settings", OpenSettingsCommand);
+	public IReadOnlyList<RouteCommandPresentation> RouteSecondaryCommands =>
+	[
+		new("Manage accounts", OpenAccountsCommand),
+		new("About and updates", OpenAboutCommand),
+	];
+	public RouteStatusPresentation RouteStatusBadge => new(AppearanceProfileText, LibationStatusKind.Completed);
 
 	private void ApplySearch()
 	{
@@ -138,7 +149,7 @@ public sealed class SettingsViewModel : SecondaryDestinationViewModel
 		foreach (var property in new[]
 		{
 			nameof(AppearanceProfileText), nameof(DensityText), nameof(DecorationText), nameof(MotionText),
-			nameof(TypographyText), nameof(LibraryViewText), nameof(NavigationText), nameof(AppearanceSummary),
+			nameof(TypographyText), nameof(LibraryViewText), nameof(NavigationText), nameof(AppearanceSummary), nameof(RouteStatusBadge),
 		})
 			this.RaisePropertyChanged(property);
 	}

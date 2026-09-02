@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Threading;
+using LibationAvalonia.DesignSystem.Components;
 using LibationAvalonia.Features.Flight;
 using LibationAvalonia.Shell;
 using LibationAvalonia.ViewModels;
@@ -25,7 +26,7 @@ namespace LibationAvalonia.Features.Library;
 /// One presentation model over the established ProductsDisplay/filter state and the
 /// shell-scoped Flight selection. It never owns a second library or domain command path.
 /// </summary>
-public sealed class LibraryViewModel : ViewModelBase, IDisposable
+public sealed class LibraryViewModel : ViewModelBase, IDisposable, IRoutePresentation
 {
 	private static readonly TimeSpan SearchDebounce = TimeSpan.FromMilliseconds(200);
 	private const double GalleryCardWidth = 196;
@@ -119,6 +120,21 @@ public sealed class LibraryViewModel : ViewModelBase, IDisposable
 	public ReactiveCommand<Unit, Unit> AddVisibleToFlightCommand { get; }
 	public ReactiveCommand<Unit, Unit> EmptyPrimaryCommand { get; }
 	public ReactiveCommand<Unit, Unit> CloseDetailsCommand { get; }
+	public string RouteEyebrow => "Library workspace";
+	public string RouteTitle => "Library";
+	public string RouteSubtitle => "Search, select, and prepare titles without leaving the shared library.";
+	public RouteCommandPresentation? RoutePrimaryCommand => ProcessSelectionCommand is null
+		? null
+		: new("Process selected", ProcessSelectionCommand);
+	public IReadOnlyList<RouteCommandPresentation> RouteSecondaryCommands =>
+	[
+		new("Scan library", ScanLibraryCommand),
+		new("Add account", AddAccountCommand),
+		new("Add shown to Flight", AddVisibleToFlightCommand),
+	];
+	public RouteStatusPresentation RouteStatusBadge => new(SelectionStateText, SelectedCount > 0
+		? LibationStatusKind.Processing
+		: LibationStatusKind.Completed);
 
 	public LibraryViewMode ViewMode
 	{
@@ -479,6 +495,7 @@ public sealed class LibraryViewModel : ViewModelBase, IDisposable
 		this.RaisePropertyChanged(nameof(SelectedCount));
 		this.RaisePropertyChanged(nameof(HiddenSelectedCount));
 		this.RaisePropertyChanged(nameof(SelectionStateText));
+		this.RaisePropertyChanged(nameof(RouteStatusBadge));
 		this.RaisePropertyChanged(nameof(CanAddVisibleToFlight));
 		PublishSelectionProjection();
 	}

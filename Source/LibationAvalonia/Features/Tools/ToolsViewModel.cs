@@ -21,7 +21,7 @@ public sealed record ToolActionGroup(string Name, string Description, IReadOnlyL
 /// Discoverable index over existing advanced commands. Each action delegates to its
 /// established owner, retaining existing dialogs and confirmations.
 /// </summary>
-public sealed class ToolsViewModel : SecondaryDestinationViewModel
+public sealed class ToolsViewModel : SecondaryDestinationViewModel, IRoutePresentation
 {
 	public ToolsViewModel(ILibationCommandAdapter commands)
 	{
@@ -82,4 +82,10 @@ public sealed class ToolsViewModel : SecondaryDestinationViewModel
 	}
 
 	public IReadOnlyList<ToolActionGroup> Groups { get; }
+	public string RouteEyebrow => "Advanced operations";
+	public string RouteTitle => "Tools";
+	public string RouteSubtitle => Resources.ToolsSupportingText;
+	public RouteCommandPresentation? RoutePrimaryCommand => null;
+	public IReadOnlyList<RouteCommandPresentation> RouteSecondaryCommands => [];
+	public RouteStatusPresentation? RouteStatusBadge => null;
 }

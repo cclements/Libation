@@ -23,7 +23,7 @@ namespace LibationAvalonia.Features.Overview;
 /// Construct it once for the shell lifetime so profile switching preserves search text,
 /// expanded regions, live queue state, and Current Flight.
 /// </summary>
-public sealed class DashboardViewModel : ViewModelBase, IDisposable
+public sealed class DashboardViewModel : ViewModelBase, IDisposable, IRoutePresentation
 {
 	private static readonly string[] SnapshotPropertyNames =
 	[
@@ -40,6 +40,7 @@ public sealed class DashboardViewModel : ViewModelBase, IDisposable
 		nameof(HasFlight), nameof(VisibleLibraryItems), nameof(RecentAdditions), nameof(RecentCompletions),
 		nameof(ActiveQueueItems), nameof(FailedJobs), nameof(HasUpdateState), nameof(UpdateStateText),
 		nameof(VisibleLibrarySummary), nameof(ErrorMessage), nameof(HasError), nameof(HasAttention),
+		nameof(RouteStatusBadge),
 	];
 
 	private readonly IDashboardDataSource source;
@@ -59,6 +60,7 @@ public sealed class DashboardViewModel : ViewModelBase, IDisposable
 	private bool isActive;
 	private bool refreshPending = true;
 	private bool disposed;
+	private DashboardLayoutKind dashboardLayout = DashboardLayoutKind.Cellar;
 	internal bool IsActive => isActive;
 
 	public DashboardViewModel(
@@ -270,6 +272,31 @@ public sealed class DashboardViewModel : ViewModelBase, IDisposable
 	public ICommand UndoFlightCommand { get; }
 	public ICommand CancelAllProcessingCommand { get; }
 	public ICommand ToggleFlightExpandedCommand { get; }
+	public string RouteEyebrow => dashboardLayout == DashboardLayoutKind.TastingRoom
+		? "Editorial library workspace"
+		: "Library workspace";
+	public string RouteTitle => dashboardLayout == DashboardLayoutKind.TastingRoom ? "Today’s Selection" : "The Cellar";
+	public string RouteSubtitle => dashboardLayout == DashboardLayoutKind.TastingRoom
+		? "Welcome back. Here is what is happening in your library today."
+		: "Your curated audiobook collection, organized and ready for the next listen.";
+	public RouteCommandPresentation RoutePrimaryCommand => new("Locate audiobooks", LocateAudiobooksCommand);
+	public IReadOnlyList<RouteCommandPresentation> RouteSecondaryCommands =>
+	[
+		new("Scan library", ScanLibraryCommand),
+		new("Open Library", OpenLibraryCommand),
+	];
+	public RouteStatusPresentation RouteStatusBadge => new(AccountHealthText, AccountStatus);
+
+	public void SetProfile(ExperienceProfile profile)
+	{
+		var next = profile.DashboardLayout;
+		if (next == dashboardLayout)
+			return;
+		dashboardLayout = next;
+		this.RaisePropertyChanged(nameof(RouteEyebrow));
+		this.RaisePropertyChanged(nameof(RouteTitle));
+		this.RaisePropertyChanged(nameof(RouteSubtitle));
+	}
 
 	public async Task RefreshAsync()
 	{

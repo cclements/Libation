@@ -8,13 +8,6 @@
 	x:DataType="downloads:DownloadsViewModel">
 	<ScrollViewer HorizontalScrollBarVisibility="Disabled">
 		<StackPanel Margin="{DynamicResource Libation.Thickness.5}" Spacing="{DynamicResource Libation.Space.4}">
-			<components:PageHeader
-				Eyebrow="Acquisition"
-				Title="Downloads"
-				SupportingText="Understand whether titles are catalogued, downloaded in Audible format, processed into open files, or need attention."
-				PrimaryActionText="Download pending titles"
-				PrimaryCommand="{Binding DownloadPendingCommand}" />
-
 			<components:AttentionBanner IsVisible="{Binding HasError}"
 				Severity="{x:Static components:ComponentSeverity.Danger}" FocusOnShow="True" Title="Download action unavailable"
 				Message="{Binding ErrorMessage}" ActionText="Copy technical details" ActionCommand="{Binding CopyTechnicalDetailsCommand}" />

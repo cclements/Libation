@@ -16,7 +16,7 @@ namespace LibationAvalonia.Features.Accounts;
 /// names, addresses, credentials, cookies, tokens, and marketplace identifiers never
 /// cross this view-model boundary.
 /// </summary>
-public sealed class AccountsViewModel : SecondaryDestinationViewModel
+public sealed class AccountsViewModel : SecondaryDestinationViewModel, IRoutePresentation
 {
 	private readonly MainVM main;
 
@@ -97,6 +97,16 @@ public sealed class AccountsViewModel : SecondaryDestinationViewModel
 	public ICommand ToggleAutoScanCommand { get; }
 	public ICommand ReconcileAllCommand { get; }
 	public ICommand ReconcileSomeCommand { get; }
+	public string RouteEyebrow => "Audible access";
+	public string RouteTitle => "Accounts";
+	public string RouteSubtitle => "Manage account access and scans without exposing private account details.";
+	public RouteCommandPresentation RoutePrimaryCommand => new("Manage accounts", ManageAccountsCommand);
+	public System.Collections.Generic.IReadOnlyList<RouteCommandPresentation> RouteSecondaryCommands =>
+	[
+		new("Add account", AddAccountCommand),
+		new("Scan all", ScanAllCommand),
+	];
+	public RouteStatusPresentation RouteStatusBadge => new(AccountCountText, AccountStatus);
 
 	private void Main_PropertyChanged(object? sender, PropertyChangedEventArgs e)
 	{
@@ -115,7 +125,7 @@ public sealed class AccountsViewModel : SecondaryDestinationViewModel
 		{
 			nameof(AccountCount), nameof(HasAccounts), nameof(HasMultipleAccounts), nameof(CanScan), nameof(CanScanSome),
 			nameof(IsScanning), nameof(AccountCountText), nameof(LibraryTitleCountText), nameof(ScanStateText),
-			nameof(AuthorizationSummary), nameof(AutoScanText), nameof(AutoScanActionText), nameof(AccountStatus),
+			nameof(AuthorizationSummary), nameof(AutoScanText), nameof(AutoScanActionText), nameof(AccountStatus), nameof(RouteStatusBadge),
 		})
 			this.RaisePropertyChanged(property);
 	}

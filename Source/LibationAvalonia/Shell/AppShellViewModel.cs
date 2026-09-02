@@ -32,9 +32,7 @@ public sealed class AppShellViewModel : ViewModelBase, IDisposable
 	private readonly Configuration configuration;
 	private readonly ExperienceManager experienceManager;
 	private bool disposed;
-	private bool isDecanterDrawerOpen;
-	private bool isFlightOpen;
-	private bool isNavigationOverlayOpen;
+	private TransientSurface activeTransientSurface;
 	private ExperienceProfile profile;
 	private Size lastEffectiveSize = new(1360, 768);
 
@@ -76,6 +74,7 @@ public sealed class AppShellViewModel : ViewModelBase, IDisposable
 			CurrentFlight,
 			new ShellDashboardNavigation(Navigation, Library),
 			DashboardSupplement);
+		Dashboard.SetProfile(Profile);
 		NavigateCommand = ReactiveCommand.Create<AppRouteId>(Navigation.Navigate);
 		ToggleFlightCommand = ReactiveCommand.Create(ToggleFlight);
 		ToggleNavigationOverlayCommand = ReactiveCommand.Create(ToggleNavigationOverlay);
@@ -87,8 +86,16 @@ public sealed class AppShellViewModel : ViewModelBase, IDisposable
 		Responsive.PropertyChanged += Responsive_PropertyChanged;
 		experienceManager.ProfileChanged += ExperienceManager_ProfileChanged;
 		configuration.PropertyChanged += Configuration_PropertyChanged;
+		main.PropertyChanged += Main_PropertyChanged;
 		LibraryCommands.LibrarySizeChanged += LibraryCommands_LibrarySizeChanged;
 		Flight.SelectionChanged += Flight_SelectionChanged;
+		AboutPresentation = new StaticRoutePresentation(
+			"Application information",
+			Properties.Resources.ShellAboutPageTitle,
+			Properties.Resources.ShellAboutPageDescription,
+			new("Open About and updates", Settings.OpenAboutCommand),
+			[],
+			null);
 		SetActiveDestinations(Navigation.CurrentRoute.Id);
 	}
 
@@ -110,6 +117,7 @@ public sealed class AppShellViewModel : ViewModelBase, IDisposable
 	public TrashViewModel Trash { get; }
 	public DashboardViewModel Dashboard { get; }
 	public IDashboardSupplementSource DashboardSupplement { get; }
+	public IRoutePresentation AboutPresentation { get; }
 	public ReactiveCommand<AppRouteId, Unit> NavigateCommand { get; }
 	public ReactiveCommand<Unit, Unit> ToggleFlightCommand { get; }
 	public ReactiveCommand<Unit, Unit> ToggleNavigationOverlayCommand { get; }
@@ -117,6 +125,20 @@ public sealed class AppShellViewModel : ViewModelBase, IDisposable
 	public ReactiveCommand<Unit, Unit> ToggleDecanterDrawerCommand { get; }
 	public ReactiveCommand<Unit, Unit> CloseDecanterDrawerCommand { get; }
 	public AppRoute CurrentRoute => Navigation.CurrentRoute;
+	public IRoutePresentation CurrentRoutePresentation => CurrentRoute.Id switch
+	{
+		AppRouteId.Overview => Dashboard,
+		AppRouteId.Library => Library,
+		AppRouteId.Downloads => Downloads,
+		AppRouteId.Processing => Processing,
+		AppRouteId.History => History,
+		AppRouteId.Accounts => Accounts,
+		AppRouteId.Settings => Settings,
+		AppRouteId.Tools => Tools,
+		AppRouteId.Trash => Trash,
+		_ => AboutPresentation,
+	};
+	public bool HasRouteStatusBadge => CurrentRoutePresentation.RouteStatusBadge is not null;
 	public ExperienceProfile Profile
 	{
 		get => profile;
@@ -135,61 +157,66 @@ public sealed class AppShellViewModel : ViewModelBase, IDisposable
 	public bool IsToolsRoute => CurrentRoute.Id == AppRouteId.Tools;
 	public bool IsTrashRoute => CurrentRoute.Id == AppRouteId.Trash;
 	public bool IsAboutRoute => CurrentRoute.Id == AppRouteId.About;
-	public bool UsesOverviewFlightSurface => IsOverviewRoute && IsCellarComposition;
-	public bool IsRailExpanded => Responsive.Current.NavigationRail == NavigationRailState.Expanded;
-	public bool IsRailCompact => Responsive.Current.NavigationRail == NavigationRailState.Compact;
-	public bool IsRailOverlay => Responsive.Current.NavigationRail == NavigationRailState.Overlay;
-	public bool IsNavigationRailExpanded => IsRailExpanded || IsRailOverlay;
-	public bool IsNavigationRailVisible => !IsRailOverlay || IsNavigationOverlayOpen;
-	public bool ShowNavigationScrim => IsRailOverlay && IsNavigationOverlayOpen;
-	public GridLength NavigationColumnWidth => IsRailOverlay ? new GridLength(0) : GridLength.Auto;
-	public bool IsContextPanePersistent => Responsive.Current.ContextualPane == ContextualPaneState.Persistent;
-	public bool IsQueueCompact => Responsive.Current.QueueSurface is QueueSurfaceState.CompactBar or QueueSurfaceState.Drawer;
-	public bool ShowQueueDock => configuration.ShowDecanterDock
-		&& Responsive.Current.QueueSurface == QueueSurfaceState.Dock
-		&& !IsProcessingRoute;
-	public bool ShowDecanterDrawer => IsDecanterDrawerOpen && !ShowQueueDock;
-	public bool IsNavigationOverlayOpen
+	public bool HasUpdateAvailable => Main.ApplicationUpdateState.Contains("available", StringComparison.OrdinalIgnoreCase);
+	public TransientSurface ActiveTransientSurface
 	{
-		get => isNavigationOverlayOpen;
+		get => activeTransientSurface;
 		private set
 		{
-			this.RaiseAndSetIfChanged(ref isNavigationOverlayOpen, value);
-			this.RaisePropertyChanged(nameof(IsNavigationRailVisible));
-			this.RaisePropertyChanged(nameof(ShowNavigationScrim));
+			this.RaiseAndSetIfChanged(ref activeTransientSurface, value);
+			this.RaisePropertyChanged(nameof(Layout));
 		}
 	}
-	public bool IsDecanterDrawerOpen
+	public ShellLayout Layout => BuildLayout();
+	public ShellNavigationItemViewModel? SelectedNavigationItem
 	{
-		get => isDecanterDrawerOpen;
-		private set
-		{
-			this.RaiseAndSetIfChanged(ref isDecanterDrawerOpen, value);
-			this.RaisePropertyChanged(nameof(ShowDecanterDrawer));
-		}
-	}
-	public bool IsFlightOpen
-	{
-		get => isFlightOpen;
-		private set
-		{
-			this.RaiseAndSetIfChanged(ref isFlightOpen, value);
-			this.RaisePropertyChanged(nameof(ShowFlightPane));
-			this.RaisePropertyChanged(nameof(ShowFlightOverlay));
-		}
-	}
-	public bool ShowPersistentFlightPane => !UsesOverviewFlightSurface && IsCellarComposition && IsContextPanePersistent;
-	public bool ShowFlightOverlay => !UsesOverviewFlightSurface && IsFlightOpen && !ShowPersistentFlightPane;
-	public bool ShowFlightPane => ShowPersistentFlightPane || ShowFlightOverlay;
-	public bool ShowFlightToggle => !UsesOverviewFlightSurface && !ShowPersistentFlightPane;
-	public ShellNavigationItemViewModel? SelectedPrimaryItem
-	{
-		get => Navigation.PrimaryItems.FirstOrDefault(item => item.IsSelected);
+		get => Navigation.PrimaryItems.Concat(Navigation.UtilityItems).FirstOrDefault(item => item.IsSelected);
 		set
 		{
 			if (value is not null)
 				Navigation.Navigate(value.Id);
 		}
+	}
+
+	private ShellLayout BuildLayout()
+	{
+		var responsive = Responsive.Current;
+		bool navigationOverlay = responsive.NavigationRail == NavigationRailState.Overlay;
+		bool hostFlightInOverview = IsOverviewRoute
+			&& IsCellarComposition
+			&& responsive.ContextualPane == ContextualPaneState.Persistent;
+		bool hostDecanterInOverview = IsOverviewRoute && IsTastingRoomComposition;
+		bool showPersistentFlight = !hostFlightInOverview
+			&& IsCellarComposition
+			&& responsive.ContextualPane == ContextualPaneState.Persistent;
+		bool showFlightOverlay = !hostFlightInOverview
+			&& !showPersistentFlight
+			&& ActiveTransientSurface == TransientSurface.Flight;
+		bool showQueueDock = !hostDecanterInOverview
+			&& configuration.ShowDecanterDock
+			&& responsive.QueueSurface == QueueSurfaceState.Dock
+			&& !IsProcessingRoute;
+		return new(
+			responsive.LayoutClass,
+			responsive.NavigationRail switch
+			{
+				NavigationRailState.Expanded => SplitViewDisplayMode.Inline,
+				NavigationRailState.Compact => SplitViewDisplayMode.CompactInline,
+				_ => SplitViewDisplayMode.Overlay,
+			},
+			responsive.NavigationRail == NavigationRailState.Expanded
+				|| navigationOverlay && ActiveTransientSurface == TransientSurface.Navigation,
+			responsive.NavigationRail != NavigationRailState.Compact,
+			navigationOverlay,
+			showPersistentFlight,
+			showFlightOverlay,
+			!hostFlightInOverview && !showPersistentFlight,
+			showQueueDock,
+			!showQueueDock && !hostDecanterInOverview && ActiveTransientSurface == TransientSurface.Decanter,
+			responsive.QueueSurface is QueueSurfaceState.CompactBar or QueueSurfaceState.Drawer,
+			hostFlightInOverview,
+			hostDecanterInOverview,
+			responsive.IsBelowSupportedMinimum);
 	}
 
 	public void UpdateLayout(Size effectiveSize)
@@ -207,6 +234,8 @@ public sealed class AppShellViewModel : ViewModelBase, IDisposable
 	{
 		SetActiveDestinations(e.Current.Id);
 		this.RaisePropertyChanged(nameof(CurrentRoute));
+		this.RaisePropertyChanged(nameof(CurrentRoutePresentation));
+		this.RaisePropertyChanged(nameof(HasRouteStatusBadge));
 		this.RaisePropertyChanged(nameof(IsOverviewRoute));
 		this.RaisePropertyChanged(nameof(IsLibraryRoute));
 		this.RaisePropertyChanged(nameof(IsDownloadsRoute));
@@ -217,15 +246,9 @@ public sealed class AppShellViewModel : ViewModelBase, IDisposable
 		this.RaisePropertyChanged(nameof(IsToolsRoute));
 		this.RaisePropertyChanged(nameof(IsTrashRoute));
 		this.RaisePropertyChanged(nameof(IsAboutRoute));
-		this.RaisePropertyChanged(nameof(UsesOverviewFlightSurface));
-		this.RaisePropertyChanged(nameof(SelectedPrimaryItem));
-		this.RaisePropertyChanged(nameof(ShowQueueDock));
-		this.RaisePropertyChanged(nameof(ShowFlightPane));
-		this.RaisePropertyChanged(nameof(ShowPersistentFlightPane));
-		this.RaisePropertyChanged(nameof(ShowFlightOverlay));
-		this.RaisePropertyChanged(nameof(ShowFlightToggle));
-		IsNavigationOverlayOpen = false;
-		IsDecanterDrawerOpen = false;
+		this.RaisePropertyChanged(nameof(SelectedNavigationItem));
+		ActiveTransientSurface = TransientSurface.None;
+		this.RaisePropertyChanged(nameof(Layout));
 	}
 
 	private void SetActiveDestinations(AppRouteId route)
@@ -239,23 +262,10 @@ public sealed class AppShellViewModel : ViewModelBase, IDisposable
 	{
 		if (e.PropertyName != nameof(ResponsiveLayoutService.Current))
 			return;
-		this.RaisePropertyChanged(nameof(IsRailExpanded));
-		this.RaisePropertyChanged(nameof(IsRailCompact));
-		this.RaisePropertyChanged(nameof(IsRailOverlay));
-		this.RaisePropertyChanged(nameof(IsNavigationRailExpanded));
-		this.RaisePropertyChanged(nameof(IsNavigationRailVisible));
-		this.RaisePropertyChanged(nameof(ShowNavigationScrim));
-		this.RaisePropertyChanged(nameof(NavigationColumnWidth));
-		this.RaisePropertyChanged(nameof(IsContextPanePersistent));
-		this.RaisePropertyChanged(nameof(IsQueueCompact));
-		this.RaisePropertyChanged(nameof(ShowQueueDock));
-		this.RaisePropertyChanged(nameof(ShowDecanterDrawer));
-		this.RaisePropertyChanged(nameof(ShowFlightPane));
-		this.RaisePropertyChanged(nameof(ShowPersistentFlightPane));
-		this.RaisePropertyChanged(nameof(ShowFlightOverlay));
-		this.RaisePropertyChanged(nameof(ShowFlightToggle));
-		if (!IsRailOverlay)
-			IsNavigationOverlayOpen = false;
+		if (Responsive.Current.NavigationRail != NavigationRailState.Overlay
+			&& ActiveTransientSurface == TransientSurface.Navigation)
+			ActiveTransientSurface = TransientSurface.None;
+		this.RaisePropertyChanged(nameof(Layout));
 	}
 
 	private void ExperienceManager_ProfileChanged(object? sender, ExperienceProfileChangedEventArgs e)
@@ -267,70 +277,63 @@ public sealed class AppShellViewModel : ViewModelBase, IDisposable
 		}
 
 		Profile = e.Current;
+		Dashboard.SetProfile(Profile);
 		this.RaisePropertyChanged(nameof(IsCellarComposition));
 		this.RaisePropertyChanged(nameof(IsTastingRoomComposition));
 		this.RaisePropertyChanged(nameof(IsAccessibleComposition));
-		this.RaisePropertyChanged(nameof(ShowFlightPane));
-		this.RaisePropertyChanged(nameof(ShowPersistentFlightPane));
-		this.RaisePropertyChanged(nameof(ShowFlightOverlay));
-		this.RaisePropertyChanged(nameof(ShowFlightToggle));
+		this.RaisePropertyChanged(nameof(CurrentRoutePresentation));
+		this.RaisePropertyChanged(nameof(Layout));
 		UpdateLayout(lastEffectiveSize);
 	}
 
 	private void ToggleFlight()
 	{
-		IsNavigationOverlayOpen = false;
-		IsDecanterDrawerOpen = false;
-		IsFlightOpen = !IsFlightOpen;
+		ActiveTransientSurface = ActiveTransientSurface == TransientSurface.Flight
+			? TransientSurface.None
+			: TransientSurface.Flight;
 	}
 	private void ToggleNavigationOverlay()
 	{
-		if (IsRailOverlay)
-		{
-			IsDecanterDrawerOpen = false;
-			IsFlightOpen = false;
-			IsNavigationOverlayOpen = !IsNavigationOverlayOpen;
-		}
+		if (Responsive.Current.NavigationRail == NavigationRailState.Overlay)
+			ActiveTransientSurface = ActiveTransientSurface == TransientSurface.Navigation
+				? TransientSurface.None
+				: TransientSurface.Navigation;
 	}
-	private void CloseNavigationOverlay() => IsNavigationOverlayOpen = false;
+	private void CloseNavigationOverlay()
+	{
+		if (ActiveTransientSurface == TransientSurface.Navigation)
+			ActiveTransientSurface = TransientSurface.None;
+	}
 	private void ToggleDecanterDrawer()
 	{
-		if (ShowQueueDock)
+		if (Layout.ShowQueueDock || Layout.HostDecanterInOverview)
 			Navigation.Navigate(AppRouteId.Processing);
 		else
-		{
-			IsNavigationOverlayOpen = false;
-			IsFlightOpen = false;
-			IsDecanterDrawerOpen = !IsDecanterDrawerOpen;
-		}
+			ActiveTransientSurface = ActiveTransientSurface == TransientSurface.Decanter
+				? TransientSurface.None
+				: TransientSurface.Decanter;
 	}
-	private void CloseDecanterDrawer() => IsDecanterDrawerOpen = false;
+	private void CloseDecanterDrawer()
+	{
+		if (ActiveTransientSurface == TransientSurface.Decanter)
+			ActiveTransientSurface = TransientSurface.None;
+	}
 
 	public bool CloseTransientSurface()
 	{
-		if (IsNavigationOverlayOpen)
-		{
-			IsNavigationOverlayOpen = false;
-			return true;
-		}
-		if (IsDecanterDrawerOpen)
-		{
-			IsDecanterDrawerOpen = false;
-			return true;
-		}
-		if (IsFlightOpen)
-		{
-			IsFlightOpen = false;
-			return true;
-		}
-		return false;
+		if (ActiveTransientSurface == TransientSurface.None)
+			return false;
+		ActiveTransientSurface = TransientSurface.None;
+		return true;
 	}
 
 	private void Flight_SelectionChanged(object? sender, FlightChangedEventArgs e)
 	{
-		this.RaisePropertyChanged(nameof(ShowFlightPane));
-		if (Flight.Count == 0 && !IsContextPanePersistent)
-			IsFlightOpen = false;
+		this.RaisePropertyChanged(nameof(Layout));
+		if (Flight.Count == 0
+			&& Responsive.Current.ContextualPane != ContextualPaneState.Persistent
+			&& ActiveTransientSurface == TransientSurface.Flight)
+			ActiveTransientSurface = TransientSurface.None;
 	}
 
 	private void Configuration_PropertyChanged(object sender, Dinah.Core.PropertyChangedEventArgsEx e)
@@ -348,12 +351,17 @@ public sealed class AppShellViewModel : ViewModelBase, IDisposable
 		RefreshConfigurationProjection();
 	}
 
+	private void Main_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+	{
+		if (e.PropertyName is nameof(MainVM.ApplicationUpdateState) or nameof(MainVM.DownloadProgress))
+			this.RaisePropertyChanged(nameof(HasUpdateAvailable));
+	}
+
 	private void RefreshConfigurationProjection()
 	{
 		SetActiveDestinations(Navigation.CurrentRoute.Id);
 		UpdateLayout(lastEffectiveSize);
-		this.RaisePropertyChanged(nameof(ShowQueueDock));
-		this.RaisePropertyChanged(nameof(ShowDecanterDrawer));
+		this.RaisePropertyChanged(nameof(Layout));
 	}
 
 	private void LibraryCommands_LibrarySizeChanged(object? sender, List<DataLayer.LibraryBook> library)
@@ -373,6 +381,7 @@ public sealed class AppShellViewModel : ViewModelBase, IDisposable
 		Responsive.PropertyChanged -= Responsive_PropertyChanged;
 		experienceManager.ProfileChanged -= ExperienceManager_ProfileChanged;
 		configuration.PropertyChanged -= Configuration_PropertyChanged;
+		Main.PropertyChanged -= Main_PropertyChanged;
 		LibraryCommands.LibrarySizeChanged -= LibraryCommands_LibrarySizeChanged;
 		Flight.SelectionChanged -= Flight_SelectionChanged;
 		Library.Dispose();

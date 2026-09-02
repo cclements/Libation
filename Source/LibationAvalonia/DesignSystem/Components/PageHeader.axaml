@@ -16,33 +16,36 @@
 					   FontFamily="{DynamicResource Libation.Font.UI}"
 					   FontSize="{DynamicResource Libation.FontSize.Caption}"
 					   FontWeight="SemiBold" />
-			<StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="{DynamicResource Libation.Space.3}">
+			<WrapPanel Grid.Row="1" Orientation="Horizontal">
 				<TextBlock x:Name="TitleBlock" Text="{Binding Title, ElementName=Root}"
 						   Foreground="{DynamicResource Libation.Brush.TextPrimary}"
 						   FontFamily="{DynamicResource Libation.Font.Display}"
 						   FontSize="{DynamicResource Libation.FontSize.Page}"
 						   TextWrapping="Wrap" />
-				<ContentControl Content="{Binding StatusContent, ElementName=Root}" VerticalAlignment="Center" />
-			</StackPanel>
+				<ContentControl Content="{Binding StatusContent, ElementName=Root}"
+							Margin="12,0,0,0"
+							VerticalAlignment="Center" />
+			</WrapPanel>
 			<TextBlock Grid.Row="2"
 					   Text="{Binding SupportingText, ElementName=Root}"
 					   IsVisible="{Binding SupportingText, ElementName=Root, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
 					   Foreground="{DynamicResource Libation.Brush.TextSecondary}"
 					   FontSize="{DynamicResource Libation.FontSize.Body}"
 					   TextWrapping="Wrap" />
-			<StackPanel Grid.Row="3" Orientation="Horizontal" Spacing="{DynamicResource Libation.Density.ToolbarGap}">
+			<Grid Grid.Row="3" ColumnDefinitions="Auto,*" ColumnSpacing="{DynamicResource Libation.Density.ToolbarGap}">
 				<Button Classes="contemporary primary"
 						Content="{Binding PrimaryActionText, ElementName=Root}"
 						Command="{Binding PrimaryCommand, ElementName=Root}"
 						CommandParameter="{Binding PrimaryCommandParameter, ElementName=Root}"
 						IsVisible="{Binding PrimaryActionText, ElementName=Root, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
-				<ItemsControl ItemsSource="{Binding SecondaryActions, ElementName=Root}"
+				<ItemsControl Grid.Column="1"
+							  ItemsSource="{Binding SecondaryActions, ElementName=Root}"
 							  ItemTemplate="{Binding SecondaryActionTemplate, ElementName=Root}">
 					<ItemsControl.ItemsPanel>
 						<ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate>
 					</ItemsControl.ItemsPanel>
 				</ItemsControl>
-			</StackPanel>
+			</Grid>
 		</Grid>
 		<ContentControl Grid.Column="1"
 					Content="{Binding HeroArt, ElementName=Root}"

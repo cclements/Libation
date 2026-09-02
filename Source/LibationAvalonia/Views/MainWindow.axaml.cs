@@ -34,6 +34,15 @@ public partial class MainWindow : ReactiveWindow<MainVM>
 	private AppShellView? contemporaryShell;
 	private AppShellViewModel? contemporaryShellViewModel;
 	private OnboardingViewModel? onboardingViewModel;
+	private readonly List<KeyBinding> contemporaryKeyBindings = [];
+	private readonly List<KeyBinding> classicPlatformKeyBindings = [];
+	private NativeMenuItem? nativeAccountsMenuItem;
+	private NativeMenuItem? nativeSettingsMenuItem;
+	private KeyGesture? classicNativeAccountsGesture;
+	private ICommand? classicNativeAccountsCommand;
+	private ICommand? classicNativeSettingsCommand;
+	private ICommand? contemporaryNativeAccountsCommand;
+	private ICommand? contemporaryNativeSettingsCommand;
 	private List<LibraryBook>? loadedLibrary;
 	private bool isOpened;
 	private bool contemporaryShellFailureNoticePending;
@@ -65,20 +74,15 @@ public partial class MainWindow : ReactiveWindow<MainVM>
 
 		KeyBindings.Add(new KeyBinding { Command = ReactiveCommand.Create(selectAndFocusSearchBox), Gesture = new KeyGesture(Key.F, KeyGestureHelper.CommandModifier) });
 		KeyBindings.Add(new KeyBinding { Command = ReactiveCommand.Create(selectAndFocusSearchBox), Gesture = new KeyGesture(Key.K, KeyGestureHelper.CommandModifier) });
-		KeyBindings.Add(new KeyBinding { Command = ReactiveCommand.Create(closeContemporaryTransientSurface), Gesture = new KeyGesture(Key.Escape) });
-		KeyBindings.Add(new KeyBinding { Command = ReactiveCommand.Create(processContemporaryFlight), Gesture = new KeyGesture(Key.Enter, KeyGestureHelper.CommandModifier) });
-		KeyBindings.Add(new KeyBinding { Command = ReactiveCommand.Create(cycleContemporaryFocusRegion), Gesture = new KeyGesture(Key.F6) });
-		KeyBindings.Add(new KeyBinding { Command = ReactiveCommand.Create(() => NavigateContemporary(AppRouteId.Overview)), Gesture = new KeyGesture(Key.D1, KeyGestureHelper.CommandModifier | KeyModifiers.Shift) });
-		KeyBindings.Add(new KeyBinding { Command = ReactiveCommand.Create(() => NavigateContemporary(AppRouteId.Library)), Gesture = new KeyGesture(Key.D2, KeyGestureHelper.CommandModifier | KeyModifiers.Shift) });
-		KeyBindings.Add(new KeyBinding { Command = ReactiveCommand.Create(() => NavigateContemporary(AppRouteId.Downloads)), Gesture = new KeyGesture(Key.D3, KeyGestureHelper.CommandModifier | KeyModifiers.Shift) });
-		KeyBindings.Add(new KeyBinding { Command = ReactiveCommand.Create(() => NavigateContemporary(AppRouteId.Processing)), Gesture = new KeyGesture(Key.D4, KeyGestureHelper.CommandModifier | KeyModifiers.Shift) });
-		KeyBindings.Add(new KeyBinding { Command = ReactiveCommand.Create(() => NavigateContemporary(AppRouteId.History)), Gesture = new KeyGesture(Key.D5, KeyGestureHelper.CommandModifier | KeyModifiers.Shift) });
+		ConfigureContemporaryKeyBindings();
+		if (ViewModel is MainVM main)
+			ConfigureNativeShellMenuBindings(main);
 
 		if (!Configuration.IsMacOs && ViewModel is MainVM vm)
 		{
-			KeyBindings.Add(new KeyBinding { Command = ReactiveCommand.Create(vm.ShowSettingsAsync), Gesture = new KeyGesture(Key.P, KeyGestureHelper.CommandModifier) });
-			KeyBindings.Add(new KeyBinding { Command = ReactiveCommand.Create(vm.ShowAccountsAsync), Gesture = new KeyGesture(Key.A, KeyGestureHelper.CommandModifier | KeyModifiers.Shift) });
-			KeyBindings.Add(new KeyBinding { Command = ReactiveCommand.Create(vm.ExportLibraryAsync), Gesture = new KeyGesture(Key.S, KeyGestureHelper.CommandModifier) });
+			classicPlatformKeyBindings.Add(new KeyBinding { Command = ReactiveCommand.Create(vm.ShowSettingsAsync), Gesture = new KeyGesture(Key.P, KeyGestureHelper.CommandModifier) });
+			classicPlatformKeyBindings.Add(new KeyBinding { Command = ReactiveCommand.Create(vm.ShowAccountsAsync), Gesture = new KeyGesture(Key.A, KeyGestureHelper.CommandModifier | KeyModifiers.Shift) });
+			classicPlatformKeyBindings.Add(new KeyBinding { Command = ReactiveCommand.Create(vm.ExportLibraryAsync), Gesture = new KeyGesture(Key.S, KeyGestureHelper.CommandModifier) });
 		}
 
 		Configuration.Instance.PropertyChanged += Settings_PropertyChanged;
@@ -88,6 +92,94 @@ public partial class MainWindow : ReactiveWindow<MainVM>
 #if DEBUG
 		Configure_DebugMenu();
 #endif
+	}
+
+	private void ConfigureContemporaryKeyBindings()
+	{
+		void Add(Key key, KeyModifiers modifiers, Action action)
+			=> contemporaryKeyBindings.Add(new KeyBinding
+			{
+				Command = ReactiveCommand.Create(action),
+				Gesture = new KeyGesture(key, modifiers),
+			});
+
+		Add(Key.Escape, KeyModifiers.None, closeContemporaryTransientSurface);
+		Add(Key.Enter, KeyGestureHelper.CommandModifier, processContemporaryFlight);
+		Add(Key.F6, KeyModifiers.None, cycleContemporaryFocusRegion);
+		Add(Key.D1, KeyGestureHelper.CommandModifier | KeyModifiers.Alt, () => NavigateContemporary(AppRouteId.Overview));
+		Add(Key.D2, KeyGestureHelper.CommandModifier | KeyModifiers.Alt, () => NavigateContemporary(AppRouteId.Library));
+		Add(Key.D3, KeyGestureHelper.CommandModifier | KeyModifiers.Alt, () => NavigateContemporary(AppRouteId.Downloads));
+		Add(Key.D4, KeyGestureHelper.CommandModifier | KeyModifiers.Alt, () => NavigateContemporary(AppRouteId.Processing));
+		Add(Key.D5, KeyGestureHelper.CommandModifier | KeyModifiers.Alt, () => NavigateContemporary(AppRouteId.History));
+		Add(Key.D6, KeyGestureHelper.CommandModifier | KeyModifiers.Alt, () => NavigateContemporary(AppRouteId.Accounts));
+		Add(Key.D7, KeyGestureHelper.CommandModifier | KeyModifiers.Alt, () => NavigateContemporary(AppRouteId.Settings));
+		Add(Key.D8, KeyGestureHelper.CommandModifier | KeyModifiers.Alt, () => NavigateContemporary(AppRouteId.Tools));
+		Add(Key.OemComma, KeyGestureHelper.CommandModifier, () => NavigateContemporary(AppRouteId.Settings));
+		Add(Key.P, KeyModifiers.Control, () => NavigateContemporary(AppRouteId.Settings));
+		Add(Key.A, KeyGestureHelper.CommandModifier | KeyModifiers.Shift, () => NavigateContemporary(AppRouteId.Accounts));
+	}
+
+	private void ConfigureNativeShellMenuBindings(MainVM main)
+	{
+		if (!Configuration.IsMacOs)
+			return;
+
+		var settingsMenu = NativeMenu.GetMenu(this)?.Items
+			.OfType<NativeMenuItem>()
+			.FirstOrDefault(item => string.Equals(item.Header?.ToString(), "Settings", StringComparison.Ordinal))
+			?.Menu;
+		if (settingsMenu is null)
+			return;
+
+		nativeAccountsMenuItem = settingsMenu.Items
+			.OfType<NativeMenuItem>()
+			.FirstOrDefault(item => item.Header?.ToString()?.StartsWith("Accounts", StringComparison.Ordinal) == true);
+		nativeSettingsMenuItem = settingsMenu.Items
+			.OfType<NativeMenuItem>()
+			.FirstOrDefault(item => item.Header?.ToString()?.StartsWith("Settings", StringComparison.Ordinal) == true);
+		if (nativeAccountsMenuItem is not null)
+		{
+			classicNativeAccountsGesture = nativeAccountsMenuItem.Gesture;
+			classicNativeAccountsCommand = ReactiveCommand.CreateFromTask(main.ShowAccountsAsync);
+			contemporaryNativeAccountsCommand = ReactiveCommand.Create(() => NavigateContemporary(AppRouteId.Accounts));
+		}
+		if (nativeSettingsMenuItem is not null)
+		{
+			classicNativeSettingsCommand = ReactiveCommand.CreateFromTask(main.ShowSettingsAsync);
+			contemporaryNativeSettingsCommand = ReactiveCommand.Create(() => NavigateContemporary(AppRouteId.Settings));
+		}
+	}
+
+	private void SetContemporaryKeyBindingsActive(bool active)
+	{
+		foreach (var binding in contemporaryKeyBindings)
+		{
+			if (active && !KeyBindings.Contains(binding))
+				KeyBindings.Add(binding);
+			else if (!active)
+				KeyBindings.Remove(binding);
+		}
+		foreach (var binding in classicPlatformKeyBindings)
+		{
+			if (!active && !KeyBindings.Contains(binding))
+				KeyBindings.Add(binding);
+			else if (active)
+				KeyBindings.Remove(binding);
+		}
+
+		if (nativeAccountsMenuItem is not null)
+		{
+			nativeAccountsMenuItem.Command = active
+				? contemporaryNativeAccountsCommand
+				: classicNativeAccountsCommand;
+			nativeAccountsMenuItem.Gesture = active
+				? new KeyGesture(Key.A, KeyGestureHelper.CommandModifier | KeyModifiers.Shift)
+				: classicNativeAccountsGesture;
+		}
+		if (nativeSettingsMenuItem is not null)
+			nativeSettingsMenuItem.Command = active
+				? contemporaryNativeSettingsCommand
+				: classicNativeSettingsCommand;
 	}
 
 	private void NavigateContemporary(AppRouteId route)
@@ -196,6 +288,7 @@ public partial class MainWindow : ReactiveWindow<MainVM>
 					// Plan §8 defines this minimum for the contemporary desktop shell.
 					MinWidth = 720;
 					MinHeight = 560;
+					SetContemporaryKeyBindingsActive(true);
 				}
 				catch (Exception ex)
 				{
@@ -205,15 +298,18 @@ public partial class MainWindow : ReactiveWindow<MainVM>
 		}
 		else
 		{
+			SetContemporaryKeyBindingsActive(false);
 			Content = classicContent;
 			MinWidth = classicMinWidth;
 			MinHeight = classicMinHeight;
+			DiscardContemporaryShell();
 		}
 	}
 
 	private void HandleContemporaryShellFailure(Exception failure)
 	{
 		StartupLog.Error(failure, "The contemporary shell failed to initialize. Libation restored the current interface.");
+		SetContemporaryKeyBindingsActive(false);
 		DiscardContemporaryShell();
 		contemporaryShellFailureNoticePending = true;
 		if (Configuration.Instance.UseContemporaryShell)
@@ -305,6 +401,7 @@ public partial class MainWindow : ReactiveWindow<MainVM>
 
 			onboardingViewModel = candidate;
 			candidate.ExitRequested += Onboarding_ExitRequested;
+			SetContemporaryKeyBindingsActive(false);
 			Content = new OnboardingView { DataContext = candidate };
 			// Plan section 8 owns the contemporary desktop minimum.
 			MinWidth = 720;

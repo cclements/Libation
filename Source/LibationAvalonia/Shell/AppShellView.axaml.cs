@@ -15,6 +15,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Windows.Input;
 
 namespace LibationAvalonia.Shell;
 
@@ -27,10 +28,14 @@ public partial class AppShellView : UserControl
 	private Control? decanterReturnFocus;
 	private CellarOverviewView? cellarOverview;
 	private TastingRoomOverviewView? tastingRoomOverview;
+	private readonly FlightSurfaceHost flightSurfaceHost;
+	private readonly DecanterSurfaceHost decanterSurfaceHost;
 
 	public AppShellView()
 	{
 		InitializeComponent();
+		flightSurfaceHost = new(SharedFlightSurface);
+		decanterSurfaceHost = new(SharedDecanterSurface);
 #if DEBUG
 		ConfigureDebugMenu();
 #endif
@@ -73,6 +78,7 @@ public partial class AppShellView : UserControl
 			subscribedViewModel.PropertyChanged += ViewModel_PropertyChanged;
 		ViewModel?.UpdateLayout(Bounds.Size);
 		UpdateOverviewHost();
+		MoveContextualSurfaces();
 	}
 
 	private void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -82,43 +88,25 @@ public partial class AppShellView : UserControl
 
 		switch (e.PropertyName)
 		{
-			case nameof(AppShellViewModel.IsNavigationOverlayOpen):
-				if (viewModel.IsNavigationOverlayOpen)
-				{
-					PlaySurfaceEntrance(NavigationRail, "translateX(-20px)");
-					EnterTransientSurface(NavigationRail, ref navigationReturnFocus);
-				}
-				else
-					RestoreTransientFocus(ref navigationReturnFocus);
+			case nameof(AppShellViewModel.ActiveTransientSurface):
+				MoveContextualSurfaces();
+				UpdateTransientFocus(viewModel);
 				break;
-			case nameof(AppShellViewModel.ShowFlightOverlay):
-				if (viewModel.ShowFlightOverlay)
-				{
-					PlaySurfaceEntrance(FlightOverlay, "translateX(20px)");
-					EnterTransientSurface(FlightOverlay, ref flightReturnFocus);
-				}
-				else
-					RestoreTransientFocus(ref flightReturnFocus);
-				break;
-			case nameof(AppShellViewModel.ShowDecanterDrawer):
-				if (viewModel.ShowDecanterDrawer)
-				{
-					PlaySurfaceEntrance(DecanterDrawer, "translateX(20px)");
-					EnterTransientSurface(DecanterDrawer, ref decanterReturnFocus);
-				}
-				else
-					RestoreTransientFocus(ref decanterReturnFocus);
-				break;
-			case nameof(AppShellViewModel.ShowPersistentFlightPane):
-				if (viewModel.ShowPersistentFlightPane)
+			case nameof(AppShellViewModel.Layout):
+				ApplyOverviewLayout(viewModel.Layout.LayoutClass);
+				MoveContextualSurfaces();
+				if (viewModel.Layout.ShowPersistentFlight)
 					PlaySurfaceEntrance(PersistentFlightPane, "translateX(20px)");
 				break;
 			case nameof(AppShellViewModel.CurrentRoute):
 				PlayRouteEntrance();
+				UpdateOverviewHost();
+				MoveContextualSurfaces();
 				break;
 			case nameof(AppShellViewModel.IsCellarComposition):
 			case nameof(AppShellViewModel.IsTastingRoomComposition):
 				UpdateOverviewHost();
+				MoveContextualSurfaces();
 				break;
 		}
 	}
@@ -148,6 +136,68 @@ public partial class AppShellView : UserControl
 			};
 			OverviewHost.Content = tastingRoomOverview;
 		}
+		ApplyOverviewLayout(viewModel.Layout.LayoutClass);
+	}
+
+	private void ApplyOverviewLayout(DesktopLayoutClass layoutClass)
+	{
+		cellarOverview?.ApplyLayout(layoutClass);
+		tastingRoomOverview?.ApplyLayout(layoutClass);
+	}
+
+	private void MoveContextualSurfaces()
+	{
+		if (ViewModel is not { } viewModel)
+			return;
+
+		ContentControl flightTarget = viewModel.Layout.HostFlightInOverview && cellarOverview is not null
+			? cellarOverview.FlightHost
+			: viewModel.Layout.ShowPersistentFlight
+				? PersistentFlightHost
+				: viewModel.Layout.ShowFlightOverlay
+					? FlightOverlayHost
+					: FlightParkingHost;
+		flightSurfaceHost.AttachTo(flightTarget);
+		if (cellarOverview is not null)
+			cellarOverview.FlightHost.IsVisible = ReferenceEquals(flightTarget, cellarOverview.FlightHost);
+
+		ContentControl decanterTarget = viewModel.Layout.HostDecanterInOverview && tastingRoomOverview is not null
+			? tastingRoomOverview.DecanterHost
+			: viewModel.Layout.ShowQueueDock
+				? QueueDock
+				: viewModel.Layout.ShowDecanterDrawer
+					? DecanterDrawerHost
+					: DecanterParkingHost;
+		decanterSurfaceHost.AttachTo(decanterTarget);
+		if (tastingRoomOverview is not null)
+			tastingRoomOverview.DecanterHost.IsVisible = ReferenceEquals(decanterTarget, tastingRoomOverview.DecanterHost);
+	}
+
+	private void UpdateTransientFocus(AppShellViewModel viewModel)
+	{
+		if (viewModel.ActiveTransientSurface == TransientSurface.Navigation)
+		{
+			PlaySurfaceEntrance(NavigationRail, "translateX(-20px)");
+			EnterTransientSurface(NavigationRail, ref navigationReturnFocus);
+		}
+		else
+			RestoreTransientFocus(ref navigationReturnFocus);
+
+		if (viewModel.ActiveTransientSurface == TransientSurface.Flight && viewModel.Layout.ShowFlightOverlay)
+		{
+			PlaySurfaceEntrance(FlightOverlay, "translateX(20px)");
+			EnterTransientSurface(FlightOverlay, ref flightReturnFocus);
+		}
+		else
+			RestoreTransientFocus(ref flightReturnFocus);
+
+		if (viewModel.ActiveTransientSurface == TransientSurface.Decanter && viewModel.Layout.ShowDecanterDrawer)
+		{
+			PlaySurfaceEntrance(DecanterDrawer, "translateX(20px)");
+			EnterTransientSurface(DecanterDrawer, ref decanterReturnFocus);
+		}
+		else
+			RestoreTransientFocus(ref decanterReturnFocus);
 	}
 
 	private void PlayRouteEntrance()
@@ -192,18 +242,25 @@ public partial class AppShellView : UserControl
 
 	public bool CycleFocusRegion()
 	{
-		Control[] candidates =
+		if (ViewModel is not { } viewModel)
+			return false;
+
+		var layout = viewModel.Layout;
+		(Control Region, bool IsPresented)[] candidates =
 		[
-			NavigationRail,
-			HeaderRegion,
-			ContentRegion,
-			PersistentFlightPane,
-			FlightOverlay,
-			QueueDock,
-			ShellStatusBar,
-			DecanterDrawer,
+			(NavigationRail, !layout.ShowNavigationCommand || layout.IsNavigationPaneOpen),
+			(HeaderRegion, true),
+			(ContentRegion, true),
+			(PersistentFlightPane, layout.ShowPersistentFlight),
+			(FlightOverlay, layout.ShowFlightOverlay),
+			(QueueDock, layout.ShowQueueDock),
+			(ShellStatusBar, true),
+			(DecanterDrawer, layout.ShowDecanterDrawer),
 		];
-		var regions = candidates.Where(region => region.IsEffectivelyVisible).ToList();
+		var regions = candidates
+			.Where(candidate => candidate.IsPresented && candidate.Region.IsEffectivelyVisible)
+			.Select(candidate => candidate.Region)
+			.ToList();
 		if (regions.Count == 0)
 			return false;
 
@@ -234,6 +291,18 @@ public partial class AppShellView : UserControl
 	{
 		ViewModel?.Navigation.Navigate(AppRouteId.Library);
 		Dispatcher.UIThread.Post(LibraryDisplay.SelectAndFocusSearch, DispatcherPriority.Input);
+	}
+
+	private void SearchShortcut_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+		=> SelectAndFocusSearch();
+
+	private void ShellSplitView_PaneClosing(object? sender, Avalonia.Interactivity.CancelRoutedEventArgs e)
+	{
+		if (ViewModel?.ActiveTransientSurface != TransientSurface.Navigation)
+			return;
+		var command = (ICommand)ViewModel.CloseNavigationOverlayCommand;
+		if (command.CanExecute(null))
+			command.Execute(null);
 	}
 
 	public string SearchText

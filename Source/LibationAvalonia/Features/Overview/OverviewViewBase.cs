@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Input;
+using LibationAvalonia.Shell;
 
 namespace LibationAvalonia.Features.Overview;
 
@@ -13,23 +14,27 @@ public abstract class OverviewViewBase : UserControl
 
 	protected OverviewViewBase()
 	{
-		SizeChanged += (_, e) => UpdateLayoutClass(e.NewSize.Width);
-		AttachedToVisualTree += (_, _) => UpdateLayoutClass(Bounds.Width);
+		AttachedToVisualTree += (_, _) => ApplyLayout(DesktopLayoutClass.Wide, onlyWhenUnset: true);
 	}
 
-	private void UpdateLayoutClass(double width)
+	internal void ApplyLayout(DesktopLayoutClass layoutClass) => ApplyLayout(layoutClass, onlyWhenUnset: false);
+
+	private void ApplyLayout(DesktopLayoutClass layoutClass, bool onlyWhenUnset)
 	{
-		if (width <= 0)
+		if (onlyWhenUnset && currentClass is not null)
 			return;
-		string next = width >= 1360 ? ":wide"
-			: width >= 1080 ? ":standard"
-			: width >= 840 ? ":compact"
-			: ":narrow";
+		string next = layoutClass switch
+		{
+			DesktopLayoutClass.Wide => ":wide",
+			DesktopLayoutClass.Standard => ":standard",
+			DesktopLayoutClass.Compact => ":compact",
+			_ => ":narrow",
+		};
 		if (next == currentClass)
 			return;
 
-		foreach (var layoutClass in new[] { ":wide", ":standard", ":compact", ":narrow" })
-			PseudoClasses.Set(layoutClass, layoutClass == next);
+		foreach (var pseudoClass in new[] { ":wide", ":standard", ":compact", ":narrow" })
+			PseudoClasses.Set(pseudoClass, pseudoClass == next);
 		currentClass = next;
 	}
 

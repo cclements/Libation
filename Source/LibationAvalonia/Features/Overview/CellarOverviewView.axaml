@@ -44,24 +44,6 @@
 		<Style Selector="overview|CellarOverviewView:narrow UniformGrid#CellarMetrics">
 			<Setter Property="Columns" Value="1" />
 		</Style>
-		<Style Selector="overview|CellarOverviewView:standard flight|CurrentFlightView#WideFlight">
-			<Setter Property="IsVisible" Value="False" />
-		</Style>
-		<Style Selector="overview|CellarOverviewView:compact flight|CurrentFlightView#WideFlight">
-			<Setter Property="IsVisible" Value="False" />
-		</Style>
-		<Style Selector="overview|CellarOverviewView:narrow flight|CurrentFlightView#WideFlight">
-			<Setter Property="IsVisible" Value="False" />
-		</Style>
-		<Style Selector="overview|CellarOverviewView:standard Expander#CompactFlight">
-			<Setter Property="IsVisible" Value="True" />
-		</Style>
-		<Style Selector="overview|CellarOverviewView:compact Expander#CompactFlight">
-			<Setter Property="IsVisible" Value="True" />
-		</Style>
-		<Style Selector="overview|CellarOverviewView:narrow Expander#CompactFlight">
-			<Setter Property="IsVisible" Value="True" />
-		</Style>
 		<Style Selector="overview|CellarOverviewView:narrow ContentControl#CellarHeroArt">
 			<Setter Property="IsVisible" Value="False" />
 		</Style>
@@ -69,20 +51,6 @@
 
 	<ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
 		<StackPanel Margin="{DynamicResource Libation.Thickness.4}" Spacing="{DynamicResource Libation.Space.4}">
-			<components:PageHeader
-				Eyebrow="Library workspace"
-				Title="The Cellar"
-				SupportingText="Your curated audiobook collection, organized and ready for the next listen."
-				PrimaryActionText="Locate Audiobooks"
-				PrimaryCommand="{Binding LocateAudiobooksCommand}">
-				<components:PageHeader.StatusContent>
-					<components:StatusBadge
-						Status="{Binding AccountStatus}"
-						TextOverride="{Binding AccountHealthText}"
-						AccessibleName="{Binding AccountHealthText}" />
-				</components:PageHeader.StatusContent>
-			</components:PageHeader>
-
 			<Border Classes="card" IsVisible="{Binding IsLoading}"
 				AutomationProperties.LiveSetting="{x:Static designSystem:PlatformAutomationPolicy.Polite}">
 				<StackPanel Spacing="{DynamicResource Libation.Space.3}">
@@ -215,13 +183,6 @@
 								Height="448"
 								DataContext="{Binding Library, ElementName=Root}" />
 						</Border>
-						<Expander x:Name="CompactFlight" IsVisible="False" IsExpanded="{Binding IsFlightExpanded, Mode=TwoWay}">
-							<Expander.Header>
-								<Button Classes="contemporary quiet" Content="{Binding FlightCountText, StringFormat='Current Flight — {0}'}"
-									Command="{Binding ToggleFlightExpandedCommand}" />
-							</Expander.Header>
-							<flight:CurrentFlightView DataContext="{Binding CurrentFlight, Mode=OneTime}" />
-						</Expander>
 						<components:DropZone
 							Title="Locate audiobooks"
 							Hint="Choose audiobook files or folders already on this computer."
@@ -230,11 +191,10 @@
 							DropCommand="{Binding DropAudiobooksCommand}" />
 					</StackPanel>
 
-					<flight:CurrentFlightView
-						x:Name="WideFlight"
+					<ContentControl
+						x:Name="FlightSurfaceHost"
 						Grid.Column="1"
-						Width="360"
-						DataContext="{Binding CurrentFlight, Mode=OneTime}" />
+						Width="360" />
 				</Grid>
 
 			</StackPanel>
