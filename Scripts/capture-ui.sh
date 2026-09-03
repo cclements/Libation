@@ -63,7 +63,12 @@ with open(plan_path, encoding="utf-8") as source:
 with open(manifest_path, "w", encoding="utf-8") as target:
     for index, entry in enumerate(plan["entries"]):
         surface = entry.get("surface", "Route").lower()
-        subject = "componentgallery" if surface == "componentgallery" else entry["route"].lower()
+        if surface == "componentgallery":
+            subject = "componentgallery"
+        elif surface == "onboarding":
+            subject = f"onboarding-step{entry.get('onboardingStep', 1)}"
+        else:
+            subject = entry["route"].lower()
         name = entry.get("file") or (
             f"{entry['profile'].lower()}-{subject}-"
             f"{entry['width']}x{entry['height']}.png"

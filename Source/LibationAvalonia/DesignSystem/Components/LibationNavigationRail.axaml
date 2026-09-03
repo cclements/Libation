@@ -60,6 +60,8 @@
 			<Grid Grid.Row="1" RowDefinitions="*,Auto" RowSpacing="{DynamicResource Libation.Space.2}">
 			<ListBox x:Name="PrimaryRoutes"
 				 Classes="contemporary"
+				 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+				 ScrollViewer.VerticalScrollBarVisibility="Hidden"
 					 ItemContainerTheme="{StaticResource LibationNavigationItemTheme}"
 					 ItemsSource="{Binding ItemsSource, ElementName=Root}"
 					 ItemTemplate="{Binding ItemTemplate, ElementName=Root}"
@@ -68,6 +70,8 @@
 				 AutomationProperties.Name="{Binding AccessibleName, ElementName=Root}" />
 			<ListBox x:Name="UtilityRoutes" Grid.Row="1"
 				 Classes="contemporary"
+				 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+				 ScrollViewer.VerticalScrollBarVisibility="Hidden"
 				 ItemContainerTheme="{StaticResource LibationNavigationItemTheme}"
 				 ItemsSource="{Binding UtilityItemsSource, ElementName=Root}"
 				 ItemTemplate="{Binding ItemTemplate, ElementName=Root}"

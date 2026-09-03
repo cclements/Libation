@@ -29,20 +29,26 @@
 						   TextTrimming="CharacterEllipsis" />
 				<StackPanel Grid.Row="2" Spacing="{DynamicResource Libation.Space.1}">
 					<TextBlock Text="{Binding Metadata, ElementName=Root}" Foreground="{DynamicResource Libation.Brush.TextTertiary}"
-							   FontSize="{DynamicResource Libation.FontSize.Caption}" Opacity="{DynamicResource Libation.Density.MetadataOpacity}" />
+							   FontSize="{DynamicResource Libation.FontSize.Caption}" Opacity="{DynamicResource Libation.Density.MetadataOpacity}"
+							   TextTrimming="CharacterEllipsis" />
 					<ProgressBar Classes="contemporary" Minimum="0" Maximum="100" Value="{Binding Progress, ElementName=Root}"
-							 IsVisible="{Binding ShowProgress, ElementName=Root}" AutomationProperties.Name="Book progress" />
+								 IsVisible="{Binding ShowProgress, ElementName=Root}"
+								 AutomationProperties.Name="{Binding ProgressAccessibleName, ElementName=Root}" />
 				</StackPanel>
 			</Grid>
 			<components:StatusBadge Grid.Column="2" Status="{Binding Status, ElementName=Root}"
-								TextOverride="{Binding StatusText, ElementName=Root}" VerticalAlignment="Center" />
+								TextOverride="{Binding StatusText, ElementName=Root}"
+								AccessibleName="{Binding StatusAccessibleName, ElementName=Root}" VerticalAlignment="Center" />
 			<StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="{DynamicResource Libation.Space.2}" VerticalAlignment="Center">
-				<Button Classes="contemporary quiet compact" Content="Open" Command="{Binding Command, ElementName=Root}"
-						CommandParameter="{Binding CommandParameter, ElementName=Root}" />
-				<Button Classes="contemporary quiet compact" Content="More" Command="{Binding ContextCommand, ElementName=Root}"
+				<Button Classes="contemporary quiet compact" Content="{Binding CommandText, ElementName=Root}"
+						Command="{Binding Command, ElementName=Root}" CommandParameter="{Binding CommandParameter, ElementName=Root}"
+						IsVisible="{Binding Command, ElementName=Root, Converter={x:Static ObjectConverters.IsNotNull}}"
+						AutomationProperties.Name="{Binding CommandAccessibleName, ElementName=Root}" />
+				<Button Classes="contemporary quiet compact" Content="{Binding ContextCommandText, ElementName=Root}"
+						Command="{Binding ContextCommand, ElementName=Root}"
 						CommandParameter="{Binding ContextCommandParameter, ElementName=Root}"
 						IsVisible="{Binding ContextCommand, ElementName=Root, Converter={x:Static ObjectConverters.IsNotNull}}"
-						AutomationProperties.Name="More book actions" />
+						AutomationProperties.Name="{Binding ContextCommandAccessibleName, ElementName=Root}" />
 			</StackPanel>
 		</Grid>
 	</Border>

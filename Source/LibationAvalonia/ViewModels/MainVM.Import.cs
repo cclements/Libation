@@ -2,7 +2,9 @@ using ApplicationServices;
 using AudibleUtilities;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Platform.Storage;
 using Avalonia.Threading;
+using DataLayer;
 using LibationFileManager;
 using LibationUiBase;
 using LibationUiBase.Forms;
@@ -98,6 +100,47 @@ public partial class MainVM
 			await scanLibrariesAsync(firstAccount);
 	}
 
+	public async Task ScanAccountAsync(string accountId, string registeredMarketplace)
+	{
+		using var persister = AudibleApiStorage.GetAccountsSettingsPersister();
+		var account = FindAccount(persister.AccountsSettings, accountId, registeredMarketplace);
+		if (account is null)
+		{
+			await MessageBox.Show(MainWindow, "That Audible account is no longer available. Refresh Accounts and try again.", "Account not found");
+			return;
+		}
+		await scanLibrariesAsync(account);
+	}
+
+	public async Task ReauthenticateAccountAsync(string accountId, string registeredMarketplace)
+	{
+		try
+		{
+			using var persister = AudibleApiStorage.GetAccountsSettingsPersister();
+			var account = FindAccount(persister.AccountsSettings, accountId, registeredMarketplace);
+			if (account is null)
+			{
+				await MessageBox.Show(MainWindow, "That Audible account is no longer available. Refresh Accounts and try again.", "Account not found");
+				return;
+			}
+
+			await ApiExtended.ReauthenticateAsync(account);
+			await MessageBox.Show(MainWindow, "Audible authorization was refreshed for this account.", "Account reauthenticated");
+		}
+		catch (OperationCanceledException)
+		{
+			Serilog.Log.Information("Audible reauthentication was cancelled by the user");
+		}
+		catch (Exception ex)
+		{
+			await MessageBox.ShowAdminAlert(
+				MainWindow,
+				"Libation could not refresh this account's Audible authorization.",
+				"Reauthentication failed",
+				ex);
+		}
+	}
+
 	public async Task ScanAllAccountsAsync()
 	{
 		using var persister = AudibleApiStorage.GetAccountsSettingsPersister();
@@ -115,6 +158,44 @@ public partial class MainVM
 			return;
 
 		await scanLibrariesAsync(scanAccountsDialog.CheckedAccounts.ToArray());
+	}
+
+	/// <summary>
+	/// Associates one existing library title with a file selected by the user.
+	/// Both Classic and contemporary presentations delegate to this owner.
+	/// </summary>
+	public async Task<bool> LocateBookFileAsync(LibraryBook libraryBook)
+	{
+		ArgumentNullException.ThrowIfNull(libraryBook);
+		try
+		{
+			var options = new FilePickerOpenOptions
+			{
+				Title = $"Locate the audiobook file for {libraryBook.Book.Title}",
+				AllowMultiple = false,
+				FileTypeFilter = [new("All files (*.*)") { Patterns = ["*"] }],
+			};
+			var booksPath = Configuration.Instance.Books?.PathWithoutPrefix;
+			if (!string.IsNullOrWhiteSpace(booksPath))
+				options.SuggestedStartLocation = await MainWindow.StorageProvider.TryGetFolderFromPathAsync(booksPath);
+
+			var selectedFile = (await MainWindow.StorageProvider.OpenFilePickerAsync(options))
+				.SingleOrDefault()?.TryGetLocalPath();
+			if (selectedFile is null)
+				return false;
+
+			FilePathCache.Insert(libraryBook.Book.AudibleProductId, selectedFile);
+			return true;
+		}
+		catch (Exception ex)
+		{
+			await MessageBox.ShowAdminAlert(
+				MainWindow,
+				"Libation could not associate the selected file with this title.",
+				"Could not locate audiobook file",
+				ex);
+			return false;
+		}
 	}
 
 	public async Task RemoveBooksAsync()
@@ -277,6 +358,11 @@ public partial class MainVM
 			}
 		}
 	}
+
+	private static Account? FindAccount(AccountsSettings settings, string accountId, string registeredMarketplace)
+		=> settings.Accounts.FirstOrDefault(account =>
+			string.Equals(account.AccountId, accountId, StringComparison.OrdinalIgnoreCase)
+			&& string.Equals(account.Locale?.Name, registeredMarketplace, StringComparison.OrdinalIgnoreCase));
 
 	private void refreshImportMenu()
 	{

@@ -25,10 +25,21 @@ partial class MainVM
 
 	public Task ShowAboutAsync() => new LibationAvalonia.Dialogs.AboutDialog().ShowDialog(MainWindow);
 	public Task ShowAccountsAsync() => new LibationAvalonia.Dialogs.AccountsDialog().ShowDialog(MainWindow);
+	public Task EditAccountMarketplacesAsync(string accountId, string registeredMarketplace)
+		=> new LibationAvalonia.Dialogs.AccountsDialog(accountId, registeredMarketplace, openMarketplaces: true).ShowDialog(MainWindow);
+	public Task RemoveAccountAsync(string accountId, string registeredMarketplace, string consequenceText)
+		=> new LibationAvalonia.Dialogs.AccountsDialog(
+			accountId,
+			registeredMarketplace,
+			openMarketplaces: false,
+			requestRemoval: true,
+			removalConsequenceText: consequenceText).ShowDialog(MainWindow);
 	public Task ShowSettingsAsync() => new LibationAvalonia.Dialogs.SettingsDialog().ShowDialog(MainWindow);
+	public Task ShowSettingsAsync(LibationAvalonia.Dialogs.SettingsDialogSection section)
+		=> new LibationAvalonia.Dialogs.SettingsDialog(section).ShowDialog(MainWindow);
 	public async Task ShowTrashBinAsync()
 	{
-		await new LibationAvalonia.Dialogs.TrashBinDialog().ShowDialog(MainWindow);
+		await new LibationAvalonia.Dialogs.TrashBinDialog(this).ShowDialog(MainWindow);
 		//Restoring or permanently deleting inside the dialog changes the count behind it.
 		await RefreshBooksInTrashAsync();
 	}

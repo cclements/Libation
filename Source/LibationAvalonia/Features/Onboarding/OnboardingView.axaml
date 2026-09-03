@@ -3,6 +3,7 @@
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:onboarding="using:LibationAvalonia.Features.Onboarding"
 	xmlns:components="using:LibationAvalonia.DesignSystem.Components"
+	xmlns:designSystem="using:LibationAvalonia.DesignSystem"
 	xmlns:experience="using:LibationFileManager"
 	xmlns:properties="using:LibationAvalonia.Properties"
 	x:Class="LibationAvalonia.Features.Onboarding.OnboardingView"
@@ -109,13 +110,17 @@
 									FontSize="{DynamicResource Libation.FontSize.Section}" />
 								<TextBlock Text="{Binding ScanStateText}" TextWrapping="Wrap" />
 							</StackPanel>
-							<components:StatusBadge Grid.Column="1" Status="{x:Static components:LibationStatusKind.Processing}"
-								TextOverride="Scan is nonblocking" AccessibleName="Library scan is nonblocking" />
+							<components:StatusBadge Grid.Column="1" Status="{Binding ScanStatus}"
+								TextOverride="{Binding ScanStageText}" AccessibleName="{Binding ScanProgressAccessibleName}" />
 						</Grid>
+						<ProgressBar IsVisible="{Binding IsScanning}" IsIndeterminate="True"
+							AutomationProperties.Name="{Binding ScanProgressAccessibleName}"
+							AutomationProperties.LiveSetting="{x:Static designSystem:PlatformAutomationPolicy.Polite}" />
 						<TextBlock Text="{x:Static properties:Resources.OnboardingScanExplanation}"
 							TextWrapping="Wrap" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
 						<Button Classes="contemporary primary" Content="Scan all accounts" Command="{Binding ScanCommand}"
-							IsEnabled="{Binding HasAccounts}" HorizontalAlignment="Left" />
+							IsEnabled="{Binding CanStartScan}" HorizontalAlignment="Left"
+							AutomationProperties.HelpText="Starts the existing nonblocking account scan. You can continue setup while it runs." />
 					</StackPanel>
 				</Border>
 
@@ -131,13 +136,20 @@
 									TextWrapping="Wrap" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
 								<TextBlock Text="{x:Static properties:Resources.OnboardingStatusExplanation}"
 									TextWrapping="Wrap" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+								<TextBlock Text="{Binding FirstFlightStateText}"
+									TextWrapping="Wrap" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
 								<TextBlock Text="{Binding LocationStateText}" TextWrapping="Wrap"
 									Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
 							</StackPanel>
 						</Grid>
+					<Button Classes="contemporary primary" Content="{Binding FirstFlightActionText}"
+						Command="{Binding AddNewestToFlightCommand}" IsEnabled="{Binding CanShowFirstFlightAction}"
+							HorizontalAlignment="Left"
+							AutomationProperties.Name="Add the three newest eligible titles to Current Flight and open Library"
+							AutomationProperties.HelpText="{Binding FirstFlightActionHelpText}" />
 						<components:AttentionBanner Severity="{x:Static components:ComponentSeverity.Info}"
-							Title="{x:Static properties:Resources.OnboardingLibraryUnchangedTitle}"
-							Message="{x:Static properties:Resources.OnboardingLibraryUnchangedMessage}" />
+							Title="You remain in control"
+							Message="Choose the first-Flight action to add titles, or finish without adding titles. Neither choice starts a download or changes audiobook files." />
 					</StackPanel>
 				</Border>
 			</StackPanel>

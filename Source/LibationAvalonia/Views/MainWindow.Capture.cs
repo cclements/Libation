@@ -8,6 +8,8 @@ using DataLayer;
 using LibationAvalonia.Diagnostics;
 using LibationAvalonia.DesignSystem.Components;
 using LibationAvalonia.Features.Library;
+using LibationAvalonia.Features.Onboarding;
+using LibationAvalonia.Shell;
 using LibationFileManager;
 using LibationUiBase.ProcessQueue;
 using System;
@@ -73,12 +75,24 @@ public partial class MainWindow
 			await WaitForLibraryReadyAsync();
 			var routeContent = Content as Control
 				?? throw new InvalidOperationException("The contemporary shell was not available for capture.");
+			var main = ViewModel
+				?? throw new InvalidOperationException("The main view model was not available for capture.");
 			Content = null;
 			await Dispatcher.UIThread.InvokeAsync(() => { }, DispatcherPriority.Background);
 			var galleryContent = new ComponentGallery { IsVisible = false };
+			using var onboardingViewModel = new OnboardingViewModel(
+				new LibationCommandAdapter(main),
+				isManualReentry: true,
+				Configuration.Instance);
+			var onboardingContent = new OnboardingView
+			{
+				DataContext = onboardingViewModel,
+				IsVisible = false,
+			};
 			var captureHost = new Grid();
 			captureHost.Children.Add(routeContent);
 			captureHost.Children.Add(galleryContent);
+			captureHost.Children.Add(onboardingContent);
 			Content = captureHost;
 			await Dispatcher.UIThread.InvokeAsync(() => { }, DispatcherPriority.Background);
 
@@ -87,6 +101,10 @@ public partial class MainWindow
 				try
 				{
 					var entry = plan.Entries[index];
+					SizeCaptureSurface(captureHost, entry);
+					SizeCaptureSurface(routeContent, entry);
+					SizeCaptureSurface(galleryContent, entry);
+					SizeCaptureSurface(onboardingContent, entry);
 					var baseline = Configuration.Instance.GetContemporaryExperienceSettings();
 					Configuration.Instance.SaveContemporaryExperienceSettings(baseline with
 					{
@@ -101,6 +119,7 @@ public partial class MainWindow
 					if (entry.Surface == CaptureSurface.ComponentGallery)
 					{
 						routeContent.IsVisible = false;
+						onboardingContent.IsVisible = false;
 						galleryContent.PreviewStyle = entry.Profile;
 						galleryContent.PreviewDensity = entry.Density;
 						galleryContent.PreviewDecoration = entry.Decoration;
@@ -110,9 +129,19 @@ public partial class MainWindow
 						ResizeForCapture(entry);
 						await Dispatcher.UIThread.InvokeAsync(() => { }, DispatcherPriority.Background);
 					}
+					else if (entry.Surface == CaptureSurface.Onboarding)
+					{
+						routeContent.IsVisible = false;
+						galleryContent.IsVisible = false;
+						onboardingViewModel.PrepareCaptureState(entry.OnboardingStep, entry.OnboardingScanActive);
+						onboardingContent.IsVisible = true;
+						ResizeForCapture(entry);
+						await Dispatcher.UIThread.InvokeAsync(() => { }, DispatcherPriority.Background);
+					}
 					else
 					{
 						galleryContent.IsVisible = false;
+						onboardingContent.IsVisible = false;
 						routeContent.IsVisible = true;
 						ResizeForCapture(entry);
 						NavigateContemporary(entry.Route);
@@ -387,6 +416,18 @@ public partial class MainWindow
 		ClientSize = new Size(entry.Width, entry.Height);
 	}
 
+	private static void SizeCaptureSurface(Control surface, CaptureEntry entry)
+	{
+		// The route, gallery, and onboarding controls share a temporary Grid during
+		// capture.  An inactive surface can otherwise contribute an oversized desired
+		// size when the shell is re-parented, causing the active surface to be centered
+		// and clipped instead of occupying the requested client area.
+		surface.Width = entry.Width;
+		surface.Height = entry.Height;
+		surface.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left;
+		surface.VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top;
+	}
+
 	private void PrepareInitialCaptureSize(CaptureEntry entry)
 	{
 		// ClientSize requires the native platform window, so the pre-show path sets
@@ -438,6 +479,8 @@ public partial class MainWindow
 			await WaitForPropertyAsync(shell.Downloads, () => !shell.Downloads.IsLoading);
 		else if (route == Shell.AppRouteId.History)
 			await WaitForPropertyAsync(shell.History, () => !shell.History.IsLoading);
+		else if (route == Shell.AppRouteId.Trash)
+			await WaitForPropertyAsync(shell.Trash, () => !shell.Trash.IsLoading);
 
 		await Dispatcher.UIThread.InvokeAsync(() => { }, DispatcherPriority.Background);
 	}

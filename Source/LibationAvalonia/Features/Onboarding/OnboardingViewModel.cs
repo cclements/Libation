@@ -1,4 +1,6 @@
+using Avalonia.Threading;
 using LibationAvalonia.Features.Tools;
+using LibationAvalonia.DesignSystem.Components;
 using LibationAvalonia.Shell;
 using LibationAvalonia.ViewModels;
 using LibationFileManager;
@@ -18,7 +20,12 @@ public enum OnboardingProfileChoice
 	CurrentInterface,
 }
 
-public sealed record OnboardingExitEventArgs(bool Completed, bool Skipped, OnboardingProfileChoice SelectedProfile);
+public sealed record OnboardingCompletionRequest(int NewestEligibleTitleCount, AppRouteId Destination);
+public sealed record OnboardingExitEventArgs(
+	bool Completed,
+	bool Skipped,
+	OnboardingProfileChoice SelectedProfile,
+	OnboardingCompletionRequest? CompletionRequest = null);
 
 /// <summary>
 /// Five-step, local-draft onboarding coordinator. Construction and preview never
@@ -28,10 +35,15 @@ public sealed record OnboardingExitEventArgs(bool Completed, bool Skipped, Onboa
 public sealed class OnboardingViewModel : SecondaryDestinationViewModel
 {
 	private const int LastStepIndex = 4;
+	private const int FirstFlightTitleCount = 3;
 	private readonly MainVM main;
 	private readonly Configuration configuration;
 	private OnboardingProfileChoice selectedProfile;
 	private bool hasExplicitProfileChoice;
+	private bool captureScanActive;
+	private bool isCaptureProjection;
+	private bool exitRequested;
+	private bool disposed;
 
 	public OnboardingViewModel(
 		ILibationCommandAdapter commands,
@@ -58,6 +70,7 @@ public sealed class OnboardingViewModel : SecondaryDestinationViewModel
 		OpenSettingsCommand = CreateOwnerCommand(commands.ShowSettingsAsync, "choose folders during onboarding", "Libation could not open Settings. You can continue and choose folders later.");
 		LocateFilesCommand = CreateOwnerCommand(commands.LocateAudiobooksAsync, "locate existing files during onboarding", "Libation could not open the file locator. You can continue and locate files later.");
 		ScanCommand = CreateOwnerCommand(commands.ScanLibraryAsync, "scan accounts during onboarding", "Libation could not start the library scan. Review account authorization and try again later.");
+		AddNewestToFlightCommand = Track(ReactiveCommand.Create(FinishWithFirstFlight));
 
 		main.PropertyChanged += Main_PropertyChanged;
 		this.configuration.PropertyChanged += Configuration_PropertyChanged;
@@ -86,7 +99,7 @@ public sealed class OnboardingViewModel : SecondaryDestinationViewModel
 	public bool IsScanStep => StepIndex == 3;
 	public bool IsFirstFlightStep => StepIndex == 4;
 	public bool CanGoBack => StepIndex > 0;
-	public string NextText => IsFirstFlightStep ? "Finish and enter Libation" : "Continue";
+	public string NextText => IsFirstFlightStep ? "Finish without adding titles" : "Continue";
 	public string SkipText => IsManualReentry ? "Close without changes" : "Skip for now";
 	public string StepTitle => StepIndex switch
 	{
@@ -128,9 +141,39 @@ public sealed class OnboardingViewModel : SecondaryDestinationViewModel
 			: "Follow System is the starting preview. Choose it or another profile explicitly before continuing; Skip leaves the current interface unchanged.";
 
 	public bool HasAccounts => main.AnyAccounts;
-	public bool IsScanning => main.ActivelyScanning;
+	public bool IsScanning => captureScanActive || main.ActivelyScanning;
+	public bool CanStartScan => HasAccounts && !IsScanning && !isCaptureProjection;
 	public string AccountStateText => HasAccounts ? main.AccountsCount == 1 ? "1 account connected" : $"{main.AccountsCount} accounts connected" : "No Audible account connected";
-	public string ScanStateText => IsScanning ? main.ScanningText : HasAccounts ? "Ready to scan when you choose" : "Connect an account before scanning";
+	public string ScanStateText => captureScanActive
+		? "Reading account catalogues and updating the local Library…"
+		: IsScanning
+			? main.ScanningText
+			: main.LastSuccessfulScan is DateTimeOffset completed
+				? $"Last scan completed {completed.ToString("g")}."
+				: HasAccounts ? "Ready to scan when you choose" : "Connect an account before scanning";
+	public string ScanStageText => IsScanning
+		? "Scan in progress"
+		: main.LastSuccessfulScan is not null ? "Last scan completed" : HasAccounts ? "Ready" : "Account required";
+	public LibationStatusKind ScanStatus => IsScanning
+		? LibationStatusKind.Processing
+		: main.LastSuccessfulScan is not null ? LibationStatusKind.Completed : HasAccounts ? LibationStatusKind.DownloadPending : LibationStatusKind.Unavailable;
+	public string ScanProgressAccessibleName => IsScanning ? $"Library scan in progress. {ScanStateText}" : ScanStateText;
+	public string FirstFlightStateText => SelectedProfile == OnboardingProfileChoice.CurrentInterface
+		? "The current Libation interface does not host the contemporary Current Flight. Finish without adding titles to return to that interface."
+		: IsScanning
+			? "Wait for the current library scan to finish so Libation can choose from the completed catalogue. You can still finish without adding titles."
+		: "Libation will request up to the three newest eligible titles after setup, add them through the shell-owned Current Flight, and open Library. No processing starts automatically.";
+	public string FirstFlightActionText => "Add the three newest titles to your Flight";
+	public string FirstFlightActionHelpText => SelectedProfile == OnboardingProfileChoice.CurrentInterface
+		? "Unavailable for the current Libation interface because Current Flight belongs to the contemporary shell."
+		: IsScanning
+			? "Unavailable until the current library scan finishes."
+		: "Adds up to three available non-series-parent titles. It does not start processing.";
+	public bool CanRequestFirstFlight => !isCaptureProjection
+		&& !IsScanning
+		&& SelectedProfile != OnboardingProfileChoice.CurrentInterface;
+	public bool CanShowFirstFlightAction => !IsScanning
+		&& SelectedProfile != OnboardingProfileChoice.CurrentInterface;
 	public string LocationStateText
 	{
 		get
@@ -155,6 +198,23 @@ public sealed class OnboardingViewModel : SecondaryDestinationViewModel
 	public ICommand OpenSettingsCommand { get; }
 	public ICommand LocateFilesCommand { get; }
 	public ICommand ScanCommand { get; }
+	public ICommand AddNewestToFlightCommand { get; }
+
+	/// <summary>
+	/// Capture-only projection. It changes no configuration, starts no scan, and
+	/// emits no completion or Flight request.
+	/// </summary>
+	internal void PrepareCaptureState(int stepNumber, bool scanActive)
+	{
+		if (stepNumber is < 1 or > LastStepIndex + 1)
+			throw new ArgumentOutOfRangeException(nameof(stepNumber), stepNumber, "Onboarding capture step must be from 1 through 5.");
+		isCaptureProjection = true;
+		captureScanActive = scanActive;
+		StepIndex = stepNumber - 1;
+		RaiseScanState();
+		this.RaisePropertyChanged(nameof(CanRequestFirstFlight));
+		this.RaisePropertyChanged(nameof(CanShowFirstFlightAction));
+	}
 
 	private void Back()
 	{
@@ -164,6 +224,8 @@ public sealed class OnboardingViewModel : SecondaryDestinationViewModel
 
 	private void Next()
 	{
+		if (isCaptureProjection || exitRequested)
+			return;
 		if (StepIndex == 0 && !HasExplicitProfileChoice)
 		{
 			NeedsExplicitProfileChoice = true;
@@ -175,12 +237,31 @@ public sealed class OnboardingViewModel : SecondaryDestinationViewModel
 			return;
 		}
 		CommitSelection();
+		exitRequested = true;
 		ExitRequested?.Invoke(this, new(true, false, SelectedProfile));
+	}
+
+	private void FinishWithFirstFlight()
+	{
+		if (exitRequested || !IsFirstFlightStep || !CanRequestFirstFlight)
+			return;
+		CommitSelection();
+		exitRequested = true;
+		ExitRequested?.Invoke(
+			this,
+			new(
+				true,
+				false,
+				SelectedProfile,
+				new(FirstFlightTitleCount, AppRouteId.Library)));
 	}
 
 	private void Skip()
 	{
+		if (isCaptureProjection || exitRequested)
+			return;
 		configuration.FirstLaunch = false;
+		exitRequested = true;
 		ExitRequested?.Invoke(this, new(false, true, SelectedProfile));
 	}
 
@@ -223,6 +304,8 @@ public sealed class OnboardingViewModel : SecondaryDestinationViewModel
 
 	private void SelectProfile(OnboardingProfileChoice profile)
 	{
+		if (isCaptureProjection)
+			return;
 		SelectedProfile = profile;
 		HasExplicitProfileChoice = true;
 		NeedsExplicitProfileChoice = false;
@@ -234,7 +317,8 @@ public sealed class OnboardingViewModel : SecondaryDestinationViewModel
 		{
 			nameof(IsFollowSystemSelected), nameof(IsCellarSelected), nameof(IsTastingRoomSelected),
 			nameof(IsHighContrastSelected), nameof(IsCurrentInterfaceSelected),
-			nameof(SelectedProfileText), nameof(ProfileChoiceHelpText),
+			nameof(SelectedProfileText), nameof(ProfileChoiceHelpText), nameof(FirstFlightStateText),
+			nameof(FirstFlightActionHelpText), nameof(CanRequestFirstFlight), nameof(CanShowFirstFlightAction),
 		})
 			this.RaisePropertyChanged(property);
 	}
@@ -252,16 +336,37 @@ public sealed class OnboardingViewModel : SecondaryDestinationViewModel
 
 	private void Main_PropertyChanged(object? sender, PropertyChangedEventArgs e)
 	{
+		if (disposed)
+			return;
 		if (!string.IsNullOrEmpty(e.PropertyName)
 			&& e.PropertyName is not nameof(MainVM.AccountsCount)
 				and not nameof(MainVM.AnyAccounts)
 				and not nameof(MainVM.ActivelyScanning)
-				and not nameof(MainVM.ScanningText))
+				and not nameof(MainVM.ScanningText)
+				and not nameof(MainVM.LastSuccessfulScan))
 			return;
+		if (!Dispatcher.UIThread.CheckAccess())
+		{
+			Dispatcher.UIThread.Post(() => Main_PropertyChanged(sender, e));
+			return;
+		}
 		this.RaisePropertyChanged(nameof(HasAccounts));
-		this.RaisePropertyChanged(nameof(IsScanning));
 		this.RaisePropertyChanged(nameof(AccountStateText));
+		RaiseScanState();
+	}
+
+	private void RaiseScanState()
+	{
+		this.RaisePropertyChanged(nameof(IsScanning));
+		this.RaisePropertyChanged(nameof(CanStartScan));
 		this.RaisePropertyChanged(nameof(ScanStateText));
+		this.RaisePropertyChanged(nameof(ScanStageText));
+		this.RaisePropertyChanged(nameof(ScanStatus));
+		this.RaisePropertyChanged(nameof(ScanProgressAccessibleName));
+		this.RaisePropertyChanged(nameof(FirstFlightStateText));
+		this.RaisePropertyChanged(nameof(FirstFlightActionHelpText));
+		this.RaisePropertyChanged(nameof(CanRequestFirstFlight));
+		this.RaisePropertyChanged(nameof(CanShowFirstFlightAction));
 	}
 
 	private void Configuration_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -272,6 +377,7 @@ public sealed class OnboardingViewModel : SecondaryDestinationViewModel
 
 	protected override void DisposeCore()
 	{
+		disposed = true;
 		main.PropertyChanged -= Main_PropertyChanged;
 		configuration.PropertyChanged -= Configuration_PropertyChanged;
 	}

@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
+using Avalonia.Threading;
 using System.Collections;
 using System.Linq;
 
@@ -30,6 +31,12 @@ public partial class LibationNavigationRail : UserControl
 	{
 		InitializeComponent();
 		UpdateCompactState();
+	}
+
+	protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
+	{
+		base.OnAttachedToVisualTree(e);
+		UpdateSelection();
 	}
 
 	public IEnumerable? ItemsSource { get => GetValue(ItemsSourceProperty); set => SetValue(ItemsSourceProperty, value); }
@@ -77,6 +84,15 @@ public partial class LibationNavigationRail : UserControl
 		{
 			synchronizingSelection = false;
 		}
+		Dispatcher.UIThread.Post(ScrollSelectedIntoView, DispatcherPriority.Background);
+	}
+
+	private void ScrollSelectedIntoView()
+	{
+		if (PrimaryRoutes?.SelectedItem is { } primary)
+			PrimaryRoutes.ScrollIntoView(primary);
+		else if (UtilityRoutes?.SelectedItem is { } utility)
+			UtilityRoutes.ScrollIntoView(utility);
 	}
 
 	private static bool Contains(IEnumerable? source, object? item)

@@ -77,7 +77,13 @@ partial class MainVM
 		=> await setLiberatedVisibleMenuItemAsync();
 
 
-	public async void LiberateVisible()
+	public async void LiberateVisible() => await ProcessVisibleAsync();
+
+	/// <summary>
+	/// Awaitable owner operation for contemporary surfaces. The legacy menu keeps
+	/// its <see cref="LiberateVisible"/> event-handler wrapper.
+	/// </summary>
+	public async Task ProcessVisibleAsync()
 	{
 		try
 		{
@@ -87,6 +93,39 @@ partial class MainVM
 		catch (Exception ex)
 		{
 			Serilog.Log.Logger.Error(ex, "An error occurred while backing up visible library books");
+		}
+	}
+
+	/// <summary>Contemporary Tools entry point with an explicit, cancel-default scope confirmation.</summary>
+	public async Task ProcessVisibleConfirmedAsync()
+	{
+		var eligible = ProductsDisplay.GetVisibleBookEntries().UnLiberated().ToArray();
+		if (eligible.Length == 0)
+			return;
+
+		var result = await MessageBox.Show(
+			MainWindow,
+			$"Queue {eligible.Length} visible title(s) that still need processing? This can download Audible files, decrypt audiobooks, and write output into the configured Books location.",
+			"Process visible titles?",
+			MessageBoxButtons.YesNo,
+			MessageBoxIcon.Question,
+			MessageBoxDefaultButton.Button2);
+		if (result != DialogResult.Yes)
+			return;
+
+		try
+		{
+			if (await ProcessQueue.QueueDownloadDecryptAsync(eligible))
+				setQueueCollapseState(false);
+		}
+		catch (Exception ex)
+		{
+			Serilog.Log.Logger.Error(ex, "An error occurred while backing up visible library books");
+			await MessageBox.ShowAdminAlert(
+				MainWindow,
+				"Libation could not queue the visible titles for processing.",
+				"Could not process visible titles",
+				ex);
 		}
 	}
 

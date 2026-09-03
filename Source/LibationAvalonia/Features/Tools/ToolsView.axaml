@@ -6,6 +6,19 @@
 	xmlns:properties="using:LibationAvalonia.Properties"
 	x:Class="LibationAvalonia.Features.Tools.ToolsView"
 	x:DataType="tools:ToolsViewModel">
+	<UserControl.Styles>
+		<Style Selector="Border.tool-risk">
+			<Setter Property="Background" Value="{DynamicResource Libation.Brush.SurfaceInteractive}" />
+			<Setter Property="BorderBrush" Value="{DynamicResource Libation.Brush.BorderStrong}" />
+			<Setter Property="BorderThickness" Value="1" />
+			<Setter Property="CornerRadius" Value="{DynamicResource Libation.Radius.Large}" />
+			<Setter Property="Padding" Value="8,4" />
+		</Style>
+		<Style Selector="Border.tool-risk.readonly"><Setter Property="BorderBrush" Value="{DynamicResource Libation.Brush.Success}" /></Style>
+		<Style Selector="Border.tool-risk.review"><Setter Property="BorderBrush" Value="{DynamicResource Libation.Brush.Warning}" /></Style>
+		<Style Selector="Border.tool-risk.datachange"><Setter Property="BorderBrush" Value="{DynamicResource Libation.Brush.Info}" /></Style>
+		<Style Selector="Border.tool-risk.destructive"><Setter Property="BorderBrush" Value="{DynamicResource Libation.Brush.Danger}" /></Style>
+	</UserControl.Styles>
 	<UserControl.Resources>
 		<DataTemplate x:Key="ToolAction" x:DataType="tools:ToolActionItem">
 			<Border Classes="card" Margin="0,0,0,8">
@@ -17,9 +30,13 @@
 							IsVisible="{Binding StateText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
 					</StackPanel>
 					<StackPanel Grid.Column="1" Spacing="{DynamicResource Libation.Space.2}" HorizontalAlignment="Right">
-						<components:StatusBadge Status="{Binding RiskStatus}" TextOverride="{Binding RiskText}" AccessibleName="{Binding RiskText}" />
-						<Button Classes="contemporary" Content="Run" Command="{Binding Command}" HorizontalAlignment="Right"
-							AutomationProperties.Name="{Binding Name}" />
+						<Border Classes="tool-risk" Classes.readonly="{Binding IsReadOnlyRisk}" Classes.review="{Binding IsReviewRisk}"
+							Classes.datachange="{Binding IsDataChangeRisk}" Classes.destructive="{Binding IsDestructiveRisk}"
+							Classes.external="{Binding IsExternalRisk}" AutomationProperties.Name="{Binding RiskText}">
+							<TextBlock Text="{Binding RiskText}" FontSize="{DynamicResource Libation.FontSize.Caption}" FontWeight="SemiBold" />
+						</Border>
+						<Button Classes="contemporary" Content="{Binding ActionText}" Command="{Binding Command}" HorizontalAlignment="Right"
+							AutomationProperties.Name="{Binding Name}" AutomationProperties.HelpText="{Binding Consequence}" />
 					</StackPanel>
 				</Grid>
 			</Border>
@@ -42,6 +59,25 @@
 				ActionText="Copy technical details" ActionCommand="{Binding CopyTechnicalDetailsCommand}" />
 			<components:AttentionBanner Severity="{x:Static components:ComponentSeverity.Warning}" Title="The current Library filter defines visible-title scope"
 				Message="Commands that say visible titles operate on the shared Library filter, including titles outside the current viewport. Review that filter before running a scoped or destructive action." />
+			<Border Classes="card raised">
+				<Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource Libation.Space.4}">
+					<StackPanel Spacing="{DynamicResource Libation.Space.1}">
+						<TextBlock Text="Apply the first saved quick filter at startup" FontWeight="SemiBold"
+							Foreground="{DynamicResource Libation.Brush.TextPrimary}" />
+						<TextBlock Text="Controls only the filter Libation applies when it opens; it does not change or delete any saved filter."
+							TextWrapping="Wrap" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+						<TextBlock Text="{Binding StartupFilterStateText}" TextWrapping="Wrap"
+							Foreground="{DynamicResource Libation.Brush.TextTertiary}" />
+					</StackPanel>
+					<StackPanel Grid.Column="1" Spacing="{DynamicResource Libation.Space.2}" HorizontalAlignment="Right">
+						<components:StatusBadge Status="{Binding StartupFilterStatus}" TextOverride="{Binding StartupFilterBadgeText}"
+							AccessibleName="{Binding StartupFilterStateText}" />
+						<ToggleSwitch IsChecked="{Binding FirstFilterIsDefault, Mode=TwoWay}" HorizontalAlignment="Right"
+							AutomationProperties.Name="Apply the first saved quick filter at startup"
+							AutomationProperties.HelpText="Changes only the startup quick-filter preference." />
+					</StackPanel>
+				</Grid>
+			</Border>
 			<ItemsControl ItemsSource="{Binding Groups}" ItemTemplate="{StaticResource ToolGroup}" />
 		</StackPanel>
 	</ScrollViewer>

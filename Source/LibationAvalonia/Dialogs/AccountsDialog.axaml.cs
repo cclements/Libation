@@ -17,6 +17,12 @@ namespace LibationAvalonia.Dialogs;
 
 public partial class AccountsDialog : DialogWindow
 {
+	private readonly string? targetAccountId;
+	private readonly string? targetMarketplace;
+	private readonly bool openMarketplaces;
+	private readonly bool requestRemoval;
+	private readonly string? removalConsequenceText;
+	private bool targetIntentHandled;
 	public AvaloniaList<AccountDto> Accounts { get; } = new();
 	private bool _isDirty;
 	private bool _closeConfirmed;
@@ -137,8 +143,20 @@ public partial class AccountsDialog : DialogWindow
 		=> Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Audible");
 
 	private static IReadOnlyList<Locale> Locales => Localization.Locales.OrderBy(l => l.Name).ToList();
-	public AccountsDialog()
+	public AccountsDialog() : this(null, null, false) { }
+
+	public AccountsDialog(
+		string? targetAccountId,
+		string? targetMarketplace,
+		bool openMarketplaces,
+		bool requestRemoval = false,
+		string? removalConsequenceText = null)
 	{
+		this.targetAccountId = targetAccountId;
+		this.targetMarketplace = targetMarketplace;
+		this.openMarketplaces = openMarketplaces;
+		this.requestRemoval = requestRemoval;
+		this.removalConsequenceText = removalConsequenceText;
 		InitializeComponent();
 
 		// WARNING: accounts persister will write ANY EDIT to object immediately to file
@@ -151,6 +169,48 @@ public partial class AccountsDialog : DialogWindow
 
 		DataContext = this;
 		addBlankAccount();
+		Opened += AccountsDialog_Opened;
+	}
+
+	private async void AccountsDialog_Opened(object? sender, EventArgs e)
+	{
+		if (targetIntentHandled || string.IsNullOrWhiteSpace(targetAccountId))
+			return;
+		targetIntentHandled = true;
+		var target = Accounts.FirstOrDefault(account =>
+			string.Equals(account.AccountId, targetAccountId, StringComparison.OrdinalIgnoreCase)
+			&& string.Equals(account.SelectedLocale?.Name, targetMarketplace, StringComparison.OrdinalIgnoreCase));
+		if (target is null)
+		{
+			await MessageBox.Show(this, "That Audible account is no longer available. Refresh Accounts and try again.", "Account not found");
+			_closeConfirmed = true;
+			Close(DialogResult.Cancel);
+			return;
+		}
+		accountsGrid.SelectedItem = target;
+		accountsGrid.ScrollIntoView(target, null);
+		if (requestRemoval)
+		{
+			var result = await MessageBox.Show(
+				this,
+				removalConsequenceText ?? "Removing this account deletes its saved sign-in and marketplace settings from Libation.",
+				"Remove Audible account?",
+				MessageBoxButtons.YesNo,
+				MessageBoxIcon.Warning,
+				MessageBoxDefaultButton.Button2);
+			if (result != DialogResult.Yes)
+			{
+				_closeConfirmed = true;
+				Close(DialogResult.Cancel);
+				return;
+			}
+
+			Accounts.Remove(target);
+			await SaveAndCloseAsync();
+			return;
+		}
+		if (openMarketplaces)
+			await EditMarketplacesAsync(target);
 	}
 
 	private void Accounts_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -260,6 +320,11 @@ public partial class AccountsDialog : DialogWindow
 	{
 		if (e.Source is not Button btn || btn.DataContext is not AccountDto acc)
 			return;
+		await EditMarketplacesAsync(acc);
+	}
+
+	private async Task EditMarketplacesAsync(AccountDto acc)
+	{
 
 		// the probe speaks to Audible with this account's stored credentials, so it needs the saved account,
 		// not the grid's copy of it

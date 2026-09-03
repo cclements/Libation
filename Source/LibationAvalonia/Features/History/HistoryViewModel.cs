@@ -11,6 +11,7 @@ using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
@@ -22,11 +23,14 @@ namespace LibationAvalonia.Features.History;
 
 /// <summary>
 /// An honest projection of timestamps Libation already owns. This is not an audit
-	/// log: library-added and last-downloaded dates can be shown, while queue log rows
+/// log: library-added and last-downloaded dates can be shown, while queue log rows
 /// cover only the current retained processing session.
 /// </summary>
 public sealed class HistoryViewModel : SecondaryDestinationViewModel, IRoutePresentation
 {
+	public const string AllActions = "All actions";
+	public const string AllResults = "All results";
+
 	private readonly MainVM main;
 	private readonly CancellationTokenSource lifetime = new();
 	private IReadOnlyList<HistoryItem> allItems = [];
@@ -34,6 +38,7 @@ public sealed class HistoryViewModel : SecondaryDestinationViewModel, IRoutePres
 	private bool refreshAgain;
 	private bool isActive;
 	private bool refreshPending = true;
+	private bool changingFilters;
 	private bool disposed;
 	internal bool IsActive => isActive;
 
@@ -41,6 +46,7 @@ public sealed class HistoryViewModel : SecondaryDestinationViewModel, IRoutePres
 	{
 		this.main = main ?? throw new ArgumentNullException(nameof(main));
 		RefreshCommand = Track(ReactiveCommand.CreateFromTask(RefreshAsync));
+		ClearFiltersCommand = Track(ReactiveCommand.Create(ClearFilters));
 		main.PropertyChanged += Main_PropertyChanged;
 		main.ProcessQueue.LogEntries.CollectionChanged += LogEntries_CollectionChanged;
 	}
@@ -68,20 +74,70 @@ public sealed class HistoryViewModel : SecondaryDestinationViewModel, IRoutePres
 		set
 		{
 			this.RaiseAndSetIfChanged(ref field, value ?? string.Empty);
-			ApplyFilter();
+			if (!changingFilters)
+				ApplyFilter();
 		}
 	} = string.Empty;
 
-	public IReadOnlyList<HistoryItem> VisibleItems { get => field; private set => this.RaiseAndSetIfChanged(ref field, value); } = [];
+	public DateTimeOffset? FromDate
+	{
+		get => field;
+		set
+		{
+			this.RaiseAndSetIfChanged(ref field, value);
+			if (!changingFilters)
+				ApplyFilter();
+		}
+	}
+
+	public DateTimeOffset? ToDate
+	{
+		get => field;
+		set
+		{
+			this.RaiseAndSetIfChanged(ref field, value);
+			if (!changingFilters)
+				ApplyFilter();
+		}
+	}
+
+	public IReadOnlyList<string> ActionOptions { get => field; private set => this.RaiseAndSetIfChanged(ref field, value); } = [AllActions];
+	public string SelectedAction
+	{
+		get => field;
+		set
+		{
+			this.RaiseAndSetIfChanged(ref field, string.IsNullOrWhiteSpace(value) ? AllActions : value);
+			if (!changingFilters)
+				ApplyFilter();
+		}
+	} = AllActions;
+
+	public IReadOnlyList<string> ResultOptions { get => field; private set => this.RaiseAndSetIfChanged(ref field, value); } = [AllResults];
+	public string SelectedResult
+	{
+		get => field;
+		set
+		{
+			this.RaiseAndSetIfChanged(ref field, string.IsNullOrWhiteSpace(value) ? AllResults : value);
+			if (!changingFilters)
+				ApplyFilter();
+		}
+	} = AllResults;
+
+	public ObservableCollection<HistoryItem> VisibleItems { get; } = new();
 	public bool IsLoading { get => field; private set => this.RaiseAndSetIfChanged(ref field, value); } = true;
 	public bool HasItems => VisibleItems.Count > 0;
 	public bool ShowEmpty => !IsLoading && !HasItems;
-	public string ResultSummary => string.IsNullOrWhiteSpace(SearchText)
-		? $"{VisibleItems.Count.ToString("N0", CultureInfo.CurrentCulture)} available timestamped outcomes"
-		: $"{VisibleItems.Count.ToString("N0", CultureInfo.CurrentCulture)} outcomes match the current search";
+	public bool HasActiveFilters => FromDate is not null || ToDate is not null
+		|| SelectedAction != AllActions || SelectedResult != AllResults || !string.IsNullOrWhiteSpace(SearchText);
+	public string ResultSummary => HasActiveFilters
+		? $"{VisibleItems.Count.ToString("N0", CultureInfo.CurrentCulture)} outcomes match the current filters"
+		: $"{VisibleItems.Count.ToString("N0", CultureInfo.CurrentCulture)} available timestamped outcomes";
 	public string? LoadError => CurrentError?.PrimaryMessage;
 	public bool HasLoadError => CurrentError is not null;
 	public ICommand RefreshCommand { get; }
+	public ICommand ClearFiltersCommand { get; }
 	public string RouteEyebrow => LibationAvalonia.Properties.Resources.HistoryEyebrow;
 	public string RouteTitle => "History";
 	public string RouteSubtitle => LibationAvalonia.Properties.Resources.HistorySupportingText;
@@ -126,6 +182,7 @@ public sealed class HistoryViewModel : SecondaryDestinationViewModel, IRoutePres
 						.Select(entry => new HistoryLogRaw(entry.LogDate, entry.LogMessage))
 						.ToArray();
 					allItems = await Task.Run(() => BuildItems(books, logs, lifetime.Token), lifetime.Token);
+					RefreshFilterOptions();
 					CurrentError = null;
 					RaiseLoadErrorState();
 					ApplyFilter();
@@ -136,7 +193,7 @@ public sealed class HistoryViewModel : SecondaryDestinationViewModel, IRoutePres
 				}
 				catch (Exception ex)
 				{
-					CurrentError = LibationAvalonia.DesignSystem.UserFacingErrorFactory.FromException(
+					CurrentError = UserFacingErrorFactory.FromException(
 						ex,
 						"refresh the available History projection",
 						"Libation could not refresh the available history timestamps. No library or queue data was changed.");
@@ -171,36 +228,123 @@ public sealed class HistoryViewModel : SecondaryDestinationViewModel, IRoutePres
 		{
 			cancellationToken.ThrowIfCancellationRequested();
 			if (book.DateAdded != default)
-				items.Add(ToItem(book.DateAdded, "Catalogued", book.Title, "Added to Libation’s library.", "Recorded", LibationStatusKind.DownloadPending));
+				items.Add(ToItem(book.DateAdded, null, "Catalogued", book.Title, "Added to Libation’s library.", "Recorded", LibationStatusKind.Completed));
 			if (book.LastDownloaded is DateTime downloaded)
-				items.Add(ToItem(downloaded, "Downloaded", book.Title, "Last completed download timestamp recorded for this title.", "Completed", LibationStatusKind.Completed));
+				items.Add(ToItem(downloaded, null, "Downloaded", book.Title, "Last completed download timestamp recorded for this title.", "Completed", LibationStatusKind.Completed));
 		}
 		foreach (var log in logs)
 		{
 			cancellationToken.ThrowIfCancellationRequested();
-			items.Add(ToItem(log.Timestamp, "Processing session", "Queue activity", log.Message, "Recorded", LibationStatusKind.Processing));
+			var (correlationId, detail) = ExtractCorrelation(log.Message);
+			items.Add(ToItem(log.Timestamp, correlationId, "Processing session", "Queue activity", detail, "Recorded", LibationStatusKind.Processing));
 		}
 		return items.OrderByDescending(item => item.Timestamp).ToArray();
 	}
 
-	private static HistoryItem ToItem(DateTime timestamp, string action, string title, string detail, string result, LibationStatusKind status)
-		=> new(timestamp, timestamp.ToString("g", CultureInfo.CurrentCulture), action, title, detail, result, status);
+	private static HistoryItem ToItem(
+		DateTime timestamp,
+		Guid? correlationId,
+		string action,
+		string title,
+		string detail,
+		string result,
+		LibationStatusKind status)
+		=> new(timestamp, correlationId, timestamp.ToString("g", CultureInfo.CurrentCulture), action, title, detail, result, status);
+
+	private static (Guid? CorrelationId, string Detail) ExtractCorrelation(string message)
+	{
+		const int idLength = 32;
+		if (message.Length >= idLength + 2
+			&& message[0] == '['
+			&& message[idLength + 1] == ']'
+			&& Guid.TryParseExact(message.Substring(1, idLength), "N", out var correlationId))
+			return (correlationId, message[(idLength + 2)..].TrimStart());
+		return (null, message);
+	}
+
+	private void RefreshFilterOptions()
+	{
+		changingFilters = true;
+		try
+		{
+			ActionOptions = [AllActions, .. allItems.Select(item => item.Action).Distinct().OrderBy(value => value, StringComparer.CurrentCultureIgnoreCase)];
+			ResultOptions = [AllResults, .. allItems.Select(item => item.Result).Distinct().OrderBy(value => value, StringComparer.CurrentCultureIgnoreCase)];
+			if (!ActionOptions.Contains(SelectedAction))
+				SelectedAction = AllActions;
+			if (!ResultOptions.Contains(SelectedResult))
+				SelectedResult = AllResults;
+		}
+		finally
+		{
+			changingFilters = false;
+		}
+	}
 
 	private void ApplyFilter()
 	{
 		string query = SearchText.Trim();
-		VisibleItems = string.IsNullOrWhiteSpace(query)
-			? allItems
-			: allItems.Where(item => new[] { item.DateText, item.Action, item.Title, item.Detail, item.Result }
-				.Any(value => value.Contains(query, StringComparison.CurrentCultureIgnoreCase)))
-				.ToArray();
+		var fromDate = FromDate?.Date;
+		var toDate = ToDate?.Date;
+		var desired = allItems.Where(item =>
+			(fromDate is null || item.Timestamp.Date >= fromDate.Value)
+			&& (toDate is null || item.Timestamp.Date <= toDate.Value)
+			&& (SelectedAction == AllActions || item.Action == SelectedAction)
+			&& (SelectedResult == AllResults || item.Result == SelectedResult)
+			&& (string.IsNullOrWhiteSpace(query)
+				|| new[] { item.DateText, item.Action, item.Title, item.Detail, item.Result }
+					.Any(value => value.Contains(query, StringComparison.CurrentCultureIgnoreCase))))
+			.ToArray();
+		ReconcileVisibleItems(desired);
 		RaiseResultState();
+	}
+
+	private void ReconcileVisibleItems(IReadOnlyList<HistoryItem> desired)
+	{
+		for (int index = 0; index < desired.Count; index++)
+		{
+			if (index < VisibleItems.Count && VisibleItems[index] == desired[index])
+				continue;
+
+			int currentIndex = -1;
+			for (int candidate = index + 1; candidate < VisibleItems.Count; candidate++)
+			{
+				if (VisibleItems[candidate] != desired[index])
+					continue;
+				currentIndex = candidate;
+				break;
+			}
+			if (currentIndex >= 0)
+				VisibleItems.Move(currentIndex, index);
+			else
+				VisibleItems.Insert(index, desired[index]);
+		}
+		while (VisibleItems.Count > desired.Count)
+			VisibleItems.RemoveAt(VisibleItems.Count - 1);
+	}
+
+	private void ClearFilters()
+	{
+		changingFilters = true;
+		try
+		{
+			SearchText = string.Empty;
+			FromDate = null;
+			ToDate = null;
+			SelectedAction = AllActions;
+			SelectedResult = AllResults;
+		}
+		finally
+		{
+			changingFilters = false;
+		}
+		ApplyFilter();
 	}
 
 	private void RaiseResultState()
 	{
 		this.RaisePropertyChanged(nameof(HasItems));
 		this.RaisePropertyChanged(nameof(ShowEmpty));
+		this.RaisePropertyChanged(nameof(HasActiveFilters));
 		this.RaisePropertyChanged(nameof(ResultSummary));
 		this.RaisePropertyChanged(nameof(RouteStatusBadge));
 	}

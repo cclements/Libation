@@ -14,12 +14,14 @@ namespace LibationAvalonia.Dialogs;
 public partial class TrashBinDialog : DialogWindow
 {
 	private TrashBinViewModel VM { get; }
-	public TrashBinDialog()
+	public TrashBinDialog() : this(App.MainWindow?.ViewModel) { }
+
+	internal TrashBinDialog(MainVM? main)
 	{
 		InitializeComponent();
 		SaveOnEnter = false;
 		ControlToFocusOnShow = searchTb;
-		DataContext = VM = new TrashBinViewModel();
+		DataContext = VM = new TrashBinViewModel(main, this);
 
 		Closing += (_, _) => this.SaveSizeAndLocation(Configuration.Instance);
 		Loaded += async (_, _) => await VM.InitAsync();
@@ -28,6 +30,8 @@ public partial class TrashBinDialog : DialogWindow
 
 public class TrashBinViewModel : ViewModelBase
 {
+	private readonly MainVM? commandOwner;
+	private readonly Avalonia.Controls.Window? confirmationOwner;
 	private TempSearchEngine SearchEngine { get; } = new();
 	public ProductsDisplayViewModel ProductsDisplay { get; }
 	public string? CheckedCountText { get => field; set => this.RaiseAndSetIfChanged(ref field, value); }
@@ -56,8 +60,10 @@ public class TrashBinViewModel : ViewModelBase
 		}
 	}
 
-	public TrashBinViewModel()
+	internal TrashBinViewModel(MainVM? commandOwner, Avalonia.Controls.Window? confirmationOwner)
 	{
+		this.commandOwner = commandOwner;
+		this.confirmationOwner = confirmationOwner;
 		ProductsDisplay = new() { SearchEngine = SearchEngine };
 		ProductsDisplay.RemovableCountChanged += (_, _) => UpdateCounts();
 		ProductsDisplay.VisibleCountChanged += (_, _) => UpdateCounts();
@@ -126,7 +132,8 @@ public class TrashBinViewModel : ViewModelBase
 	public async Task RestoreCheckedAsync()
 	{
 		ControlsEnabled = false;
-		var qtyChanges = await GetCheckedBooks().RestoreBooksAsync();
+		var selected = GetCheckedBooks().ToArray();
+		var qtyChanges = commandOwner is null ? 0 : await commandOwner.RestoreTrashBooksAsync(selected);
 		if (qtyChanges > 0)
 			await ReloadAsync();
 		ControlsEnabled = true;
@@ -135,7 +142,10 @@ public class TrashBinViewModel : ViewModelBase
 	public async Task PermanentlyDeleteCheckedAsync()
 	{
 		ControlsEnabled = false;
-		var qtyChanges = await GetCheckedBooks().PermanentlyDeleteBooksAsync();
+		var selected = GetCheckedBooks().ToArray();
+		var qtyChanges = commandOwner is null
+			? 0
+			: await commandOwner.PermanentlyDeleteTrashBooksConfirmedAsync(selected, confirmationOwner);
 		if (qtyChanges > 0)
 			await ReloadAsync();
 		ControlsEnabled = true;

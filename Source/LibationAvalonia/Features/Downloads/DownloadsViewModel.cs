@@ -1,33 +1,59 @@
 using ApplicationServices;
+using Avalonia.Threading;
+using DataLayer;
 using LibationAvalonia.DesignSystem.Components;
 using LibationAvalonia.Features.Tools;
 using LibationAvalonia.Properties;
 using LibationAvalonia.Shell;
 using LibationAvalonia.ViewModels;
+using LibationFileManager;
 using LibationUiBase.ProcessQueue;
 using ReactiveUI;
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace LibationAvalonia.Features.Downloads;
 
 /// <summary>
-/// Explains acquisition state using the existing filesystem-aware LibraryStats and
-/// queue. It deliberately does not create a second downloader or infer unavailable
-/// account/marketplace/quality facts.
+/// Sectioned presentation over the existing filesystem-aware LibraryStats and
+/// ProcessQueue. It never creates a downloader, queue, or persisted status.
 /// </summary>
 public sealed class DownloadsViewModel : SecondaryDestinationViewModel, IRoutePresentation
 {
+	private static readonly DownloadsSectionKind[] SectionOrder =
+	[
+		DownloadsSectionKind.DownloadPending,
+		DownloadsSectionKind.Downloading,
+		DownloadsSectionKind.Downloaded,
+		DownloadsSectionKind.Unavailable,
+	];
+
+	private readonly ILibationCommandAdapter commands;
 	private readonly MainVM main;
+	private readonly Dictionary<DownloadBookKey, DownloadBookItemViewModel> books = new();
+	private readonly Dictionary<DownloadBookKey, DownloadsListRowViewModel> bookRows = new();
+	private readonly IReadOnlyDictionary<DownloadsSectionKind, DownloadsListRowViewModel> sectionRows;
+	private CancellationTokenSource projectionCancellation = new();
+	private bool projectionRunning;
+	private bool queueRefreshPending;
+	private bool disposed;
 
 	public DownloadsViewModel(ILibationCommandAdapter commands)
 	{
 		ArgumentNullException.ThrowIfNull(commands);
+		this.commands = commands;
 		main = commands.Main;
+		sectionRows = SectionOrder.ToDictionary(
+			section => section,
+			section => DownloadsListRowViewModel.Section(SectionTitle(section)));
 		DownloadPendingCommand = CreateOwnerCommand(
 			commands.DownloadPendingBooksAsync,
 			"download and process pending audiobooks",
@@ -45,8 +71,12 @@ public sealed class DownloadsViewModel : SecondaryDestinationViewModel, IRoutePr
 			"convert the library to MP3",
 			"Libation could not start the MP3 conversion workflow. Review Processing and the application log.");
 		RefreshCommand = CreateOwnerCommand(
-			() => main.SetBackupCountsAsync(null),
-			"refresh download counts",
+			async () =>
+			{
+				await main.SetBackupCountsAsync(null);
+				RequestLibraryProjection();
+			},
+			"refresh download state",
 			Resources.DownloadsRefreshUnchangedError);
 		OpenAccountsCommand = CreateOwnerCommand(
 			commands.ShowAccountsAsync,
@@ -58,14 +88,15 @@ public sealed class DownloadsViewModel : SecondaryDestinationViewModel, IRoutePr
 			"Libation could not start the library scan. Review account access and try again.");
 
 		main.PropertyChanged += Main_PropertyChanged;
-		main.ProcessQueue.PropertyChanged += ProcessQueue_PropertyChanged;
 		main.ProcessQueue.Queue.CollectionChanged += Queue_CollectionChanged;
+		RequestLibraryProjection();
 	}
 
 	private LibraryCommands.LibraryStats? Stats => main.LibraryStats;
-	public bool IsLoading => Stats is null;
-	public bool IsReady => Stats is not null;
-	public bool HasLibraryTitles => Stats?.HasBookResults == true;
+	public ObservableCollection<DownloadsListRowViewModel> Rows { get; } = new();
+	public bool IsLoading => Stats is null || projectionRunning && Rows.Count == 0;
+	public bool IsReady => Stats is not null && !projectionRunning;
+	public bool HasLibraryTitles => books.Count > 0;
 	public bool ShowEmptyLibrary => IsReady && !HasLibraryTitles;
 	public string EmptyLibraryExplanation => main.AnyAccounts
 		? main.ActivelyScanning
@@ -74,26 +105,13 @@ public sealed class DownloadsViewModel : SecondaryDestinationViewModel, IRoutePr
 		: "Add an Audible account, then scan it to catalogue titles before starting a download workflow.";
 	public string EmptyLibraryActionText => main.AnyAccounts && !main.ActivelyScanning ? "Scan accounts" : "Manage accounts";
 	public ICommand EmptyLibraryCommand => main.AnyAccounts && !main.ActivelyScanning ? ScanLibraryCommand : OpenAccountsCommand;
-	public bool HasAttention => AttentionCount > 0;
-	public string TotalText => Format(TotalCount);
-	public string PendingText => Format(Stats?.PendingBooks ?? 0);
-	public string DownloadedText => Format(Stats?.booksDownloadedOnly ?? 0);
-	public string CompletedText => Format(Stats?.booksFullyBackedUp ?? 0);
-	public string AttentionText => Format(AttentionCount);
-	public string PendingExplanation => string.Format(CultureInfo.CurrentCulture, Resources.DownloadsPendingExplanationFormat, PendingText, DownloadedText);
-	public int TotalCount => Stats is null ? 0 : Stats.booksFullyBackedUp + Stats.booksDownloadedOnly + Stats.booksNoProgress + Stats.booksError + Stats.booksUnavailable;
-	public int AttentionCount => Stats is null ? 0 : Stats.booksError + Stats.booksUnavailable;
-	public int ActiveCount => main.ProcessQueue.Queue.GetAllItems().Count(item => item.Status == ProcessBookStatus.Working);
-	public int QueuedCount => main.ProcessQueue.Queue.GetAllItems().Count(item => item.Status == ProcessBookStatus.Queued);
-	public bool HasActivePipeline => ActiveCount + QueuedCount > 0;
-	public string PipelineText => HasActivePipeline
-		? string.Format(CultureInfo.CurrentCulture, Resources.DownloadsPipelineActiveFormat, Format(ActiveCount), Format(QueuedCount))
-		: Resources.DownloadsPipelineIdle;
-	public string PipelineBadgeText => HasActivePipeline ? "Active" : "Idle";
-	public LibationStatusKind PipelineStatus => HasActivePipeline ? LibationStatusKind.Processing : LibationStatusKind.Completed;
-	public string AttentionExplanation => AttentionCount == 1
-		? "1 title is unavailable or has a recorded download error. Open the Library or Processing view for title-level detail."
-		: $"{Format(AttentionCount)} titles are unavailable or have recorded download errors. Open the Library or Processing view for title-level detail.";
+
+	public int PendingCount => books.Values.Count(book => book.Section == DownloadsSectionKind.DownloadPending);
+	public int DownloadingCount => books.Values.Count(book => book.Section == DownloadsSectionKind.Downloading);
+	public int DownloadedCount => books.Values.Count(book => book.Section == DownloadsSectionKind.Downloaded);
+	public int UnavailableCount => books.Values.Count(book => book.Section == DownloadsSectionKind.Unavailable);
+	public string ResultSummary
+		=> $"{PendingCount:N0} pending · {DownloadingCount:N0} downloading · {DownloadedCount:N0} downloaded · {UnavailableCount:N0} unavailable";
 
 	public ICommand DownloadPendingCommand { get; }
 	public ICommand DownloadPdfsCommand { get; }
@@ -104,26 +122,243 @@ public sealed class DownloadsViewModel : SecondaryDestinationViewModel, IRoutePr
 	public ICommand ScanLibraryCommand { get; }
 	public string RouteEyebrow => "Acquisition";
 	public string RouteTitle => "Downloads";
-	public string RouteSubtitle => "See which titles are pending, downloaded, processed, or need attention.";
+	public string RouteSubtitle => "See what is pending, downloading, downloaded, or unavailable.";
 	public RouteCommandPresentation RoutePrimaryCommand => new("Download pending titles", DownloadPendingCommand);
-	public System.Collections.Generic.IReadOnlyList<RouteCommandPresentation> RouteSecondaryCommands =>
+	public IReadOnlyList<RouteCommandPresentation> RouteSecondaryCommands =>
 	[
 		new("Download PDFs", DownloadPdfsCommand),
 		new("Locate files", LocateFilesCommand),
+		new("Convert to MP3", ConvertAllToMp3Command),
 		new("Refresh", RefreshCommand),
 	];
-	public RouteStatusPresentation RouteStatusBadge => new(HasAttention ? AttentionExplanation : PipelineText,
-		HasAttention ? LibationStatusKind.NeedsAttention : PipelineStatus);
+	public RouteStatusPresentation RouteStatusBadge => new(ResultSummary,
+		UnavailableCount > 0 ? LibationStatusKind.NeedsAttention
+		: DownloadingCount > 0 ? LibationStatusKind.Downloading
+		: PendingCount > 0 ? LibationStatusKind.DownloadPending
+		: LibationStatusKind.Completed);
+
+	internal Task QueueBookAsync(LibraryBook book)
+		=> RunOwnerActionAsync(
+			async () => await main.QueueBooksAsync([book], Configuration.Instance),
+			$"start the download workflow for {book.Book.AudibleProductId}",
+			"Libation could not start this title. Review its download state, account access, and Books location, then try again.");
+
+	internal Task RetryBookAsync(ProcessBookViewModel item)
+		=> RunOwnerActionAsync(
+			async () => await main.QueueBooksAsync([item.LibraryBook], item.Configuration),
+			$"retry the download workflow for {item.LibraryBook.Book.AudibleProductId}",
+			"Libation could not retry this title. Review its current queue state and account access, then try again.");
+
+	internal Task LocateBookAsync(LibraryBook book)
+		=> RunOwnerActionAsync(
+			() => commands.LocateAudiobookAsync(book),
+			$"locate an existing file for {book.Book.AudibleProductId}",
+			"Libation could not open the file picker for this title. No library or file data was changed.");
 
 	private void Main_PropertyChanged(object? sender, PropertyChangedEventArgs e)
 	{
+		if (string.IsNullOrEmpty(e.PropertyName) || e.PropertyName == nameof(MainVM.LibraryStats))
+			RequestLibraryProjection();
 		if (string.IsNullOrEmpty(e.PropertyName)
 			|| e.PropertyName is nameof(MainVM.LibraryStats) or nameof(MainVM.AnyAccounts) or nameof(MainVM.ActivelyScanning))
 			RaiseState();
 	}
 
-	private void ProcessQueue_PropertyChanged(object? sender, PropertyChangedEventArgs e) => RaisePipeline();
-	private void Queue_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) => RaisePipeline();
+	private void Queue_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e) => RequestQueueProjection();
+	private void Book_MembershipChanged(object? sender, EventArgs e) => RequestQueueProjection();
+
+	private void RequestLibraryProjection()
+	{
+		if (disposed)
+			return;
+		if (!Dispatcher.UIThread.CheckAccess())
+		{
+			Dispatcher.UIThread.Post(RequestLibraryProjection);
+			return;
+		}
+
+		var stats = Stats;
+		projectionCancellation.Cancel();
+		projectionCancellation.Dispose();
+		projectionCancellation = new CancellationTokenSource();
+		if (stats is null)
+		{
+			projectionRunning = false;
+			ClearBooks();
+			RaiseState();
+			return;
+		}
+
+		var library = stats.LibraryBooks.WithoutParents().ToArray();
+		projectionRunning = true;
+		RaiseState();
+		_ = ProjectLibraryAsync(stats, library, projectionCancellation.Token);
+	}
+
+	private async Task ProjectLibraryAsync(
+		LibraryCommands.LibraryStats stats,
+		IReadOnlyList<LibraryBook> library,
+		CancellationToken cancellationToken)
+	{
+		try
+		{
+			var snapshots = await Task.Run(() => library.Select(book => ProjectBook(book, cancellationToken)).ToArray(), cancellationToken);
+			await Dispatcher.UIThread.InvokeAsync(() => ApplyLibraryProjection(stats, snapshots, cancellationToken));
+		}
+		catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+		{
+		}
+		catch (Exception ex)
+		{
+			await Dispatcher.UIThread.InvokeAsync(() =>
+			{
+				if (cancellationToken.IsCancellationRequested || disposed)
+					return;
+				projectionRunning = false;
+				CurrentError = LibationAvalonia.DesignSystem.UserFacingErrorFactory.FromException(
+					ex,
+					"build the Downloads title list",
+					"Libation could not read the current per-title download state. Refresh the page after checking the Books location.");
+				RaiseState();
+			});
+		}
+	}
+
+	private static DownloadBookSnapshot ProjectBook(LibraryBook book, CancellationToken cancellationToken)
+	{
+		cancellationToken.ThrowIfCancellationRequested();
+		var status = LibraryCommands.Liberated_Status(book.Book);
+		var path = status switch
+		{
+			LiberatedStatus.PartialDownload => FilePathCache.GetFirstPath(book.Book.AudibleProductId, FileType.AAXC)?.Path,
+			LiberatedStatus.Liberated => AudibleFileStorage.Audio.GetPath(book.Book.AudibleProductId)?.Path,
+			_ => null,
+		};
+		var file = path is null ? null : new FileInfo(path);
+		long? bytes = file?.Exists == true
+			? file.Length
+			: null;
+		return new(book, status, bytes);
+	}
+
+	private void ApplyLibraryProjection(
+		LibraryCommands.LibraryStats stats,
+		IReadOnlyList<DownloadBookSnapshot> snapshots,
+		CancellationToken cancellationToken)
+	{
+		if (disposed || cancellationToken.IsCancellationRequested || !ReferenceEquals(Stats, stats))
+			return;
+
+		var retained = new HashSet<DownloadBookKey>();
+		foreach (var snapshot in snapshots)
+		{
+			var key = DownloadBookKey.From(snapshot.Book);
+			retained.Add(key);
+			if (!books.TryGetValue(key, out var item))
+			{
+				item = new DownloadBookItemViewModel(this, snapshot.Book, snapshot.Status, snapshot.KnownSizeBytes);
+				item.MembershipChanged += Book_MembershipChanged;
+				books.Add(key, item);
+				bookRows.Add(key, DownloadsListRowViewModel.BookRow(item));
+			}
+			else
+				item.UpdateLibrary(snapshot.Book, snapshot.Status, snapshot.KnownSizeBytes);
+		}
+
+		foreach (var key in books.Keys.Where(key => !retained.Contains(key)).ToArray())
+		{
+			var item = books[key];
+			item.MembershipChanged -= Book_MembershipChanged;
+			item.Dispose();
+			books.Remove(key);
+			bookRows.Remove(key);
+		}
+
+		projectionRunning = false;
+		CurrentError = null;
+		ApplyQueueProjection();
+		RaiseState();
+	}
+
+	private void RequestQueueProjection()
+	{
+		if (disposed || queueRefreshPending)
+			return;
+		queueRefreshPending = true;
+		Dispatcher.UIThread.Post(() =>
+		{
+			queueRefreshPending = false;
+			if (!disposed)
+				ApplyQueueProjection();
+		}, DispatcherPriority.Background);
+	}
+
+	private void ApplyQueueProjection()
+	{
+		if (!Dispatcher.UIThread.CheckAccess())
+		{
+			RequestQueueProjection();
+			return;
+		}
+
+		var queue = main.ProcessQueue.Queue.GetAllItems()
+			.GroupBy(item => DownloadBookKey.From(item.LibraryBook))
+			.ToDictionary(group => group.Key, group => group.OrderBy(QueuePriority).First());
+		foreach (var (key, book) in books)
+			book.UpdateQueue(queue.GetValueOrDefault(key));
+		RebuildRows();
+		RaiseState();
+	}
+
+	private void RebuildRows()
+	{
+		var desired = new List<DownloadsListRowViewModel>(books.Count + SectionOrder.Length);
+		foreach (var section in SectionOrder)
+		{
+			var sectionBooks = books.Values
+				.Where(book => book.Section == section)
+				.OrderBy(book => book.Title, StringComparer.CurrentCultureIgnoreCase)
+				.ToArray();
+			var sectionRow = sectionRows[section];
+			sectionRow.UpdateSectionCount(sectionBooks.Length);
+			desired.Add(sectionRow);
+			foreach (var book in sectionBooks)
+				desired.Add(bookRows[book.Key]);
+		}
+
+		var desiredSet = desired.ToHashSet();
+		for (int index = Rows.Count - 1; index >= 0; index--)
+			if (!desiredSet.Contains(Rows[index]))
+				Rows.RemoveAt(index);
+		for (int index = 0; index < desired.Count; index++)
+		{
+			var row = desired[index];
+			if (index < Rows.Count && ReferenceEquals(Rows[index], row))
+				continue;
+			int currentIndex = Rows.IndexOf(row);
+			if (currentIndex >= 0)
+				Rows.Move(currentIndex, index);
+			else
+				Rows.Insert(index, row);
+		}
+	}
+
+	private static int QueuePriority(ProcessBookViewModel item) => item.Status switch
+	{
+		ProcessBookStatus.Working => 0,
+		ProcessBookStatus.Queued => 1,
+		ProcessBookStatus.Failed => 2,
+		ProcessBookStatus.Completed => 3,
+		_ => 4,
+	};
+
+	private static string SectionTitle(DownloadsSectionKind section) => section switch
+	{
+		DownloadsSectionKind.DownloadPending => "Download Pending",
+		DownloadsSectionKind.Downloading => "Downloading",
+		DownloadsSectionKind.Downloaded => "Downloaded",
+		_ => "Unavailable",
+	};
 
 	private void RaiseState()
 	{
@@ -131,30 +366,33 @@ public sealed class DownloadsViewModel : SecondaryDestinationViewModel, IRoutePr
 		{
 			nameof(IsLoading), nameof(IsReady), nameof(HasLibraryTitles), nameof(ShowEmptyLibrary),
 			nameof(EmptyLibraryExplanation), nameof(EmptyLibraryActionText), nameof(EmptyLibraryCommand),
-			nameof(HasAttention), nameof(TotalText), nameof(PendingText), nameof(PendingExplanation),
-			nameof(DownloadedText), nameof(CompletedText), nameof(AttentionText), nameof(TotalCount),
-			nameof(AttentionCount), nameof(AttentionExplanation), nameof(RouteStatusBadge),
+			nameof(PendingCount), nameof(DownloadingCount), nameof(DownloadedCount), nameof(UnavailableCount),
+			nameof(ResultSummary), nameof(RouteStatusBadge),
 		})
 			this.RaisePropertyChanged(property);
 	}
 
-	private void RaisePipeline()
+	private void ClearBooks()
 	{
-		this.RaisePropertyChanged(nameof(ActiveCount));
-		this.RaisePropertyChanged(nameof(QueuedCount));
-		this.RaisePropertyChanged(nameof(HasActivePipeline));
-		this.RaisePropertyChanged(nameof(PipelineText));
-		this.RaisePropertyChanged(nameof(PipelineBadgeText));
-		this.RaisePropertyChanged(nameof(PipelineStatus));
-		this.RaisePropertyChanged(nameof(RouteStatusBadge));
+		foreach (var book in books.Values)
+		{
+			book.MembershipChanged -= Book_MembershipChanged;
+			book.Dispose();
+		}
+		books.Clear();
+		bookRows.Clear();
+		Rows.Clear();
 	}
-
-	private static string Format(int value) => value.ToString("N0", CultureInfo.CurrentCulture);
 
 	protected override void DisposeCore()
 	{
+		disposed = true;
 		main.PropertyChanged -= Main_PropertyChanged;
-		main.ProcessQueue.PropertyChanged -= ProcessQueue_PropertyChanged;
 		main.ProcessQueue.Queue.CollectionChanged -= Queue_CollectionChanged;
+		projectionCancellation.Cancel();
+		projectionCancellation.Dispose();
+		ClearBooks();
 	}
+
+	private sealed record DownloadBookSnapshot(LibraryBook Book, LiberatedStatus Status, long? KnownSizeBytes);
 }

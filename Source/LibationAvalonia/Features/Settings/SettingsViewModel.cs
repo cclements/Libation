@@ -1,5 +1,6 @@
-using LibationAvalonia.Features.Tools;
 using LibationAvalonia.DesignSystem.Components;
+using LibationAvalonia.Dialogs;
+using LibationAvalonia.Features.Tools;
 using LibationAvalonia.Properties;
 using LibationAvalonia.Shell;
 using LibationFileManager;
@@ -8,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace LibationAvalonia.Features.Settings;
@@ -17,12 +19,11 @@ public sealed record SettingsCategoryItem(
 	string Description,
 	string SearchTerms,
 	ICommand OpenCommand,
-	string ActionLabel = "Open settings");
+	string ActionLabel);
 
 /// <summary>
-/// Searchable category index and live appearance summary over the existing settings
-/// dialog and Configuration owner. It does not duplicate the established editor's
-/// validation, preview/cancel, or legacy Chardonnay override behavior.
+/// Native contemporary appearance editor plus a truthful index of the five tabs
+/// still owned by SettingsDialog.
 /// </summary>
 public sealed class SettingsViewModel : SecondaryDestinationViewModel, IRoutePresentation
 {
@@ -33,39 +34,73 @@ public sealed class SettingsViewModel : SecondaryDestinationViewModel, IRoutePre
 	{
 		ArgumentNullException.ThrowIfNull(commands);
 		this.configuration = configuration ?? Configuration.Instance;
+		Appearance = new(this.configuration);
 		OpenSettingsCommand = CreateOwnerCommand(
 			commands.ShowSettingsAsync,
 			"open settings",
 			"Libation could not open Settings. No settings were changed.");
+		OpenImportantSettingsCommand = CreateSectionCommand(commands, SettingsDialogSection.Important, "Important Settings");
+		OpenImportLibraryCommand = CreateSectionCommand(commands, SettingsDialogSection.ImportLibrary, "Import Library");
+		OpenDownloadDecryptCommand = CreateSectionCommand(commands, SettingsDialogSection.DownloadDecrypt, "Download/Decrypt");
+		OpenAudioFilesCommand = CreateSectionCommand(commands, SettingsDialogSection.AudioFiles, "Audio File Settings");
+		OpenAudiobookshelfCommand = CreateSectionCommand(commands, SettingsDialogSection.Audiobookshelf, "Audiobookshelf");
 		OpenAccountsCommand = CreateOwnerCommand(
 			commands.ShowAccountsAsync,
 			"open account settings",
 			"Libation could not open account management. No account data was changed.");
 		OpenAboutCommand = CreateOwnerCommand(
-			commands.Main.ShowAboutAsync,
+			commands.ShowAboutAsync,
 			"open About and update status",
 			"Libation could not open About. Try the native application menu instead.");
+		ApplyAppearanceCommand = CreateOwnerCommand(
+			() => { Appearance.Apply(); return Task.CompletedTask; },
+			"apply contemporary appearance",
+			"Libation could not apply the appearance draft. The saved appearance was not partially changed.");
+		ResetAppearanceCommand = CreateOwnerCommand(
+			() => { Appearance.ResetAndApply(); return Task.CompletedTask; },
+			"reset contemporary appearance",
+			"Libation could not reset appearance. The saved appearance was not partially changed.");
 		RequestOnboardingCommand = Track(ReactiveCommand.Create(() => OnboardingRequested?.Invoke(this, EventArgs.Empty)));
 
 		allCategories =
 		[
-			new("General", "Startup, notifications, and core application behavior.", "startup notifications basic", OpenSettingsCommand),
-			new("Appearance", "Experience profile, density, decoration, motion, typography, library view, and legacy palette overrides.", "cellar tasting room current interface high contrast theme chardonnay density motion typography", OpenSettingsCommand),
-			new("Accounts", "Audible accounts, marketplaces, sign-in, and authorization.", "audible login authentication marketplace", OpenAccountsCommand, "Manage accounts"),
-			new("Download", "Acquisition format, quality, and download behavior.", "download audible format quality", OpenSettingsCommand),
-			new("Processing", "Output format, chapter handling, concurrency, and conversion.", "decrypt mp3 m4b queue concurrency chapter", OpenSettingsCommand),
-			new("Naming and folders", "Books location, temporary files, templates, and file naming.", "path folder books location template filename", OpenSettingsCommand),
-			new("Metadata", "Tags, cover art, metadata files, and file metadata behavior.", "tag cover metadata", OpenSettingsCommand),
-			new("Automation", "Automatic scans and post-scan processing behavior.", "auto scan automatic schedule", OpenSettingsCommand),
-			new("Updates", Resources.SettingsUpdatesDescription, "upgrade version release", OpenSettingsCommand),
-			new("Privacy", "Logging, account storage, and integrations that may send library information elsewhere.", "credential token log telemetry service", OpenSettingsCommand),
-			new("Advanced", "Legacy palette editor, integrations, and expert settings.", "advanced chardonnay audiobook shelf legacy", OpenSettingsCommand),
+			new(
+				"Important Settings",
+				"Books location, startup updates, authentication-token storage, logging, display scaling, and Classic theme access.",
+				"general books folder startup updates privacy credentials tokens logging display classic chardonnay",
+				OpenImportantSettingsCommand,
+				"Open Important Settings"),
+			new(
+				"Import Library",
+				"Automatic scans, imported-title summaries, podcasts, episodes, and Plus titles.",
+				"import library automatic auto scan podcasts episodes plus",
+				OpenImportLibraryCommand,
+				"Open Import Library"),
+			new(
+				"Download / Decrypt",
+				"Daily download limits, unavailable-title behavior, naming templates, temporary files, and metadata sidecars.",
+				"download decrypt limit unavailable naming folders templates temporary metadata",
+				OpenDownloadDecryptCommand,
+				"Open Download / Decrypt"),
+			new(
+				"Audio File Settings",
+				"Audio quality, codecs, output format, chapters, cover art, and processing fix-ups.",
+				"audio quality codec widevine xhe aac spatial mp3 m4b chapters cover processing",
+				OpenAudioFilesCommand,
+				"Open Audio File Settings"),
+			new(
+				"Audiobookshelf",
+				"Server connection, API token, remote library, and destination folder.",
+				"audiobookshelf server api token integration remote library folder advanced",
+				OpenAudiobookshelfCommand,
+				"Open Audiobookshelf"),
 		];
 		VisibleCategories = allCategories;
 		this.configuration.PropertyChanged += Configuration_PropertyChanged;
 	}
 
 	public event EventHandler? OnboardingRequested;
+	public AppearanceSettingsViewModel Appearance { get; }
 
 	public string SearchText
 	{
@@ -77,11 +112,13 @@ public sealed class SettingsViewModel : SecondaryDestinationViewModel, IRoutePre
 		}
 	} = string.Empty;
 
-	public IReadOnlyList<SettingsCategoryItem> VisibleCategories { get => field; private set => this.RaiseAndSetIfChanged(ref field, value); }
+	public IReadOnlyList<SettingsCategoryItem> VisibleCategories { get => field; private set => this.RaiseAndSetIfChanged(ref field, value); } = [];
 	public bool HasCategories => VisibleCategories.Count > 0;
 	public string CategorySummary => string.IsNullOrWhiteSpace(SearchText)
-		? "All stable settings categories"
-		: $"{VisibleCategories.Count} categories match the current search";
+		? "Five Settings tabs"
+		: VisibleCategories.Count == 1
+			? "1 Settings tab matches the current search"
+			: $"{VisibleCategories.Count} Settings tabs match the current search";
 	public string AppearanceProfileText => !configuration.UseContemporaryShell
 		? "Current Libation interface"
 		: configuration.ExperienceStyle switch
@@ -100,26 +137,36 @@ public sealed class SettingsViewModel : SecondaryDestinationViewModel, IRoutePre
 		ReducedMotionPreference.Full => "Reduced motion off",
 		_ => "Follow system motion",
 	};
-	public string TypographyText => configuration.UseSystemTypography ? "System typography" : "Profile typography";
-	public string LibraryViewText => configuration.LibraryViewMode.ToString();
-	public string NavigationText => configuration.NavigationRailPreference.ToString();
 	public string AppearanceSummary => $"{AppearanceProfileText} · {DensityText} density · {DecorationText} decoration · {MotionText}";
 	public string LegacyThemeSummary => Resources.SettingsClassicColorSummary;
 
 	public ICommand OpenSettingsCommand { get; }
+	public ICommand OpenImportantSettingsCommand { get; }
+	public ICommand OpenImportLibraryCommand { get; }
+	public ICommand OpenDownloadDecryptCommand { get; }
+	public ICommand OpenAudioFilesCommand { get; }
+	public ICommand OpenAudiobookshelfCommand { get; }
 	public ICommand OpenAccountsCommand { get; }
 	public ICommand OpenAboutCommand { get; }
+	public ICommand ApplyAppearanceCommand { get; }
+	public ICommand ResetAppearanceCommand { get; }
 	public ICommand RequestOnboardingCommand { get; }
 	public string RouteEyebrow => "Preferences";
 	public string RouteTitle => "Settings";
-	public string RouteSubtitle => Resources.SettingsSupportingText;
-	public RouteCommandPresentation RoutePrimaryCommand => new("Open Settings", OpenSettingsCommand);
+	public string RouteSubtitle => "Adjust contemporary appearance here or open one exact Settings tab.";
+	public RouteCommandPresentation RoutePrimaryCommand => new("Apply appearance", ApplyAppearanceCommand);
 	public IReadOnlyList<RouteCommandPresentation> RouteSecondaryCommands =>
 	[
+		new("Open Settings", OpenSettingsCommand),
 		new("Manage accounts", OpenAccountsCommand),
-		new("About and updates", OpenAboutCommand),
 	];
 	public RouteStatusPresentation RouteStatusBadge => new(AppearanceProfileText, LibationStatusKind.Completed);
+
+	private ICommand CreateSectionCommand(ILibationCommandAdapter commands, SettingsDialogSection section, string sectionName)
+		=> CreateOwnerCommand(
+			() => commands.ShowSettingsAsync(section),
+			$"open the {sectionName} tab",
+			$"Libation could not open {sectionName}. No settings were changed.");
 
 	private void ApplySearch()
 	{
@@ -143,16 +190,23 @@ public sealed class SettingsViewModel : SecondaryDestinationViewModel, IRoutePre
 				and not nameof(Configuration.ReducedMotionPreference)
 				and not nameof(Configuration.UseSystemTypography)
 				and not nameof(Configuration.LibraryViewMode)
-				and not nameof(Configuration.NavigationRailPreference))
+				and not nameof(Configuration.NavigationRailPreference)
+				and not nameof(Configuration.ShowDecanterDock)
+				and not nameof(Configuration.PersistFlightBetweenSessions))
 			return;
 
+		Appearance.SynchronizeFromConfiguration();
 		foreach (var property in new[]
 		{
-			nameof(AppearanceProfileText), nameof(DensityText), nameof(DecorationText), nameof(MotionText),
-			nameof(TypographyText), nameof(LibraryViewText), nameof(NavigationText), nameof(AppearanceSummary), nameof(RouteStatusBadge),
+			nameof(AppearanceProfileText), nameof(DensityText), nameof(DecorationText),
+			nameof(MotionText), nameof(AppearanceSummary), nameof(RouteStatusBadge),
 		})
 			this.RaisePropertyChanged(property);
 	}
 
-	protected override void DisposeCore() => configuration.PropertyChanged -= Configuration_PropertyChanged;
+	protected override void DisposeCore()
+	{
+		configuration.PropertyChanged -= Configuration_PropertyChanged;
+		Appearance.Dispose();
+	}
 }

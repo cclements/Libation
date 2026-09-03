@@ -1,0 +1,20 @@
+<UserControl
+	xmlns="https://github.com/avaloniaui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:settings="using:LibationAvalonia.Features.Settings"
+	xmlns:components="using:LibationAvalonia.DesignSystem.Components"
+	x:Class="LibationAvalonia.Features.Settings.AppearanceProfilePreview"
+	x:Name="Root">
+	<ThemeVariantScope x:Name="PreviewScope">
+		<components:ThemePreviewCard
+			ProfileName="{Binding ProfileName, ElementName=Root}"
+			Description="{Binding Description, ElementName=Root}"
+			ActionText="{Binding ProfileName, ElementName=Root, StringFormat='Choose {0}'}"
+			ActionCommand="{Binding SelectCommand, ElementName=Root}"
+			BadgeStatus="{Binding SelectionStatus, ElementName=Root}"
+			BadgeText="{Binding SelectionText, ElementName=Root}"
+			SelectedRowTitle="Library row preview"
+			SelectedRowMetadata="Profile color, type, spacing, status, and progress"
+			Progress="58" />
+	</ThemeVariantScope>
+</UserControl>

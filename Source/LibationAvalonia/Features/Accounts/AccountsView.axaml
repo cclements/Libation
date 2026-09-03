@@ -3,66 +3,71 @@
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:accounts="using:LibationAvalonia.Features.Accounts"
 	xmlns:components="using:LibationAvalonia.DesignSystem.Components"
-	xmlns:properties="using:LibationAvalonia.Properties"
 	x:Class="LibationAvalonia.Features.Accounts.AccountsView"
 	x:DataType="accounts:AccountsViewModel">
+	<UserControl.Resources>
+		<DataTemplate x:Key="AccountCard" x:DataType="accounts:AccountCardViewModel">
+			<Border Classes="card raised" Margin="0,0,0,12" AutomationProperties.Name="{Binding DisplayName}">
+				<StackPanel Spacing="{DynamicResource Libation.Space.3}">
+					<Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource Libation.Space.3}">
+						<StackPanel Spacing="{DynamicResource Libation.Space.1}">
+							<TextBlock Text="{Binding DisplayName}" FontFamily="{DynamicResource Libation.Font.Display}"
+								FontSize="{DynamicResource Libation.FontSize.Section}" TextWrapping="Wrap" />
+							<TextBlock Text="{Binding MarketplaceSummary}" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+						</StackPanel>
+						<components:StatusBadge Grid.Column="1" Status="{Binding AuthorizationStatus}"
+							TextOverride="{Binding AuthorizationText}" AccessibleName="{Binding AuthorizationAccessibleName}" />
+					</Grid>
+					<Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="{DynamicResource Libation.Space.3}"
+						RowSpacing="{DynamicResource Libation.Space.2}">
+						<TextBlock Text="Marketplaces" FontWeight="SemiBold" />
+						<TextBlock Grid.Column="1" Text="{Binding MarketplacesText}" TextWrapping="Wrap"
+							Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+						<TextBlock Grid.Row="1" Text="Titles" FontWeight="SemiBold" />
+						<TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding TitleCountText}"
+							Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+						<TextBlock Grid.Row="2" Text="Scanning" FontWeight="SemiBold" />
+						<TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding ScanInclusionText}"
+							Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+					</Grid>
+					<WrapPanel Orientation="Horizontal">
+						<Button Classes="contemporary primary" Margin="0,0,8,8" Content="Scan now"
+							Command="{Binding ScanNowCommand}" CommandParameter="{Binding}" IsEnabled="{Binding CanScanNow}"
+							AutomationProperties.Name="{Binding ScanAccessibleName}" />
+						<Button Classes="contemporary" Margin="0,0,8,8" Content="Edit marketplaces"
+							Command="{Binding EditMarketplacesCommand}" CommandParameter="{Binding}" IsEnabled="{Binding CanManage}"
+							AutomationProperties.Name="{Binding EditMarketplacesAccessibleName}" />
+						<Button Classes="contemporary" Margin="0,0,8,8" Content="Reauthenticate"
+							Command="{Binding ReauthenticateCommand}" CommandParameter="{Binding}" IsEnabled="{Binding CanManage}"
+							AutomationProperties.Name="{Binding ReauthenticateAccessibleName}" />
+						<Button Classes="contemporary" Margin="0,0,8,8" Content="Remove"
+							Command="{Binding RemoveCommand}" CommandParameter="{Binding}" IsEnabled="{Binding CanManage}"
+							AutomationProperties.Name="{Binding RemoveAccessibleName}" />
+					</WrapPanel>
+					<TextBlock Text="{Binding RemovalConsequenceText}" TextWrapping="Wrap"
+						Foreground="{DynamicResource Libation.Brush.TextTertiary}" />
+				</StackPanel>
+			</Border>
+		</DataTemplate>
+	</UserControl.Resources>
 	<ScrollViewer HorizontalScrollBarVisibility="Disabled">
 		<StackPanel Margin="{DynamicResource Libation.Thickness.5}" Spacing="{DynamicResource Libation.Space.4}">
 			<components:AttentionBanner IsVisible="{Binding HasError}" Severity="{x:Static components:ComponentSeverity.Danger}" FocusOnShow="True"
-				Title="Account action unavailable" Message="{Binding ErrorMessage}"
+				Title="Accounts unavailable" Message="{Binding ErrorMessage}"
 				ActionText="Copy technical details" ActionCommand="{Binding CopyTechnicalDetailsCommand}" />
-
-			<Grid ColumnDefinitions="*,*" ColumnSpacing="{DynamicResource Libation.Space.4}">
-				<Border Classes="card raised">
-					<StackPanel Spacing="{DynamicResource Libation.Space.3}">
-						<TextBlock Text="Connection summary" FontFamily="{DynamicResource Libation.Font.Display}" FontSize="{DynamicResource Libation.FontSize.Section}" />
-						<TextBlock Text="{Binding AccountCountText}" FontWeight="SemiBold" />
-						<TextBlock Text="{Binding LibraryTitleCountText}" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
-						<TextBlock Text="{Binding AuthorizationSummary}" TextWrapping="Wrap" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
-						<StackPanel Orientation="Horizontal" Spacing="8">
-							<Button Classes="contemporary primary" Content="Manage accounts" Command="{Binding ManageAccountsCommand}" />
-							<Button Classes="contemporary" Content="Add account" Command="{Binding AddAccountCommand}" />
-						</StackPanel>
-					</StackPanel>
-				</Border>
-				<Border Grid.Column="1" Classes="card raised">
-					<StackPanel Spacing="{DynamicResource Libation.Space.3}">
-						<TextBlock Text="Library scan" FontFamily="{DynamicResource Libation.Font.Display}" FontSize="{DynamicResource Libation.FontSize.Section}" />
-						<TextBlock Text="{Binding ScanStateText}" TextWrapping="Wrap" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
-						<StackPanel Orientation="Horizontal" Spacing="8">
-							<Button Classes="contemporary primary" Content="Scan all accounts" Command="{Binding ScanAllCommand}" IsEnabled="{Binding CanScan}" />
-							<Button Classes="contemporary" Content="Choose accounts to scan" Command="{Binding ScanSomeCommand}"
-								IsEnabled="{Binding CanScanSome}" />
-						</StackPanel>
-					</StackPanel>
-				</Border>
-			</Grid>
-
-			<Border Classes="card">
-				<Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource Libation.Space.3}">
-					<StackPanel Spacing="{DynamicResource Libation.Space.1}">
-						<TextBlock Text="Automatic scanning" FontWeight="SemiBold" />
-						<TextBlock Text="{Binding AutoScanText}" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
-					</StackPanel>
-					<Button Grid.Column="1" Classes="contemporary" Content="{Binding AutoScanActionText}" Command="{Binding ToggleAutoScanCommand}" />
-				</Grid>
-			</Border>
-
-			<Border Classes="card">
-				<StackPanel Spacing="{DynamicResource Libation.Space.3}">
-					<TextBlock Text="Review titles missing from account scans" FontFamily="{DynamicResource Libation.Font.Display}"
+			<Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource Libation.Space.3}">
+				<StackPanel Spacing="{DynamicResource Libation.Space.1}">
+					<TextBlock Text="Configured accounts" FontFamily="{DynamicResource Libation.Font.Display}"
 						FontSize="{DynamicResource Libation.FontSize.Section}" />
-					<TextBlock Text="{x:Static properties:Resources.AccountsReconcileExplanation}"
-						TextWrapping="Wrap" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
-					<components:AttentionBanner Severity="{x:Static components:ComponentSeverity.Warning}" Title="Review before removing records"
-						Message="Moving a library record to Trash hides it from the library. Restore and permanent record deletion remain in the protected Trash workflow." />
-					<StackPanel Orientation="Horizontal" Spacing="8">
-						<Button Classes="contemporary" Content="Review all accounts" Command="{Binding ReconcileAllCommand}" IsEnabled="{Binding CanScan}" />
-						<Button Classes="contemporary" Content="Choose accounts to review" Command="{Binding ReconcileSomeCommand}"
-							IsEnabled="{Binding CanScanSome}" />
-					</StackPanel>
+					<TextBlock Text="{Binding ScanStateText}" Foreground="{DynamicResource Libation.Brush.TextSecondary}" TextWrapping="Wrap" />
 				</StackPanel>
-			</Border>
+				<components:StatusBadge Grid.Column="1" Status="{Binding AccountStatus}"
+					TextOverride="{Binding AccountCountText}" AccessibleName="{Binding AccountCountText}" />
+			</Grid>
+			<components:EmptyState IsVisible="{Binding !HasAccounts}" Title="{Binding EmptyStateTitle}"
+				Explanation="{Binding EmptyStateExplanation}" PrimaryActionText="Add account"
+				PrimaryCommand="{Binding AddAccountCommand}" />
+			<ItemsControl ItemsSource="{Binding Accounts}" ItemTemplate="{StaticResource AccountCard}" />
 		</StackPanel>
 	</ScrollViewer>
 </UserControl>

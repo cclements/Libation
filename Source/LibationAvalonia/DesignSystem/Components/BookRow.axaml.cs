@@ -16,10 +16,16 @@ public partial class BookRow : UserControl
 	public static readonly StyledProperty<bool> IsSelectedProperty = AvaloniaProperty.Register<BookRow, bool>(nameof(IsSelected));
 	public static readonly StyledProperty<bool> ShowProgressProperty = AvaloniaProperty.Register<BookRow, bool>(nameof(ShowProgress));
 	public static readonly StyledProperty<double> ProgressProperty = AvaloniaProperty.Register<BookRow, double>(nameof(Progress));
+	public static readonly StyledProperty<string?> ProgressAccessibleNameProperty = AvaloniaProperty.Register<BookRow, string?>(nameof(ProgressAccessibleName), "Book progress");
+	public static readonly StyledProperty<string?> StatusAccessibleNameProperty = AvaloniaProperty.Register<BookRow, string?>(nameof(StatusAccessibleName));
 	public static readonly StyledProperty<ICommand?> CommandProperty = AvaloniaProperty.Register<BookRow, ICommand?>(nameof(Command));
 	public static readonly StyledProperty<object?> CommandParameterProperty = AvaloniaProperty.Register<BookRow, object?>(nameof(CommandParameter));
+	public static readonly StyledProperty<string?> CommandTextProperty = AvaloniaProperty.Register<BookRow, string?>(nameof(CommandText), "Open");
+	public static readonly StyledProperty<string?> CommandAccessibleNameProperty = AvaloniaProperty.Register<BookRow, string?>(nameof(CommandAccessibleName));
 	public static readonly StyledProperty<ICommand?> ContextCommandProperty = AvaloniaProperty.Register<BookRow, ICommand?>(nameof(ContextCommand));
 	public static readonly StyledProperty<object?> ContextCommandParameterProperty = AvaloniaProperty.Register<BookRow, object?>(nameof(ContextCommandParameter));
+	public static readonly StyledProperty<string?> ContextCommandTextProperty = AvaloniaProperty.Register<BookRow, string?>(nameof(ContextCommandText), "More");
+	public static readonly StyledProperty<string?> ContextCommandAccessibleNameProperty = AvaloniaProperty.Register<BookRow, string?>(nameof(ContextCommandAccessibleName), "More book actions");
 
 	public BookRow()
 	{
@@ -36,10 +42,16 @@ public partial class BookRow : UserControl
 	public bool IsSelected { get => GetValue(IsSelectedProperty); set => SetValue(IsSelectedProperty, value); }
 	public bool ShowProgress { get => GetValue(ShowProgressProperty); set => SetValue(ShowProgressProperty, value); }
 	public double Progress { get => GetValue(ProgressProperty); set => SetValue(ProgressProperty, value); }
+	public string? ProgressAccessibleName { get => GetValue(ProgressAccessibleNameProperty); set => SetValue(ProgressAccessibleNameProperty, value); }
+	public string? StatusAccessibleName { get => GetValue(StatusAccessibleNameProperty); set => SetValue(StatusAccessibleNameProperty, value); }
 	public ICommand? Command { get => GetValue(CommandProperty); set => SetValue(CommandProperty, value); }
 	public object? CommandParameter { get => GetValue(CommandParameterProperty); set => SetValue(CommandParameterProperty, value); }
+	public string? CommandText { get => GetValue(CommandTextProperty); set => SetValue(CommandTextProperty, value); }
+	public string? CommandAccessibleName { get => GetValue(CommandAccessibleNameProperty); set => SetValue(CommandAccessibleNameProperty, value); }
 	public ICommand? ContextCommand { get => GetValue(ContextCommandProperty); set => SetValue(ContextCommandProperty, value); }
 	public object? ContextCommandParameter { get => GetValue(ContextCommandParameterProperty); set => SetValue(ContextCommandParameterProperty, value); }
+	public string? ContextCommandText { get => GetValue(ContextCommandTextProperty); set => SetValue(ContextCommandTextProperty, value); }
+	public string? ContextCommandAccessibleName { get => GetValue(ContextCommandAccessibleNameProperty); set => SetValue(ContextCommandAccessibleNameProperty, value); }
 
 	protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
 	{

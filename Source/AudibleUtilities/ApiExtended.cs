@@ -31,6 +31,41 @@ public class ApiExtended
 	public static Task<ApiExtended> CreateAsync(Account account)
 		=> CreateAsync(account, allowInteractiveLogin: true);
 
+	/// <summary>
+	/// Starts a fresh interactive login even when the stored tokens are currently
+	/// usable. This is intentionally separate from <see cref="CreateAsync(Account)"/>,
+	/// whose normal contract is to reuse stored authorization first.
+	/// </summary>
+	public static async Task ReauthenticateAsync(Account account)
+	{
+		ArgumentValidator.EnsureNotNull(account, nameof(account));
+		ArgumentValidator.EnsureNotNull(account.AccountId, nameof(account.AccountId));
+		var locale = ArgumentValidator.EnsureNotNull(account.Locale, nameof(account.Locale));
+		if (LoginChoiceFactory is null)
+			throw new AuthenticationRequiredException(
+				account,
+				$"Interactive login is not available for {account.MaskedLogEntry} in this context (CLI/Docker).");
+
+		await InteractiveLoginGate.WaitAsync();
+		try
+		{
+			Serilog.Log.Logger.Information("Beginning forced interactive account authentication. {@DebugInfo}", new
+			{
+				Account = account.MaskedLogEntry ?? "[null]",
+				LocaleName = locale.Name,
+			});
+			_ = await EzApiCreator.GetApiAsync(
+				LoginChoiceFactory(account),
+				locale,
+				AudibleApiStorage.AccountsSettingsFile,
+				account.GetIdentityTokensJsonPath());
+		}
+		finally
+		{
+			InteractiveLoginGate.Release();
+		}
+	}
+
 	/// <param name="storeLocale">
 	/// The marketplace to read, when it is not the one the account is registered with. The account's own tokens
 	/// are used either way; only the store host changes. Null means the account's own marketplace.

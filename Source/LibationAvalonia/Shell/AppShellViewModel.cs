@@ -277,6 +277,7 @@ public sealed class AppShellViewModel : ViewModelBase, IDisposable
 		bool shellActive = configuration.UseContemporaryShell;
 		Dashboard.SetActive(shellActive && route == AppRouteId.Overview);
 		History.SetActive(shellActive && route == AppRouteId.History);
+		Trash.SetActive(shellActive && route == AppRouteId.Trash);
 	}
 
 	private void Responsive_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)

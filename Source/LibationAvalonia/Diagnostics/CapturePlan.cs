@@ -40,6 +40,7 @@ public enum CaptureSurface
 {
 	Route,
 	ComponentGallery,
+	Onboarding,
 }
 
 public enum ProcessingCaptureScenario
@@ -71,6 +72,8 @@ public sealed record CaptureEntry(
 	public ProcessingCaptureScenario ProcessingScenario { get; init; } = ProcessingCaptureScenario.Default;
 	public bool OpenDecanter { get; init; }
 	public bool FocusFailedProcessingItem { get; init; }
+	public int OnboardingStep { get; init; } = 1;
+	public bool OnboardingScanActive { get; init; }
 	public string FileName => File ?? CapturePlan.DefaultFileName(this);
 }
 
@@ -87,9 +90,12 @@ public sealed record CapturePlan(int SettleMs, IReadOnlyList<CaptureEntry> Entri
 
 	public static string DefaultFileName(CaptureEntry entry)
 	{
-		var surface = entry.Surface == CaptureSurface.ComponentGallery
-			? "componentgallery"
-			: entry.Route.ToString().ToLowerInvariant();
+		var surface = entry.Surface switch
+		{
+			CaptureSurface.ComponentGallery => "componentgallery",
+			CaptureSurface.Onboarding => $"onboarding-step{entry.OnboardingStep}",
+			_ => entry.Route.ToString().ToLowerInvariant(),
+		};
 		return $"{entry.Profile.ToString().ToLowerInvariant()}-{surface}-{entry.Width}x{entry.Height}.png";
 	}
 
@@ -119,7 +125,7 @@ public sealed record CapturePlan(int SettleMs, IReadOnlyList<CaptureEntry> Entri
 			var surface = entry.Surface is null ? CaptureSurface.Route
 				: TryParseDefined(entry.Surface, out CaptureSurface parsedSurface) ? parsedSurface
 				: throw new CapturePlanException($"Unknown surface '{entry.Surface}'.");
-			var route = entry.Route is null && surface == CaptureSurface.ComponentGallery
+			var route = entry.Route is null && surface is CaptureSurface.ComponentGallery or CaptureSurface.Onboarding
 				? AppRouteId.Overview
 				: TryParseDefined(entry.Route, out AppRouteId parsedRoute) ? parsedRoute
 				: throw new CapturePlanException($"Unknown route '{entry.Route}'.");
@@ -129,6 +135,8 @@ public sealed record CapturePlan(int SettleMs, IReadOnlyList<CaptureEntry> Entri
 				throw new CapturePlanException($"Entry {profile}/{surface} has a negative Flight selection count.");
 			if (entry.ProcessingSeedCount < 0)
 				throw new CapturePlanException($"Entry {profile}/{surface} has a negative processing seed count.");
+			if (surface == CaptureSurface.Onboarding && entry.OnboardingStep is < 1 or > 5)
+				throw new CapturePlanException($"Entry {profile}/{surface} has onboarding step {entry.OnboardingStep}; expected 1 through 5.");
 
 			var density = entry.Density is null ? DensityMode.Comfortable
 				: TryParseDefined(entry.Density, out DensityMode parsedDensity) ? parsedDensity
@@ -161,6 +169,8 @@ public sealed record CapturePlan(int SettleMs, IReadOnlyList<CaptureEntry> Entri
 				ProcessingScenario = processingScenario,
 				OpenDecanter = entry.OpenDecanter,
 				FocusFailedProcessingItem = entry.FocusFailedProcessingItem,
+				OnboardingStep = entry.OnboardingStep,
+				OnboardingScanActive = entry.OnboardingScanActive,
 			});
 		}
 
@@ -194,6 +204,8 @@ public sealed record CapturePlan(int SettleMs, IReadOnlyList<CaptureEntry> Entri
 		[JsonPropertyName("openDetails")] public bool OpenDetails { get; set; }
 		[JsonPropertyName("openDecanter")] public bool OpenDecanter { get; set; }
 		[JsonPropertyName("focusFailedProcessingItem")] public bool FocusFailedProcessingItem { get; set; }
+		[JsonPropertyName("onboardingStep")] public int OnboardingStep { get; set; } = 1;
+		[JsonPropertyName("onboardingScanActive")] public bool OnboardingScanActive { get; set; }
 		[JsonPropertyName("file")] public string? File { get; set; }
 	}
 }

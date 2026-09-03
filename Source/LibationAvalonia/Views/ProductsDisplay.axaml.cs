@@ -560,35 +560,8 @@ public partial class ProductsDisplay : UserControl
 			menuItems.Add(new MenuItem
 			{
 				Header = ctx.LocateFileText,
-				Command = ReactiveCommand.CreateFromTask(async () =>
-				{
-					try
-					{
-						if (this.GetParentWindow() is not Window window)
-							return;
-
-						var openFileDialogOptions = new FilePickerOpenOptions
-						{
-							Title = ctx.LocateFileDialogTitle,
-							AllowMultiple = false,
-							SuggestedStartLocation = await window.StorageProvider.TryGetFolderFromPathAsync(Configuration.Instance.Books?.PathWithoutPrefix!),
-							FileTypeFilter = new FilePickerFileType[]
-							{
-								new("All files (*.*)") { Patterns = new[] { "*" } },
-							}
-						};
-
-						var selectedFiles = await window.StorageProvider.OpenFilePickerAsync(openFileDialogOptions);
-						var selectedFile = selectedFiles.SingleOrDefault()?.TryGetLocalPath();
-
-						if (selectedFile is not null)
-							FilePathCache.Insert(entry.AudibleProductId, selectedFile);
-					}
-					catch (Exception ex)
-					{
-						await MessageBox.ShowAdminAlert(null, ctx.LocateFileErrorMessage, ctx.LocateFileErrorMessage, ex);
-					}
-				})
+				Command = ReactiveCommand.CreateFromTask(() =>
+					App.MainWindow?.ViewModel?.LocateBookFileAsync(entry.LibraryBook) ?? Task.FromResult(false))
 			});
 		}
 

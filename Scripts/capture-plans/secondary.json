@@ -144,6 +144,46 @@
       "route": "Trash",
       "width": 960,
       "height": 720
+    },
+    {
+      "profile": "Cellar",
+      "surface": "Onboarding",
+      "onboardingStep": 1,
+      "onboardingScanActive": false,
+      "width": 1456,
+      "height": 1060
+    },
+    {
+      "profile": "Cellar",
+      "surface": "Onboarding",
+      "onboardingStep": 2,
+      "onboardingScanActive": false,
+      "width": 1456,
+      "height": 1060
+    },
+    {
+      "profile": "Cellar",
+      "surface": "Onboarding",
+      "onboardingStep": 3,
+      "onboardingScanActive": false,
+      "width": 1456,
+      "height": 1060
+    },
+    {
+      "profile": "Cellar",
+      "surface": "Onboarding",
+      "onboardingStep": 4,
+      "onboardingScanActive": true,
+      "width": 1456,
+      "height": 1060
+    },
+    {
+      "profile": "Cellar",
+      "surface": "Onboarding",
+      "onboardingStep": 5,
+      "onboardingScanActive": false,
+      "width": 1456,
+      "height": 1060
     }
   ]
 }

@@ -8,51 +8,90 @@
 	x:DataType="history:HistoryViewModel">
 	<UserControl.Resources>
 		<DataTemplate x:Key="HistoryRow" x:DataType="history:HistoryItem">
-			<Border Classes="card" Margin="0,0,0,8">
-				<Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{DynamicResource Libation.Space.3}">
-					<TextBlock Text="{Binding DateText}" Width="150" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+			<Border Classes="card" Margin="0,0,0,8" AutomationProperties.Name="{Binding AccessibleName}">
+				<Grid ColumnDefinitions="128,*,Auto" ColumnSpacing="{DynamicResource Libation.Space.3}">
+					<TextBlock Text="{Binding DateText}" TextWrapping="Wrap"
+						Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
 					<StackPanel Grid.Column="1" Spacing="{DynamicResource Libation.Space.1}">
-						<TextBlock Text="{Binding Title}" FontWeight="SemiBold" Foreground="{DynamicResource Libation.Brush.TextPrimary}" />
+						<TextBlock Text="{Binding Title}" FontWeight="SemiBold"
+							Foreground="{DynamicResource Libation.Brush.TextPrimary}" TextTrimming="CharacterEllipsis" />
 						<TextBlock Text="{Binding Action}" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
-						<TextBlock Text="{Binding Detail}" TextWrapping="Wrap" Foreground="{DynamicResource Libation.Brush.TextTertiary}" />
+						<TextBlock Text="{Binding Detail}" TextWrapping="Wrap"
+							Foreground="{DynamicResource Libation.Brush.TextTertiary}" MaxLines="2" TextTrimming="CharacterEllipsis" />
 					</StackPanel>
-					<components:StatusBadge Grid.Column="2" Status="{Binding Status}" TextOverride="{Binding Result}" AccessibleName="{Binding Result}" />
+					<components:StatusBadge Grid.Column="2" Status="{Binding Status}" TextOverride="{Binding Result}"
+						AccessibleName="{Binding StatusAccessibleName}" />
 				</Grid>
 			</Border>
 		</DataTemplate>
 	</UserControl.Resources>
-	<Grid Margin="{DynamicResource Libation.Thickness.5}" RowDefinitions="Auto,Auto,Auto,*"
+	<Grid Margin="{DynamicResource Libation.Thickness.4}" RowDefinitions="Auto,Auto,*"
 		RowSpacing="{DynamicResource Libation.Space.3}">
-			<components:AttentionBanner Grid.Row="0" Severity="{x:Static components:ComponentSeverity.Info}"
-				Title="{x:Static properties:Resources.HistoryScopeTitle}"
-				Message="{x:Static properties:Resources.HistoryScopeMessage}" />
-			<components:AttentionBanner Grid.Row="1" IsVisible="{Binding HasLoadError}" Severity="{x:Static components:ComponentSeverity.Danger}" FocusOnShow="True"
-				Title="History unavailable" Message="{Binding LoadError}" ActionText="Refresh" ActionCommand="{Binding RefreshCommand}"
-				SecondaryActionText="Copy technical details" SecondaryActionCommand="{Binding CopyTechnicalDetailsCommand}" />
-			<Border Grid.Row="2" Classes="card">
-				<Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource Libation.Space.3}">
-					<StackPanel Spacing="{DynamicResource Libation.Space.1}">
-						<TextBox Text="{Binding SearchText, Mode=TwoWay}" PlaceholderText="Search date, title, action, result, or recorded detail"
-							AutomationProperties.Name="Search available history" />
-						<TextBlock Text="{Binding ResultSummary}" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+		<components:AttentionBanner Grid.Row="0" IsVisible="{Binding HasLoadError}"
+			Severity="{x:Static components:ComponentSeverity.Danger}" FocusOnShow="True"
+			Title="History unavailable" Message="{Binding LoadError}" ActionText="Refresh" ActionCommand="{Binding RefreshCommand}"
+			SecondaryActionText="Copy technical details" SecondaryActionCommand="{Binding CopyTechnicalDetailsCommand}" />
+		<Border Grid.Row="1" Classes="card">
+			<StackPanel Spacing="{DynamicResource Libation.Space.2}">
+				<TextBlock Text="{x:Static properties:Resources.HistoryScopeMessage}"
+					Foreground="{DynamicResource Libation.Brush.TextSecondary}" TextWrapping="Wrap"
+					AutomationProperties.Name="{x:Static properties:Resources.HistoryScopeTitle}" />
+				<WrapPanel Orientation="Horizontal">
+					<StackPanel Width="168" Margin="0,0,12,8" Spacing="{DynamicResource Libation.Space.1}">
+						<TextBlock Text="From date" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+						<CalendarDatePicker SelectedDate="{Binding FromDate, Mode=TwoWay}" AutomationProperties.Name="History from date" />
 					</StackPanel>
-					<Button Grid.Column="1" Classes="contemporary quiet" Content="Refresh" Command="{Binding RefreshCommand}" />
+					<StackPanel Width="168" Margin="0,0,12,8" Spacing="{DynamicResource Libation.Space.1}">
+						<TextBlock Text="To date" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+						<CalendarDatePicker SelectedDate="{Binding ToDate, Mode=TwoWay}" AutomationProperties.Name="History to date" />
+					</StackPanel>
+					<StackPanel Width="180" Margin="0,0,12,8" Spacing="{DynamicResource Libation.Space.1}">
+						<TextBlock Text="Action" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+						<ComboBox ItemsSource="{Binding ActionOptions}" SelectedItem="{Binding SelectedAction, Mode=TwoWay}"
+							AutomationProperties.Name="Filter History by action" />
+					</StackPanel>
+					<StackPanel Width="180" Margin="0,0,0,8" Spacing="{DynamicResource Libation.Space.1}">
+						<TextBlock Text="Result" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+						<ComboBox ItemsSource="{Binding ResultOptions}" SelectedItem="{Binding SelectedResult, Mode=TwoWay}"
+							AutomationProperties.Name="Filter History by result" />
+					</StackPanel>
+				</WrapPanel>
+				<Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="{DynamicResource Libation.Space.2}">
+					<TextBox Text="{Binding SearchText, Mode=TwoWay}"
+						PlaceholderText="Search date, title, action, result, or recorded detail"
+						AutomationProperties.Name="Search available history" />
+					<Button Grid.Column="1" Classes="contemporary quiet" Content="Clear filters"
+						Command="{Binding ClearFiltersCommand}" />
+					<Button Grid.Column="2" Classes="contemporary quiet" Content="Refresh"
+						Command="{Binding RefreshCommand}" />
 				</Grid>
+				<TextBlock Text="{Binding ResultSummary}" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+			</StackPanel>
+		</Border>
+		<Grid Grid.Row="2">
+			<Border Classes="card" IsVisible="{Binding IsLoading}" VerticalAlignment="Top">
+				<StackPanel Spacing="{DynamicResource Libation.Space.2}">
+					<TextBlock Text="Loading available history…" FontWeight="SemiBold" />
+					<ProgressBar IsIndeterminate="True" AutomationProperties.Name="Loading available history" />
+				</StackPanel>
 			</Border>
-			<Grid Grid.Row="3">
-				<Border Classes="card" IsVisible="{Binding IsLoading}" VerticalAlignment="Top">
-					<StackPanel Spacing="{DynamicResource Libation.Space.2}">
-						<TextBlock Text="Loading available history…" FontWeight="SemiBold" />
-						<ProgressBar IsIndeterminate="True" AutomationProperties.Name="Loading available history" />
-					</StackPanel>
-				</Border>
-				<components:EmptyState IsVisible="{Binding ShowEmpty}" VerticalAlignment="Top" Title="No recorded outcomes match"
-					Explanation="Clear the search, or return after Libation records a library addition, completed title, or processing-session message."
-					PrimaryActionText="Refresh" PrimaryCommand="{Binding RefreshCommand}" />
-				<ListBox ItemsSource="{Binding VisibleItems}" ItemTemplate="{StaticResource HistoryRow}"
-					IsVisible="{Binding HasItems}" AutomationProperties.Name="Available history outcomes">
-					<ListBox.ItemsPanel><ItemsPanelTemplate><VirtualizingStackPanel /></ItemsPanelTemplate></ListBox.ItemsPanel>
-				</ListBox>
-			</Grid>
+			<components:EmptyState IsVisible="{Binding ShowEmpty}" VerticalAlignment="Top" Title="No recorded outcomes match"
+				Explanation="Adjust or clear the filters, or return after Libation records another available outcome."
+				PrimaryActionText="Clear filters" PrimaryCommand="{Binding ClearFiltersCommand}"
+				SecondaryActionText="Refresh" SecondaryCommand="{Binding RefreshCommand}" />
+			<ListBox ItemsSource="{Binding VisibleItems}" ItemTemplate="{StaticResource HistoryRow}"
+				IsVisible="{Binding HasItems}" AutomationProperties.Name="Available history outcomes"
+				BorderThickness="0">
+				<ListBox.Styles>
+					<Style Selector="ListBoxItem">
+						<Setter Property="Padding" Value="0" />
+						<Setter Property="HorizontalContentAlignment" Value="Stretch" />
+					</Style>
+				</ListBox.Styles>
+				<ListBox.ItemsPanel>
+					<ItemsPanelTemplate><VirtualizingStackPanel /></ItemsPanelTemplate>
+				</ListBox.ItemsPanel>
+			</ListBox>
+		</Grid>
 	</Grid>
 </UserControl>

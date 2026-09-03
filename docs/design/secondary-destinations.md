@@ -1,222 +1,122 @@
 # Contemporary secondary destinations
 
-Prompt 10 is implemented as presentation over the existing `MainVM`,
-`ProductsDisplayViewModel`, `ProcessQueueViewModel`, dialogs, configuration, and
-command owners. The feature views do not open their own account persister, create a
-second downloader, reproduce settings validation, or mutate database rows directly.
+S6 implements Downloads, History, Accounts, Settings, Tools, Trash, and the five-step onboarding surface as presentation over Libation's established owners. It does not introduce another downloader, queue, Flight, account store, settings writer, library filter, deletion path, or route dispatcher.
 
-The current Libation interface, the contemporary shell, native menus, established
-dialogs, and existing keyboard gestures remain available together during the
-experimental opt-in rollout.
+The contemporary shell and current Libation interface remain two presentations over the same application state. Native menus, existing dialogs, established keyboard gestures, and Classic-mode behavior remain available during the default-off rollout.
 
 ## Construction and lifetime
 
-`LibationCommandAdapter` is the shared bridge to established command owners.
-`AppShellViewModel` constructs one instance of each destination view model and owns
-its lifetime:
+`AppShellViewModel` owns one instance of each destination view model for the shell lifetime:
 
 ```csharp
-var adapter = new LibationCommandAdapter(main);
-
-var downloads = new DownloadsViewModel(adapter);
-var history = new HistoryViewModel(main);
-var accounts = new AccountsViewModel(adapter);
-var settings = new SettingsViewModel(adapter, configuration);
-var tools = new ToolsViewModel(adapter);
-var trash = new TrashViewModel(adapter);
+Downloads = new DownloadsViewModel(CommandAdapter);
+History = new HistoryViewModel(main);
+Accounts = new AccountsViewModel(CommandAdapter);
+Settings = new SettingsViewModel(CommandAdapter, configuration);
+Tools = new ToolsViewModel(CommandAdapter);
+Trash = new TrashViewModel(CommandAdapter);
 ```
 
-Each instance must be reused while its route is hidden so an in-flight action,
-search, and live aggregate do not restart on every navigation. The shell disposes
-all six instances. `SecondaryDestinationViewModel` serializes owner actions through
-a nonblocking gate, reports a literal local error, logs the exception, and disposes
-only commands it created. It never disposes a `MainVM`-owned command.
+Hidden routes retain their view models so searches, row identity, live state, and in-flight owner actions do not restart on navigation. Refreshes reconcile existing observable rows by stable title or presentation identity. `SecondaryDestinationViewModel` serializes delegated actions, publishes literal local errors, logs exceptions, and disposes only commands it created.
 
 ## Destination contracts
 
-| Destination | Authoritative data | Production states | Delegated actions |
+| Destination | Authoritative input | Production presentation | Delegated actions |
 |---|---|---|---|
-| Downloads | `MainVM.LibraryStats`; shared `ProcessQueue.Queue` | counts loading; no catalogued titles with account-aware next action; Download Pending; downloaded Audible file; processed open copy; unavailable/error; queue idle/active | pending books, pending PDFs, locate existing files, convert M4B library to MP3, account management/scan for an empty library, refresh counts |
-| History | `LibraryBook.DateAdded`; `UserDefinedItem.LastDownloaded`; current retained `ProcessQueue.LogEntries` | asynchronous loading; searchable results; no match; source/projection error | refresh only; no mutation |
-| Accounts | aggregate `MainVM` account, scan, auto-scan, and library counts | no accounts; connected account count; scanning; idle; automatic scan on/off | add/manage, scan all/some, toggle automatic scan, run existing missing-title review for all/some |
-| Settings | `Configuration` summaries; stable local category index | all categories; filtered categories; no match; owner-dialog error | established Settings, Accounts, and About dialogs; request contemporary onboarding re-entry |
-| Tools | literal static command catalogue; `MainVM` commands | grouped low-risk, preference-changing, scope-sensitive, file-writing, destructive-after-confirmation, external-utility actions | existing library maintenance, file discovery, metadata, quality, export, quick-filter, About/update, and Hangover owners |
-| Trash | `MainVM.BooksInTrash` | empty; items present; owner-dialog error | refresh count; open the existing searchable restore/permanent-delete dialog |
+| Downloads | `MainVM.LibraryStats`, existing process queue, known local source paths | one virtualized list with stable Download Pending, Downloading, Downloaded, and Unavailable sections | title Download/Process/Retry when applicable, title Locate, pending books/PDFs, locate files, convert M4B, refresh |
+| History | `LibraryBook.DateAdded`, `LastDownloaded`, retained queue log | timestamped typed outcomes with date/action/result/text filters; limited-history disclosure | refresh only |
+| Accounts | `AccountPresentationSource` safe snapshots over account settings and current library facts | masked or genuine nickname, known marketplaces/title count, local credential state, scan inclusion | add/manage, per-account scan, edit marketplaces, forced interactive reauthentication, cancel-default removal |
+| Settings | `Configuration`, five established dialog sections | native contemporary appearance draft plus searchable cards for the five real tabs | atomic apply/reset, onboarding re-entry, exact tab deep links, Accounts and About |
+| Tools | existing `MainVM` commands and current Library filter | literal scope, consequence, risk, live startup-filter preference, owner-provided update state | established maintenance, discovery, metadata, quality, export/filter, About, and Hangover owners |
+| Trash | `DbContexts.GetDeletedLibraryBooks()` | one searchable, virtualized list containing only actionable deleted non-parent records | restore and cancel-default permanent record deletion |
 
-All profile-dependent colors, typography, spacing, decoration, and status treatment
-come from `Libation.*` resources. Feature views consume the shared `PageHeader`,
-`MetricCard`, `StatusBadge`, `AttentionBanner`, `EmptyState`, and
-`ThemePreviewCard` components instead of local substitutes.
+All profile-dependent color, typography, spacing, decoration, and status treatment comes from `Libation.*` resources. The views reuse `PageHeader`, `BookRow`, `StatusBadge`, `AttentionBanner`, `EmptyState`, and the scoped profile-preview components.
 
 ## Truth and privacy boundaries
 
 ### Downloads
 
-The backend currently combines acquisition and processing in some queue operations.
-The page explains the states separately but invokes the same combined command. Its
-counts are filesystem-aware `LibraryStats` results. “Downloaded Audible file” is a
-subset of “Download Pending” until an open copy completes, and the page labels that
-overlap explicitly instead of presenting the metrics as disjoint. It does not infer or fabricate
-per-title account, marketplace, source quality, expected size, missing-file reason,
-retryability, or progress when those facts are not exposed by one stable destination
-source. Title-level queue outcomes remain in Processing and title facts remain in
-Library.
+Each row joins one library title with its existing queue item. Membership changes when the real queue stage or retained library status changes; reconciliation preserves surviving book and section-row instances so a refresh does not discard focus merely to update counts.
+
+Rows publish only known facts:
+
+- masked account and recorded marketplace;
+- stored download quality when present;
+- the byte size of an existing Audible or processed source file when present;
+- queued/working progress from the current queue item; and
+- an action only when its owner predicate is satisfied.
+
+Unknown expected sizes remain absent. An unavailable remote title with a retained local copy remains Downloaded. Retry is offered only for a failed, reconstructible download/decrypt stage whose book or PDF still needs work. Locate uses the same extracted owner path as the current interface.
 
 ### History
 
-History is explicitly a limited projection, not an audit log. At most two persisted
-timestamp rows are projected for a title: catalogued and last completed download.
-Queue messages cover only the current retained processing session. Scans, exports,
-metadata edits, removals, restores, retries, account, marketplace, and durable
-failure history are absent unless a future domain-owned event store records them.
+History is an explicitly limited projection, not a durable audit log. It can show catalogue-added time, last completed download time, and retained current-session queue messages when those sources exist. It does not imply durable scan, export, tag, account, restore, or deletion history.
 
-The library snapshot is captured on the UI thread, projection/sort runs on a worker,
-refresh requests coalesce, and the final `ListBox` owns a bounded `*` row with a
-`VirtualizingStackPanel`. No ancestor `ScrollViewer` defeats virtualization.
+Correlation IDs remain typed diagnostic data. They are removed from visible detail and are not searchable public prose. Refresh captures input on the UI thread, computes projection away from it, coalesces requests, and reconciles one stable `ObservableCollection` on return. The single list owns its `VirtualizingStackPanel`; no ancestor item scroller defeats virtualization.
 
 ### Accounts
 
-The destination projects counts and coarse operational state only. It never opens
-`AudibleApiStorage`, reads account rows, or exposes names, login addresses, locale,
-marketplace IDs, cookies, credentials, tokens, or copyable diagnostics. Identities
-and marketplaces stay in `AccountsDialog`. There is no reliable persisted
-per-account last-successful-scan or authorization-health aggregate, so the page does
-not claim either one. Existing scan/sign-in owners surface authorization requests
-when required.
+`AccountPresentationSource` may inspect account persistence, but only immutable `AccountPresentationSnapshot` values cross into the view model. A snapshot contains an opaque presentation ID, safe display name, known marketplace names, locally counted titles, coarse stored-credential state, scan inclusion, and action availability. Raw account IDs, credentials, cookies, tokens, activation bytes, and domain `Account` instances do not cross the boundary.
 
-Account removal remains inside the established account dialog. That dialog currently
-does not provide a consequence-focused confirmation; the aggregate page therefore
-does not surface removal itself or imply that a confirmation exists.
+Generated account names are masked; a genuine nickname remains readable with any embedded login masked. Authorization labels describe local stored state only and never claim that Audible has accepted it remotely.
+
+Per-account actions resolve the opaque presentation ID back inside the source and delegate to established owners. Reauthenticate forces the real interactive login path. Edit and Remove open the transactional `AccountsDialog` at the target account. Removal defaults to cancel and explains that saved sign-in/marketplace settings are deleted while existing Library records and local audiobook files remain.
 
 ### Settings, About, and updates
 
-Search indexes only stable category names, descriptions, and generic search terms;
-it never indexes current values, paths, account identities, or secrets. Actual edits
-open `SettingsDialog`, which remains responsible for validation, directory creation,
-secure token conversion, preview/cancel, and saving. The appearance summary observes
-the existing configuration properties and does not write them.
+The route indexes exactly `Important Settings`, `Import Library`, `Download / Decrypt`, `Audio File Settings`, and `Audiobookshelf`. Each card opens the established `SettingsDialog` with that exact tab selected; validation, directory handling, token conversion, and dialog save/cancel behavior stay there.
 
-The existing Chardonnay editor remains accessible as an advanced override surface.
-Complete profile defaults and legacy palette overrides are not flattened or migrated
-by the category index. About/version/release notes/update checking and installation
-remain owned by the established About dialog, reachable from Settings, Tools, the
-About route, and the preserved menu.
+Contemporary appearance is native to the route. One draft includes profile or High Contrast choice, density, decoration, motion, default Library view, navigation rail, system typography, Decanter visibility, and Flight persistence. Preview changes do not mutate the active shell. Apply writes one `ContemporaryExperienceSettings` transaction. Reset writes the supported defaults while retaining the contemporary shell.
 
-### Tools and Trash
+The current-interface theme editor remains reachable from Important Settings. About/version/release notes/update checking remain owned by the established About dialog and are reachable through Settings, Tools, the About route, and preserved menus.
 
-Tool labels are literal and every entry states its consequence and risk. Commands
-that say “visible titles” mean every title matching the shared Library filter, not
-only rows in the viewport. Destructive actions retain their established preview or
-confirmation where one already exists.
+### Tools
 
-The Trash destination is a gateway, not a second deletion implementation. The
-established dialog provides search, selection, restore, and permanent record
-deletion. Its permanent action currently removes the selected `Book` and
-`LibraryBook` database records immediately after activation and does not add another
-confirmation. The destination warns about that exact behavior and does not claim
-that open audiobook files are deleted from disk.
+Commands that say `visible titles` use the complete shared Library filter result, not only realized rows in the viewport. Every card states its consequence and one of the typed risk classes: read-only, needs review, changes data, destructive, or external.
+
+The startup-filter switch reads and updates the live owner preference. Process visible titles calls an awaitable owner seam, calculates the exact eligible scope—including PDF-only work—and presents a cancel-default confirmation before any queue mutation. The route deliberately does not display the legacy book-only count as though it were the confirmation total.
+
+### Trash
+
+Trash is no longer a gateway to a second list. It projects the existing deleted-record source inline and excludes retained or series-parent rows from selection. Search and refresh reconcile stable row instances.
+
+Restore delegates directly to the existing restoration owner. Permanent deletion always asks for cancel-default confirmation before the established database-record deletion path. The copy states the material boundary: the selected Libation records are removed; existing audiobook files are not deleted from disk.
 
 ## Command parity
 
-| Existing command/workflow | Contemporary destination | Owner preserved |
+| Workflow | Contemporary entry | Existing owner retained |
 |---|---|---|
-| Add account | Accounts; onboarding | `MainVM.AddAccountsAsync` |
-| Toggle automatic scan | Accounts | `MainVM.ToggleAutoScan` |
-| Scan one/all accounts | Accounts; onboarding; empty Downloads | `MainVM.ScanAllAccountsAsync` through adapter |
-| Choose accounts to scan | Accounts | `MainVM.ScanSomeAccountsAsync` |
-| Review removed titles for one/all accounts | Accounts | `MainVM.RemoveBooksAllAsync` |
-| Choose accounts for removed-title review | Accounts | `MainVM.RemoveBooksSomeAsync` |
-| Locate audiobooks | Downloads; Tools; onboarding | `MainVM.LocateAudiobooksAsync` |
-| Begin book backups | Downloads | `MainVM.BackupAllBooks` |
-| Begin PDF-only backups | Downloads | `MainVM.BackupAllPdfs` |
-| Convert all M4B to MP3 | Downloads | `MainVM.ConvertAllToMp3Async` and its confirmation |
-| Process visible titles | Tools; preserved Library/menu action | `MainVM.LiberateVisible` |
-| Export library | Tools | `MainVM.ExportLibraryAsync` |
-| Apply a saved quick filter | Library quick-filter collection and preserved menu/gestures | existing generated quick-filter commands |
-| Edit quick filters | Tools; Library quick-filter menu | `MainVM.EditQuickFiltersAsync` |
-| Save current filter | Tools; Library action | `MainVM.AddQuickFilterBtn` |
-| Toggle first quick filter at startup | Tools; preserved quick-filter menu | `MainVM.ToggleFirstFilterIsDefault` |
-| Filter syntax help | Tools; Library action | `MainVM.FilterHelpBtn` |
-| Replace visible-title tags | Tools | `MainVM.ReplaceTagsAsync` and established prompts |
-| Set visible audiobook status | Tools | `MainVM.SetBookDownloadedAsync` |
-| Set visible PDF status | Tools | `MainVM.SetPdfDownloadedAsync` |
-| Detect visible download status | Tools | `MainVM.SetDownloadedAutoAsync` |
-| Move visible titles to Trash | Tools | `MainVM.RemoveVisibleAsync` and established confirmation |
-| Manage accounts | Accounts; Settings | `MainVM.ShowAccountsAsync` |
-| Edit settings | Settings; onboarding | `MainVM.ShowSettingsAsync` |
-| Restore/permanently delete library records | Trash | `MainVM.ShowTrashBinAsync` and `TrashBinViewModel` |
-| Launch Hangover | Tools | `MainVM.LaunchHangover` |
-| Scan for better-quality audiobooks | Tools | `MainVM.ShowFindBetterQualityBooksAsync` |
-| About/version/update status | Settings; Tools; About route | `MainVM.ShowAboutAsync` |
-| Guided Tour / contemporary setup review | current interface uses the established tour; contemporary shell opens repeatable onboarding | `MainVM.StartWalkthroughAsync` routes by the active shell mode |
+| Add/manage account | Accounts; Settings; onboarding | `MainVM.AddAccountsAsync` / `ShowAccountsAsync` |
+| Scan one account | account card | existing account-scan path through `ApiExtended` and `MainVM` |
+| Edit marketplaces/remove account | account card | targeted transactional `AccountsDialog` |
+| Force interactive reauthentication | account card | established login owner with interactive auth forced |
+| Download/process/retry one title | Downloads row | existing queue and processing commands |
+| Locate one or many files | Downloads; Tools; onboarding | extracted `MainVM` locate owner |
+| Download pending books/PDFs | Downloads | existing backup commands |
+| Convert M4B library | Downloads | existing conversion owner and confirmation |
+| Process visible titles | Tools | awaitable `MainVM` owner and confirmation |
+| Detect/set visible status | Tools | existing status workflows |
+| Move visible titles to Trash | Tools | existing confirmation and removal owner |
+| Restore/permanently delete record | Trash | existing database owners with S6 confirmation |
+| Export library / edit or save filters | Tools | existing `MainVM` commands |
+| Toggle first filter at startup | Tools | existing live preference owner |
+| Guided setup review | Settings; preserved Tour intent | `MainVM.StartWalkthroughAsync` routes by active shell mode |
 
-The current guided tour is coupled to controls in the current Libation interface.
-`MainVM.StartWalkthroughAsync` therefore keeps that tour when the feature flag is off
-and routes the same menu intent to repeatable profile-aware onboarding while the
-contemporary shell is active. The two presentations share an entry point without
-pretending their control-level walkthroughs are interchangeable.
+## Onboarding and hosting
 
-## Onboarding and hosting API
+`OnboardingViewModel` owns a five-step local draft: profile, accounts, local-file location, scan, and first Current Flight. It delegates real work and does not fabricate accounts, books, paths, queue items, free-space values, or scan percentages. Capture projection can render an active scan stage but cannot start a scan or mutate Flight.
 
-`OnboardingViewModel` owns a five-step local draft: profile, accounts, locations,
-scan, and first Current Flight. It delegates all real actions and never fabricates an
-account, book, queue item, location, free-space value, or output path. Profile cards
-use isolated `ExperienceManager.CreatePreviewScope` resources and do not mutate the
-active application profile.
+Automatic first run requires an explicit profile choice before Continue. Manual re-entry seeds the saved profile and can close without changes. Completing a contemporary choice persists the profile, first-launch marker, and shell activation through one settings-file transaction; `UseContemporaryShell` is published last. Choosing the current Libation interface leaves the contemporary shell disabled.
 
-The presentation host, not the view model, owns overlay/window policy. `MainWindow`
-now implements this sequence:
+Step 4 shows owner scan text and indeterminate activity instead of a fabricated percentage. The user may continue while an owner scan runs. Step 5 offers two explicit outcomes:
 
-1. Construct `new OnboardingViewModel(adapter, isManualReentry, configuration)`.
-2. For automatic first run, present only when `ShouldOfferAutomatically` is true;
-   the former first-launch tour prompt no longer clears `Configuration.FirstLaunch`
-   first, so the two flows cannot compete.
-3. For re-entry, subscribe to `SettingsViewModel.OnboardingRequested` and construct
-   with `isManualReentry: true`.
-4. Set a new `OnboardingView` data context to that instance as a first-class main
-   window surface. Existing account/settings/location dialogs retain `MainWindow` as
-   owner and scan/library work remains nonblocking.
-5. Subscribe to `ExitRequested`; on completion or skip, unsubscribe, dispose, and
-   reapply the saved shell mode. Window close performs the same cleanup.
+- finish without changing Flight; or
+- request up to three newest, present, non-deleted, non-parent titles from `MainWindow`, add them through the shell-owned `FlightService`, and open Library without starting processing.
 
-Automatic first run starts with a Follow System draft, but that draft is not an
-opt-in. Continue is stopped until the user explicitly selects Follow System or
-another profile card. Skip changes only `Configuration.FirstLaunch`; it never writes
-`UseContemporaryShell` or `ExperienceStyle`. Finish commits the explicit choice:
+Library is activated before the requested Flight projection is dispatched. This ordering prevents a retained Details-grid selection event from replacing the onboarding gesture. If no title is eligible, Library still opens and the shell reports that outcome; if all candidates are already present, it reports that distinct outcome.
 
-| Choice shown to the user | Persisted result |
-|---|---|
-| Follow System | `ExperienceStyle.FollowSystem`, then `UseContemporaryShell = true` |
-| Cellar | `ExperienceStyle.Cellar`, then `UseContemporaryShell = true` |
-| Tasting Room | `ExperienceStyle.TastingRoom`, then `UseContemporaryShell = true` |
-| High Contrast | `ExperienceStyle.HighContrast`, then `UseContemporaryShell = true` |
-| Current Libation interface | `UseContemporaryShell = false` |
+## Capture contract and evidence boundary
 
-`UseContemporaryShell` remains default-off. “Current Libation interface” is the user
-label; `ExperienceStyle.CurrentAvalonia` remains the internal preview/profile name.
-The separately shipped Libation-Classic application is not an onboarding choice.
-Manual re-entry seeds the saved profile and may close without changes. Construction,
-Back, preview, and search do not write settings.
+`secondary.json` binds 24 route frames: six destinations, both profiles, and Wide 1456 x 1060 plus Compact 960 x 720. Five additional inert frames cover onboarding steps 1 through 5. The temporary capture host sizes both its window and re-parented content to the requested extent. On macOS, direct-window discovery includes a valid isolated layer-zero window even when another Libation instance places it on a different Space.
 
-Contemporary finishes persist the selected experience, the completed first-launch
-marker, and shell activation with one atomic settings-file replacement. Configuration
-change notifications are published only after that replacement succeeds, with
-`UseContemporaryShell` last, so presentation subscribers cannot observe a partially
-applied profile.
-
-## Integration gaps and evidence boundary
-
-1. Downloads requires a future domain adapter for per-title marketplace, source
-   quality, expected size, retryability, and acquisition progress. Aggregate state
-   and established actions are production-safe without those claims.
-2. Rich History requires a durable domain event schema. The current page is honest
-   and useful but intentionally incomplete.
-3. A privacy-safe per-account adapter is required before account cards can show
-   nickname, marketplace count, title count, last successful scan, or authorization
-   health. Do not derive these by opening the account persister in the view model.
-4. Account removal and Trash permanent deletion lack consequence-focused
-   confirmations in their established dialogs. This tranche warns or withholds the
-   action rather than duplicating domain logic.
-5. Release compilation proves the current source/XAML target. Keyboard traversal,
-   screen-reader output, runtime profile switching, supported-platform behavior,
-   screenshots, automated tests, and interaction remain separate unverified gates.
+The current S6 evidence is recorded outside the source repository under `runtime-audit-2026-09-03/S6/`. The approved focused contract gate passes 8/8; the unchanged full Release solution gate passes 1,800 total with 1,777 passed, 23 expected platform/secret-store skips, and 0 failed. Local compilation, automated tests, exact-size captures, accessibility-tree inspection, and scoped interactions do not prove VoiceOver or other assistive technology, keyboard-only traversal, live scan/download/process/destructive outcomes, 200% logical scaling, runtime High Contrast/reduced motion, Windows/Linux, installed packaging, notarization, distribution, publication, rollout, or release.

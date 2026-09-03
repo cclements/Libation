@@ -3,87 +3,58 @@
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:downloads="using:LibationAvalonia.Features.Downloads"
 	xmlns:components="using:LibationAvalonia.DesignSystem.Components"
-	xmlns:properties="using:LibationAvalonia.Properties"
 	x:Class="LibationAvalonia.Features.Downloads.DownloadsView"
 	x:DataType="downloads:DownloadsViewModel">
-	<ScrollViewer HorizontalScrollBarVisibility="Disabled">
-		<StackPanel Margin="{DynamicResource Libation.Thickness.5}" Spacing="{DynamicResource Libation.Space.4}">
-			<components:AttentionBanner IsVisible="{Binding HasError}"
-				Severity="{x:Static components:ComponentSeverity.Danger}" FocusOnShow="True" Title="Download action unavailable"
-				Message="{Binding ErrorMessage}" ActionText="Copy technical details" ActionCommand="{Binding CopyTechnicalDetailsCommand}" />
-			<Border Classes="card" IsVisible="{Binding IsLoading}">
+	<UserControl.Resources>
+		<DataTemplate x:Key="DownloadsRow" x:DataType="downloads:DownloadsListRowViewModel">
+			<Grid>
+				<Border IsVisible="{Binding IsSectionHeader}" Margin="0,12,0,8" Padding="4,0"
+					AutomationProperties.Name="{Binding SectionText}">
+					<TextBlock Text="{Binding SectionText}" FontFamily="{DynamicResource Libation.Font.Display}"
+						FontSize="{DynamicResource Libation.FontSize.Section}" Foreground="{DynamicResource Libation.Brush.TextPrimary}" />
+				</Border>
+				<components:BookRow IsVisible="{Binding IsBookRow}" Margin="0,0,0,8"
+					Title="{Binding Book.Title}" SupportingText="{Binding Book.SupportingText}" Metadata="{Binding Book.Metadata}"
+					Status="{Binding Book.Status}" StatusText="{Binding Book.StatusText}"
+					StatusAccessibleName="{Binding Book.StatusAccessibleName}"
+					ShowProgress="{Binding Book.ShowProgress}" Progress="{Binding Book.Progress}"
+					ProgressAccessibleName="{Binding Book.ProgressAccessibleName}"
+					Command="{Binding Book.PrimaryCommand}" CommandText="{Binding Book.PrimaryActionText}"
+					CommandAccessibleName="{Binding Book.PrimaryAccessibleName}"
+					ContextCommand="{Binding Book.LocateCommand}" ContextCommandText="Locate"
+					ContextCommandAccessibleName="{Binding Book.LocateAccessibleName}" />
+			</Grid>
+		</DataTemplate>
+	</UserControl.Resources>
+	<Grid Margin="{DynamicResource Libation.Thickness.5}" RowDefinitions="Auto,*"
+		RowSpacing="{DynamicResource Libation.Space.3}">
+		<components:AttentionBanner Grid.Row="0" IsVisible="{Binding HasError}"
+			Severity="{x:Static components:ComponentSeverity.Danger}" FocusOnShow="True" Title="Download action unavailable"
+			Message="{Binding ErrorMessage}" ActionText="Copy technical details" ActionCommand="{Binding CopyTechnicalDetailsCommand}" />
+		<Grid Grid.Row="1">
+			<Border Classes="card" IsVisible="{Binding IsLoading}" VerticalAlignment="Top">
 				<StackPanel Spacing="{DynamicResource Libation.Space.2}">
-					<TextBlock Text="Loading download state…" FontWeight="SemiBold" />
-					<ProgressBar IsIndeterminate="True" AutomationProperties.Name="Loading download state" />
+					<TextBlock Text="Loading per-title download state…" FontWeight="SemiBold" />
+					<ProgressBar IsIndeterminate="True" AutomationProperties.Name="Loading per-title download state" />
 				</StackPanel>
 			</Border>
-
-			<components:EmptyState IsVisible="{Binding ShowEmptyLibrary}" Title="No catalogued titles yet"
+			<components:EmptyState IsVisible="{Binding ShowEmptyLibrary}" VerticalAlignment="Top" Title="No catalogued titles yet"
 				Explanation="{Binding EmptyLibraryExplanation}" PrimaryActionText="{Binding EmptyLibraryActionText}"
-				PrimaryCommand="{Binding EmptyLibraryCommand}" SecondaryActionText="Refresh counts"
+				PrimaryCommand="{Binding EmptyLibraryCommand}" SecondaryActionText="Refresh"
 				SecondaryCommand="{Binding RefreshCommand}" />
-
-			<StackPanel IsVisible="{Binding HasLibraryTitles}" Spacing="{DynamicResource Libation.Space.4}">
-				<UniformGrid Columns="4" Rows="0">
-					<components:MetricCard Margin="0,0,12,12" IconData="{StaticResource glyph.downloads}"
-						Value="{Binding PendingText}" Label="Download Pending" Severity="{x:Static components:ComponentSeverity.Warning}"
-						CommandText="Start workflow" Command="{Binding DownloadPendingCommand}" />
-					<components:MetricCard Margin="0,0,12,12" IconData="{StaticResource status.downloaded}"
-						Value="{Binding DownloadedText}" Label="Downloaded Audible files" Severity="{x:Static components:ComponentSeverity.Info}" />
-					<components:MetricCard Margin="0,0,12,12" IconData="{StaticResource glyph.completed}"
-						Value="{Binding CompletedText}" Label="Processed open copies" Severity="{x:Static components:ComponentSeverity.Success}" />
-					<components:MetricCard Margin="0,0,12,12" IconData="{StaticResource status.needs-attention}"
-						Value="{Binding AttentionText}" Label="Unavailable or failed" Severity="{x:Static components:ComponentSeverity.Danger}" />
-				</UniformGrid>
-				<TextBlock Text="{Binding PendingExplanation}" TextWrapping="Wrap"
-					Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
-
-				<components:AttentionBanner IsVisible="{Binding HasAttention}"
-					Severity="{x:Static components:ComponentSeverity.Warning}" Title="Some titles need attention"
-					Message="{Binding AttentionExplanation}" />
-
-				<Border Classes="card raised">
-					<StackPanel Spacing="{DynamicResource Libation.Space.3}">
-						<Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource Libation.Space.3}">
-							<StackPanel Spacing="{DynamicResource Libation.Space.1}">
-								<TextBlock Text="Current pipeline" FontFamily="{DynamicResource Libation.Font.Display}"
-									FontSize="{DynamicResource Libation.FontSize.Section}" />
-								<TextBlock Text="{Binding PipelineText}" TextWrapping="Wrap"
-									Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
-							</StackPanel>
-							<components:StatusBadge Grid.Column="1" Status="{Binding PipelineStatus}"
-								TextOverride="{Binding PipelineBadgeText}" AccessibleName="{Binding PipelineText}" />
-						</Grid>
-						<TextBlock Text="{x:Static properties:Resources.DownloadsPipelineExplanation}"
-							TextWrapping="Wrap" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
-					</StackPanel>
-				</Border>
-
-				<Grid ColumnDefinitions="*,*" ColumnSpacing="{DynamicResource Libation.Space.4}">
-					<Border Classes="card">
-						<StackPanel Spacing="{DynamicResource Libation.Space.3}">
-							<TextBlock Text="Find and acquire" FontFamily="{DynamicResource Libation.Font.Display}" FontSize="{DynamicResource Libation.FontSize.Section}" />
-							<TextBlock Text="{x:Static properties:Resources.DownloadsFindAcquireExplanation}"
-								TextWrapping="Wrap" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
-							<StackPanel Orientation="Horizontal" Spacing="8">
-								<Button Classes="contemporary primary" Content="Download pending titles" Command="{Binding DownloadPendingCommand}" />
-								<Button Classes="contemporary" Content="Download pending PDFs" Command="{Binding DownloadPdfsCommand}" />
-								<Button Classes="contemporary" Content="Locate existing files" Command="{Binding LocateFilesCommand}" />
-							</StackPanel>
-						</StackPanel>
-					</Border>
-					<Border Grid.Column="1" Classes="card">
-						<StackPanel Spacing="{DynamicResource Libation.Space.3}">
-							<TextBlock Text="Long-running conversion" FontFamily="{DynamicResource Libation.Font.Display}" FontSize="{DynamicResource Libation.FontSize.Section}" />
-							<TextBlock Text="{x:Static properties:Resources.DownloadsConvertExplanation}"
-								TextWrapping="Wrap" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
-							<Button Classes="contemporary" HorizontalAlignment="Left" Content="Convert all M4B titles to MP3"
-								Command="{Binding ConvertAllToMp3Command}" />
-						</StackPanel>
-					</Border>
-				</Grid>
-				<Button Classes="contemporary quiet" HorizontalAlignment="Left" Content="Refresh download counts" Command="{Binding RefreshCommand}" />
-			</StackPanel>
-		</StackPanel>
-	</ScrollViewer>
+			<ListBox ItemsSource="{Binding Rows}" ItemTemplate="{StaticResource DownloadsRow}"
+				IsVisible="{Binding HasLibraryTitles}" AutomationProperties.Name="Downloads grouped by title"
+				BorderThickness="0">
+				<ListBox.Styles>
+					<Style Selector="ListBoxItem">
+						<Setter Property="Padding" Value="0" />
+						<Setter Property="HorizontalContentAlignment" Value="Stretch" />
+					</Style>
+				</ListBox.Styles>
+				<ListBox.ItemsPanel>
+					<ItemsPanelTemplate><VirtualizingStackPanel /></ItemsPanelTemplate>
+				</ListBox.ItemsPanel>
+			</ListBox>
+		</Grid>
+	</Grid>
 </UserControl>

@@ -3,6 +3,7 @@
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:settings="using:LibationAvalonia.Features.Settings"
 	xmlns:components="using:LibationAvalonia.DesignSystem.Components"
+	xmlns:fileManager="using:LibationFileManager"
 	xmlns:properties="using:LibationAvalonia.Properties"
 	x:Class="LibationAvalonia.Features.Settings.SettingsView"
 	x:DataType="settings:SettingsViewModel">
@@ -14,7 +15,8 @@
 						<TextBlock Text="{Binding Name}" FontWeight="SemiBold" Foreground="{DynamicResource Libation.Brush.TextPrimary}" />
 						<TextBlock Text="{Binding Description}" TextWrapping="Wrap" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
 					</StackPanel>
-					<Button Grid.Column="1" Classes="contemporary" Content="{Binding ActionLabel}" Command="{Binding OpenCommand}" />
+					<Button Grid.Column="1" Classes="contemporary" Content="{Binding ActionLabel}" Command="{Binding OpenCommand}"
+						AutomationProperties.Name="{Binding ActionLabel}" />
 				</Grid>
 			</Border>
 		</DataTemplate>
@@ -26,53 +28,127 @@
 				ActionText="Copy technical details" ActionCommand="{Binding CopyTechnicalDetailsCommand}" />
 
 			<Border Classes="card raised">
-				<StackPanel Spacing="{DynamicResource Libation.Space.3}">
+				<StackPanel Spacing="{DynamicResource Libation.Space.4}">
 					<Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource Libation.Space.3}">
 						<StackPanel Spacing="{DynamicResource Libation.Space.1}">
-							<TextBlock Text="Appearance" FontFamily="{DynamicResource Libation.Font.Display}" FontSize="{DynamicResource Libation.FontSize.Section}" />
-							<TextBlock Text="{Binding AppearanceSummary}" TextWrapping="Wrap" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+							<TextBlock Text="Appearance" FontFamily="{DynamicResource Libation.Font.Display}"
+								FontSize="{DynamicResource Libation.FontSize.Section}" />
+							<TextBlock Text="{Binding AppearanceSummary}" TextWrapping="Wrap"
+								Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
 						</StackPanel>
 						<components:StatusBadge Grid.Column="1" Status="{x:Static components:LibationStatusKind.Completed}"
 							TextOverride="{Binding AppearanceProfileText}" AccessibleName="{Binding AppearanceProfileText}" />
 					</Grid>
-					<UniformGrid Columns="3" Rows="0">
-						<components:MetricCard Margin="0,0,8,8" IconData="{StaticResource glyph.settings}"
-							Value="{Binding DensityText}" Label="Density" />
-						<components:MetricCard Margin="0,0,8,8" IconData="{StaticResource glyph.settings}"
-							Value="{Binding DecorationText}" Label="Decoration" />
-						<components:MetricCard Margin="0,0,8,8" IconData="{StaticResource glyph.settings}"
-							Value="{Binding MotionText}" Label="Motion" />
-					</UniformGrid>
-					<TextBlock Text="{Binding LegacyThemeSummary}" TextWrapping="Wrap" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
-					<StackPanel Orientation="Horizontal" Spacing="8">
-						<Button Classes="contemporary primary" Content="Edit appearance and settings" Command="{Binding OpenSettingsCommand}" />
-						<Button Classes="contemporary" Content="Run profile chooser again" Command="{Binding RequestOnboardingCommand}" />
+
+					<StackPanel Spacing="{DynamicResource Libation.Space.3}">
+						<settings:AppearanceProfilePreview
+							ProfileStyle="{x:Static fileManager:ExperienceStyle.Cellar}"
+							ProfileName="Cellar"
+							Description="A focused dark workspace with the Cellar dashboard and Decanter dock."
+							SelectCommand="{Binding Appearance.SelectCellarCommand}"
+							IsSelected="{Binding Appearance.IsCellarSelected}"
+							Density="{Binding Appearance.Density}"
+							Decoration="{Binding Appearance.Decoration}"
+							Motion="{Binding Appearance.Motion}"
+							UseSystemTypography="{Binding Appearance.UseSystemTypography}" />
+						<settings:AppearanceProfilePreview
+							ProfileStyle="{x:Static fileManager:ExperienceStyle.TastingRoom}"
+							ProfileName="Tasting Room"
+							Description="A bright editorial workspace with the Tasting Room dashboard."
+							SelectCommand="{Binding Appearance.SelectTastingRoomCommand}"
+							IsSelected="{Binding Appearance.IsTastingRoomSelected}"
+							Density="{Binding Appearance.Density}"
+							Decoration="{Binding Appearance.Decoration}"
+							Motion="{Binding Appearance.Motion}"
+							UseSystemTypography="{Binding Appearance.UseSystemTypography}" />
 					</StackPanel>
+
+					<Border Classes="card">
+						<StackPanel Spacing="{DynamicResource Libation.Space.3}">
+							<CheckBox Content="Use High Contrast" IsChecked="{Binding Appearance.IsHighContrast, Mode=TwoWay}"
+								AutomationProperties.Name="Use High Contrast" />
+							<TextBlock Text="High Contrast is an exclusive profile. Turning it off returns to the profile selected in this draft."
+								TextWrapping="Wrap" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+
+							<StackPanel Spacing="{DynamicResource Libation.Space.1}">
+								<TextBlock Text="Profile behavior" FontWeight="SemiBold" />
+								<ComboBox ItemsSource="{Binding Appearance.BaseStyles}" SelectedItem="{Binding Appearance.SelectedBaseStyle, Mode=TwoWay}"
+									HorizontalContentAlignment="Stretch" AutomationProperties.Name="Contemporary profile behavior" />
+							</StackPanel>
+							<StackPanel Spacing="{DynamicResource Libation.Space.1}">
+								<TextBlock Text="Density" FontWeight="SemiBold" />
+								<ComboBox ItemsSource="{Binding Appearance.DensityModes}" SelectedItem="{Binding Appearance.SelectedDensityMode, Mode=TwoWay}"
+									HorizontalContentAlignment="Stretch" AutomationProperties.Name="Contemporary density" />
+							</StackPanel>
+							<StackPanel Spacing="{DynamicResource Libation.Space.1}">
+								<TextBlock Text="Decoration" FontWeight="SemiBold" />
+								<ComboBox ItemsSource="{Binding Appearance.DecorationLevels}" SelectedItem="{Binding Appearance.SelectedDecorationLevel, Mode=TwoWay}"
+									HorizontalContentAlignment="Stretch" AutomationProperties.Name="Contemporary decoration" />
+							</StackPanel>
+							<StackPanel Spacing="{DynamicResource Libation.Space.1}">
+								<TextBlock Text="Motion" FontWeight="SemiBold" />
+								<ComboBox ItemsSource="{Binding Appearance.MotionPreferences}" SelectedItem="{Binding Appearance.SelectedMotionPreference, Mode=TwoWay}"
+									HorizontalContentAlignment="Stretch" AutomationProperties.Name="Contemporary motion" />
+							</StackPanel>
+							<StackPanel Spacing="{DynamicResource Libation.Space.1}">
+								<TextBlock Text="Default Library view" FontWeight="SemiBold" />
+								<ComboBox ItemsSource="{Binding Appearance.LibraryViews}" SelectedItem="{Binding Appearance.SelectedLibraryView, Mode=TwoWay}"
+									HorizontalContentAlignment="Stretch" AutomationProperties.Name="Default contemporary Library view" />
+							</StackPanel>
+							<StackPanel Spacing="{DynamicResource Libation.Space.1}">
+								<TextBlock Text="Navigation rail" FontWeight="SemiBold" />
+								<ComboBox ItemsSource="{Binding Appearance.NavigationRails}" SelectedItem="{Binding Appearance.SelectedNavigationRail, Mode=TwoWay}"
+									HorizontalContentAlignment="Stretch" AutomationProperties.Name="Contemporary navigation rail" />
+							</StackPanel>
+
+							<CheckBox Content="Use system typography" IsChecked="{Binding Appearance.UseSystemTypography, Mode=TwoWay}"
+								AutomationProperties.Name="Use system typography" />
+							<CheckBox Content="Show the Decanter processing dock when space allows"
+								IsChecked="{Binding Appearance.ShowDecanterDock, Mode=TwoWay}"
+								AutomationProperties.Name="Show the Decanter processing dock when space allows" />
+							<CheckBox Content="Restore Current Flight after restarting Libation"
+								IsChecked="{Binding Appearance.PersistFlightBetweenSessions, Mode=TwoWay}"
+								AutomationProperties.Name="Restore Current Flight after restarting Libation" />
+						</StackPanel>
+					</Border>
+
+					<TextBlock Text="{Binding Appearance.DraftStateText}" TextWrapping="Wrap"
+						Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+					<TextBlock Text="{Binding LegacyThemeSummary}" TextWrapping="Wrap"
+						Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+					<WrapPanel Orientation="Horizontal">
+						<Button Classes="contemporary primary" Margin="0,0,8,8" Content="Apply appearance"
+							Command="{Binding ApplyAppearanceCommand}" AutomationProperties.Name="Apply appearance settings" />
+						<Button Classes="contemporary" Margin="0,0,8,8" Content="Reset appearance"
+							Command="{Binding ResetAppearanceCommand}" AutomationProperties.Name="Reset appearance to defaults" />
+						<Button Classes="contemporary" Margin="0,0,8,8" Content="Run profile chooser again"
+							Command="{Binding RequestOnboardingCommand}" />
+					</WrapPanel>
 				</StackPanel>
 			</Border>
 
 			<Border Classes="card">
 				<StackPanel Spacing="{DynamicResource Libation.Space.2}">
-					<TextBox Text="{Binding SearchText, Mode=TwoWay}" PlaceholderText="Search settings categories"
-						AutomationProperties.Name="Search settings categories" />
+					<TextBox Text="{Binding SearchText, Mode=TwoWay}" PlaceholderText="Search Settings tabs"
+						AutomationProperties.Name="Search Settings tabs" />
 					<TextBlock Text="{Binding CategorySummary}" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
 				</StackPanel>
 			</Border>
-			<components:EmptyState IsVisible="{Binding !HasCategories}" Title="No settings categories match"
+			<components:EmptyState IsVisible="{Binding !HasCategories}" Title="No Settings tabs match"
 				Explanation="{x:Static properties:Resources.SettingsEmptyExplanation}" PrimaryActionText="Open Settings"
 				PrimaryCommand="{Binding OpenSettingsCommand}" />
 			<ItemsControl ItemsSource="{Binding VisibleCategories}" ItemTemplate="{StaticResource SettingsCategory}" />
 
 			<Border Classes="card">
-				<Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="{DynamicResource Libation.Space.3}">
-					<StackPanel Spacing="{DynamicResource Libation.Space.1}">
-						<TextBlock Text="Accounts, About, and updates" FontWeight="SemiBold" />
-						<TextBlock Text="Account identities remain in the protected account dialog. About owns the current version, release notes, and update check."
-							TextWrapping="Wrap" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
-					</StackPanel>
-					<Button Grid.Column="1" Classes="contemporary" Content="Manage accounts" Command="{Binding OpenAccountsCommand}" />
-					<Button Grid.Column="2" Classes="contemporary" Content="About and updates" Command="{Binding OpenAboutCommand}" />
-				</Grid>
+				<StackPanel Spacing="{DynamicResource Libation.Space.3}">
+					<TextBlock Text="Accounts, About, and updates" FontWeight="SemiBold" />
+					<TextBlock Text="Account identities remain in the protected account workflow. About owns version, release notes, and update checks."
+						TextWrapping="Wrap" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+					<WrapPanel Orientation="Horizontal">
+						<Button Classes="contemporary" Margin="0,0,8,8" Content="Manage accounts" Command="{Binding OpenAccountsCommand}" />
+						<Button Classes="contemporary" Margin="0,0,8,8" Content="About and updates" Command="{Binding OpenAboutCommand}" />
+					</WrapPanel>
+				</StackPanel>
 			</Border>
 		</StackPanel>
 	</ScrollViewer>

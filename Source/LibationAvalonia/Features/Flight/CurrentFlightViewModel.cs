@@ -322,6 +322,14 @@ public sealed class CurrentFlightViewModel : ReactiveObject, IDisposable
 		this.RaisePropertyChanged(nameof(UndoActionText));
 	}
 
+	internal void ReportNotice(string message)
+	{
+		ArgumentException.ThrowIfNullOrWhiteSpace(message);
+		Announcement = message;
+		Notifications.Clear();
+		Notifications.Add(new ToastMessage(message, ToastKind.Warning));
+	}
+
 	private void InspectPreflight()
 	{
 		FlightPreflightResult result;

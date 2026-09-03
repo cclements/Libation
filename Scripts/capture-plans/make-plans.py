@@ -40,7 +40,18 @@ PLANS = {
     "processing.json": entries(["Processing"], SIZES),
     "secondary.json": entries(
         ["Downloads", "History", "Accounts", "Settings", "Tools", "Trash"], SIZES
-    ),
+    )
+    + [
+        {
+            "profile": "Cellar",
+            "surface": "Onboarding",
+            "onboardingStep": step,
+            "onboardingScanActive": step == 4,
+            "width": 1456,
+            "height": 1060,
+        }
+        for step in range(1, 6)
+    ],
 }
 
 

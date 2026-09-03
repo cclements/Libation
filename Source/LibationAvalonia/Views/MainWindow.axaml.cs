@@ -1,4 +1,5 @@
 using AudibleUtilities;
+using ApplicationServices;
 using AppScaffolding;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -34,6 +35,7 @@ public partial class MainWindow : ReactiveWindow<MainVM>
 	private AppShellView? contemporaryShell;
 	private AppShellViewModel? contemporaryShellViewModel;
 	private OnboardingViewModel? onboardingViewModel;
+	private OnboardingCompletionRequest? pendingOnboardingCompletion;
 	private readonly List<KeyBinding> contemporaryKeyBindings = [];
 	private readonly List<KeyBinding> classicPlatformKeyBindings = [];
 	private NativeMenuItem? nativeAccountsMenuItem;
@@ -43,7 +45,7 @@ public partial class MainWindow : ReactiveWindow<MainVM>
 	private ICommand? classicNativeSettingsCommand;
 	private ICommand? contemporaryNativeAccountsCommand;
 	private ICommand? contemporaryNativeSettingsCommand;
-	private List<LibraryBook>? loadedLibrary;
+	private IReadOnlyList<LibraryBook>? loadedLibrary;
 	private bool isOpened;
 	private bool contemporaryShellFailureNoticePending;
 
@@ -66,6 +68,7 @@ public partial class MainWindow : ReactiveWindow<MainVM>
 		classicMinWidth = MinWidth;
 		classicMinHeight = MinHeight;
 		DataContext = new MainVM(this);
+		LibraryCommands.LibrarySizeChanged += LibraryCommands_LibrarySizeChanged;
 		Configure_Upgrade();
 
 		Opened += MainWindow_Opened;
@@ -432,13 +435,72 @@ public partial class MainWindow : ReactiveWindow<MainVM>
 		if (sender is not OnboardingViewModel viewModel || !ReferenceEquals(viewModel, onboardingViewModel))
 			return;
 
+		pendingOnboardingCompletion = e.CompletionRequest;
 		viewModel.ExitRequested -= Onboarding_ExitRequested;
 		onboardingViewModel = null;
 		viewModel.Dispose();
 		// Saving the selected profile schedules its resource transaction first.
 		// Queue the shell swap behind that commit so a new visual never inherits
 		// the previous profile's resource values while it is being attached.
-		Dispatcher.UIThread.Post(ApplyShellMode, DispatcherPriority.Normal);
+		Dispatcher.UIThread.Post(() =>
+		{
+			ApplyShellMode();
+			CompletePendingOnboarding();
+		}, DispatcherPriority.Normal);
+	}
+
+	private void CompletePendingOnboarding()
+	{
+		var request = pendingOnboardingCompletion;
+		if (request is null)
+			return;
+		if (!Configuration.Instance.UseContemporaryShell)
+		{
+			pendingOnboardingCompletion = null;
+			return;
+		}
+		if (loadedLibrary is null || ViewModel?.BindToGridTask?.IsCompletedSuccessfully != true)
+			return;
+
+		if (!ReferenceEquals(request, pendingOnboardingCompletion))
+			return;
+		if (!EnsureContemporaryShell() || contemporaryShellViewModel is not { } shell)
+			return;
+
+		var newest = SelectNewestEligibleTitles(loadedLibrary, request.NewestEligibleTitleCount);
+		shell.Navigation.Navigate(request.Destination);
+		pendingOnboardingCompletion = null;
+		// Let the retained Details grid finish becoming visible before projecting the
+		// requested Flight. Its visual selection can publish one final route-activation
+		// change; adding after that change keeps this explicit onboarding gesture
+		// authoritative instead of allowing stale grid selection to replace it.
+		Dispatcher.UIThread.Post(() =>
+		{
+			if (!ReferenceEquals(shell, contemporaryShellViewModel))
+				return;
+			int added = shell.Flight.AddRange(newest);
+			if (newest.Count == 0)
+				shell.CurrentFlight.ReportNotice(
+					"No eligible titles were added to Current Flight. Add or scan an Audible account if needed, then select available titles in Library.");
+			else if (added == 0)
+				shell.CurrentFlight.ReportNotice(
+					"The newest eligible titles are already in Current Flight. Review the Flight or select other titles in Library.");
+			selectAndFocusSearchBox();
+		}, DispatcherPriority.Background);
+	}
+
+	internal static IReadOnlyList<LibraryBook> SelectNewestEligibleTitles(
+		IEnumerable<LibraryBook> library,
+		int requestedCount)
+	{
+		ArgumentNullException.ThrowIfNull(library);
+		ArgumentOutOfRangeException.ThrowIfNegative(requestedCount);
+		return library
+			.Where(book => !book.IsDeleted && !book.AbsentFromLastScan)
+			.WithoutParents()
+			.OrderByDescending(book => book.DateAdded)
+			.Take(requestedCount)
+			.ToArray();
 	}
 
 #if DEBUG
@@ -591,6 +653,7 @@ public partial class MainWindow : ReactiveWindow<MainVM>
 		contemporaryShellViewModel?.Dispose();
 		Configuration.Instance.PropertyChanged -= Settings_PropertyChanged;
 		Configuration.Instance.PropertyChanged -= ShellSettings_PropertyChanged;
+		LibraryCommands.LibrarySizeChanged -= LibraryCommands_LibrarySizeChanged;
 		this.SaveSizeAndLocation(Configuration.Instance);
 		//This is double firing with 11.3.9
 		Closing -= MainWindow_Closing;
@@ -609,7 +672,7 @@ public partial class MainWindow : ReactiveWindow<MainVM>
 
 	public async Task OnLibraryLoadedAsync(List<LibraryBook> initialLibrary)
 	{
-		loadedLibrary = initialLibrary;
+		loadedLibrary = initialLibrary.ToArray();
 		//Get the ViewModel before crossing the await boundary
 		if (ViewModel is not MainVM vm)
 			return;
@@ -624,6 +687,16 @@ public partial class MainWindow : ReactiveWindow<MainVM>
 
 		await vm.BindToGridTask;
 		contemporaryShellViewModel?.Flight.ReconcileLibrary(initialLibrary);
+		CompletePendingOnboarding();
+	}
+
+	private void LibraryCommands_LibrarySizeChanged(object? sender, List<LibraryBook> fullLibrary)
+	{
+		var snapshot = fullLibrary.ToArray();
+		if (Dispatcher.UIThread.CheckAccess())
+			loadedLibrary = snapshot;
+		else
+			Dispatcher.UIThread.Post(() => loadedLibrary = snapshot);
 	}
 
 	public void ProductsDisplay_LiberateClicked(object _, IList<LibraryBook> libraryBook, Configuration config) => ViewModel?.LiberateClicked(libraryBook, config);

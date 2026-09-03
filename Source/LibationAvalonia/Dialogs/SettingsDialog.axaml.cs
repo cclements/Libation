@@ -14,11 +14,14 @@ public partial class SettingsDialog : DialogWindow
 	private readonly SettingsVM settingsDisp;
 
 	private readonly Configuration config = Design.IsDesignMode ? Configuration.CreateMockInstance() : Configuration.Instance;
-	public SettingsDialog()
+	public SettingsDialog() : this(SettingsDialogSection.Important) { }
+
+	public SettingsDialog(SettingsDialogSection section)
 	{
 		InitializeComponent();
 
 		DataContext = settingsDisp = new(config);
+		tabControl.SelectedIndex = (int)section;
 	}
 
 	protected override async Task SaveAndCloseAsync()

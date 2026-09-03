@@ -8,7 +8,11 @@ guard CommandLine.arguments.count == 2,
     exit(2)
 }
 
-let options: CGWindowListOption = [.optionOnScreenOnly, .excludeDesktopElements]
+// Direct-window capture can render a layer-zero window even when macOS has placed
+// that process on another Space. Restricting discovery to the current Space makes
+// an otherwise valid isolated capture wait until the full-plan timeout whenever a
+// normal installed Libation window is already active.
+let options: CGWindowListOption = [.excludeDesktopElements]
 guard let windows = CGWindowListCopyWindowInfo(options, kCGNullWindowID)
     as? [[CFString: Any]] else {
     exit(1)

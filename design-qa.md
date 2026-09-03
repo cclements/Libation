@@ -1,55 +1,40 @@
-# S5 Processing and The Decanter design QA
+# S6 secondary destinations and onboarding design QA
 
-- Binding source references:
-  - `/Users/chris/projects/libation-patch/libation-contemporary-cellar-complete-agent-pack/02-reference-mockups/01-cellar-main-dashboard.png`
-  - `/Users/chris/projects/libation-patch/libation-contemporary-cellar-complete-agent-pack/02-reference-mockups/02-tasting-room-main-dashboard.png`
-- Source pixels: 1448 × 1086 for each supplied board, including its decorative window frame.
-- Final implementation captures: `/Users/chris/projects/libation-patch/runtime-audit-2026-09-02/S5/captures/r10/`; expanded failed-row evidence: `captures/failed-focus-r3/`.
-- Implementation viewports: 1456 × 1060 and 960 × 720 logical pixels at 2× density.
-- Candidate identity: apphost `86ec0a78215004e853e28c4c940270666a47641ca7b40cf4e2a72876c09b55b3`; `Libation.dll` `54d0eafe3270de15fff01066d4ae3708f215f2586677528bcaddd39941bcfc5a`; `LibationUiBase.dll` `77321644a9b6c69304f29b85ee8e701999271233b229746ca4b86a0023b158b7`.
-- Implementation state: isolated 1,000-title demo data with capture-only empty and mixed queue projections. The mixed fixture contains one active, one waiting, one completed, and one failed item without starting the production queue runner. The failed `Return to Meridian` row is currently not liberated, retains a download/decrypt recipe, and therefore truthfully exposes Retry.
-
-## Same-input comparison evidence
-
-Each listed image contains the supplied reference and matching implementation in one comparison input. All six were inspected at original density, together with all sixteen individual final frames.
-
-- Cellar Overview / mixed Decanter: `runtime-audit-2026-09-02/S5/comparisons/r10/cellar-overview-mixed-v-reference.png`.
-- Tasting Room Overview / mixed Decanter: `runtime-audit-2026-09-02/S5/comparisons/r10/tastingroom-overview-mixed-v-reference.png`.
-- Cellar Processing / mixed queue: `runtime-audit-2026-09-02/S5/comparisons/r10/cellar-processing-mixed-v-reference.png`.
-- Tasting Room Processing / mixed queue: `runtime-audit-2026-09-02/S5/comparisons/r10/tastingroom-processing-mixed-v-reference.png`.
-- Cellar Decanter focused comparison: `runtime-audit-2026-09-02/S5/comparisons/r10/cellar-decanter-focus-v-reference.png`.
-- Tasting Room Decanter focused comparison: `runtime-audit-2026-09-02/S5/comparisons/r10/tastingroom-decanter-focus-v-reference.png`.
+- Binding design authority: the Cellar and Tasting Room boards plus the accepted S6 contract; no destination-specific mockups were supplied.
+- Final implementation captures: `/Users/chris/projects/libation-patch/runtime-audit-2026-09-03/S6/captures/`.
+- Implementation viewports: 1456 x 1060 and 960 x 720 logical pixels at 2x density.
+- Candidate identity: apphost `86ec0a78215004e853e28c4c940270666a47641ca7b40cf4e2a72876c09b55b3`; `Libation.dll` `80d3d9ee0d76e03812ee180232be888e190018548da4a6ea50f8c6bd22b92911`; `LibationUiBase.dll` `a502af2506f0f5a08e08559d029c68bb864edf03802f8009463946fc1f47e331`.
+- Implementation state: isolated 1,000-title demo data with one masked demo account, 19 removed records, an empty queue, and an empty capture Flight. Onboarding scan-active state is capture-only and inert.
 
 ## Acceptance matrix
 
-The final run produced all sixteen required states with no missing frame:
+The exact final run completed with application exit 0 and no missing frame:
 
-- Processing and Overview/Decanter;
-- empty and mixed queue;
-- Cellar and Tasting Room; and
-- Wide 1456 × 1060 and Compact 960 × 720.
+- Downloads, History, Accounts, Settings, Tools, and Trash;
+- Cellar and Tasting Room;
+- Wide 1456 x 1060 and Compact 960 x 720; and
+- onboarding steps 1 through 5, including the inert active-scan presentation at step 4.
 
-All eight Wide screenshots are exactly 2912 × 2120 pixels. All eight Compact screenshots are exactly 1920 × 1440 pixels. Compact Cellar evidence opens the existing Decanter drawer; Compact Tasting Room retains the card in the Overview composition.
+The resulting 29 images contain 17 Wide frames at exactly `2912 x 2120` and 12 Compact frames at exactly `1920 x 1440`. `runtime-audit-2026-09-03/S6/SHA256SUMS` verifies every final frame.
 
-The supplemental failed-row run produced four more exact-size frames: two Wide at 2912 × 2120 and two Compact at 1920 × 1440. Each starts the failed `Return to Meridian` row expanded and keeps Copy details, Retry, and Open log visible.
+All 29 frames were reviewed as contact sheets and at original density where copy, clipping, or action layout required it. Both profiles retain their accepted semantic type, spacing, cards, status treatment, navigation, Flight, and Decanter hierarchy. Compact frames retain the full route header and scroll the single destination body without clipping the shell status surface.
 
 ## Findings and corrections
 
-No P0, P1, or P2 visual finding remains.
+No S6-owned P0, P1, or P2 visual finding remains.
 
-- **P1, corrected:** the shell-owned Current Flight could render blank after a profile/route re-parent because its parent-sensitive one-time data-context binding had already resolved. The shell now applies the retained Flight owner immediately before every host attachment. Final Wide Cellar frames show the expected Flight rows, while the Processing route truthfully shows an empty Flight after the capture seam clears selection.
-- **P2, corrected:** Compact Cellar exposed a second external “Open full Processing workspace” action around the Decanter drawer in addition to the Decanter's own action. The duplicate shell affordance was removed; the final drawer has one canonical Open Processing action.
-- **P2, corrected:** an earlier Tasting Room Decanter composition overflowed its available card space. The final layout keeps the supplied illustration, current title, stage, progress, and conditional action inside the card at both binding sizes.
-- **P2, corrected:** the first failed-row composition did not keep the literal owner failure and recovery guidance legible at the required density. The final expanded failure row keeps the literal “Disk full, queue stopped” summary, recovery guidance, and correlation reference in the normal visual and accessibility trees.
-- **P1, corrected:** a tightened production retry predicate exposed that the earlier capture fixture used an already-liberated title for its failed row, so Retry correctly disappeared. The final fixture uses the current not-liberated `Return to Meridian` title with a retained decrypt recipe. Retry is visible, unobscured, and spatially distinct in both profiles at both binding sizes.
+- **P1, corrected:** the first full matrix re-parented route content into a capture host that inherited content sizing, clipping the brand/toolbar and some Compact headers. The final host gives the temporary route or onboarding surface the exact requested extent and top-left alignment before capture.
+- **P1, corrected:** an installed Libation window on another macOS Space could make isolated direct-window capture wait despite a valid candidate window. Window discovery now includes off-Space layer-zero windows; direct CoreGraphics capture still targets only the resolved isolated window ID.
+- **P2, corrected:** Tools originally paired a legacy book-only `Liberate` count with a confirmation that correctly included PDF-only work. The final card states that the confirmation supplies the exact eligible scope, including titles that need only a PDF, and does not publish a conflicting pre-confirmation number.
+- **P1 interaction, corrected:** onboarding could add three titles before Library activation, then lose one when a retained Details-grid selection published during activation. The final ordering activates Library first and applies the explicit Flight gesture at background priority; the exact candidate reports and displays all three newest eligible titles.
 
-An independent final visual pass found no visible S5 P0/P1/P2 blocker across the sixteen final frames, four supplemental failed-row frames, six comparison sheets, and four comparison crop sources. It specifically confirmed the populated Cellar Flight, removal of the duplicate Compact action, corrected Tasting Room overflow, and legible Retry action in all four expanded failure states.
+The deliberate open vertical field below the short onboarding steps is not hidden content or overflow: the progress/header and bottom navigation remain fixed while each step body stays concise. No destination-specific mockup exists from which to claim pixel parity.
 
 ## Intentional reference differences and proof boundary
 
-- The Processing route has no dedicated supplied mockup. It therefore extends the accepted profile tokens, type, spacing, cards, glyphs, and shell hierarchy without inventing a second design system.
-- Reference and demo title data differ. The accepted match is hierarchy, density, tone, profile distinction, ownership, and state behavior—not fabricated production content.
-- The supplied board frame is presentation context, not part of the application viewport.
-- These captures prove the named local macOS rendered states. They do not prove VoiceOver or another assistive technology, 200% logical scaling, runtime High Contrast or reduced motion, Windows/Linux, installed packaging, notarization, distribution, publication, or release.
+- The supplied boards describe the primary dashboard hierarchy, not these six destination bodies. S6 extends the accepted profile tokens and shared components instead of inventing pixel parity or shipping reference pixels.
+- Demo counts and titles are evidence inputs, not production copy or fixtures shipped to users.
+- Capture-only onboarding state does not start a scan or mutate Current Flight.
+- These captures prove the named local macOS rendered states only. They do not prove activation, keyboard-only traversal, VoiceOver or another assistive technology, 200% logical scaling, runtime High Contrast/reduced motion, Windows/Linux, installed packaging, notarization, distribution, publication, or release.
 
 final result: passed
