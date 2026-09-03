@@ -7,6 +7,7 @@ using Avalonia.VisualTree;
 using DataLayer;
 using LibationAvalonia.DesignSystem.Components;
 using LibationAvalonia.Features.Overview;
+using LibationAvalonia.Features.Processing;
 using LibationAvalonia.Properties;
 using LibationAvalonia.ViewModels;
 using LibationFileManager;
@@ -91,19 +92,96 @@ public partial class AppShellView : UserControl
 
 	private void Processing_PropertyChanged(object? sender, PropertyChangedEventArgs e)
 	{
-		if (subscribedViewModel is { } viewModel)
-			UpdateDecanterSurface(viewModel);
+		if (!Dispatcher.UIThread.CheckAccess())
+		{
+			Dispatcher.UIThread.Post(
+				() => Processing_PropertyChanged(sender, e),
+				DispatcherPriority.Background);
+			return;
+		}
+
+		if (subscribedViewModel is not { } viewModel)
+			return;
+
+		var processing = viewModel.Processing;
+		var current = processing.CurrentItem;
+		switch (e.PropertyName)
+		{
+			case nameof(ProcessingViewModel.SummaryText):
+				SharedDecanterSurface.SummaryText = processing.SummaryText;
+				break;
+			case nameof(ProcessingViewModel.CanCancel):
+				SharedDecanterSurface.HasWork = processing.CanCancel;
+				SharedDecanterSurface.IsIdle = !processing.CanCancel;
+				break;
+			case nameof(ProcessingViewModel.InQueueText):
+				SharedDecanterSurface.InQueueText = processing.InQueueText;
+				break;
+			case nameof(ProcessingViewModel.ConvertingText):
+				SharedDecanterSurface.ConvertingText = processing.ConvertingText;
+				break;
+			case nameof(ProcessingViewModel.RunningTimeText):
+				SharedDecanterSurface.RunningTimeText = processing.RunningTimeText;
+				break;
+			case nameof(ProcessingViewModel.CurrentItem):
+				UpdateDecanterCurrentItem(processing);
+				break;
+			case nameof(ProcessingViewModel.CurrentTitle):
+				UpdateDecanterCurrentItem(processing);
+				break;
+			case nameof(ProcessingViewModel.CurrentStage):
+			case nameof(ProcessingViewModel.CurrentStageAnnouncement):
+				SharedDecanterSurface.CurrentStageText = processing.CurrentStage;
+				SharedDecanterSurface.CurrentStageAccessibleName = processing.CurrentStageAnnouncement;
+				break;
+			case nameof(ProcessingViewModel.CurrentProgress):
+				SharedDecanterSurface.Progress = processing.CurrentProgress;
+				SharedDecanterSurface.ProgressText = current?.ProgressText;
+				SharedDecanterSurface.ProgressAccessibleName = current?.ProgressAccessibleName;
+				break;
+			case nameof(ProcessingViewModel.ShowCurrentProgress):
+				SharedDecanterSurface.ShowProgress = processing.ShowCurrentProgress;
+				break;
+			case nameof(ProcessingViewModel.CurrentCancellable):
+			case nameof(ProcessingViewModel.CurrentCancelCommand):
+				SharedDecanterSurface.CancelCommand = processing.CurrentCancelCommand;
+				SharedDecanterSurface.CanCancel = processing.CurrentCancellable;
+				SharedDecanterSurface.CancelAccessibleName = current?.CancelAccessibleName;
+				break;
+		}
 	}
 
 	private void UpdateDecanterSurface(AppShellViewModel viewModel)
 	{
 		var processing = viewModel.Processing;
+		SharedDecanterSurface.IsCellar = viewModel.IsCellarComposition || viewModel.IsAccessibleComposition;
+		SharedDecanterSurface.IsTastingRoom = viewModel.IsTastingRoomComposition;
 		SharedDecanterSurface.SummaryText = processing.SummaryText;
-		SharedDecanterSurface.ActiveText = processing.ActiveText;
-		SharedDecanterSurface.Progress = processing.Progress;
-		SharedDecanterSurface.ShowProgress = processing.ShowProgress;
-		SharedDecanterSurface.CancelCommand = processing.CancelAllCommand;
-		SharedDecanterSurface.CanCancel = processing.CanCancel;
+		SharedDecanterSurface.HasWork = processing.CanCancel;
+		SharedDecanterSurface.IsIdle = !processing.CanCancel;
+		SharedDecanterSurface.ActiveItems = processing.DecanterActiveItems;
+		SharedDecanterSurface.InQueueText = processing.InQueueText;
+		SharedDecanterSurface.ConvertingText = processing.ConvertingText;
+		SharedDecanterSurface.RunningTimeText = processing.RunningTimeText;
+		UpdateDecanterCurrentItem(processing);
+		SharedDecanterSurface.OpenProcessingCommand = viewModel.NavigateCommand;
+		SharedDecanterSurface.OpenProcessingCommandParameter = AppRouteId.Processing;
+	}
+
+	private void UpdateDecanterCurrentItem(ProcessingViewModel processing)
+	{
+		var current = processing.CurrentItem;
+		SharedDecanterSurface.CurrentTitle = processing.CurrentTitle;
+		SharedDecanterSurface.CurrentStageText = processing.CurrentStage;
+		SharedDecanterSurface.CurrentStageAccessibleName = processing.CurrentStageAnnouncement;
+		SharedDecanterSurface.CurrentOutputText = current?.OutputProfileText;
+		SharedDecanterSurface.Progress = processing.CurrentProgress;
+		SharedDecanterSurface.ProgressText = current?.ProgressText;
+		SharedDecanterSurface.ProgressAccessibleName = current?.ProgressAccessibleName;
+		SharedDecanterSurface.ShowProgress = processing.ShowCurrentProgress;
+		SharedDecanterSurface.CancelCommand = processing.CurrentCancelCommand;
+		SharedDecanterSurface.CanCancel = processing.CurrentCancellable;
+		SharedDecanterSurface.CancelAccessibleName = current?.CancelAccessibleName;
 	}
 
 	private void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -130,6 +208,8 @@ public partial class AppShellView : UserControl
 				break;
 			case nameof(AppShellViewModel.IsCellarComposition):
 			case nameof(AppShellViewModel.IsTastingRoomComposition):
+			case nameof(AppShellViewModel.IsAccessibleComposition):
+				UpdateDecanterSurface(viewModel);
 				UpdateOverviewHost();
 				MoveContextualSurfaces();
 				break;
@@ -175,6 +255,9 @@ public partial class AppShellView : UserControl
 	{
 		if (ViewModel is not { } viewModel)
 			return;
+		// The shared Decanter is physically re-parented. Refresh every local input before
+		// attachment so its presentation never depends on an inherited data context.
+		UpdateDecanterSurface(viewModel);
 
 		ContentControl flightTarget = viewModel.Layout.HostFlightInOverview && cellarOverview is not null
 			? cellarOverview.FlightHost
@@ -183,6 +266,9 @@ public partial class AppShellView : UserControl
 				: viewModel.Layout.ShowFlightOverlay
 					? FlightOverlayHost
 					: FlightParkingHost;
+		// Keep the shell-owned Flight bound to its owner when it moves beneath an
+		// Overview host whose inherited data context is the dashboard projection.
+		SharedFlightSurface.DataContext = viewModel.CurrentFlight;
 		flightSurfaceHost.AttachTo(flightTarget);
 		if (cellarOverview is not null)
 			cellarOverview.FlightHost.IsVisible = ReferenceEquals(flightTarget, cellarOverview.FlightHost);
@@ -195,6 +281,7 @@ public partial class AppShellView : UserControl
 					? DecanterDrawerHost
 					: DecanterParkingHost;
 		decanterSurfaceHost.AttachTo(decanterTarget);
+		UpdateDecanterSurface(viewModel);
 		if (tastingRoomOverview is not null)
 			tastingRoomOverview.DecanterHost.IsVisible = ReferenceEquals(decanterTarget, tastingRoomOverview.DecanterHost);
 	}

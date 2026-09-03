@@ -1,0 +1,22 @@
+{
+  "settleMs": 1200,
+  "entries": [
+    { "profile": "Cellar", "route": "Processing", "width": 1456, "height": 1060, "processingScenario": "Empty", "file": "cellar-processing-empty-wide.png" },
+    { "profile": "TastingRoom", "route": "Processing", "width": 1456, "height": 1060, "processingScenario": "Empty", "file": "tastingroom-processing-empty-wide.png" },
+    { "profile": "Cellar", "route": "Processing", "width": 1456, "height": 1060, "processingScenario": "Mixed", "file": "cellar-processing-mixed-wide.png" },
+    { "profile": "TastingRoom", "route": "Processing", "width": 1456, "height": 1060, "processingScenario": "Mixed", "file": "tastingroom-processing-mixed-wide.png" },
+    { "profile": "Cellar", "route": "Overview", "width": 1456, "height": 1060, "libraryView": "Gallery", "flightSelectionCount": 3, "processingScenario": "Empty", "file": "cellar-decanter-empty-wide.png" },
+    { "profile": "TastingRoom", "route": "Overview", "width": 1456, "height": 1060, "libraryView": "Gallery", "flightSelectionCount": 3, "processingScenario": "Empty", "file": "tastingroom-decanter-empty-wide.png" },
+    { "profile": "Cellar", "route": "Overview", "width": 1456, "height": 1060, "libraryView": "Gallery", "flightSelectionCount": 3, "processingScenario": "Mixed", "file": "cellar-decanter-mixed-wide.png" },
+    { "profile": "TastingRoom", "route": "Overview", "width": 1456, "height": 1060, "libraryView": "Gallery", "flightSelectionCount": 3, "processingScenario": "Mixed", "file": "tastingroom-decanter-mixed-wide.png" },
+
+    { "profile": "Cellar", "route": "Processing", "width": 960, "height": 720, "processingScenario": "Empty", "file": "cellar-processing-empty-compact.png" },
+    { "profile": "TastingRoom", "route": "Processing", "width": 960, "height": 720, "processingScenario": "Empty", "file": "tastingroom-processing-empty-compact.png" },
+    { "profile": "Cellar", "route": "Processing", "width": 960, "height": 720, "processingScenario": "Mixed", "file": "cellar-processing-mixed-compact.png" },
+    { "profile": "TastingRoom", "route": "Processing", "width": 960, "height": 720, "processingScenario": "Mixed", "file": "tastingroom-processing-mixed-compact.png" },
+    { "profile": "Cellar", "route": "Overview", "width": 960, "height": 720, "libraryView": "Gallery", "flightSelectionCount": 3, "processingScenario": "Empty", "openDecanter": true, "file": "cellar-decanter-empty-compact.png" },
+    { "profile": "TastingRoom", "route": "Overview", "width": 960, "height": 720, "libraryView": "Gallery", "flightSelectionCount": 3, "processingScenario": "Empty", "file": "tastingroom-decanter-empty-compact.png" },
+    { "profile": "Cellar", "route": "Overview", "width": 960, "height": 720, "libraryView": "Gallery", "flightSelectionCount": 3, "processingScenario": "Mixed", "openDecanter": true, "file": "cellar-decanter-mixed-compact.png" },
+    { "profile": "TastingRoom", "route": "Overview", "width": 960, "height": 720, "libraryView": "Gallery", "flightSelectionCount": 3, "processingScenario": "Mixed", "file": "tastingroom-decanter-mixed-compact.png" }
+  ]
+}

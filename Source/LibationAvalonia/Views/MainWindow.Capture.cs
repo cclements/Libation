@@ -26,6 +26,32 @@ namespace LibationAvalonia.Views;
 /// </summary>
 public partial class MainWindow
 {
+	private CapturePlan? capturePlanPreparedBeforeShow;
+	private Exception? capturePlanPreparationFailure;
+
+	/// <summary>
+	/// Gives the native macOS window its first planned size before it is shown. This
+	/// prevents the compositor from stretching the restored compact backing surface
+	/// across a Wide capture window.
+	/// </summary>
+	internal void PrepareCaptureWindowBeforeShow()
+	{
+		if (!CaptureEnvironment.IsRequested)
+			return;
+
+		try
+		{
+			capturePlanPreparedBeforeShow = CapturePlan.Load(CaptureEnvironment.PlanPath);
+			PrepareInitialCaptureSize(capturePlanPreparedBeforeShow.Entries[0]);
+		}
+		catch (Exception ex)
+		{
+			// RunCapturePlanIfRequestedAsync records the original failure after the
+			// window opens, preserving the capture driver's existing error contract.
+			capturePlanPreparationFailure = ex;
+		}
+	}
+
 	private async Task RunCapturePlanIfRequestedAsync()
 	{
 		if (!CaptureEnvironment.IsRequested)
@@ -35,7 +61,9 @@ public partial class MainWindow
 		var exitCode = 0;
 		try
 		{
-			var plan = CapturePlan.Load(CaptureEnvironment.PlanPath);
+			if (capturePlanPreparationFailure is not null)
+				throw capturePlanPreparationFailure;
+			var plan = capturePlanPreparedBeforeShow ?? CapturePlan.Load(CaptureEnvironment.PlanPath);
 			var outDir = Directory.CreateDirectory(CaptureEnvironment.OutputDirectory).FullName;
 			HorizontalContentAlignment = Avalonia.Layout.HorizontalAlignment.Stretch;
 			VerticalContentAlignment = Avalonia.Layout.VerticalAlignment.Stretch;
@@ -56,53 +84,62 @@ public partial class MainWindow
 
 			for (var index = 0; index < plan.Entries.Count; index++)
 			{
-				var entry = plan.Entries[index];
-				var baseline = Configuration.Instance.GetContemporaryExperienceSettings();
-				Configuration.Instance.SaveContemporaryExperienceSettings(baseline with
+				try
 				{
-					ExperienceStyle = entry.Profile,
-					DensityMode = entry.Density,
-					DecorationLevel = entry.Decoration,
-					LibraryViewMode = entry.LibraryView ?? baseline.LibraryViewMode,
-					UseContemporaryShell = true,
-				});
-				await SettleAsync(plan.SettleMs / 2);
+					var entry = plan.Entries[index];
+					var baseline = Configuration.Instance.GetContemporaryExperienceSettings();
+					Configuration.Instance.SaveContemporaryExperienceSettings(baseline with
+					{
+						ExperienceStyle = entry.Profile,
+						DensityMode = entry.Density,
+						DecorationLevel = entry.Decoration,
+						LibraryViewMode = entry.LibraryView ?? baseline.LibraryViewMode,
+						UseContemporaryShell = true,
+					});
+					await SettleAsync(plan.SettleMs / 2);
 
-				if (entry.Surface == CaptureSurface.ComponentGallery)
-				{
-					routeContent.IsVisible = false;
-					galleryContent.PreviewStyle = entry.Profile;
-					galleryContent.PreviewDensity = entry.Density;
-					galleryContent.PreviewDecoration = entry.Decoration;
-					galleryContent.PreviewMotion = ReducedMotionPreference.Full;
-					galleryContent.UseSystemTypography = false;
-					galleryContent.IsVisible = true;
-					ResizeForCapture(entry);
-					await Dispatcher.UIThread.InvokeAsync(() => { }, DispatcherPriority.Background);
-				}
-				else
-				{
-					galleryContent.IsVisible = false;
-					routeContent.IsVisible = true;
-					ResizeForCapture(entry);
-					NavigateContemporary(entry.Route);
-					await WaitForRouteReadyAsync(entry.Route);
-					PrepareFlightForCapture(entry);
-					PrepareProcessingForCapture(entry);
-				}
-				await WaitForVisibleCoverLoadsAsync();
-				await SettleAsync(plan.SettleMs);
+					if (entry.Surface == CaptureSurface.ComponentGallery)
+					{
+						routeContent.IsVisible = false;
+						galleryContent.PreviewStyle = entry.Profile;
+						galleryContent.PreviewDensity = entry.Density;
+						galleryContent.PreviewDecoration = entry.Decoration;
+						galleryContent.PreviewMotion = ReducedMotionPreference.Full;
+						galleryContent.UseSystemTypography = false;
+						galleryContent.IsVisible = true;
+						ResizeForCapture(entry);
+						await Dispatcher.UIThread.InvokeAsync(() => { }, DispatcherPriority.Background);
+					}
+					else
+					{
+						galleryContent.IsVisible = false;
+						routeContent.IsVisible = true;
+						ResizeForCapture(entry);
+						NavigateContemporary(entry.Route);
+						await WaitForRouteReadyAsync(entry.Route);
+						PrepareFlightForCapture(entry);
+						await PrepareProcessingForCaptureAsync(entry);
+						PrepareDecanterForCapture(entry);
+						await FocusFailedProcessingItemForCaptureAsync(entry);
+					}
+					await WaitForVisibleCoverLoadsAsync();
+					await SettleAsync(plan.SettleMs);
 
-				if (osHandshake is null)
-				{
-					var path = Path.Combine(outDir, entry.FileName);
-					var actual = SaveWindowBitmap(path);
-					log.AppendLine($"{entry.FileName}\t{actual.Width}x{actual.Height}\trequested {entry.Width}x{entry.Height}");
+					if (osHandshake is null)
+					{
+						var path = Path.Combine(outDir, entry.FileName);
+						var actual = SaveWindowBitmap(path);
+						log.AppendLine($"{entry.FileName}\t{actual.Width}x{actual.Height}\trequested {entry.Width}x{entry.Height}");
+					}
+					else
+					{
+						await WaitForOsCaptureAsync(osHandshake, index, entry);
+						log.AppendLine($"{entry.FileName}\tmacOS screencapture handshake\trequested {entry.Width}x{entry.Height}");
+					}
 				}
-				else
+				finally
 				{
-					await WaitForOsCaptureAsync(osHandshake, index, entry);
-					log.AppendLine($"{entry.FileName}\tmacOS screencapture handshake\trequested {entry.Width}x{entry.Height}");
+					ClearCaptureSeedState();
 				}
 			}
 		}
@@ -150,29 +187,188 @@ public partial class MainWindow
 			shell.Library.OpenItem(first);
 	}
 
-	private void PrepareProcessingForCapture(CaptureEntry entry)
+	private async Task PrepareProcessingForCaptureAsync(CaptureEntry entry)
+	{
+		if (contemporaryShellViewModel is not { } shell)
+			return;
+		if (shell.Processing.Source.Running)
+			throw new CapturePlanException("Capture processing state cannot be prepared while the real queue runner is active.");
+
+		ClearProcessingCaptureState(shell);
+		var queue = shell.Processing.Source.Queue;
+		// Use the queue container directly: unlike ProcessQueueViewModel.AddToQueue,
+		// these deterministic lifecycle transitions never signal or start the runner.
+
+		if (entry.ProcessingScenario == ProcessingCaptureScenario.Mixed)
+		{
+			var sourceItems = shell.Library.VisibleItems.Take(4).ToArray();
+			if (sourceItems.Length != 4)
+				throw new CapturePlanException("The mixed processing scenario requires four demo-library titles.");
+
+			var completed = CreateCaptureProcess(sourceItems[0].LibraryBook);
+			var failed = CreateCaptureProcess(sourceItems[2].LibraryBook);
+			var active = CreateCaptureProcess(sourceItems[1].LibraryBook);
+			active.AddConvertToMp3();
+			var waiting = CreateCaptureProcess(sourceItems[3].LibraryBook);
+			queue.Enqueue([completed, failed, active, waiting]);
+
+			MoveNext(queue, completed);
+			completed.SetCaptureState(
+				ProcessBookStatus.Completed,
+				ProcessBookResult.Success,
+				ProcessBookPresentationStage.Completed,
+				100);
+			queue.MarkCompleted(completed);
+
+			MoveNext(queue, failed);
+			failed.SetCaptureState(
+				ProcessBookStatus.Failed,
+				ProcessBookResult.DiskFull,
+				ProcessBookPresentationStage.None,
+				64,
+				lastPresentationStage: ProcessBookPresentationStage.Decrypting);
+			queue.MarkCompleted(failed);
+
+			MoveNext(queue, active);
+			active.SetCaptureState(
+				ProcessBookStatus.Working,
+				ProcessBookResult.None,
+				ProcessBookPresentationStage.Converting,
+				43,
+				TimeSpan.FromMinutes(4) + TimeSpan.FromSeconds(12));
+			waiting.SetCaptureState(
+				ProcessBookStatus.Queued,
+				ProcessBookResult.None,
+				ProcessBookPresentationStage.None,
+				0,
+				statusOverride: "Waiting to process");
+			shell.Processing.Source.RunningTime = "03:18";
+
+			await WaitForPropertyAsync(shell.Processing, () =>
+				shell.Processing.Active.Count == 1
+				&& ReferenceEquals(shell.Processing.Active[0].Source, active)
+				&& shell.Processing.Waiting.Count == 1
+				&& ReferenceEquals(shell.Processing.Waiting[0].Source, waiting)
+				&& shell.Processing.Completed.Count == 1
+				&& ReferenceEquals(shell.Processing.Completed[0].Source, completed)
+				&& shell.Processing.Failed.Count == 1
+				&& ReferenceEquals(shell.Processing.Failed[0].Source, failed));
+			return;
+		}
+
+		if (entry.ProcessingScenario == ProcessingCaptureScenario.Empty || entry.ProcessingSeedCount == 0)
+		{
+			await WaitForPropertyAsync(shell.Processing, () =>
+				shell.Processing.Active.Count == 0
+				&& shell.Processing.Waiting.Count == 0
+				&& shell.Processing.Completed.Count == 0
+				&& shell.Processing.Failed.Count == 0);
+			return;
+		}
+
+		var seeded = shell.Library.VisibleItems
+			.Take(entry.ProcessingSeedCount)
+			.Select(item => CreateCaptureProcess(item.LibraryBook))
+			.ToArray();
+		if (seeded.Length == 0)
+		{
+			await WaitForPropertyAsync(shell.Processing, () =>
+				shell.Processing.Active.Count == 0
+				&& shell.Processing.Waiting.Count == 0
+				&& shell.Processing.Completed.Count == 0
+				&& shell.Processing.Failed.Count == 0);
+			return;
+		}
+		queue.Enqueue(seeded);
+		if (seeded.FirstOrDefault() is { } activeSeed)
+		{
+			MoveNext(queue, activeSeed);
+			activeSeed.SetCaptureState(
+				ProcessBookStatus.Working,
+				ProcessBookResult.None,
+				ProcessBookPresentationStage.Downloading,
+				43);
+		}
+		foreach (var waitingSeed in seeded.Skip(1))
+			waitingSeed.SetCaptureState(
+				ProcessBookStatus.Queued,
+				ProcessBookResult.None,
+				ProcessBookPresentationStage.None,
+				0,
+				statusOverride: "Waiting to process");
+
+		await WaitForPropertyAsync(shell.Processing, () =>
+			shell.Processing.Active.Count == 1
+			&& ReferenceEquals(shell.Processing.Active[0].Source, seeded[0])
+			&& shell.Processing.Waiting.Count == seeded.Length - 1
+			&& shell.Processing.Waiting.Select(item => item.Source).SequenceEqual(seeded.Skip(1))
+			&& shell.Processing.Completed.Count == 0
+			&& shell.Processing.Failed.Count == 0);
+	}
+
+	private void ClearCaptureSeedState()
 	{
 		if (contemporaryShellViewModel is not { } shell)
 			return;
 
+		ClearProcessingCaptureState(shell);
+		if (shell.Flight.Count > 0)
+			shell.Flight.Clear();
+		shell.Library.IsDetailsPaneOpen = false;
+	}
+
+	private static void ClearProcessingCaptureState(Shell.AppShellViewModel shell)
+	{
 		var queue = shell.Processing.Source.Queue;
+		foreach (var active in queue.GetActive())
+			queue.RemoveActive(active);
 		queue.ClearQueue();
 		queue.ClearCompleted();
-		if (entry.ProcessingSeedCount == 0)
+		shell.Processing.Source.RunningTime = string.Empty;
+	}
+
+	private static CaptureProcessBookViewModel CreateCaptureProcess(LibraryBook book)
+	{
+		var process = new CaptureProcessBookViewModel(book, Configuration.Instance);
+		process.AddDownloadDecryptBook();
+		return process;
+	}
+
+	private static void MoveNext(
+		LibationUiBase.TrackedQueue<ProcessBookViewModel> queue,
+		ProcessBookViewModel expected)
+	{
+		if (!queue.TryDequeueNext(out var actual) || !ReferenceEquals(actual, expected))
+			throw new InvalidOperationException("The capture queue did not preserve its deterministic item order.");
+	}
+
+	private void PrepareDecanterForCapture(CaptureEntry entry)
+	{
+		if (contemporaryShellViewModel is not { } shell)
 			return;
 
-		var seeded = new List<ProcessBookViewModel>();
-		foreach (var item in shell.Library.VisibleItems.Take(entry.ProcessingSeedCount))
+		bool drawerIsOpen = shell.Layout.ShowDecanterDrawer;
+		bool decanterIsPermanentlyVisible = shell.Layout.ShowQueueDock || shell.Layout.HostDecanterInOverview;
+		if (entry.OpenDecanter != drawerIsOpen && !decanterIsPermanentlyVisible)
+			((System.Windows.Input.ICommand)shell.ToggleDecanterDrawerCommand).Execute(null);
+	}
+
+	private async Task FocusFailedProcessingItemForCaptureAsync(CaptureEntry entry)
+	{
+		if (!entry.FocusFailedProcessingItem)
+			return;
+		if (entry.Route != Shell.AppRouteId.Processing
+			|| entry.ProcessingScenario != ProcessingCaptureScenario.Mixed
+			|| contemporaryShellViewModel is not { } shell
+			|| shell.Processing.Failed.SingleOrDefault() is not { } failed)
+			throw new CapturePlanException("A failed Processing-item focus requires the mixed Processing route with exactly one failed item.");
+
+		await Dispatcher.UIThread.InvokeAsync(() =>
 		{
-			var process = new CaptureProcessBookViewModel(item.LibraryBook, Configuration.Instance)
-				.AddDownloadDecryptBook();
-			process.Status = seeded.Count == 0 ? ProcessBookStatus.Working : ProcessBookStatus.Queued;
-			process.StatusOverride = seeded.Count == 0 ? "Downloading audiobook" : "Waiting to process";
-			if (process is CaptureProcessBookViewModel captureProcess)
-				captureProcess.SetCaptureProgress(seeded.Count == 0 ? 43 : 0);
-			seeded.Add(process);
-		}
-		queue.Enqueue(seeded);
+			var view = this.GetVisualDescendants().OfType<Features.Processing.ProcessingView>().SingleOrDefault();
+			if (view?.TryScrollItemIntoView(failed.Source) != true)
+				throw new CapturePlanException("The failed Processing item was not available in the rendered queue.");
+		}, DispatcherPriority.Background);
 	}
 
 	private void ResizeForCapture(CaptureEntry entry)
@@ -189,6 +385,23 @@ public partial class MainWindow
 		MinWidth = entry.Width;
 		MinHeight = entry.Height;
 		ClientSize = new Size(entry.Width, entry.Height);
+	}
+
+	private void PrepareInitialCaptureSize(CaptureEntry entry)
+	{
+		// ClientSize requires the native platform window, so the pre-show path sets
+		// only layout constraints. ResizeForCapture applies ClientSize after Opened.
+		WindowState = WindowState.Normal;
+		MinWidth = 720;
+		MinHeight = 560;
+		MaxWidth = double.PositiveInfinity;
+		MaxHeight = double.PositiveInfinity;
+		Width = entry.Width;
+		Height = entry.Height;
+		MaxWidth = entry.Width;
+		MaxHeight = entry.Height;
+		MinWidth = entry.Width;
+		MinHeight = entry.Height;
 	}
 
 	private async Task WaitForLibraryReadyAsync()
@@ -309,6 +522,23 @@ public partial class MainWindow
 	private sealed class CaptureProcessBookViewModel(LibraryBook book, Configuration configuration)
 		: ProcessBookViewModel(book, configuration)
 	{
-		public void SetCaptureProgress(int progress) => Progress = progress;
+		public void SetCaptureState(
+			ProcessBookStatus status,
+			ProcessBookResult result,
+			ProcessBookPresentationStage presentationStage,
+			int progress,
+			TimeSpan? timeRemaining = null,
+			string? statusOverride = null,
+			ProcessBookPresentationStage? lastPresentationStage = null)
+		{
+			Result = result;
+			Status = status;
+			PresentationStage = presentationStage;
+			LastPresentationStage = lastPresentationStage ?? presentationStage;
+			StatusOverride = statusOverride;
+			Progress = progress;
+			if (timeRemaining is { } remaining)
+				TimeRemaining = remaining;
+		}
 	}
 }

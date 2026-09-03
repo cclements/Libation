@@ -1,47 +1,111 @@
-<UserControl xmlns="https://github.com/avaloniaui"
-			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-			 xmlns:designSystem="using:LibationAvalonia.DesignSystem"
-			 x:Class="LibationAvalonia.DesignSystem.Components.DecanterSummary"
-			 x:Name="Root">
-	<Border Classes="card raised" AutomationProperties.LiveSetting="{x:Static designSystem:PlatformAutomationPolicy.Polite}">
-		<Grid ColumnDefinitions="Auto,*" ColumnSpacing="{DynamicResource Libation.Space.4}">
-			<Grid IsVisible="{DynamicResource Libation.Decoration.Visible}"
-				Opacity="{DynamicResource Libation.Decoration.Opacity}">
-				<ContentControl
-					Width="{Binding IllustrationWidth, ElementName=Root}"
-					Height="{Binding IllustrationHeight, ElementName=Root}"
-					Content="{Binding IllustrationContent, ElementName=Root}"
-					IsVisible="{Binding IllustrationContent, ElementName=Root, Converter={x:Static ObjectConverters.IsNotNull}}"
-					VerticalAlignment="Center"
-					AutomationProperties.IsControlElementOverride="False"
-					AutomationProperties.AccessibilityView="Raw" />
-			</Grid>
-			<Grid Grid.Column="1" RowDefinitions="Auto,Auto" RowSpacing="{DynamicResource Libation.Space.2}">
-				<Expander IsExpanded="{Binding IsExpanded, ElementName=Root, Mode=TwoWay}">
-					<Expander.Header>
-						<StackPanel Spacing="{DynamicResource Libation.Space.1}">
-							<TextBlock Text="{Binding Title, ElementName=Root}" FontFamily="{DynamicResource Libation.Font.Display}"
-									   FontSize="{DynamicResource Libation.FontSize.Section}" Foreground="{DynamicResource Libation.Brush.TextPrimary}" />
-							<TextBlock Text="{Binding SummaryText, ElementName=Root}" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
-							<TextBlock Text="{Binding ActiveText, ElementName=Root}" Foreground="{DynamicResource Libation.Brush.TextPrimary}"
-									   FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
-						</StackPanel>
-					</Expander.Header>
-					<StackPanel Spacing="{DynamicResource Libation.Space.3}">
-						<ProgressBar Classes="contemporary prominent" Minimum="0" Maximum="100" Value="{Binding Progress, ElementName=Root}"
-									 IsVisible="{Binding ShowProgress, ElementName=Root}" AutomationProperties.Name="Overall processing progress" />
-						<ContentControl Content="{Binding DetailsContent, ElementName=Root}" />
+<UserControl
+	xmlns="https://github.com/avaloniaui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:designSystem="using:LibationAvalonia.DesignSystem"
+	xmlns:processing="using:LibationAvalonia.Features.Processing"
+	x:Class="LibationAvalonia.DesignSystem.Components.DecanterSummary"
+	x:Name="Root">
+	<UserControl.Resources>
+		<DataTemplate x:Key="CellarActiveRow" x:DataType="processing:ProcessingQueueItemViewModel">
+			<Border BorderBrush="{DynamicResource Libation.Brush.BorderSubtle}" BorderThickness="0,0,0,1" Padding="0,6"
+					AutomationProperties.Name="{Binding RowAccessibleName}">
+				<Grid RowDefinitions="Auto,Auto" RowSpacing="{DynamicResource Libation.Space.2}">
+					<StackPanel VerticalAlignment="Center">
+						<TextBlock Text="{Binding Title}" FontWeight="SemiBold" Foreground="{DynamicResource Libation.Brush.TextPrimary}" TextTrimming="CharacterEllipsis" />
+						<TextBlock Text="{Binding Author}" FontSize="{DynamicResource Libation.FontSize.Caption}" Foreground="{DynamicResource Libation.Brush.TextSecondary}" TextTrimming="CharacterEllipsis" />
 					</StackPanel>
-				</Expander>
-				<StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="{DynamicResource Libation.Space.2}" HorizontalAlignment="Right">
-					<Button Classes="contemporary quiet compact" Content="Pause" Command="{Binding PauseCommand, ElementName=Root}"
-							IsEnabled="{Binding CanPause, ElementName=Root}"
-							IsVisible="{Binding PauseCommand, ElementName=Root, Converter={x:Static ObjectConverters.IsNotNull}}" />
-					<Button Classes="contemporary danger compact" Content="Cancel" Command="{Binding CancelCommand, ElementName=Root}"
-							IsEnabled="{Binding CanCancel, ElementName=Root}"
-							IsVisible="{Binding CancelCommand, ElementName=Root, Converter={x:Static ObjectConverters.IsNotNull}}" />
-				</StackPanel>
+					<Grid Grid.Row="1" ColumnDefinitions="*,160" ColumnSpacing="{DynamicResource Libation.Space.3}">
+						<TextBlock Text="{Binding Stage}" VerticalAlignment="Center" Foreground="{DynamicResource Libation.Brush.AccentPrimary}" TextTrimming="CharacterEllipsis" AutomationProperties.Name="{Binding StageAnnouncement}" AutomationProperties.LiveSetting="{x:Static designSystem:PlatformAutomationPolicy.Polite}" />
+						<Grid Grid.Column="1" ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource Libation.Space.2}" VerticalAlignment="Center">
+							<ProgressBar Classes="contemporary" Minimum="0" Maximum="100" Value="{Binding Progress}" IsVisible="{Binding ShowProgress}" AutomationProperties.Name="{Binding ProgressAccessibleName}" />
+							<TextBlock Grid.Column="1" Text="{Binding ProgressText}" MinWidth="34" HorizontalAlignment="Right" VerticalAlignment="Center" />
+						</Grid>
+					</Grid>
+				</Grid>
+			</Border>
+		</DataTemplate>
+	</UserControl.Resources>
+
+	<Grid>
+		<!-- Cellar: a horizontal queue workbench, not a second queue owner. -->
+		<Border Classes="card raised" IsVisible="{Binding IsCellar, ElementName=Root}" Padding="{DynamicResource Libation.Thickness.3}">
+			<Grid ColumnDefinitions="Auto,*" ColumnSpacing="{DynamicResource Libation.Space.4}">
+				<Grid Width="120" MinHeight="92" IsVisible="{DynamicResource Libation.Decoration.Visible}" Opacity="{DynamicResource Libation.Decoration.Opacity}">
+					<Image Source="/Assets/ContemporaryCellar/decanter-cellar.png" Stretch="Uniform" VerticalAlignment="Center" AutomationProperties.AccessibilityView="Raw" AutomationProperties.IsControlElementOverride="False" />
+				</Grid>
+
+				<Grid Grid.Column="1" RowDefinitions="Auto,*,Auto" RowSpacing="{DynamicResource Libation.Space.2}">
+					<StackPanel Orientation="Horizontal" Spacing="{DynamicResource Libation.Space.3}" VerticalAlignment="Center">
+						<TextBlock Text="The Decanter" FontFamily="{DynamicResource Libation.Font.Display}" FontSize="{DynamicResource Libation.FontSize.Section}" Foreground="{DynamicResource Libation.Brush.TextPrimary}" />
+						<TextBlock Text="{Binding SummaryText, ElementName=Root}" Foreground="{DynamicResource Libation.Brush.TextSecondary}" VerticalAlignment="Center" />
+					</StackPanel>
+
+					<Grid Grid.Row="1" MinHeight="44">
+						<StackPanel Orientation="Horizontal" Spacing="{DynamicResource Libation.Space.2}" VerticalAlignment="Center" IsVisible="{Binding IsIdle, ElementName=Root}">
+							<TextBlock Text="The Decanter is resting." FontFamily="{DynamicResource Libation.Font.Display}" FontSize="{DynamicResource Libation.FontSize.BodyStrong}" />
+							<TextBlock Text="Queue a title when you are ready to prepare it." Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+						</StackPanel>
+						<ItemsControl ItemsSource="{Binding ActiveItems, ElementName=Root}" ItemTemplate="{StaticResource CellarActiveRow}" IsVisible="{Binding HasWork, ElementName=Root}" />
+					</Grid>
+
+					<Border Grid.Row="2" BorderBrush="{DynamicResource Libation.Brush.BorderStrong}" BorderThickness="0,1,0,0" Padding="0,8,0,0" IsVisible="{Binding HasWork, ElementName=Root}">
+						<Grid ColumnDefinitions="*,*,*,Auto" ColumnSpacing="{DynamicResource Libation.Space.4}">
+							<StackPanel>
+								<TextBlock Text="IN QUEUE" FontSize="{DynamicResource Libation.FontSize.Caption}" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+								<TextBlock Text="{Binding InQueueText, ElementName=Root}" FontWeight="SemiBold" />
+							</StackPanel>
+							<StackPanel Grid.Column="1">
+								<TextBlock Text="CONVERTING" FontSize="{DynamicResource Libation.FontSize.Caption}" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+								<TextBlock Text="{Binding ConvertingText, ElementName=Root}" FontWeight="SemiBold" />
+							</StackPanel>
+							<StackPanel Grid.Column="2">
+								<TextBlock Text="RUNNING TIME" FontSize="{DynamicResource Libation.FontSize.Caption}" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+								<TextBlock Text="{Binding RunningTimeText, ElementName=Root}" FontWeight="SemiBold" />
+							</StackPanel>
+							<Button Grid.Column="3" Classes="contemporary primary compact" Content="Open Processing" Command="{Binding OpenProcessingCommand, ElementName=Root}" CommandParameter="{Binding OpenProcessingCommandParameter, ElementName=Root}" />
+						</Grid>
+					</Border>
+				</Grid>
 			</Grid>
-		</Grid>
-	</Border>
+		</Border>
+
+		<!-- Tasting Room: the same owner, composed as a focused current-pour card. -->
+		<Border Classes="card raised" IsVisible="{Binding IsTastingRoom, ElementName=Root}" Padding="0" ClipToBounds="True">
+			<Grid RowDefinitions="Auto,*,Auto">
+				<Grid Margin="{DynamicResource Libation.Thickness.4}" ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource Libation.Space.2}">
+					<StackPanel>
+						<TextBlock Text="The Decanter" FontFamily="{DynamicResource Libation.Font.Display}" FontSize="{DynamicResource Libation.FontSize.Section}" />
+						<TextBlock Text="{Binding SummaryText, ElementName=Root}" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+					</StackPanel>
+					<Button Grid.Column="1" Classes="contemporary danger compact" Content="Cancel" Command="{Binding CancelCommand, ElementName=Root}" IsEnabled="{Binding CanCancel, ElementName=Root}" IsVisible="{Binding CanCancel, ElementName=Root}" AutomationProperties.Name="{Binding CancelAccessibleName, ElementName=Root}" />
+				</Grid>
+
+				<Grid Grid.Row="1" Margin="16,0,16,16" ColumnDefinitions="Auto,*" ColumnSpacing="{DynamicResource Libation.Space.4}">
+					<Grid Width="96" Height="120" IsVisible="{DynamicResource Libation.Decoration.Visible}" Opacity="{DynamicResource Libation.Decoration.Opacity}">
+						<Image Source="/Assets/ContemporaryCellar/tasting-room-decanter.png" Stretch="Uniform" AutomationProperties.AccessibilityView="Raw" AutomationProperties.IsControlElementOverride="False" />
+					</Grid>
+					<Grid Grid.Column="1">
+						<StackPanel Spacing="{DynamicResource Libation.Space.2}" VerticalAlignment="Center" IsVisible="{Binding HasWork, ElementName=Root}">
+							<TextBlock Text="{Binding CurrentStageText, ElementName=Root}" Foreground="{DynamicResource Libation.Brush.AccentPrimary}" FontWeight="SemiBold" AutomationProperties.Name="{Binding CurrentStageAccessibleName, ElementName=Root}" AutomationProperties.LiveSetting="{x:Static designSystem:PlatformAutomationPolicy.Polite}" />
+							<TextBlock Text="{Binding CurrentTitle, ElementName=Root}" FontFamily="{DynamicResource Libation.Font.Display}" FontSize="{DynamicResource Libation.FontSize.BodyStrong}" TextWrapping="Wrap" MaxLines="2" />
+							<TextBlock Text="{Binding CurrentOutputText, ElementName=Root}" Foreground="{DynamicResource Libation.Brush.TextSecondary}" IsVisible="{Binding CurrentOutputText, ElementName=Root, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+							<Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource Libation.Space.2}" IsVisible="{Binding ShowProgress, ElementName=Root}">
+								<ProgressBar Classes="contemporary prominent" Minimum="0" Maximum="100" Value="{Binding Progress, ElementName=Root}" AutomationProperties.Name="{Binding ProgressAccessibleName, ElementName=Root}" />
+								<TextBlock Grid.Column="1" Text="{Binding ProgressText, ElementName=Root}" MinWidth="36" HorizontalAlignment="Right" />
+							</Grid>
+						</StackPanel>
+						<StackPanel Spacing="{DynamicResource Libation.Space.2}" VerticalAlignment="Center" IsVisible="{Binding IsIdle, ElementName=Root}">
+							<TextBlock Text="Nothing is in the Decanter." FontFamily="{DynamicResource Libation.Font.Display}" FontSize="{DynamicResource Libation.FontSize.BodyStrong}" TextWrapping="Wrap" />
+							<TextBlock Text="Choose a title from your Current Flight when you are ready." Foreground="{DynamicResource Libation.Brush.TextSecondary}" TextWrapping="Wrap" />
+							<Button Classes="contemporary quiet compact" HorizontalAlignment="Left" Content="Open Processing" Command="{Binding OpenProcessingCommand, ElementName=Root}" CommandParameter="{Binding OpenProcessingCommandParameter, ElementName=Root}" />
+						</StackPanel>
+					</Grid>
+				</Grid>
+
+				<Border Grid.Row="2" Background="{DynamicResource Libation.Brush.SurfaceSunken}" Padding="{DynamicResource Libation.Thickness.3}">
+					<TextBlock Text="Wine takes time. Great audio takes care." HorizontalAlignment="Center" FontSize="{DynamicResource Libation.FontSize.Caption}" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+				</Border>
+			</Grid>
+		</Border>
+	</Grid>
 </UserControl>

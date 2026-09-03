@@ -2,6 +2,7 @@ using ApplicationServices;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Threading;
+using DataLayer;
 using LibationAvalonia.DesignSystem;
 using LibationAvalonia.Features.Accounts;
 using LibationAvalonia.Features.Downloads;
@@ -15,6 +16,7 @@ using LibationAvalonia.Features.Tools;
 using LibationAvalonia.Features.Trash;
 using LibationAvalonia.ViewModels;
 using LibationFileManager;
+using LibationUiBase.ProcessQueue;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
@@ -50,7 +52,7 @@ public sealed class AppShellViewModel : ViewModelBase, IDisposable
 		CurrentFlight = new CurrentFlightViewModel(Flight, configuration, main.ProcessQueue, FlightProcessor, FlightActions);
 		Processing = new ProcessingViewModel(
 			main.ProcessQueue,
-			(book, effectiveConfiguration) => main.QueueBooksAsync([book], effectiveConfiguration));
+			item => RetryProcessingItemAsync(main, item));
 		profile = experienceManager.CurrentProfile;
 		Navigation = new NavigationService(configuration, Profile);
 		Responsive = new ResponsiveLayoutService();
@@ -101,6 +103,20 @@ public sealed class AppShellViewModel : ViewModelBase, IDisposable
 			null);
 		SetActiveDestinations(Navigation.CurrentRoute.Id);
 	}
+
+	private static System.Threading.Tasks.Task<bool> RetryProcessingItemAsync(
+		MainVM main,
+		ProcessBookViewModel item)
+		=> item.LastPresentationStage switch
+		{
+			ProcessBookPresentationStage.Downloading
+				when item.IncludesPdfDownload && item.LibraryBook.NeedsPdfDownload
+				=> main.ProcessQueue.QueueDownloadPdfAsync([item.LibraryBook], item.Configuration),
+			ProcessBookPresentationStage.Decrypting
+				when item.IncludesBookDownload && item.LibraryBook.NeedsBookDownload
+				=> main.ProcessQueue.QueueDownloadDecryptAsync([item.LibraryBook], item.Configuration),
+			_ => System.Threading.Tasks.Task.FromResult(false),
+		};
 
 	public ILibationCommandAdapter CommandAdapter { get; }
 	public FlightService Flight { get; }

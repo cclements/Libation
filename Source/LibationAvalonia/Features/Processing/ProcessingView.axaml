@@ -3,58 +3,176 @@
 			 xmlns:components="using:LibationAvalonia.DesignSystem.Components"
 			 xmlns:processing="using:LibationAvalonia.Features.Processing"
 			 xmlns:views="using:LibationAvalonia.Views"
-			 xmlns:properties="using:LibationAvalonia.Properties"
 			 x:Class="LibationAvalonia.Features.Processing.ProcessingView"
 			 x:Name="Root"
 			 x:DataType="processing:ProcessingViewModel">
-	<Grid>
-		<TabControl SelectedIndex="{Binding SelectedTabIndex, Mode=TwoWay}">
-			<TabItem Header="Active">
-				<Grid>
-					<components:EmptyState IsVisible="{Binding !HasActive}"
-						Title="No active processing"
-						Explanation="Queued titles will appear here when processing begins."
-						IllustrationTemplate="{DynamicResource illustration.decanter.empty}" />
-					<ListBox ItemsSource="{Binding Active}" IsVisible="{Binding HasActive}">
-						<ListBox.ItemTemplate><DataTemplate x:DataType="processing:ProcessingQueueItemViewModel"><components:QueueItem Cover="{Binding Cover}" Title="{Binding Title}" Stage="{Binding Stage}" Message="{Binding Message}" Status="{Binding Status}" StatusText="{Binding StatusText}" Progress="{Binding Progress}" ShowProgress="{Binding ShowProgress}" ErrorDetails="{Binding ErrorDetails}" CancelCommand="{Binding CancelCommand}" /></DataTemplate></ListBox.ItemTemplate>
-					</ListBox>
+	<UserControl.Resources>
+		<views:DecimalConverter x:Key="SpeedLimitConverter" />
+	</UserControl.Resources>
+
+	<Grid RowDefinitions="Auto,Auto,*,Auto" RowSpacing="{DynamicResource Libation.Space.3}">
+		<Border Classes="card raised" Padding="{DynamicResource Libation.Thickness.3}">
+			<Grid ColumnDefinitions="Auto,Auto,Auto,Auto,*,Auto,Auto,Auto" ColumnSpacing="{DynamicResource Libation.Space.3}">
+				<Border Background="{DynamicResource Libation.Brush.SurfaceInteractive}" BorderBrush="{DynamicResource Libation.Brush.BorderSubtle}" BorderThickness="1" CornerRadius="{DynamicResource Libation.Radius.Small}" Padding="10,6">
+					<StackPanel Orientation="Horizontal" Spacing="{DynamicResource Libation.Space.1}">
+						<TextBlock Text="Active" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+						<TextBlock Text="{Binding ActiveCount}" FontWeight="SemiBold" />
+					</StackPanel>
+				</Border>
+				<Border Grid.Column="1" Background="{DynamicResource Libation.Brush.SurfaceInteractive}" BorderBrush="{DynamicResource Libation.Brush.BorderSubtle}" BorderThickness="1" CornerRadius="{DynamicResource Libation.Radius.Small}" Padding="10,6">
+					<StackPanel Orientation="Horizontal" Spacing="{DynamicResource Libation.Space.1}">
+						<TextBlock Text="Waiting" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+						<TextBlock Text="{Binding WaitingCount}" FontWeight="SemiBold" />
+					</StackPanel>
+				</Border>
+				<Border Grid.Column="2" Background="{DynamicResource Libation.Brush.SurfaceInteractive}" BorderBrush="{DynamicResource Libation.Brush.BorderSubtle}" BorderThickness="1" CornerRadius="{DynamicResource Libation.Radius.Small}" Padding="10,6">
+					<StackPanel Orientation="Horizontal" Spacing="{DynamicResource Libation.Space.1}">
+						<TextBlock Text="Completed" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+						<TextBlock Text="{Binding CompletedCount}" FontWeight="SemiBold" />
+					</StackPanel>
+				</Border>
+				<Border Grid.Column="3" Background="{DynamicResource Libation.Brush.SurfaceInteractive}" BorderBrush="{DynamicResource Libation.Brush.BorderSubtle}" BorderThickness="1" CornerRadius="{DynamicResource Libation.Radius.Small}" Padding="10,6">
+					<StackPanel Orientation="Horizontal" Spacing="{DynamicResource Libation.Space.1}">
+						<TextBlock Text="Failed" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+						<TextBlock Text="{Binding FailedCount}" FontWeight="SemiBold" />
+					</StackPanel>
+				</Border>
+
+				<StackPanel Grid.Column="5" MinWidth="170" VerticalAlignment="Center">
+					<TextBlock Text="Overall progress" FontSize="{DynamicResource Libation.FontSize.Caption}" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+					<Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource Libation.Space.2}">
+						<ProgressBar Classes="contemporary" Minimum="0" Maximum="100" Value="{Binding Progress}" MinWidth="112" AutomationProperties.Name="Overall queue progress" />
+						<TextBlock Grid.Column="1" Text="{Binding OverallProgressText}" MinWidth="34" HorizontalAlignment="Right" />
+					</Grid>
+				</StackPanel>
+				<StackPanel Grid.Column="6" VerticalAlignment="Center">
+					<TextBlock Text="Running time" FontSize="{DynamicResource Libation.FontSize.Caption}" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+					<TextBlock Text="{Binding RunningTimeText}" FontWeight="SemiBold" />
+				</StackPanel>
+				<Button Grid.Column="7" Classes="contemporary quiet compact" Content="Queue log" Command="{Binding OpenLogCommand}" />
+			</Grid>
+		</Border>
+
+		<Border Grid.Row="1" IsVisible="{Binding IsPerformanceExpanded}"
+				Background="{DynamicResource Libation.Brush.SurfaceSunken}"
+				BorderBrush="{DynamicResource Libation.Brush.BorderSubtle}" BorderThickness="1"
+				CornerRadius="{DynamicResource Libation.Radius.Medium}" Padding="{DynamicResource Libation.Thickness.3}">
+				<Grid ColumnDefinitions="Auto,Auto,*,Auto,Auto,Auto" ColumnSpacing="{DynamicResource Libation.Space.3}">
+					<TextBlock Text="At once" VerticalAlignment="Center" />
+					<NumericUpDown Grid.Column="1" MinWidth="96"
+								   Value="{Binding Source.MaxConcurrentDownloads, Mode=TwoWay}"
+								   Minimum="{Binding Source.MinConcurrentDownloads}"
+								   Maximum="{Binding Source.MaxAllowedConcurrentDownloads}"
+								   Increment="1" FormatString="0"
+								   ToolTip.Tip="How many books to download and decrypt at the same time." />
+					<TextBlock Grid.Column="2" Text="{Binding Source.ConcurrencyHint}"
+							   VerticalAlignment="Center" Foreground="{DynamicResource Libation.Brush.TextSecondary}"
+							   IsVisible="{Binding Source.ConcurrencyHint, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+					<TextBlock Grid.Column="3" Text="Download limit" VerticalAlignment="Center" />
+					<NumericUpDown Grid.Column="4" MinWidth="112"
+								   TextConverter="{StaticResource SpeedLimitConverter}"
+								   Value="{Binding Source.SpeedLimit, Mode=TwoWay}"
+								   Minimum="0" Maximum="999"
+								   Increment="{Binding Source.SpeedLimitIncrement}"
+								   KeyDown="NumericUpDown_KeyDown" />
+					<CheckBox Grid.Column="5" Content="Auto-scroll"
+							  IsChecked="{Binding Source.AutoScrollQueue, Mode=TwoWay}"
+							  ToolTip.Tip="Keep newly active titles in view when you are already following the queue." />
 				</Grid>
-			</TabItem>
-			<TabItem Header="Waiting">
-				<Grid>
-					<components:EmptyState IsVisible="{Binding !HasWaiting}" Title="Nothing waiting" Explanation="New processing work will be listed here in queue order." />
-					<ListBox ItemsSource="{Binding Waiting}" IsVisible="{Binding HasWaiting}">
-						<ListBox.ItemTemplate><DataTemplate x:DataType="processing:ProcessingQueueItemViewModel"><components:QueueItem Cover="{Binding Cover}" Title="{Binding Title}" Stage="{Binding Stage}" Message="{Binding Message}" Status="{Binding Status}" StatusText="{Binding StatusText}" Progress="{Binding Progress}" ShowProgress="{Binding ShowProgress}" CancelCommand="{Binding CancelCommand}" /></DataTemplate></ListBox.ItemTemplate>
-					</ListBox>
+		</Border>
+
+		<Grid Grid.Row="2">
+			<components:EmptyState IsVisible="{Binding !HasWork}"
+				Title="The Decanter is resting"
+				Explanation="Queue a title from the Library when you are ready to prepare it."
+				IllustrationTemplate="{DynamicResource illustration.decanter.empty}" />
+
+			<ListBox x:Name="QueueListControl" ItemsSource="{Binding QueueRows}" IsVisible="{Binding HasWork}">
+				<ListBox.Styles>
+					<Style Selector="ListBoxItem">
+						<Setter Property="Padding" Value="0" />
+						<Setter Property="Margin" Value="0,0,0,8" />
+						<Setter Property="HorizontalContentAlignment" Value="Stretch" />
+					</Style>
+				</ListBox.Styles>
+				<ListBox.ItemsPanel>
+					<ItemsPanelTemplate><VirtualizingStackPanel /></ItemsPanelTemplate>
+				</ListBox.ItemsPanel>
+				<ListBox.ItemTemplate>
+					<DataTemplate x:DataType="processing:ProcessingQueueRowViewModel">
+						<Grid>
+							<Border IsVisible="{Binding IsSectionHeader}" Padding="4,10,4,4"
+									BorderBrush="{DynamicResource Libation.Brush.BorderStrong}" BorderThickness="0,0,0,1">
+								<TextBlock Text="{Binding SectionText}" FontFamily="{DynamicResource Libation.Font.Display}"
+										   FontSize="{DynamicResource Libation.FontSize.Section}" />
+							</Border>
+							<components:QueueItem IsVisible="{Binding IsQueueItem}"
+								Cover="{Binding Item.Cover}"
+								Title="{Binding Item.Title}"
+								Author="{Binding Item.Author}"
+								Stage="{Binding Item.Stage}"
+								AccessibleName="{Binding Item.RowAccessibleName}"
+								StageAccessibleName="{Binding Item.StageAnnouncement}"
+								Message="{Binding Item.Message}"
+								Status="{Binding Item.Status}"
+								StatusText="{Binding Item.StatusText}"
+								Progress="{Binding Item.Progress}"
+								ProgressText="{Binding Item.ProgressText}"
+								ProgressAccessibleName="{Binding Item.ProgressAccessibleName}"
+								ShowProgress="{Binding Item.ShowProgress}"
+								EtaText="{Binding Item.EtaText}"
+								OutputProfileText="{Binding Item.OutputProfileText}"
+								ErrorDetails="{Binding Item.ErrorDetails}"
+								RecommendedAction="{Binding Item.RecommendedAction}"
+								ReferenceText="{Binding Item.ReferenceText}"
+								IsExpanded="{Binding Item.IsExpanded, Mode=TwoWay}"
+								MoveUpCommand="{Binding Item.MoveUpCommand}"
+								MoveDownCommand="{Binding Item.MoveDownCommand}"
+								RetryCommand="{Binding Item.RetryCommand}"
+								RevealCommand="{Binding Item.RevealCommand}"
+								CopyTechnicalDetailsCommand="{Binding Item.CopyTechnicalDetailsCommand}"
+								OpenLogCommand="{Binding Item.OpenLogCommand}"
+								CancelCommand="{Binding Item.CancelCommand}"
+								MoveUpAccessibleName="{Binding Item.MoveUpAccessibleName}"
+								MoveDownAccessibleName="{Binding Item.MoveDownAccessibleName}"
+								RetryAccessibleName="{Binding Item.RetryAccessibleName}"
+								RevealAccessibleName="{Binding Item.RevealAccessibleName}"
+								CopyDetailsAccessibleName="{Binding Item.CopyDetailsAccessibleName}"
+								OpenLogAccessibleName="{Binding Item.OpenLogAccessibleName}"
+								CancelAccessibleName="{Binding Item.CancelAccessibleName}" />
+						</Grid>
+					</DataTemplate>
+				</ListBox.ItemTemplate>
+			</ListBox>
+		</Grid>
+
+		<Border Grid.Row="3" IsVisible="{Binding IsLogOpen}" MaxHeight="260"
+				Background="{DynamicResource Libation.Brush.SurfaceRaised}"
+				BorderBrush="{DynamicResource Libation.Brush.BorderStrong}" BorderThickness="1"
+				CornerRadius="{DynamicResource Libation.Radius.Medium}" Padding="{DynamicResource Libation.Thickness.3}">
+			<Grid RowDefinitions="Auto,*" RowSpacing="{DynamicResource Libation.Space.2}">
+				<Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="{DynamicResource Libation.Space.2}">
+					<StackPanel>
+						<TextBlock Text="Queue log" FontFamily="{DynamicResource Libation.Font.Display}" FontSize="{DynamicResource Libation.FontSize.Section}" />
+						<TextBlock Text="{Binding LogSummary}" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+					</StackPanel>
+					<Button Grid.Column="1" Classes="contemporary quiet compact" Content="Copy log" Command="{Binding CopyLogCommand}" IsEnabled="{Binding HasLogEntries}" />
+					<Button Grid.Column="2" Classes="contemporary quiet compact" Content="Clear log" Command="{Binding ClearLogCommand}" IsEnabled="{Binding HasLogEntries}" />
+					<Button Grid.Column="3" Classes="contemporary quiet compact" Content="Close" Command="{Binding CloseLogCommand}" />
 				</Grid>
-			</TabItem>
-			<TabItem Header="Completed">
-				<Grid RowDefinitions="Auto,*">
-					<Button HorizontalAlignment="Right" Margin="0,0,0,8" Content="Clear finished" Command="{Binding ClearFinishedCommand}" IsEnabled="{Binding HasFinished}" />
-					<components:EmptyState Grid.Row="1" IsVisible="{Binding !HasCompleted}" Title="No completed work" Explanation="Successfully processed titles remain here until finished work is cleared." />
-					<ListBox Grid.Row="1" ItemsSource="{Binding Completed}" IsVisible="{Binding HasCompleted}">
-						<ListBox.ItemTemplate><DataTemplate x:DataType="processing:ProcessingQueueItemViewModel"><components:QueueItem Cover="{Binding Cover}" Title="{Binding Title}" Stage="{Binding Stage}" Message="{Binding Message}" Status="{Binding Status}" StatusText="{Binding StatusText}" Progress="{Binding Progress}" ShowProgress="False" /></DataTemplate></ListBox.ItemTemplate>
-					</ListBox>
-				</Grid>
-			</TabItem>
-			<TabItem Header="Failed / cancelled">
-				<Grid RowDefinitions="Auto,*">
-					<Button HorizontalAlignment="Right" Margin="0,0,0,8" Content="Clear finished" Command="{Binding ClearFinishedCommand}" IsEnabled="{Binding HasFinished}" />
-					<components:EmptyState Grid.Row="1" IsVisible="{Binding !HasFailed}" Title="No failed or cancelled work" Explanation="{x:Static properties:Resources.ProcessingNoFailuresExplanation}" />
-					<ListBox Grid.Row="1" ItemsSource="{Binding Failed}" IsVisible="{Binding HasFailed}">
-						<ListBox.ItemTemplate><DataTemplate x:DataType="processing:ProcessingQueueItemViewModel"><components:QueueItem Cover="{Binding Cover}" Title="{Binding Title}" Stage="{Binding Stage}" Message="{Binding Message}" Status="{Binding Status}" StatusText="{Binding StatusText}" Progress="{Binding Progress}" ShowProgress="False" ErrorDetails="{Binding ErrorDetails}" RetryCommand="{Binding RetryCommand}" OpenLogCommand="{Binding OpenLogCommand}" CopyTechnicalDetailsCommand="{Binding CopyTechnicalDetailsCommand}" /></DataTemplate></ListBox.ItemTemplate>
-					</ListBox>
-				</Grid>
-			</TabItem>
-			<TabItem Header="Queue controls &amp; log">
-				<Grid RowDefinitions="Auto,*" RowSpacing="8">
-					<TextBlock Text="{Binding LogSummary}" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
-					<Border Grid.Row="1" BorderBrush="{DynamicResource Libation.Brush.BorderSubtle}" BorderThickness="1" CornerRadius="{DynamicResource Libation.Radius.Medium}" ClipToBounds="True">
-						<views:ProcessQueueControl DataContext="{Binding Source, Mode=OneTime}"
-							SelectedTabIndex="{Binding DataContext.QueueDetailTabIndex, ElementName=Root, Mode=TwoWay}" />
-					</Border>
-				</Grid>
-			</TabItem>
-		</TabControl>
+				<DataGrid Grid.Row="1" AutoGenerateColumns="False" ItemsSource="{Binding Source.LogEntries}" IsReadOnly="True">
+					<DataGrid.Columns>
+						<DataGridTextColumn SortMemberPath="LogDate" Header="Timestamp" CanUserSort="True" Binding="{Binding LogDateString}" Width="100" />
+						<DataGridTemplateColumn SortMemberPath="LogMessage" Header="Message" CanUserSort="True" Width="*">
+							<DataGridTemplateColumn.CellTemplate>
+								<DataTemplate>
+									<TextBlock Text="{Binding LogMessage}" TextWrapping="Wrap" Margin="4" />
+								</DataTemplate>
+							</DataGridTemplateColumn.CellTemplate>
+						</DataGridTemplateColumn>
+					</DataGrid.Columns>
+				</DataGrid>
+			</Grid>
+		</Border>
 	</Grid>
 </UserControl>

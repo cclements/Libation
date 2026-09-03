@@ -219,6 +219,7 @@ public class App : Application
 			desktop.Shutdown();
 		};
 		mainWindow.RestoreSizeAndLocation(Configuration.Instance);
+		mainWindow.PrepareCaptureWindowBeforeShow();
 		mainWindow.Show();
 	}
 

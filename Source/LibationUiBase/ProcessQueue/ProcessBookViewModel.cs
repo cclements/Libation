@@ -42,6 +42,19 @@ public enum ProcessBookStatus
 }
 
 /// <summary>
+/// Typed, presentation-safe stage emitted by the real processable boundary.
+/// <see cref="None"/> means consumers should retain the owner's literal status.
+/// </summary>
+public enum ProcessBookPresentationStage
+{
+	None,
+	Downloading,
+	Decrypting,
+	Converting,
+	Completed
+}
+
+/// <summary>
 /// This is the viewmodel for queued processables
 /// </summary>
 public class ProcessBookViewModel : ReactiveObject
@@ -57,14 +70,16 @@ public class ProcessBookViewModel : ReactiveObject
 
 	#region Properties exposed to the view
 	public ProcessBookResult Result { get => field; set { RaiseAndSetIfChanged(ref field, value); RaisePropertyChanged(nameof(StatusText)); } }
-	public ProcessBookStatus Status { get => field; set { RaiseAndSetIfChanged(ref field, value); RaisePropertyChanged(nameof(IsFinished)); RaisePropertyChanged(nameof(IsDownloading)); RaisePropertyChanged(nameof(Queued)); } }
+	public ProcessBookStatus Status { get => field; set { RaiseAndSetIfChanged(ref field, value); RaisePropertyChanged(nameof(IsFinished)); RaisePropertyChanged(nameof(IsDownloading)); RaisePropertyChanged(nameof(Queued)); RaisePropertyChanged(nameof(StatusText)); } }
 	public string? Narrator { get => field; set => RaiseAndSetIfChanged(ref field, value); }
 	public string? Author { get => field; set => RaiseAndSetIfChanged(ref field, value); }
 	public string? Title { get => field; set => RaiseAndSetIfChanged(ref field, value); }
 	public int Progress { get => field; protected set => RaiseAndSetIfChanged(ref field, value); }
-	public TimeSpan TimeRemaining { get => field; set { RaiseAndSetIfChanged(ref field, value); ETA = $"ETA: {value:mm\\:ss}"; } }
+	public TimeSpan TimeRemaining { get => field; set { RaiseAndSetIfChanged(ref field, value); ETA = value > TimeSpan.Zero ? $"ETA: {value:mm\\:ss}" : null; } }
 	public string? ETA { get => field; private set => RaiseAndSetIfChanged(ref field, value); }
 	public object? Cover { get => field; protected set => RaiseAndSetIfChanged(ref field, value); }
+	public ProcessBookPresentationStage PresentationStage { get => field; set => RaiseAndSetIfChanged(ref field, value); }
+	public ProcessBookPresentationStage LastPresentationStage { get => field; protected set => RaiseAndSetIfChanged(ref field, value); }
 	public bool IsFinished => Status is not ProcessBookStatus.Queued and not ProcessBookStatus.Working;
 	public bool IsDownloading => Status is ProcessBookStatus.Working;
 	public bool Queued => Status is ProcessBookStatus.Queued;
@@ -80,6 +95,8 @@ public class ProcessBookViewModel : ReactiveObject
 	/// PDF-only and mp3-conversion items are never limited.
 	/// </summary>
 	public bool IncludesBookDownload { get; private set; }
+	public bool IncludesPdfDownload { get; private set; }
+	public bool IncludesMp3Conversion { get; private set; }
 
 	public string StatusText => StatusOverride ?? (Result, LibraryBook.IsAudiblePlus) switch
 	{
@@ -192,6 +209,18 @@ public class ProcessBookViewModel : ReactiveObject
 		}
 
 		Result = result;
+		if (result is ProcessBookResult.Success)
+		{
+			Progress = 100;
+			TimeRemaining = TimeSpan.Zero;
+			PresentationStage = ProcessBookPresentationStage.Completed;
+			LastPresentationStage = ProcessBookPresentationStage.Completed;
+		}
+		else
+		{
+			ResetPresentationProgress();
+			PresentationStage = ProcessBookPresentationStage.None;
+		}
 		return result;
 	}
 
@@ -199,6 +228,10 @@ public class ProcessBookViewModel : ReactiveObject
 	{
 		string procName = processable.Name;
 		ProcessBookResult result = ProcessBookResult.None;
+		// Never carry retry authority across steps. Begin records the current typed
+		// stage; a failure before Begin therefore remains intentionally unretryable.
+		PresentationStage = ProcessBookPresentationStage.None;
+		LastPresentationStage = ProcessBookPresentationStage.None;
 		try
 		{
 			// Optional steps (e.g. PDF when the book has no supplement) use Validate() to mean "does not apply".
@@ -327,13 +360,21 @@ public class ProcessBookViewModel : ReactiveObject
 		}
 	}
 
-	public ProcessBookViewModel AddDownloadPdf() => AddProcessable<DownloadPdf>();
+	public ProcessBookViewModel AddDownloadPdf()
+	{
+		IncludesPdfDownload = true;
+		return AddProcessable<DownloadPdf>();
+	}
 	public ProcessBookViewModel AddDownloadDecryptBook()
 	{
 		IncludesBookDownload = true;
 		return AddProcessable<DownloadDecryptBook>();
 	}
-	public ProcessBookViewModel AddConvertToMp3() => AddProcessable<ConvertToMp3>();
+	public ProcessBookViewModel AddConvertToMp3()
+	{
+		IncludesMp3Conversion = true;
+		return AddProcessable<ConvertToMp3>();
+	}
 	public ProcessBookViewModel AddUploadToAudiobookshelf() => AddProcessable<UploadToAudiobookshelf>();
 	public ProcessBookViewModel AddSimulateBadBookFailure() => AddProcessable<SimulateBadBookFailure>();
 
@@ -442,6 +483,16 @@ public class ProcessBookViewModel : ReactiveObject
 
 	private void Processable_Begin(object? sender, LibraryBook libraryBook)
 	{
+		ResetPresentationProgress();
+		var presentationStage = sender switch
+		{
+			DownloadPdf => ProcessBookPresentationStage.Downloading,
+			DownloadDecryptBook => ProcessBookPresentationStage.Decrypting,
+			ConvertToMp3 => ProcessBookPresentationStage.Converting,
+			_ => ProcessBookPresentationStage.None,
+		};
+		PresentationStage = presentationStage;
+		LastPresentationStage = presentationStage;
 		Status = ProcessBookStatus.Working;
 
 		if (sender is Processable processable)
@@ -450,6 +501,12 @@ public class ProcessBookViewModel : ReactiveObject
 		Title = libraryBook.Book.TitleWithSubtitle;
 		Author = libraryBook.Book.AuthorNames;
 		Narrator = libraryBook.Book.NarratorNames;
+	}
+
+	private void ResetPresentationProgress()
+	{
+		Progress = 0;
+		TimeRemaining = TimeSpan.Zero;
 	}
 
 	private void Processable_StatusUpdate(object? sender, string statusUpdate)

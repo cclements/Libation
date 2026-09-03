@@ -366,30 +366,36 @@
 				</Grid>
 				<StackPanel Grid.Row="1" Spacing="{DynamicResource Libation.Space.3}">
 					<ContentControl x:Name="DecanterDrawerHost" />
-					<Button Classes="contemporary primary" HorizontalAlignment="Left"
-						Command="{Binding NavigateCommand}"
-						CommandParameter="{x:Static shell:AppRouteId.Processing}"
-						Content="{x:Static properties:Resources.ShellOpenProcessingWorkspaceCommandLabel}" />
 				</StackPanel>
 			</Grid>
 		</Border>
 		<Panel x:Name="SurfaceParkingHost" IsVisible="False">
 			<ContentControl x:Name="FlightParkingHost">
-				<flight:CurrentFlightView x:Name="SharedFlightSurface" DataContext="{Binding CurrentFlight, Mode=OneTime}" />
+				<flight:CurrentFlightView x:Name="SharedFlightSurface" />
 			</ContentControl>
 			<ContentControl x:Name="DecanterParkingHost">
 			<components:DecanterSummary x:Name="SharedDecanterSurface"
-				Title="The Decanter"
 				SummaryText="{Binding Processing.SummaryText}"
-				ActiveText="{Binding Processing.ActiveText}"
-				Progress="{Binding Processing.Progress}"
-				ShowProgress="{Binding Processing.ShowProgress}"
-				CancelCommand="{Binding Processing.CancelAllCommand}"
-				CanCancel="{Binding Processing.CanCancel}">
-				<components:DecanterSummary.IllustrationContent>
-					<Image Width="120" Height="92" Stretch="Uniform" Source="/Assets/ContemporaryCellar/decanter-cellar.png" />
-				</components:DecanterSummary.IllustrationContent>
-			</components:DecanterSummary>
+				IsCellar="{Binding IsCellarComposition}"
+				IsTastingRoom="{Binding IsTastingRoomComposition}"
+				HasWork="{Binding Processing.CanCancel}"
+				IsIdle="{Binding !Processing.CanCancel}"
+				ActiveItems="{Binding Processing.DecanterActiveItems}"
+				InQueueText="{Binding Processing.InQueueText}"
+				ConvertingText="{Binding Processing.ConvertingText}"
+				RunningTimeText="{Binding Processing.RunningTimeText}"
+				CurrentTitle="{Binding Processing.CurrentTitle}"
+				CurrentStageText="{Binding Processing.CurrentStage}"
+				CurrentOutputText="{Binding Processing.CurrentItem.OutputProfileText}"
+				Progress="{Binding Processing.CurrentProgress}"
+				ProgressText="{Binding Processing.CurrentItem.ProgressText}"
+				ProgressAccessibleName="{Binding Processing.CurrentItem.ProgressAccessibleName}"
+				ShowProgress="{Binding Processing.ShowCurrentProgress}"
+				CancelCommand="{Binding Processing.CurrentCancelCommand}"
+				CanCancel="{Binding Processing.CurrentCancellable}"
+				CancelAccessibleName="{Binding Processing.CurrentItem.CancelAccessibleName}"
+				OpenProcessingCommand="{Binding NavigateCommand}"
+				OpenProcessingCommandParameter="{x:Static shell:AppRouteId.Processing}" />
 			</ContentControl>
 		</Panel>
 		<components:ToastHost Grid.RowSpan="3" ZIndex="60"

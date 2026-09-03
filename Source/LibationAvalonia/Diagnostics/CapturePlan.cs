@@ -42,6 +42,13 @@ public enum CaptureSurface
 	ComponentGallery,
 }
 
+public enum ProcessingCaptureScenario
+{
+	Default,
+	Empty,
+	Mixed,
+}
+
 public sealed record CaptureEntry(
 	ExperienceStyle Profile,
 	CaptureSurface Surface,
@@ -57,6 +64,13 @@ public sealed record CaptureEntry(
 	bool OpenDetails,
 	string? File)
 {
+	/// <summary>
+	/// Semantic processing state for captures. Default preserves the legacy
+	/// <see cref="ProcessingSeedCount"/> behavior.
+	/// </summary>
+	public ProcessingCaptureScenario ProcessingScenario { get; init; } = ProcessingCaptureScenario.Default;
+	public bool OpenDecanter { get; init; }
+	public bool FocusFailedProcessingItem { get; init; }
 	public string FileName => File ?? CapturePlan.DefaultFileName(this);
 }
 
@@ -125,6 +139,9 @@ public sealed record CapturePlan(int SettleMs, IReadOnlyList<CaptureEntry> Entri
 			LibraryViewMode? libraryView = entry.LibraryView is null ? null
 				: TryParseDefined(entry.LibraryView, out LibraryViewMode parsedLibraryView) ? parsedLibraryView
 				: throw new CapturePlanException($"Unknown library view '{entry.LibraryView}'.");
+			var processingScenario = entry.ProcessingScenario is null ? ProcessingCaptureScenario.Default
+				: TryParseDefined(entry.ProcessingScenario, out ProcessingCaptureScenario parsedProcessingScenario) ? parsedProcessingScenario
+				: throw new CapturePlanException($"Unknown processing scenario '{entry.ProcessingScenario}'.");
 
 			entries.Add(new CaptureEntry(
 				profile,
@@ -139,7 +156,12 @@ public sealed record CapturePlan(int SettleMs, IReadOnlyList<CaptureEntry> Entri
 				entry.ProcessingSeedCount,
 				entry.OpenFlight,
 				entry.OpenDetails,
-				entry.File));
+				entry.File)
+			{
+				ProcessingScenario = processingScenario,
+				OpenDecanter = entry.OpenDecanter,
+				FocusFailedProcessingItem = entry.FocusFailedProcessingItem,
+			});
 		}
 
 		return new CapturePlan(raw.SettleMs ?? DefaultSettleMs, entries);
@@ -167,8 +189,11 @@ public sealed record CapturePlan(int SettleMs, IReadOnlyList<CaptureEntry> Entri
 		[JsonPropertyName("libraryView")] public string? LibraryView { get; set; }
 		[JsonPropertyName("flightSelectionCount")] public int FlightSelectionCount { get; set; }
 		[JsonPropertyName("processingSeedCount")] public int ProcessingSeedCount { get; set; }
+		[JsonPropertyName("processingScenario")] public string? ProcessingScenario { get; set; }
 		[JsonPropertyName("openFlight")] public bool OpenFlight { get; set; }
 		[JsonPropertyName("openDetails")] public bool OpenDetails { get; set; }
+		[JsonPropertyName("openDecanter")] public bool OpenDecanter { get; set; }
+		[JsonPropertyName("focusFailedProcessingItem")] public bool FocusFailedProcessingItem { get; set; }
 		[JsonPropertyName("file")] public string? File { get; set; }
 	}
 }
