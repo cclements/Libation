@@ -14,7 +14,10 @@ namespace LibationAvalonia.Tests;
 internal static class HeadlessTestAppBuilder
 {
 	public static AppBuilder BuildAvaloniaApp()
-		=> AppBuilder.Configure<App>().UseReactiveUI(_ => { });
+		=> AppBuilder.Configure<App>()
+			.UseHeadless(new AvaloniaHeadlessPlatformOptions { UseHeadlessDrawing = false })
+			.UseSkia()
+			.UseReactiveUI(_ => { });
 }
 
 internal static class HeadlessTestHost

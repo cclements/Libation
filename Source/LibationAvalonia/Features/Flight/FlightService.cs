@@ -5,6 +5,7 @@ using LibationFileManager;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
@@ -102,7 +103,7 @@ public interface IFlightService
 public sealed class FlightService : ViewModelBase, IFlightService, IDisposable
 {
 	private readonly Configuration configuration;
-	private readonly ObservableCollection<FlightItemViewModel> items = new();
+	private readonly FlightItemCollection items = new();
 	private readonly Dictionary<FlightItemId, FlightItemViewModel> byId = new();
 	private readonly Dictionary<FlightItemId, LibraryBook> availableById = new();
 	private HashSet<FlightItemId>? visibleIds;
@@ -170,35 +171,45 @@ public sealed class FlightService : ViewModelBase, IFlightService, IDisposable
 	public bool Replace(IReadOnlyCollection<FlightItemId> ids)
 	{
 		ArgumentNullException.ThrowIfNull(ids);
-		var desiredIds = ids.Distinct().Where(id => byId.ContainsKey(id) || availableById.ContainsKey(id)).ToArray();
-		if (items.Select(item => item.Id).SequenceEqual(desiredIds))
+		var desiredIds = new HashSet<FlightItemId>();
+		var desiredItems = new List<FlightItemViewModel>(ids.Count);
+		foreach (var id in ids)
+		{
+			if (!desiredIds.Add(id))
+				continue;
+			if (byId.TryGetValue(id, out var existing))
+				desiredItems.Add(existing);
+			else if (availableById.TryGetValue(id, out var available))
+				desiredItems.Add(new FlightItemViewModel(available));
+		}
+
+		if (items.SequenceEqual(desiredItems))
 			return false;
 
-		var desiredItems = desiredIds.Select(id => byId.TryGetValue(id, out var existing)
-			? existing
-			: new FlightItemViewModel(availableById[id])).ToArray();
-		var desiredSet = desiredIds.ToHashSet();
-		for (int index = items.Count - 1; index >= 0; index--)
-			if (!desiredSet.Contains(items[index].Id))
-				items.RemoveAt(index);
-
-		for (int index = 0; index < desiredItems.Length; index++)
-		{
-			var desired = desiredItems[index];
-			if (index < items.Count && ReferenceEquals(items[index], desired))
-				continue;
-			int currentIndex = items.IndexOf(desired);
-			if (currentIndex >= 0)
-				items.Move(currentIndex, index);
-			else
-				items.Insert(index, desired);
-		}
+		// Replace the backing list in one linear pass and publish one reset. Repeated
+		// ObservableCollection.Move/IndexOf calls make a reverse selection quadratic.
+		// The item view models themselves remain stable for every retained identifier.
+		items.ReplaceAll(desiredItems);
 
 		byId.Clear();
 		foreach (var item in items)
 			byId.Add(item.Id, item);
 		OnChanged(string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.FlightServiceCurrentFlightNowContains0TitleS, Count), FlightChangeKind.Replace);
 		return true;
+	}
+
+	private sealed class FlightItemCollection : ObservableCollection<FlightItemViewModel>
+	{
+		public void ReplaceAll(IReadOnlyList<FlightItemViewModel> replacement)
+		{
+			CheckReentrancy();
+			Items.Clear();
+			foreach (var item in replacement)
+				Items.Add(item);
+			OnPropertyChanged(new PropertyChangedEventArgs(nameof(Count)));
+			OnPropertyChanged(new PropertyChangedEventArgs("Item[]"));
+			OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+		}
 	}
 
 	public bool Move(FlightItemId id, int destinationIndex)
