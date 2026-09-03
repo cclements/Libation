@@ -66,7 +66,10 @@ public partial class AppShellView : UserControl
 	private void OnShellDataContextChanged()
 	{
 		if (subscribedViewModel is not null)
+		{
 			subscribedViewModel.PropertyChanged -= ViewModel_PropertyChanged;
+			subscribedViewModel.Processing.PropertyChanged -= Processing_PropertyChanged;
+		}
 		if (!ReferenceEquals(subscribedViewModel, ViewModel))
 		{
 			cellarOverview = null;
@@ -75,10 +78,32 @@ public partial class AppShellView : UserControl
 		}
 		subscribedViewModel = ViewModel;
 		if (subscribedViewModel is not null)
+		{
 			subscribedViewModel.PropertyChanged += ViewModel_PropertyChanged;
+			subscribedViewModel.Processing.PropertyChanged += Processing_PropertyChanged;
+			SharedFlightSurface.DataContext = subscribedViewModel.CurrentFlight;
+			UpdateDecanterSurface(subscribedViewModel);
+		}
 		ViewModel?.UpdateLayout(Bounds.Size);
 		UpdateOverviewHost();
 		MoveContextualSurfaces();
+	}
+
+	private void Processing_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+	{
+		if (subscribedViewModel is { } viewModel)
+			UpdateDecanterSurface(viewModel);
+	}
+
+	private void UpdateDecanterSurface(AppShellViewModel viewModel)
+	{
+		var processing = viewModel.Processing;
+		SharedDecanterSurface.SummaryText = processing.SummaryText;
+		SharedDecanterSurface.ActiveText = processing.ActiveText;
+		SharedDecanterSurface.Progress = processing.Progress;
+		SharedDecanterSurface.ShowProgress = processing.ShowProgress;
+		SharedDecanterSurface.CancelCommand = processing.CancelAllCommand;
+		SharedDecanterSurface.CanCancel = processing.CanCancel;
 	}
 
 	private void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -132,6 +157,7 @@ public partial class AppShellView : UserControl
 		{
 			tastingRoomOverview ??= new TastingRoomOverviewView
 			{
+				Library = viewModel.Library,
 				DataContext = viewModel.Dashboard,
 			};
 			OverviewHost.Content = tastingRoomOverview;

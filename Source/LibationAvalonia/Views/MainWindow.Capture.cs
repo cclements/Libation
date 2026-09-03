@@ -4,11 +4,14 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
+using DataLayer;
 using LibationAvalonia.Diagnostics;
 using LibationAvalonia.DesignSystem.Components;
 using LibationAvalonia.Features.Library;
 using LibationFileManager;
+using LibationUiBase.ProcessQueue;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
@@ -85,6 +88,7 @@ public partial class MainWindow
 					NavigateContemporary(entry.Route);
 					await WaitForRouteReadyAsync(entry.Route);
 					PrepareFlightForCapture(entry);
+					PrepareProcessingForCapture(entry);
 				}
 				await WaitForVisibleCoverLoadsAsync();
 				await SettleAsync(plan.SettleMs);
@@ -144,6 +148,31 @@ public partial class MainWindow
 			((System.Windows.Input.ICommand)shell.ToggleFlightCommand).Execute(null);
 		if (entry.OpenDetails && shell.Library.VisibleItems.FirstOrDefault() is { } first)
 			shell.Library.OpenItem(first);
+	}
+
+	private void PrepareProcessingForCapture(CaptureEntry entry)
+	{
+		if (contemporaryShellViewModel is not { } shell)
+			return;
+
+		var queue = shell.Processing.Source.Queue;
+		queue.ClearQueue();
+		queue.ClearCompleted();
+		if (entry.ProcessingSeedCount == 0)
+			return;
+
+		var seeded = new List<ProcessBookViewModel>();
+		foreach (var item in shell.Library.VisibleItems.Take(entry.ProcessingSeedCount))
+		{
+			var process = new CaptureProcessBookViewModel(item.LibraryBook, Configuration.Instance)
+				.AddDownloadDecryptBook();
+			process.Status = seeded.Count == 0 ? ProcessBookStatus.Working : ProcessBookStatus.Queued;
+			process.StatusOverride = seeded.Count == 0 ? "Downloading audiobook" : "Waiting to process";
+			if (process is CaptureProcessBookViewModel captureProcess)
+				captureProcess.SetCaptureProgress(seeded.Count == 0 ? 43 : 0);
+			seeded.Add(process);
+		}
+		queue.Enqueue(seeded);
 	}
 
 	private void ResizeForCapture(CaptureEntry entry)
@@ -275,5 +304,11 @@ public partial class MainWindow
 		bitmap.Render((Visual)(Content ?? throw new InvalidOperationException("The capture window has no content.")));
 		bitmap.Save(path);
 		return size;
+	}
+
+	private sealed class CaptureProcessBookViewModel(LibraryBook book, Configuration configuration)
+		: ProcessBookViewModel(book, configuration)
+	{
+		public void SetCaptureProgress(int progress) => Progress = progress;
 	}
 }

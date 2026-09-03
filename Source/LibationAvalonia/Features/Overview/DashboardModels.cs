@@ -1,6 +1,5 @@
 using DataLayer;
 using LibationAvalonia.DesignSystem.Components;
-using LibationUiBase.ProcessQueue;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -64,28 +63,22 @@ public interface IDashboardNavigation
 
 public sealed record DashboardBookItem(
 	LibraryBook LibraryBook,
+	string ProductId,
 	string Title,
 	string SupportingText,
 	string Author,
 	string Narrator,
 	string DurationText,
+	string AddedText,
 	string Metadata,
 	LibationStatusKind Status,
 	string StatusText)
 {
 	public ICommand? OpenCommand { get; init; }
+	public double ProcessingProgress { get; init; }
+	public bool ShowProcessingProgress { get; init; }
+	public string? ProcessingStatusText { get; init; }
 }
-
-public sealed record DashboardQueueItem(
-	ProcessBookViewModel ProcessBook,
-	string Title,
-	string Stage,
-	string Message,
-	LibationStatusKind Status,
-	string StatusText,
-	double Progress,
-	bool ShowProgress,
-	string? ErrorDetails);
 
 /// <summary>
 /// Immutable result of one dashboard aggregation pass. Both profile views bind to the
@@ -99,27 +92,17 @@ public sealed record DashboardSnapshot
 	public int TotalTitles { get; init; }
 	public int VisibleTitles { get; init; }
 	public int DownloadPendingCount { get; init; }
-	public int DownloadedCount { get; init; }
 	public int CompletedCount { get; init; }
-	public int LibraryErrorCount { get; init; }
-	public int UnavailableCount { get; init; }
-	public int ActiveProcessingCount { get; init; }
-	public int QueuedProcessingCount { get; init; }
-	public int CompletedJobCount { get; init; }
 	public int FailedJobCount { get; init; }
-	public double QueueProgress { get; init; }
-	public bool QueueRunning { get; init; }
+	public int AddedThisWeekCount { get; init; }
+	public int ActiveDownloadCount { get; init; }
 	public int AccountCount { get; init; }
 	public bool IsScanning { get; init; }
 	public string ScanProgressText { get; init; } = string.Empty;
 	public string SearchText { get; init; } = string.Empty;
-	public int HiddenFlightCount { get; init; }
-	public IReadOnlyList<DashboardBookItem> VisibleLibrary { get; init; } = [];
 	public IReadOnlyList<DashboardBookItem> RecentAdditions { get; init; } = [];
 	public IReadOnlyList<DashboardBookItem> RecentCompletions { get; init; } = [];
 	public IReadOnlyList<DashboardBookItem> CurrentFlight { get; init; } = [];
-	public IReadOnlyList<DashboardQueueItem> ActiveQueue { get; init; } = [];
-	public IReadOnlyList<DashboardQueueItem> FailedJobs { get; init; } = [];
 	public DashboardSupplement Supplement { get; init; } = DashboardSupplement.Unknown;
 }
 

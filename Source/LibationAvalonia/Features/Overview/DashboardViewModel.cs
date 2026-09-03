@@ -4,6 +4,8 @@ using DataLayer;
 using LibationAvalonia.DesignSystem;
 using LibationAvalonia.DesignSystem.Components;
 using LibationAvalonia.Features.Flight;
+using LibationAvalonia.Features.Library;
+using LibationAvalonia.Features.Processing;
 using LibationAvalonia.Shell;
 using LibationAvalonia.ViewModels;
 using LibationFileManager;
@@ -25,38 +27,40 @@ namespace LibationAvalonia.Features.Overview;
 /// </summary>
 public sealed class DashboardViewModel : ViewModelBase, IDisposable, IRoutePresentation
 {
+	private static readonly TimeSpan RefreshDebounce = TimeSpan.FromMilliseconds(300);
+	private const string RecentAdditionsScope = "Recent additions";
+	private const string RecentCompletionsScope = "Recently completed";
+
 	private static readonly string[] SnapshotPropertyNames =
 	[
 		nameof(Snapshot), nameof(HasDashboardData), nameof(IsLoading), nameof(ShowInitialError),
-		nameof(TotalTitlesText), nameof(VisibleTitlesText), nameof(DownloadPendingText), nameof(DownloadedText),
-		nameof(CompletedText), nameof(ProcessingText), nameof(HasLocalStorage), nameof(HasStorageSaved), nameof(LocalStorageText), nameof(StorageSavedText),
+		nameof(TotalTitlesText), nameof(VisibleTitlesText), nameof(DownloadPendingText),
+		nameof(CompletedText), nameof(ProcessingText), nameof(HasLocalStorage), nameof(LocalStorageText),
+		nameof(TotalSizeText), nameof(AddedThisWeekDeltaText), nameof(DownloadsDeltaText), nameof(ProcessingDeltaText), nameof(CompletedDeltaText),
 		nameof(StorageStatusText), nameof(AccountHealthText), nameof(AccountStatus), nameof(ScanStateText),
 		nameof(ScanStatus), nameof(IsScanning), nameof(ShowNoAccount), nameof(ShowNeedsScan),
-		nameof(ShowScanningEmpty), nameof(HasLibrary), nameof(HasCatalogWithoutLocalCopies),
+		nameof(ShowScanningEmpty), nameof(HasLibrary),
 		nameof(IsOffline), nameof(IsScanStale), nameof(HasFailedJobs), nameof(FailedJobsText),
-		nameof(HasActiveWork), nameof(NoActiveWork), nameof(QueueSummaryText), nameof(QueueActiveText),
-		nameof(QueueProgress), nameof(CurrentFlightItems), nameof(FlightCountText), nameof(FlightDurationText), nameof(FlightWarningText),
-		nameof(ProcessFlightActionText), nameof(FlightUndoActionText),
-		nameof(HasFlight), nameof(VisibleLibraryItems), nameof(RecentAdditions), nameof(RecentCompletions),
-		nameof(ActiveQueueItems), nameof(FailedJobs), nameof(HasUpdateState), nameof(UpdateStateText),
-		nameof(VisibleLibrarySummary), nameof(ErrorMessage), nameof(HasError), nameof(HasAttention),
+		nameof(CurrentFlightItems), nameof(FlightCountText),
+		nameof(HasFlight), nameof(HasNoFlight), nameof(ShowAccountScanStrip), nameof(RecentAdditions), nameof(RecentCompletions), nameof(TastingLibraryItems),
+		nameof(VisibleLibrarySummary), nameof(ErrorMessage), nameof(HasError),
 		nameof(RouteStatusBadge),
 	];
 
 	private readonly IDashboardDataSource source;
 	private readonly ILibationCommandAdapter commands;
-	private readonly IFlightService flight;
-	private readonly CurrentFlightViewModel currentFlight;
+	private readonly LibraryViewModel library;
+	private readonly ProcessingViewModel processing;
 	private readonly IDashboardNavigation navigation;
 	private readonly CancellationTokenSource lifetime = new();
 	private readonly SemaphoreSlim actionGate = new(1, 1);
 	private readonly List<IDisposable> commandDisposables = [];
+	private CancellationTokenSource? refreshDebounceCancellation;
 	private DashboardSnapshot snapshot = DashboardSnapshot.Loading;
 	private UserFacingError? refreshError;
 	private UserFacingError? actionError;
 	private bool refreshRunning;
 	private bool refreshAgain;
-	private bool hasLoadedSearchText;
 	private bool isActive;
 	private bool refreshPending = true;
 	private bool disposed;
@@ -66,15 +70,17 @@ public sealed class DashboardViewModel : ViewModelBase, IDisposable, IRoutePrese
 	public DashboardViewModel(
 		ILibationCommandAdapter commands,
 		IFlightService flight,
-		CurrentFlightViewModel currentFlight,
+		LibraryViewModel library,
+		ProcessingViewModel processing,
 		IDashboardNavigation navigation,
 		IDashboardSupplementSource? supplementSource = null)
 	{
 		this.commands = commands ?? throw new ArgumentNullException(nameof(commands));
-		this.flight = flight ?? throw new ArgumentNullException(nameof(flight));
-		this.currentFlight = currentFlight ?? throw new ArgumentNullException(nameof(currentFlight));
+		ArgumentNullException.ThrowIfNull(flight);
+		this.library = library ?? throw new ArgumentNullException(nameof(library));
+		this.processing = processing ?? throw new ArgumentNullException(nameof(processing));
 		this.navigation = navigation ?? throw new ArgumentNullException(nameof(navigation));
-		source = new MainDashboardDataSource(commands.Main, flight, supplementSource);
+		source = new MainDashboardDataSource(commands.Main, flight, processing, supplementSource);
 		source.Invalidated += Source_Invalidated;
 
 		RefreshCommand = Track(ReactiveCommand.CreateFromTask(RefreshAsync));
@@ -107,6 +113,14 @@ public sealed class DashboardViewModel : ViewModelBase, IDisposable, IRoutePrese
 			"search the library",
 			() => commands.ApplyFilterAsync(SearchText),
 			"Libation could not apply that library search. Clear the search and try again.")));
+		OpenFilteredLibraryCommand = Track(ReactiveCommand.CreateFromTask(() => RunActionAsync(
+			"search the library",
+			async () =>
+			{
+				await commands.ApplyFilterAsync(SearchText);
+				await navigation.OpenLibraryAsync();
+			},
+			"Libation could not open the filtered Library. Clear the search and try again.")));
 		OpenLibraryCommand = Track(ReactiveCommand.CreateFromTask(() => RunActionAsync(
 			"open the library",
 			navigation.OpenLibraryAsync,
@@ -116,15 +130,8 @@ public sealed class DashboardViewModel : ViewModelBase, IDisposable, IRoutePrese
 			navigation.OpenProcessingAsync,
 			"Libation could not open Processing. Try Processing from the navigation.")));
 		OpenBookCommand = Track(ReactiveCommand.CreateFromTask<DashboardBookItem>(OpenBookAsync));
-		ProcessFlightCommand = currentFlight.ProcessCommand;
-		ClearFlightCommand = currentFlight.ClearCommand;
-		UndoFlightCommand = currentFlight.UndoCommand;
-		CancelAllProcessingCommand = Track(ReactiveCommand.CreateFromTask(() => RunActionAsync(
-			"cancel active processing",
-			() => commands.Main.ProcessQueue.CancelAllAsync(),
-			"Libation could not cancel all active processing. Open Processing to review the remaining work.")));
-		ToggleFlightExpandedCommand = Track(ReactiveCommand.Create(() => IsFlightExpanded = !IsFlightExpanded));
-		currentFlight.PropertyChanged += CurrentFlight_PropertyChanged;
+		library.PropertyChanged += Library_PropertyChanged;
+		processing.PropertyChanged += Processing_PropertyChanged;
 	}
 
 	public void SetActive(bool active)
@@ -157,16 +164,32 @@ public sealed class DashboardViewModel : ViewModelBase, IDisposable, IRoutePrese
 
 	public string SearchText
 	{
-		get => field;
-		set => this.RaiseAndSetIfChanged(ref field, value ?? string.Empty);
-	} = string.Empty;
+		get => library.SearchText;
+		set
+		{
+			value ??= string.Empty;
+			if (string.Equals(library.SearchText, value, StringComparison.Ordinal))
+				return;
+			library.SearchText = value;
+			this.RaisePropertyChanged();
+		}
+	}
 
 	public bool IsRefreshing { get => field; private set => this.RaiseAndSetIfChanged(ref field, value); } = true;
 	public bool IsActionBusy { get => field; private set => this.RaiseAndSetIfChanged(ref field, value); }
-	public bool IsQueueExpanded { get => field; set => this.RaiseAndSetIfChanged(ref field, value); }
-	public bool IsFlightExpanded { get => field; set => this.RaiseAndSetIfChanged(ref field, value); }
-	public CurrentFlightViewModel CurrentFlight => currentFlight;
-
+	public string SelectedLibraryScope
+	{
+		get => field;
+		set
+		{
+			value = value == RecentCompletionsScope ? RecentCompletionsScope : RecentAdditionsScope;
+			if (string.Equals(field, value, StringComparison.Ordinal))
+				return;
+			this.RaiseAndSetIfChanged(ref field, value);
+			this.RaisePropertyChanged(nameof(TastingLibraryItems));
+		}
+	} = RecentAdditionsScope;
+	public IReadOnlyList<string> LibraryScopes { get; } = [RecentAdditionsScope, RecentCompletionsScope];
 	public bool HasDashboardData => Snapshot.IsDataReady;
 	public bool IsLoading => !HasDashboardData && !HasError;
 	public bool ShowInitialError => !HasDashboardData && HasError;
@@ -174,28 +197,35 @@ public sealed class DashboardViewModel : ViewModelBase, IDisposable, IRoutePrese
 	public bool ShowNoAccount => HasDashboardData && !Snapshot.IsScanning && Snapshot.AccountCount == 0 && Snapshot.TotalTitles == 0;
 	public bool ShowNeedsScan => HasDashboardData && !Snapshot.IsScanning && Snapshot.AccountCount > 0 && Snapshot.TotalTitles == 0;
 	public bool ShowScanningEmpty => HasDashboardData && Snapshot.IsScanning && Snapshot.TotalTitles == 0;
-	public bool HasCatalogWithoutLocalCopies => HasLibrary && Snapshot.CompletedCount == 0;
 	public bool IsScanning => Snapshot.IsScanning;
 	public bool IsOffline => Snapshot.Supplement.Connectivity == DashboardConnectivityState.Offline;
 	public bool IsScanStale => Snapshot.Supplement.ScanFreshness == DashboardScanFreshness.Stale;
 	public bool HasFailedJobs => Snapshot.FailedJobCount > 0;
-	public bool HasActiveWork => Snapshot.ActiveProcessingCount + Snapshot.QueuedProcessingCount > 0;
-	public bool NoActiveWork => !HasActiveWork;
 	public bool HasFlight => Snapshot.CurrentFlight.Count > 0;
-	public bool HasUpdateState => !string.IsNullOrWhiteSpace(Snapshot.Supplement.ApplicationUpdateState);
+	public bool HasNoFlight => !HasFlight;
+	public bool ShowAccountScanStrip => Snapshot.AccountCount == 0 || Snapshot.IsScanning || IsScanStale;
 	public bool HasError => !string.IsNullOrWhiteSpace(ErrorMessage);
-	public bool HasAttention => HasError || IsOffline || IsScanStale || HasFailedJobs || HasCatalogWithoutLocalCopies;
 
 	public string TotalTitlesText => FormatCount(Snapshot.TotalTitles);
 	public string VisibleTitlesText => FormatCount(Snapshot.VisibleTitles);
 	public string DownloadPendingText => FormatCount(Snapshot.DownloadPendingCount);
-	public string DownloadedText => FormatCount(Snapshot.DownloadedCount);
 	public string CompletedText => FormatCount(Snapshot.CompletedCount);
-	public string ProcessingText => FormatCount(Snapshot.ActiveProcessingCount + Snapshot.QueuedProcessingCount);
+	public string ProcessingText => FormatCount(processing.Active.Count + processing.Waiting.Count);
 	public bool HasLocalStorage => Snapshot.Supplement.TotalLocalStorageBytes.HasValue;
-	public bool HasStorageSaved => Snapshot.Supplement.StorageSavedBytes.HasValue;
 	public string LocalStorageText => Snapshot.Supplement.TotalLocalStorageBytes is long bytes ? DiskSpaceHelper.FormatBytes(bytes) : string.Empty;
-	public string StorageSavedText => Snapshot.Supplement.StorageSavedBytes is long bytes ? DiskSpaceHelper.FormatBytes(bytes) : string.Empty;
+	public string TotalSizeText => HasLocalStorage ? LocalStorageText : "Not measured";
+	public string AddedThisWeekDeltaText => Snapshot.AddedThisWeekCount == 0
+		? "No additions this week"
+		: Snapshot.AddedThisWeekCount == 1
+			? "+1 this week"
+			: $"+{FormatCount(Snapshot.AddedThisWeekCount)} this week";
+	public string DownloadsDeltaText => Snapshot.ActiveDownloadCount == 0
+		? "None running"
+		: Snapshot.ActiveDownloadCount == 1 ? "1 running" : $"{FormatCount(Snapshot.ActiveDownloadCount)} running";
+	public string ProcessingDeltaText => $"{FormatCount(processing.Active.Count)} running · {FormatCount(processing.Waiting.Count)} queued";
+	public string CompletedDeltaText => Snapshot.FailedJobCount == 0
+		? "All looks good"
+		: Snapshot.FailedJobCount == 1 ? "1 failed" : $"{FormatCount(Snapshot.FailedJobCount)} failed";
 	public string StorageStatusText => Snapshot.Supplement.TotalLocalStorageBytes.HasValue ? "Local audiobook storage" : "Storage has not been measured";
 	public string AccountHealthText => Snapshot.AccountCount switch
 	{
@@ -221,33 +251,15 @@ public sealed class DashboardViewModel : ViewModelBase, IDisposable, IRoutePrese
 	public string FailedJobsText => Snapshot.FailedJobCount == 1
 		? "1 processing job failed. Open Processing for details."
 		: $"{Snapshot.FailedJobCount.ToString("N0", CultureInfo.CurrentCulture)} processing jobs failed. Open Processing for details.";
-	public string QueueSummaryText => HasActiveWork
-		? $"{Snapshot.ActiveProcessingCount.ToString("N0", CultureInfo.CurrentCulture)} active, {Snapshot.QueuedProcessingCount.ToString("N0", CultureInfo.CurrentCulture)} queued"
-		: "No active processing work";
-	public string QueueActiveText => Snapshot.ActiveQueue.FirstOrDefault()?.Title ?? "Queue is idle";
-	public double QueueProgress => Snapshot.QueueProgress;
 	public IReadOnlyList<DashboardBookItem> CurrentFlightItems => Snapshot.CurrentFlight;
-	public IReadOnlyList<DashboardBookItem> VisibleLibraryItems => Snapshot.VisibleLibrary;
 	public IReadOnlyList<DashboardBookItem> RecentAdditions => Snapshot.RecentAdditions;
 	public IReadOnlyList<DashboardBookItem> RecentCompletions => Snapshot.RecentCompletions;
-	public IReadOnlyList<DashboardQueueItem> ActiveQueueItems => Snapshot.ActiveQueue;
-	public IReadOnlyList<DashboardQueueItem> FailedJobs => Snapshot.FailedJobs;
+	public IReadOnlyList<DashboardBookItem> TastingLibraryItems => SelectedLibraryScope == RecentCompletionsScope
+		? RecentCompletions
+		: RecentAdditions;
 	public string FlightCountText => Snapshot.CurrentFlight.Count == 1
 		? "1 title"
 		: $"{Snapshot.CurrentFlight.Count.ToString("N0", CultureInfo.CurrentCulture)} titles";
-	public string FlightDurationText => currentFlight.DurationText;
-	public bool FocusFlightWarning => currentFlight.FocusWarning;
-	public string? FlightWarningText => !string.IsNullOrWhiteSpace(currentFlight.WarningText)
-		? currentFlight.WarningText
-		: Snapshot.CurrentFlight.Count == 0
-			? "No titles selected. Add titles from the Library."
-			: Snapshot.HiddenFlightCount > 0
-				? $"{Snapshot.HiddenFlightCount.ToString("N0", CultureInfo.CurrentCulture)} selected title(s) are hidden by the current library filter."
-				: null;
-	public string FlightOutputProfileText => currentFlight.OutputProfileText;
-	public string ProcessFlightActionText => currentFlight.ProcessActionText;
-	public string? FlightUndoActionText => currentFlight.UndoActionText;
-	public string UpdateStateText => Snapshot.Supplement.ApplicationUpdateState ?? string.Empty;
 	public string VisibleLibrarySummary => string.IsNullOrWhiteSpace(Snapshot.SearchText)
 		? $"{VisibleTitlesText} titles visible"
 		: $"{VisibleTitlesText} titles match the current library search";
@@ -264,27 +276,19 @@ public sealed class DashboardViewModel : ViewModelBase, IDisposable, IRoutePrese
 	public ICommand DownloadPendingCommand { get; }
 	public ICommand DropAudiobooksCommand { get; }
 	public ICommand ApplySearchCommand { get; }
+	public ICommand OpenFilteredLibraryCommand { get; }
 	public ICommand OpenLibraryCommand { get; }
 	public ICommand OpenProcessingCommand { get; }
 	public ICommand OpenBookCommand { get; }
-	public ICommand ProcessFlightCommand { get; }
-	public ICommand ClearFlightCommand { get; }
-	public ICommand UndoFlightCommand { get; }
-	public ICommand CancelAllProcessingCommand { get; }
-	public ICommand ToggleFlightExpandedCommand { get; }
 	public string RouteEyebrow => dashboardLayout == DashboardLayoutKind.TastingRoom
 		? "Editorial library workspace"
 		: "Library workspace";
 	public string RouteTitle => dashboardLayout == DashboardLayoutKind.TastingRoom ? "Today’s Selection" : "The Cellar";
 	public string RouteSubtitle => dashboardLayout == DashboardLayoutKind.TastingRoom
-		? "Welcome back. Here is what is happening in your library today."
-		: "Your curated audiobook collection, organized and ready for the next listen.";
-	public RouteCommandPresentation RoutePrimaryCommand => new("Locate audiobooks", LocateAudiobooksCommand);
-	public IReadOnlyList<RouteCommandPresentation> RouteSecondaryCommands =>
-	[
-		new("Scan library", ScanLibraryCommand),
-		new("Open Library", OpenLibraryCommand),
-	];
+		? "Welcome back. Here’s what’s happening in your cellar."
+		: "Your curated collection of stories, neatly aged and ready to enjoy.";
+	public RouteCommandPresentation? RoutePrimaryCommand => null;
+	public IReadOnlyList<RouteCommandPresentation> RouteSecondaryCommands => [];
 	public RouteStatusPresentation RouteStatusBadge => new(AccountHealthText, AccountStatus);
 
 	public void SetProfile(ExperienceProfile profile)
@@ -326,11 +330,6 @@ public sealed class DashboardViewModel : ViewModelBase, IDisposable, IRoutePrese
 					var next = await source.LoadAsync(lifetime.Token);
 					refreshError = null;
 					Snapshot = AttachPresentationCommands(next);
-					if (!hasLoadedSearchText)
-					{
-						SearchText = next.SearchText;
-						hasLoadedSearchText = true;
-					}
 					RaiseErrorProperties();
 				}
 				catch (OperationCanceledException) when (lifetime.IsCancellationRequested)
@@ -378,30 +377,16 @@ public sealed class DashboardViewModel : ViewModelBase, IDisposable, IRoutePrese
 		DashboardBookItem Attach(DashboardBookItem item) => item with { OpenCommand = OpenBookCommand };
 		return next with
 		{
-			VisibleLibrary = next.VisibleLibrary.Select(Attach).ToArray(),
-			RecentAdditions = next.RecentAdditions.Select(Attach).ToArray(),
+				RecentAdditions = next.RecentAdditions.Select(Attach).ToArray(),
 			RecentCompletions = next.RecentCompletions.Select(Attach).ToArray(),
 			CurrentFlight = next.CurrentFlight.Select(Attach).ToArray(),
 		};
 	}
 
-	private void CurrentFlight_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+	private void Library_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
 	{
-		if (string.IsNullOrEmpty(e.PropertyName)
-			|| e.PropertyName is nameof(CurrentFlightViewModel.WarningText)
-				or nameof(CurrentFlightViewModel.ProcessActionText)
-				or nameof(CurrentFlightViewModel.OutputProfileText)
-				or nameof(CurrentFlightViewModel.UndoActionText)
-				or nameof(CurrentFlightViewModel.DurationText)
-				or nameof(CurrentFlightViewModel.FocusWarning))
-		{
-			this.RaisePropertyChanged(nameof(FlightWarningText));
-			this.RaisePropertyChanged(nameof(ProcessFlightActionText));
-			this.RaisePropertyChanged(nameof(FlightOutputProfileText));
-			this.RaisePropertyChanged(nameof(FlightUndoActionText));
-			this.RaisePropertyChanged(nameof(FlightDurationText));
-			this.RaisePropertyChanged(nameof(FocusFlightWarning));
-		}
+		if (string.IsNullOrEmpty(e.PropertyName) || e.PropertyName == nameof(LibraryViewModel.SearchText))
+			this.RaisePropertyChanged(nameof(SearchText));
 	}
 
 	private async Task RunActionAsync(string actionName, Func<Task> action, string userError)
@@ -451,7 +436,48 @@ public sealed class DashboardViewModel : ViewModelBase, IDisposable, IRoutePrese
 			refreshPending = true;
 			return;
 		}
-		_ = RefreshAsync();
+		ScheduleRefresh();
+	}
+
+	private void ScheduleRefresh()
+	{
+		refreshDebounceCancellation?.Cancel();
+		var cancellation = CancellationTokenSource.CreateLinkedTokenSource(lifetime.Token);
+		refreshDebounceCancellation = cancellation;
+		_ = RefreshAfterDebounceAsync(cancellation);
+	}
+
+	private async Task RefreshAfterDebounceAsync(CancellationTokenSource cancellation)
+	{
+		try
+		{
+			await Task.Delay(RefreshDebounce, cancellation.Token);
+			if (!ReferenceEquals(refreshDebounceCancellation, cancellation))
+				return;
+			refreshDebounceCancellation = null;
+			await RefreshAsync();
+		}
+		catch (OperationCanceledException)
+		{
+		}
+		finally
+		{
+			cancellation.Dispose();
+		}
+	}
+
+	private void Processing_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+	{
+		if (string.IsNullOrEmpty(e.PropertyName)
+			|| e.PropertyName is nameof(ProcessingViewModel.HasActive)
+				or nameof(ProcessingViewModel.HasWaiting)
+				or nameof(ProcessingViewModel.ActiveText)
+				or nameof(ProcessingViewModel.SummaryText)
+				or nameof(ProcessingViewModel.Progress))
+		{
+			this.RaisePropertyChanged(nameof(ProcessingText));
+			this.RaisePropertyChanged(nameof(ProcessingDeltaText));
+		}
 	}
 
 	private async Task CopyTechnicalDetailsAsync()
@@ -480,7 +506,6 @@ public sealed class DashboardViewModel : ViewModelBase, IDisposable, IRoutePrese
 		this.RaisePropertyChanged(nameof(HasError));
 		this.RaisePropertyChanged(nameof(IsLoading));
 		this.RaisePropertyChanged(nameof(ShowInitialError));
-		this.RaisePropertyChanged(nameof(HasAttention));
 	}
 
 	private T Track<T>(T command) where T : class, ICommand
@@ -498,7 +523,9 @@ public sealed class DashboardViewModel : ViewModelBase, IDisposable, IRoutePrese
 			return;
 		disposed = true;
 		source.Invalidated -= Source_Invalidated;
-		currentFlight.PropertyChanged -= CurrentFlight_PropertyChanged;
+		library.PropertyChanged -= Library_PropertyChanged;
+		processing.PropertyChanged -= Processing_PropertyChanged;
+		refreshDebounceCancellation?.Cancel();
 		lifetime.Cancel();
 		source.Dispose();
 		foreach (var command in commandDisposables)

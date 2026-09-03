@@ -4,56 +4,26 @@
 	xmlns:overview="using:LibationAvalonia.Features.Overview"
 	xmlns:components="using:LibationAvalonia.DesignSystem.Components"
 	xmlns:designSystem="using:LibationAvalonia.DesignSystem"
-	xmlns:flight="using:LibationAvalonia.Features.Flight"
 	xmlns:library="using:LibationAvalonia.Features.Library"
-	xmlns:properties="using:LibationAvalonia.Properties"
 	x:Class="LibationAvalonia.Features.Overview.CellarOverviewView"
 	x:Name="Root"
 	x:DataType="overview:DashboardViewModel">
-	<UserControl.Resources>
-		<DataTemplate x:Key="CellarLibraryRow" x:DataType="overview:DashboardBookItem">
-			<components:BookRow
-				Title="{Binding Title}"
-				SupportingText="{Binding SupportingText}"
-				Metadata="{Binding Metadata}"
-				Status="{Binding Status}"
-				StatusText="{Binding StatusText}"
-				Command="{Binding OpenCommand}"
-				CommandParameter="{Binding}" />
-		</DataTemplate>
-		<DataTemplate x:Key="CellarQueueRow" x:DataType="overview:DashboardQueueItem">
-			<components:QueueItem
-				Title="{Binding Title}"
-				Stage="{Binding Stage}"
-				Message="{Binding Message}"
-				Status="{Binding Status}"
-				StatusText="{Binding StatusText}"
-				Progress="{Binding Progress}"
-				ShowProgress="{Binding ShowProgress}"
-				ErrorDetails="{Binding ErrorDetails}" />
-		</DataTemplate>
-	</UserControl.Resources>
-
 	<UserControl.Styles>
-		<Style Selector="overview|CellarOverviewView:standard UniformGrid#CellarMetrics">
-			<Setter Property="Columns" Value="3" />
+		<Style Selector="overview|CellarOverviewView:compact ComboBox#CellarViewChoice">
+			<Setter Property="Width" Value="120" />
 		</Style>
-		<Style Selector="overview|CellarOverviewView:compact UniformGrid#CellarMetrics">
-			<Setter Property="Columns" Value="2" />
-		</Style>
-		<Style Selector="overview|CellarOverviewView:narrow UniformGrid#CellarMetrics">
-			<Setter Property="Columns" Value="1" />
-		</Style>
-		<Style Selector="overview|CellarOverviewView:narrow ContentControl#CellarHeroArt">
-			<Setter Property="IsVisible" Value="False" />
+		<Style Selector="overview|CellarOverviewView:narrow ComboBox#CellarViewChoice">
+			<Setter Property="Width" Value="110" />
 		</Style>
 	</UserControl.Styles>
 
-	<ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-		<StackPanel Margin="{DynamicResource Libation.Thickness.4}" Spacing="{DynamicResource Libation.Space.4}">
+	<Grid Margin="{DynamicResource Libation.Thickness.4}"
+		RowDefinitions="Auto,Auto,*"
+		RowSpacing="{DynamicResource Libation.Space.3}">
+		<StackPanel Spacing="{DynamicResource Libation.Space.2}">
 			<Border Classes="card" IsVisible="{Binding IsLoading}"
 				AutomationProperties.LiveSetting="{x:Static designSystem:PlatformAutomationPolicy.Polite}">
-				<StackPanel Spacing="{DynamicResource Libation.Space.3}">
+				<StackPanel Spacing="{DynamicResource Libation.Space.2}">
 					<TextBlock Text="Loading your library overview…" FontWeight="SemiBold"
 						Foreground="{DynamicResource Libation.Brush.TextPrimary}" />
 					<ProgressBar Classes="contemporary prominent" IsIndeterminate="True"
@@ -71,133 +41,114 @@
 				ActionCommand="{Binding RefreshCommand}"
 				SecondaryActionText="Copy technical details"
 				SecondaryActionCommand="{Binding CopyTechnicalDetailsCommand}" />
+			<components:AttentionBanner IsVisible="{Binding IsOffline}"
+				Severity="{x:Static components:ComponentSeverity.Warning}"
+				Title="Offline"
+				Message="Your local library remains available, but account and update status cannot be confirmed."
+				ActionText="Refresh" ActionCommand="{Binding RefreshCommand}" />
+			<components:AttentionBanner IsVisible="{Binding IsScanStale}"
+				Severity="{x:Static components:ComponentSeverity.Warning}"
+				Title="Library scan needs attention"
+				Message="The last successful scan is stale. Scan the library to refresh title availability."
+				ActionText="Scan Library" ActionCommand="{Binding ScanLibraryCommand}" />
+			<components:AttentionBanner IsVisible="{Binding HasFailedJobs}"
+				Severity="{x:Static components:ComponentSeverity.Danger}"
+				Title="Processing needs attention"
+				Message="{Binding FailedJobsText}"
+				ActionText="Open Processing" ActionCommand="{Binding OpenProcessingCommand}" />
+		</StackPanel>
 
-			<StackPanel IsVisible="{Binding HasDashboardData}" Spacing="{DynamicResource Libation.Space.4}">
-				<Border Classes="card">
-					<Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource Libation.Space.3}">
-						<TextBox
-							Text="{Binding SearchText, Mode=TwoWay}"
-							PlaceholderText="Search titles, authors, narrators, or tags"
-							KeyDown="SearchBox_KeyDown"
-							AutomationProperties.Name="Search the Cellar library" />
-						<Button Grid.Column="1" Classes="contemporary" Content="Search"
-							Command="{Binding ApplySearchCommand}" />
+		<Grid Grid.Row="1" IsVisible="{Binding HasLibrary}"
+			RowDefinitions="Auto,Auto" RowSpacing="{DynamicResource Libation.Space.3}">
+			<Border Classes="card" Padding="{DynamicResource Libation.Thickness.3}">
+				<Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="{DynamicResource Libation.Space.2}">
+					<TextBox Classes="contemporary search"
+						Text="{Binding SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+						PlaceholderText="Search titles, authors, narrators, or tags"
+						KeyDown="SearchBox_KeyDown"
+						AutomationProperties.Name="Search the Cellar library" />
+					<Button Grid.Column="1" Classes="contemporary quiet compact" Content="Filter"
+						Command="{Binding Library.OpenFilterHelpCommand, ElementName=Root}"
+						AutomationProperties.Name="Open Library filter help" />
+					<ComboBox x:Name="CellarViewChoice" Grid.Column="2" Width="148"
+						ItemsSource="{Binding ViewModes, ElementName=Root}"
+						SelectedItem="{Binding Library.ViewMode, ElementName=Root, Mode=TwoWay}"
+						AutomationProperties.Name="Preferred Library view" />
+				</Grid>
+			</Border>
+
+			<UniformGrid x:Name="CellarMetrics" Grid.Row="1" Columns="5" Rows="0">
+				<components:MetricCard Margin="0,0,8,8" IconData="{StaticResource glyph.library}"
+					Value="{Binding TotalTitlesText}" Label="Titles"
+					CommandText="Open Library" Command="{Binding OpenLibraryCommand}" />
+				<components:MetricCard Margin="0,0,8,8" IconData="{StaticResource glyph.completed}"
+					Value="{Binding CompletedText}" Label="Completed"
+					Severity="{x:Static components:ComponentSeverity.Success}"
+					CommandText="Open Library" Command="{Binding OpenLibraryCommand}" />
+				<components:MetricCard Margin="0,0,8,8" IconData="{StaticResource glyph.downloads}"
+					Value="{Binding DownloadPendingText}" Label="Download Pending"
+					Severity="{x:Static components:ComponentSeverity.Warning}"
+					CommandText="Download pending titles" Command="{Binding DownloadPendingCommand}" />
+				<components:MetricCard Margin="0,0,8,8" IconData="{StaticResource glyph.processing}"
+					Value="{Binding ProcessingText}" Label="In Progress"
+					Severity="{x:Static components:ComponentSeverity.Info}"
+					CommandText="Open Processing" Command="{Binding OpenProcessingCommand}" />
+				<components:MetricCard Margin="0,0,8,8" IconData="{StaticResource glyph.metadata}"
+					Value="{Binding TotalSizeText}" Label="Total Size"
+					StatusText="{Binding StorageStatusText}" />
+			</UniformGrid>
+		</Grid>
+
+		<Grid Grid.Row="2" IsVisible="{Binding HasDashboardData}">
+			<components:EmptyState IsVisible="{Binding ShowNoAccount}"
+				IllustrationTemplate="{StaticResource illustration.shared.account-connection}"
+				Title="Connect an Audible account"
+				Explanation="Add an account to scan the marketplaces where your audiobooks live."
+				PrimaryActionText="Add Account" PrimaryCommand="{Binding AddAccountCommand}" />
+			<components:EmptyState IsVisible="{Binding ShowNeedsScan}"
+				IllustrationTemplate="{StaticResource illustration.cellar.empty-library}"
+				Title="Your cellar is ready"
+				Explanation="Scan your library to bring your titles into Libation."
+				PrimaryActionText="Scan Library" PrimaryCommand="{Binding ScanLibraryCommand}"
+				SecondaryActionText="Manage Accounts" SecondaryCommand="{Binding ManageAccountsCommand}" />
+			<components:EmptyState IsVisible="{Binding ShowScanningEmpty}"
+				IllustrationTemplate="{StaticResource illustration.shared.account-connection}"
+				Title="Scanning your library" Explanation="{Binding ScanStateText}" />
+
+			<Grid x:Name="CellarWorkArea" IsVisible="{Binding HasLibrary}"
+				ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource Libation.Space.3}">
+				<Grid RowDefinitions="Auto,*" RowSpacing="{DynamicResource Libation.Space.2}">
+					<Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="{DynamicResource Libation.Space.2}">
+						<StackPanel>
+							<TextBlock Text="Your Library" FontFamily="{DynamicResource Libation.Font.Display}"
+								FontSize="{DynamicResource Libation.FontSize.Section}"
+								Foreground="{DynamicResource Libation.Brush.TextPrimary}" />
+							<TextBlock Text="{Binding VisibleLibrarySummary}"
+								Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+						</StackPanel>
+						<ComboBox Grid.Column="1" Width="180"
+							ItemsSource="{Binding Library.SortOptions, ElementName=Root}"
+							SelectedItem="{Binding Library.SelectedSort, ElementName=Root, Mode=TwoWay}"
+							AutomationProperties.Name="Sort the Cellar gallery">
+							<ComboBox.ItemTemplate>
+								<DataTemplate x:DataType="library:LibrarySortOption">
+									<TextBlock Text="{Binding Label}" />
+								</DataTemplate>
+							</ComboBox.ItemTemplate>
+						</ComboBox>
+						<Button Grid.Column="2" Classes="contemporary quiet compact" Content="Select visible"
+							Command="{Binding Library.SelectAllVisibleCommand, ElementName=Root}" />
 					</Grid>
-				</Border>
-
-				<UniformGrid x:Name="CellarMetrics" Columns="5" Rows="0">
-					<components:MetricCard Margin="0,0,8,8" IconData="{StaticResource glyph.library}"
-						Value="{Binding TotalTitlesText}" Label="Titles in Library"
-						CommandText="Open Library" Command="{Binding OpenLibraryCommand}" />
-					<components:MetricCard Margin="0,0,8,8" IconData="{StaticResource glyph.completed}"
-						Value="{Binding CompletedText}" Label="Completed"
-						Severity="{x:Static components:ComponentSeverity.Success}"
-						CommandText="Open Library" Command="{Binding OpenLibraryCommand}" />
-					<components:MetricCard Margin="0,0,8,8" IconData="{StaticResource glyph.downloads}"
-						Value="{Binding DownloadPendingText}" Label="Download Pending"
-						Severity="{x:Static components:ComponentSeverity.Warning}"
-						CommandText="Download pending titles" Command="{Binding DownloadPendingCommand}" />
-					<components:MetricCard Margin="0,0,8,8" IconData="{StaticResource glyph.processing}"
-						Value="{Binding ProcessingText}" Label="Processing Work"
-						Severity="{x:Static components:ComponentSeverity.Info}"
-						CommandText="Open Processing" Command="{Binding OpenProcessingCommand}" />
-					<components:MetricCard Margin="0,0,8,8" IconData="{StaticResource glyph.metadata}"
-						IsVisible="{Binding HasLocalStorage}"
-						Value="{Binding LocalStorageText}" Label="Local Storage"
-						StatusText="{Binding StorageStatusText}" />
-				</UniformGrid>
-
-				<StackPanel Spacing="{DynamicResource Libation.Space.3}">
-					<components:AttentionBanner
-						IsVisible="{Binding IsScanning}"
-						Severity="{x:Static components:ComponentSeverity.Info}"
-						Title="Scanning your library"
-						Message="{Binding ScanStateText}" />
-					<components:AttentionBanner
-						IsVisible="{Binding IsOffline}"
-						Severity="{x:Static components:ComponentSeverity.Warning}"
-						Title="Offline"
-						Message="Libation cannot confirm account or update status while offline. Your local library remains available."
-						ActionText="Refresh"
-						ActionCommand="{Binding RefreshCommand}" />
-					<components:AttentionBanner
-						IsVisible="{Binding IsScanStale}"
-						Severity="{x:Static components:ComponentSeverity.Warning}"
-						Title="Library scan needs attention"
-						Message="The dashboard status source reports that the last successful scan is stale. Scan the library to refresh title availability."
-						ActionText="Scan Library"
-						ActionCommand="{Binding ScanLibraryCommand}" />
-					<components:AttentionBanner
-						IsVisible="{Binding HasFailedJobs}"
-						Severity="{x:Static components:ComponentSeverity.Danger}"
-						Title="Processing needs attention"
-						Message="{Binding FailedJobsText}"
-						ActionText="Open Processing"
-						ActionCommand="{Binding OpenProcessingCommand}" />
-				</StackPanel>
-
-				<components:EmptyState
-					IsVisible="{Binding ShowNoAccount}"
-					IllustrationTemplate="{StaticResource illustration.shared.account-connection}"
-					Title="Connect an Audible account"
-					Explanation="Add an account to scan the marketplaces where your audiobooks live."
-					PrimaryActionText="Add Account"
-					PrimaryCommand="{Binding AddAccountCommand}" />
-				<components:EmptyState
-					IsVisible="{Binding ShowNeedsScan}"
-					IllustrationTemplate="{StaticResource illustration.cellar.empty-library}"
-					Title="Your cellar is ready"
-					Explanation="Scan your library to bring your titles into Libation."
-					PrimaryActionText="Scan Library"
-					PrimaryCommand="{Binding ScanLibraryCommand}"
-					SecondaryActionText="Manage Accounts"
-					SecondaryCommand="{Binding ManageAccountsCommand}" />
-				<components:EmptyState
-					IsVisible="{Binding ShowScanningEmpty}"
-					IllustrationTemplate="{StaticResource illustration.shared.account-connection}"
-					Title="Scanning your library"
-					Explanation="{Binding ScanStateText}" />
-				<components:EmptyState
-					IsVisible="{Binding HasCatalogWithoutLocalCopies}"
-					IllustrationTemplate="{StaticResource illustration.cellar.empty-decanter}"
-					Title="Your books are catalogued"
-					Explanation="Select titles and choose Process to create open local copies."
-					PrimaryActionText="Open Library"
-					PrimaryCommand="{Binding OpenLibraryCommand}" />
-
-				<Grid x:Name="CellarWorkArea" ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource Libation.Space.4}">
-					<StackPanel Spacing="{DynamicResource Libation.Space.3}">
-						<Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource Libation.Space.3}">
-							<StackPanel>
-								<TextBlock Text="Your Library" FontFamily="{DynamicResource Libation.Font.Display}"
-									FontSize="{DynamicResource Libation.FontSize.Section}" Foreground="{DynamicResource Libation.Brush.TextPrimary}" />
-								<TextBlock Text="{Binding VisibleLibrarySummary}" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
-							</StackPanel>
-							<Button Grid.Column="1" Classes="contemporary quiet" Content="Open full Library"
-								Command="{Binding OpenLibraryCommand}" />
-						</Grid>
-						<Border Classes="card" Background="{DynamicResource Libation.Brush.SurfaceSunken}"
-							BorderBrush="{DynamicResource Libation.Brush.BorderStrong}"
-							Padding="{DynamicResource Libation.Thickness.3}" ClipToBounds="True">
-							<library:LibraryGalleryView
-								Height="448"
-								DataContext="{Binding Library, ElementName=Root}" />
-						</Border>
-						<components:DropZone
-							Title="Locate audiobooks"
-							Hint="Choose audiobook files or folders already on this computer."
-							AcceptedTypesText="{x:Static properties:Resources.SupportedAudiobookFileTypes}"
-							BrowseCommand="{Binding LocateAudiobooksCommand}"
-							DropCommand="{Binding DropAudiobooksCommand}" />
-					</StackPanel>
-
-					<ContentControl
-						x:Name="FlightSurfaceHost"
-						Grid.Column="1"
-						Width="360" />
+					<Border Grid.Row="1" Classes="card"
+						Background="{DynamicResource Libation.Brush.SurfaceSunken}"
+						BorderBrush="{DynamicResource Libation.Brush.BorderStrong}"
+						Padding="{DynamicResource Libation.Thickness.3}" ClipToBounds="True">
+						<library:LibraryGalleryView DataContext="{Binding Library, ElementName=Root}" />
+					</Border>
 				</Grid>
 
-			</StackPanel>
-		</StackPanel>
-	</ScrollViewer>
+				<ContentControl x:Name="FlightSurfaceHost" Grid.Column="1" Width="360" />
+			</Grid>
+		</Grid>
+	</Grid>
 </UserControl>

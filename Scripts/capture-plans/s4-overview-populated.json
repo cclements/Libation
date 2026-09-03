@@ -1,0 +1,13 @@
+{
+  "settleMs": 1200,
+  "entries": [
+    { "profile": "Cellar", "route": "Overview", "width": 1456, "height": 1060, "libraryView": "Gallery", "flightSelectionCount": 3, "file": "cellar-overview-populated-wide.png" },
+    { "profile": "Cellar", "route": "Overview", "width": 960, "height": 720, "libraryView": "Gallery", "flightSelectionCount": 3, "file": "cellar-overview-populated-compact.png" },
+    { "profile": "Cellar", "route": "Overview", "width": 1456, "height": 1060, "libraryView": "Gallery", "flightSelectionCount": 3, "processingSeedCount": 2, "file": "cellar-overview-processing-wide.png" },
+    { "profile": "Cellar", "route": "Overview", "width": 960, "height": 720, "libraryView": "Gallery", "flightSelectionCount": 3, "processingSeedCount": 2, "file": "cellar-overview-processing-compact.png" },
+    { "profile": "TastingRoom", "route": "Overview", "width": 1456, "height": 1060, "libraryView": "Gallery", "flightSelectionCount": 3, "file": "tastingroom-overview-populated-wide.png" },
+    { "profile": "TastingRoom", "route": "Overview", "width": 960, "height": 720, "libraryView": "Gallery", "flightSelectionCount": 3, "file": "tastingroom-overview-populated-compact.png" },
+    { "profile": "TastingRoom", "route": "Overview", "width": 1456, "height": 1060, "libraryView": "Gallery", "flightSelectionCount": 3, "processingSeedCount": 2, "file": "tastingroom-overview-processing-wide.png" },
+    { "profile": "TastingRoom", "route": "Overview", "width": 960, "height": 720, "libraryView": "Gallery", "flightSelectionCount": 3, "processingSeedCount": 2, "file": "tastingroom-overview-processing-compact.png" }
+  ]
+}

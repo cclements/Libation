@@ -1,0 +1,9 @@
+{
+  "settleMs": 1200,
+  "entries": [
+    { "profile": "Cellar", "route": "Overview", "width": 1456, "height": 1060, "file": "cellar-overview-no-account-wide.png" },
+    { "profile": "Cellar", "route": "Overview", "width": 960, "height": 720, "file": "cellar-overview-no-account-compact.png" },
+    { "profile": "TastingRoom", "route": "Overview", "width": 1456, "height": 1060, "file": "tastingroom-overview-no-account-wide.png" },
+    { "profile": "TastingRoom", "route": "Overview", "width": 960, "height": 720, "file": "tastingroom-overview-no-account-compact.png" }
+  ]
+}

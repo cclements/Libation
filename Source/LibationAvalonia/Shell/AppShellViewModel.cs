@@ -74,7 +74,8 @@ public sealed class AppShellViewModel : ViewModelBase, IDisposable
 		Dashboard = new DashboardViewModel(
 			CommandAdapter,
 			Flight,
-			CurrentFlight,
+			Library,
+			Processing,
 			new ShellDashboardNavigation(Navigation, Library),
 			DashboardSupplement);
 		Dashboard.SetProfile(Profile);
