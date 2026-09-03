@@ -32,6 +32,44 @@ def entries(routes, sizes):
     ]
 
 
+def s7_variant_entries():
+    routes = ["Overview", "Library", "Processing"]
+    variants = [
+        ("compact", {"density": "Compact"}),
+        ("decoration-off", {"decoration": "Off"}),
+        ("reduced-motion", {"motion": "Reduce"}),
+        ("scale-200", {"logicalScale": 2}),
+    ]
+    result = []
+    for variant_name, settings in variants:
+        for profile in PROFILES:
+            for route in routes:
+                entry = {
+                    "profile": profile,
+                    "route": route,
+                    "width": 1456,
+                    "height": 1060,
+                    "file": f"{variant_name}-{profile.lower()}-{route.lower()}.png",
+                    **settings,
+                }
+                if route == "Processing":
+                    entry["processingScenario"] = "Mixed"
+                result.append(entry)
+
+    for route in routes:
+        entry = {
+            "profile": "HighContrast",
+            "route": route,
+            "width": 1456,
+            "height": 1060,
+            "file": f"high-contrast-{route.lower()}.png",
+        }
+        if route == "Processing":
+            entry["processingScenario"] = "Mixed"
+        result.append(entry)
+    return result
+
+
 PLANS = {
     "all-routes.json": entries(ROUTES, SIZES + [NARROW]),
     "s2-shell.json": entries(ROUTES, SIZES + [NARROW]),
@@ -52,6 +90,7 @@ PLANS = {
         }
         for step in range(1, 6)
     ],
+    "s7-variant-matrix.json": s7_variant_entries(),
 }
 
 

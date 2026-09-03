@@ -65,11 +65,11 @@ public sealed class OnboardingViewModel : SecondaryDestinationViewModel
 		SelectTastingRoomCommand = Track(ReactiveCommand.Create(() => SelectProfile(OnboardingProfileChoice.TastingRoom)));
 		SelectHighContrastCommand = Track(ReactiveCommand.Create(() => SelectProfile(OnboardingProfileChoice.HighContrast)));
 		SelectCurrentInterfaceCommand = Track(ReactiveCommand.Create(() => SelectProfile(OnboardingProfileChoice.CurrentInterface)));
-		AddAccountCommand = CreateOwnerCommand(commands.AddAccountAsync, "add an account during onboarding", "Libation could not open account setup. You can skip this step and add an account later.");
-		ManageAccountsCommand = CreateOwnerCommand(commands.ShowAccountsAsync, "manage accounts during onboarding", "Libation could not open account management. You can continue and return later.");
-		OpenSettingsCommand = CreateOwnerCommand(commands.ShowSettingsAsync, "choose folders during onboarding", "Libation could not open Settings. You can continue and choose folders later.");
-		LocateFilesCommand = CreateOwnerCommand(commands.LocateAudiobooksAsync, "locate existing files during onboarding", "Libation could not open the file locator. You can continue and locate files later.");
-		ScanCommand = CreateOwnerCommand(commands.ScanLibraryAsync, "scan accounts during onboarding", "Libation could not start the library scan. Review account authorization and try again later.");
+		AddAccountCommand = CreateOwnerCommand(commands.AddAccountAsync, global::LibationAvalonia.Properties.Resources.OnboardingViewModelAddAnAccountDuringOnboarding, global::LibationAvalonia.Properties.Resources.OnboardingViewModelLibationCouldNotOpenAccountSetupYou);
+		ManageAccountsCommand = CreateOwnerCommand(commands.ShowAccountsAsync, global::LibationAvalonia.Properties.Resources.OnboardingViewModelManageAccountsDuringOnboarding, global::LibationAvalonia.Properties.Resources.OnboardingViewModelLibationCouldNotOpenAccountManagementYou);
+		OpenSettingsCommand = CreateOwnerCommand(commands.ShowSettingsAsync, global::LibationAvalonia.Properties.Resources.OnboardingViewModelChooseFoldersDuringOnboarding, global::LibationAvalonia.Properties.Resources.OnboardingViewModelLibationCouldNotOpenSettingsYouCan);
+		LocateFilesCommand = CreateOwnerCommand(commands.LocateAudiobooksAsync, global::LibationAvalonia.Properties.Resources.OnboardingViewModelLocateExistingFilesDuringOnboarding, global::LibationAvalonia.Properties.Resources.OnboardingViewModelLibationCouldNotOpenTheFileLocator);
+		ScanCommand = CreateOwnerCommand(commands.ScanLibraryAsync, global::LibationAvalonia.Properties.Resources.OnboardingViewModelScanAccountsDuringOnboarding, global::LibationAvalonia.Properties.Resources.OnboardingViewModelLibationCouldNotStartTheLibraryScan);
 		AddNewestToFlightCommand = Track(ReactiveCommand.Create(FinishWithFirstFlight));
 
 		main.PropertyChanged += Main_PropertyChanged;
@@ -99,17 +99,17 @@ public sealed class OnboardingViewModel : SecondaryDestinationViewModel
 	public bool IsScanStep => StepIndex == 3;
 	public bool IsFirstFlightStep => StepIndex == 4;
 	public bool CanGoBack => StepIndex > 0;
-	public string NextText => IsFirstFlightStep ? "Finish without adding titles" : "Continue";
-	public string SkipText => IsManualReentry ? "Close without changes" : "Skip for now";
+	public string NextText => IsFirstFlightStep ? global::LibationAvalonia.Properties.Resources.OnboardingViewModelFinishWithoutAddingTitles : global::LibationAvalonia.Properties.Resources.OnboardingViewModelContinue;
+	public string SkipText => IsManualReentry ? global::LibationAvalonia.Properties.Resources.OnboardingViewModelCloseWithoutChanges : global::LibationAvalonia.Properties.Resources.OnboardingViewModelSkipForNow;
 	public string StepTitle => StepIndex switch
 	{
-		0 => "Choose how Libation should feel",
-		1 => "Connect an Audible account",
-		2 => "Choose where local files belong",
-		3 => "Scan without blocking your work",
-		_ => "Create your first Current Flight",
+		0 => global::LibationAvalonia.Properties.Resources.OnboardingViewModelChooseHowLibationShouldFeel,
+		1 => global::LibationAvalonia.Properties.Resources.CellarOverviewViewConnectAnAudibleAccount,
+		2 => global::LibationAvalonia.Properties.Resources.OnboardingViewModelChooseWhereLocalFilesBelong,
+		3 => global::LibationAvalonia.Properties.Resources.OnboardingViewModelScanWithoutBlockingYourWork,
+		_ => global::LibationAvalonia.Properties.Resources.OnboardingViewModelCreateYourFirstCurrentFlight,
 	};
-	public string StepSummary => $"Step {StepNumber} of 5";
+	public string StepSummary => string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.OnboardingViewModelStep0Of5, StepNumber);
 
 	public OnboardingProfileChoice SelectedProfile
 	{
@@ -128,47 +128,47 @@ public sealed class OnboardingViewModel : SecondaryDestinationViewModel
 	public bool IsCurrentInterfaceSelected => HasExplicitProfileChoice && SelectedProfile == OnboardingProfileChoice.CurrentInterface;
 	public string SelectedProfileText => SelectedProfile switch
 	{
-		OnboardingProfileChoice.FollowSystem => "Follow System",
-		OnboardingProfileChoice.TastingRoom => "Tasting Room",
-		OnboardingProfileChoice.HighContrast => "High Contrast",
-		OnboardingProfileChoice.CurrentInterface => "Current Libation interface",
-		_ => "Cellar",
+		OnboardingProfileChoice.FollowSystem => global::LibationAvalonia.Properties.Resources.OnboardingViewFollowSystem,
+		OnboardingProfileChoice.TastingRoom => global::LibationAvalonia.Properties.Resources.OnboardingViewTastingRoom,
+		OnboardingProfileChoice.HighContrast => global::LibationAvalonia.Properties.Resources.OnboardingViewHighContrast,
+		OnboardingProfileChoice.CurrentInterface => global::LibationAvalonia.Properties.Resources.OnboardingViewCurrentLibationInterface,
+		_ => global::LibationAvalonia.Properties.Resources.OnboardingViewCellar,
 	};
 	public string ProfileChoiceHelpText => IsManualReentry
-		? $"{SelectedProfileText} reflects the current saved choice. Select another preview only if you want to change it."
+		? string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.OnboardingViewModel0ReflectsTheCurrentSavedChoiceSelect, SelectedProfileText)
 		: HasExplicitProfileChoice
-			? $"{SelectedProfileText} will be applied only when you finish onboarding."
-			: "Follow System is the starting preview. Choose it or another profile explicitly before continuing; Skip leaves the current interface unchanged.";
+			? string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.OnboardingViewModel0WillBeAppliedOnlyWhenYou, SelectedProfileText)
+			: global::LibationAvalonia.Properties.Resources.OnboardingViewModelFollowSystemIsTheStartingPreviewChoose;
 
 	public bool HasAccounts => main.AnyAccounts;
 	public bool IsScanning => captureScanActive || main.ActivelyScanning;
 	public bool CanStartScan => HasAccounts && !IsScanning && !isCaptureProjection;
-	public string AccountStateText => HasAccounts ? main.AccountsCount == 1 ? "1 account connected" : $"{main.AccountsCount} accounts connected" : "No Audible account connected";
+	public string AccountStateText => HasAccounts ? main.AccountsCount == 1 ? global::LibationAvalonia.Properties.Resources.OnboardingViewModel1AccountConnected : string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.OnboardingViewModel0AccountsConnected, main.AccountsCount) : global::LibationAvalonia.Properties.Resources.OnboardingViewModelNoAudibleAccountConnected;
 	public string ScanStateText => captureScanActive
-		? "Reading account catalogues and updating the local Library…"
+		? global::LibationAvalonia.Properties.Resources.OnboardingViewModelReadingAccountCataloguesAndUpdatingTheLocal
 		: IsScanning
 			? main.ScanningText
 			: main.LastSuccessfulScan is DateTimeOffset completed
-				? $"Last scan completed {completed.ToString("g")}."
-				: HasAccounts ? "Ready to scan when you choose" : "Connect an account before scanning";
+				? string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.OnboardingViewModelLastScanCompleted0, completed.ToString("g"))
+				: HasAccounts ? global::LibationAvalonia.Properties.Resources.OnboardingViewModelReadyToScanWhenYouChoose : global::LibationAvalonia.Properties.Resources.OnboardingViewModelConnectAnAccountBeforeScanning;
 	public string ScanStageText => IsScanning
-		? "Scan in progress"
-		: main.LastSuccessfulScan is not null ? "Last scan completed" : HasAccounts ? "Ready" : "Account required";
+		? global::LibationAvalonia.Properties.Resources.OnboardingViewModelScanInProgress
+		: main.LastSuccessfulScan is not null ? global::LibationAvalonia.Properties.Resources.OnboardingViewModelLastScanCompleted : HasAccounts ? global::LibationAvalonia.Properties.Resources.OnboardingViewModelReady : global::LibationAvalonia.Properties.Resources.OnboardingViewModelAccountRequired;
 	public LibationStatusKind ScanStatus => IsScanning
 		? LibationStatusKind.Processing
 		: main.LastSuccessfulScan is not null ? LibationStatusKind.Completed : HasAccounts ? LibationStatusKind.DownloadPending : LibationStatusKind.Unavailable;
-	public string ScanProgressAccessibleName => IsScanning ? $"Library scan in progress. {ScanStateText}" : ScanStateText;
+	public string ScanProgressAccessibleName => IsScanning ? string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.OnboardingViewModelLibraryScanInProgress0, ScanStateText) : ScanStateText;
 	public string FirstFlightStateText => SelectedProfile == OnboardingProfileChoice.CurrentInterface
-		? "The current Libation interface does not host the contemporary Current Flight. Finish without adding titles to return to that interface."
+		? global::LibationAvalonia.Properties.Resources.OnboardingViewModelTheCurrentLibationInterfaceDoesNotHost
 		: IsScanning
-			? "Wait for the current library scan to finish so Libation can choose from the completed catalogue. You can still finish without adding titles."
-		: "Libation will request up to the three newest eligible titles after setup, add them through the shell-owned Current Flight, and open Library. No processing starts automatically.";
-	public string FirstFlightActionText => "Add the three newest titles to your Flight";
+			? global::LibationAvalonia.Properties.Resources.OnboardingViewModelWaitForTheCurrentLibraryScanTo
+		: global::LibationAvalonia.Properties.Resources.OnboardingViewModelLibationWillRequestUpToTheThree;
+	public string FirstFlightActionText => global::LibationAvalonia.Properties.Resources.OnboardingViewModelAddTheThreeNewestTitlesToYour;
 	public string FirstFlightActionHelpText => SelectedProfile == OnboardingProfileChoice.CurrentInterface
-		? "Unavailable for the current Libation interface because Current Flight belongs to the contemporary shell."
+		? global::LibationAvalonia.Properties.Resources.OnboardingViewModelUnavailableForTheCurrentLibationInterfaceBecause
 		: IsScanning
-			? "Unavailable until the current library scan finishes."
-		: "Adds up to three available non-series-parent titles. It does not start processing.";
+			? global::LibationAvalonia.Properties.Resources.OnboardingViewModelUnavailableUntilTheCurrentLibraryScanFinishes
+		: global::LibationAvalonia.Properties.Resources.OnboardingViewModelAddsUpToThreeAvailableNonSeries;
 	public bool CanRequestFirstFlight => !isCaptureProjection
 		&& !IsScanning
 		&& SelectedProfile != OnboardingProfileChoice.CurrentInterface;
@@ -180,8 +180,8 @@ public sealed class OnboardingViewModel : SecondaryDestinationViewModel
 		{
 			var path = configuration.Books?.PathWithoutPrefix;
 			return string.IsNullOrWhiteSpace(path)
-				? "A valid Books location is still required before processing."
-				: $"Open copies will use the configured Books location: {path}";
+				? global::LibationAvalonia.Properties.Resources.OnboardingViewModelAValidBooksLocationIsStillRequired
+				: string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.OnboardingViewModelOpenCopiesWillUseTheConfiguredBooks, path);
 		}
 	}
 
@@ -207,7 +207,7 @@ public sealed class OnboardingViewModel : SecondaryDestinationViewModel
 	internal void PrepareCaptureState(int stepNumber, bool scanActive)
 	{
 		if (stepNumber is < 1 or > LastStepIndex + 1)
-			throw new ArgumentOutOfRangeException(nameof(stepNumber), stepNumber, "Onboarding capture step must be from 1 through 5.");
+			throw new ArgumentOutOfRangeException(nameof(stepNumber), stepNumber, global::LibationAvalonia.Properties.Resources.OnboardingViewModelOnboardingCaptureStepMustBeFrom1);
 		isCaptureProjection = true;
 		captureScanActive = scanActive;
 		StepIndex = stepNumber - 1;

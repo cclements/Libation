@@ -63,7 +63,7 @@ public sealed class LibraryBookItemViewModel : ViewModelBase, IDisposable
 	public LibraryBook LibraryBook => entry.LibraryBook;
 	public FlightItemId Id => FlightItemId.From(LibraryBook);
 	public string ProductId => entry.AudibleProductId;
-	public string Title => entry.Title ?? "Untitled audiobook";
+	public string Title => entry.Title ?? global::LibationAvalonia.Properties.Resources.DownloadsModelsUntitledAudiobook;
 	public string Author => entry.Authors ?? string.Empty;
 	public string Narrator => entry.Narrators ?? string.Empty;
 	public string Duration => entry.Length ?? string.Empty;
@@ -76,15 +76,15 @@ public sealed class LibraryBookItemViewModel : ViewModelBase, IDisposable
 	public string DateAdded => entry.DateAdded == default
 		? string.Empty
 		: entry.DateAdded.ToString("d", CultureInfo.CurrentCulture);
-	public string RatingText => entry.MyRating?.ToString() ?? "Not rated";
+	public string RatingText => entry.MyRating?.ToString() ?? global::LibationAvalonia.Properties.Resources.LibraryModelsNotRated;
 	public string MarketplaceText => string.IsNullOrWhiteSpace(LibraryBook.Book.Locale)
-		? "Not recorded"
+		? global::LibationAvalonia.Properties.Resources.LibraryModelsNotRecorded
 		: LibraryBook.Book.Locale;
-	public string ReleaseDateText => LibraryBook.Book.DatePublished?.ToString("d", CultureInfo.CurrentCulture) ?? "Not recorded";
+	public string ReleaseDateText => LibraryBook.Book.DatePublished?.ToString("d", CultureInfo.CurrentCulture) ?? global::LibationAvalonia.Properties.Resources.LibraryModelsNotRecorded;
 	public string QualityVersionText => BuildQualityVersionText(entry.LastDownload);
-	public string OutputPathText => AudibleFileStorage.Audio.GetPath(ProductId)?.ShortPathName ?? "Not created yet";
-	public string LocalStateText => LibraryBook.Book.AudioExists ? "Local audio available" : "Local audio not created";
-	public string PdfStateText => LibraryBook.Book.HasPdf ? "PDF available from Audible" : "No PDF is associated with this title";
+	public string OutputPathText => AudibleFileStorage.Audio.GetPath(ProductId)?.ShortPathName ?? global::LibationAvalonia.Properties.Resources.LibraryModelsNotCreatedYet;
+	public string LocalStateText => LibraryBook.Book.AudioExists ? global::LibationAvalonia.Properties.Resources.LibraryModelsLocalAudioAvailable : global::LibationAvalonia.Properties.Resources.LibraryModelsLocalAudioNotCreated;
+	public string PdfStateText => LibraryBook.Book.HasPdf ? global::LibationAvalonia.Properties.Resources.LibraryModelsPDFAvailableFromAudible : global::LibationAvalonia.Properties.Resources.LibraryModelsNoPDFIsAssociatedWithThisTitle;
 	public bool CanDownload => new GridContextMenu([entry], '_').DownloadBookEnabled;
 	public bool CanReveal => LibraryBook.Book.AudioExists;
 	public bool CanViewSeries => LibraryBook.Book.SeriesLink.Any();
@@ -99,11 +99,11 @@ public sealed class LibraryBookItemViewModel : ViewModelBase, IDisposable
 		};
 	public string StatusText => Status switch
 	{
-		LibationStatusKind.Unavailable => "Unavailable after the latest scan",
-		LibationStatusKind.Completed => "Completed",
-		LibationStatusKind.Downloaded => "Downloaded; processing pending",
-		LibationStatusKind.Failed => "Needs attention",
-		_ => "Download pending",
+		LibationStatusKind.Unavailable => global::LibationAvalonia.Properties.Resources.LibraryModelsUnavailableAfterTheLatestScan,
+		LibationStatusKind.Completed => global::LibationAvalonia.Properties.Resources.CellarOverviewViewCompleted,
+		LibationStatusKind.Downloaded => global::LibationAvalonia.Properties.Resources.LibraryModelsDownloadedProcessingPending,
+		LibationStatusKind.Failed => global::LibationAvalonia.Properties.Resources.DownloadsModelsNeedsAttention,
+		_ => global::LibationAvalonia.Properties.Resources.DownloadsModelsDownloadPending,
 	};
 
 	public bool IsSelected
@@ -131,20 +131,20 @@ public sealed class LibraryBookItemViewModel : ViewModelBase, IDisposable
 		}
 	}
 
-	public string SelectionText => IsSelected ? "Selected" : string.Empty;
+	public string SelectionText => IsSelected ? global::LibationAvalonia.Properties.Resources.LibraryModelsSelected : string.Empty;
 	public string AccessibleName
-		=> string.Join(", ", new[] { Title, Author, StatusText, IsSelected ? "selected" : null, IsFocused ? "focused" : null }
+		=> string.Join(", ", new[] { Title, Author, StatusText, IsSelected ? global::LibationAvalonia.Properties.Resources.LibraryModelsSelected2 : null, IsFocused ? global::LibationAvalonia.Properties.Resources.LibraryModelsFocused : null }
 			.Where(value => !string.IsNullOrWhiteSpace(value)));
 
 	private static string BuildQualityVersionText(LastDownloadStatus? download)
 	{
 		if (download?.IsValid is not true)
-			return "No completed download recorded";
-		var format = download.LastDownloadedFormat?.ToString() ?? "Audio";
+			return global::LibationAvalonia.Properties.Resources.LibraryModelsNoCompletedDownloadRecorded;
+		var format = download.LastDownloadedFormat?.ToString() ?? global::LibationAvalonia.Properties.Resources.LibraryModelsAudio;
 		var fileVersion = string.IsNullOrWhiteSpace(download.LastDownloadedFileVersion)
 			? null
-			: $"file v{download.LastDownloadedFileVersion}";
-		return string.Join(" · ", new[] { format, fileVersion, $"Libation {download.LastDownloadedVersion}" }
+			: string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.LibraryModelsFileV0, download.LastDownloadedFileVersion);
+		return string.Join(" · ", new[] { format, fileVersion, string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.LibraryModelsLibation0, download.LastDownloadedVersion) }
 			.Where(value => !string.IsNullOrWhiteSpace(value)));
 	}
 

@@ -45,7 +45,7 @@ public sealed class CurrentFlightItemViewModel : ReactiveObject, IDisposable
 	public string Author => Source.Author;
 	public string DurationText => Source.DurationMinutes <= 0
 		? string.Empty
-		: $"{Source.DurationMinutes / 60} hr {Source.DurationMinutes % 60} min";
+		: string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.CurrentFlightViewModel0Hr1Min, Source.DurationMinutes / 60, Source.DurationMinutes % 60);
 	public CoverImageCache? CoverCache
 	{
 		get => coverCache;
@@ -94,8 +94,8 @@ public sealed class CurrentFlightViewModel : ReactiveObject, IDisposable
 	private FlightUndoToken? undoToken;
 	private string? warningText;
 	private string? pendingWarningSignature;
-	private string processActionText = "Process";
-	private string announcement = "Current Flight is empty.";
+	private string processActionText = global::LibationAvalonia.Properties.Resources.BookDetailsPaneProcess;
+	private string announcement = global::LibationAvalonia.Properties.Resources.CurrentFlightViewModelCurrentFlightIsEmpty;
 	private UserFacingError? currentError;
 	private CoverImageCache? coverCache;
 	private bool focusWarning;
@@ -115,10 +115,10 @@ public sealed class CurrentFlightViewModel : ReactiveObject, IDisposable
 		this.actions = actions;
 		OutputProfiles =
 		[
-			new(FlightOutputProfile.CurrentSettings, "Current settings", "Use the saved Download/Decrypt settings."),
-			new(FlightOutputProfile.M4b, "M4B", "Create one M4B file per title."),
-			new(FlightOutputProfile.Mp3, "MP3", "Create MP3 output without changing saved settings."),
-			new(FlightOutputProfile.SplitByChapter, "Split by chapter", "Create chapter-separated output without changing saved settings."),
+			new(FlightOutputProfile.CurrentSettings, global::LibationAvalonia.Properties.Resources.CurrentFlightViewModelCurrentSettings, global::LibationAvalonia.Properties.Resources.CurrentFlightViewModelUseTheSavedDownloadDecryptSettings),
+			new(FlightOutputProfile.M4b, global::LibationAvalonia.Properties.Resources.CurrentFlightViewModelM4B, global::LibationAvalonia.Properties.Resources.CurrentFlightViewModelCreateOneM4BFilePerTitle),
+			new(FlightOutputProfile.Mp3, global::LibationAvalonia.Properties.Resources.CurrentFlightViewModelMP3, global::LibationAvalonia.Properties.Resources.CurrentFlightViewModelCreateMP3OutputWithoutChangingSavedSettings),
+			new(FlightOutputProfile.SplitByChapter, global::LibationAvalonia.Properties.Resources.CurrentFlightViewModelSplitByChapter, global::LibationAvalonia.Properties.Resources.CurrentFlightViewModelCreateChapterSeparatedOutputWithoutChangingSaved),
 		];
 		selectedOutputProfile = OutputProfiles[0];
 		RemoveCommand = ReactiveCommand.Create<CurrentFlightItemViewModel>(item => Remove(item.Source.Id));
@@ -151,15 +151,15 @@ public sealed class CurrentFlightViewModel : ReactiveObject, IDisposable
 	public ReactiveCommand<Unit, Unit> ProcessCommand { get; }
 	public int Count => flight.Count;
 	public bool IsEmpty => Count == 0;
-	public string CountText => Count == 1 ? "1 title" : $"{Count} titles";
-	public string EmptyStateTitle => IsEmpty ? "Current Flight is empty" : string.Empty;
-	public string EmptyStateText => IsEmpty ? "Select titles in the Library to build a Flight" : string.Empty;
+	public string CountText => Count == 1 ? global::LibationAvalonia.Properties.Resources.CurrentFlightViewModel1Title : string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.CurrentFlightViewModel0Titles, Count);
+	public string EmptyStateTitle => IsEmpty ? global::LibationAvalonia.Properties.Resources.CurrentFlightViewModelCurrentFlightIsEmpty2 : string.Empty;
+	public string EmptyStateText => IsEmpty ? global::LibationAvalonia.Properties.Resources.CurrentFlightViewModelSelectTitlesInTheLibraryToBuild : string.Empty;
 	public string DurationText => flight.TotalDurationMinutes <= 0
 		? string.Empty
-		: $"{flight.TotalDurationMinutes / 60} hr {flight.TotalDurationMinutes % 60} min total";
+		: string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.CurrentFlightViewModel0Hr1MinTotal, flight.TotalDurationMinutes / 60, flight.TotalDurationMinutes % 60);
 	public string EstimatedSizeText => flight.EstimatedBytes <= 0
 		? string.Empty
-		: $"about {DiskSpaceHelper.FormatBytes(flight.EstimatedBytes)}";
+		: string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.CurrentFlightViewModelAbout0, DiskSpaceHelper.FormatBytes(flight.EstimatedBytes));
 	public CoverImageCache? CoverCache
 	{
 		get => coverCache;
@@ -204,8 +204,8 @@ public sealed class CurrentFlightViewModel : ReactiveObject, IDisposable
 			this.RaisePropertyChanged(nameof(OutputProfileText));
 		}
 	}
-	public string OutputProfileText => $"Output: {SelectedOutputProfile.Label}";
-	public string? UndoActionText => undoToken?.CanRestore == true ? "Undo" : null;
+	public string OutputProfileText => string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.CurrentFlightViewModelOutput0, SelectedOutputProfile.Label);
+	public string? UndoActionText => undoToken?.CanRestore == true ? global::LibationAvalonia.Properties.Resources.CurrentFlightViewModelUndo : null;
 	public UserFacingError? CurrentError
 	{
 		get => currentError;
@@ -231,8 +231,8 @@ public sealed class CurrentFlightViewModel : ReactiveObject, IDisposable
 
 		ResetPendingPreflight();
 		Announcement = flight.HiddenCount > 0
-			? $"{flight.HiddenCount} Current Flight title(s) are outside the current Library results."
-			: "All Current Flight titles are visible in the current Library results.";
+			? string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.CurrentFlightViewModel0CurrentFlightTitleSAreOutside, flight.HiddenCount)
+			: global::LibationAvalonia.Properties.Resources.CurrentFlightViewModelAllCurrentFlightTitlesAreVisibleIn;
 	}
 
 	private void RefreshItems()
@@ -274,13 +274,13 @@ public sealed class CurrentFlightViewModel : ReactiveObject, IDisposable
 		this.RaisePropertyChanged(nameof(DurationText));
 		this.RaisePropertyChanged(nameof(EstimatedSizeText));
 		if (flight.HiddenCount > 0)
-			WarningText = $"{flight.HiddenCount} selected title(s) are hidden by the current Library filter.";
+			WarningText = string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.CurrentFlightViewModel0SelectedTitleSAreHiddenBy, flight.HiddenCount);
 	}
 
 	private void Remove(FlightItemId id)
 	{
 		undoToken = flight.Remove(id);
-		ShowUndo("Removed a title from Current Flight.");
+		ShowUndo(global::LibationAvalonia.Properties.Resources.CurrentFlightViewModelRemovedATitleFromCurrentFlight);
 	}
 
 	private void MoveBy(FlightItemId id, int offset)
@@ -303,7 +303,7 @@ public sealed class CurrentFlightViewModel : ReactiveObject, IDisposable
 		Notifications.Clear();
 		this.RaisePropertyChanged(nameof(UndoActionText));
 		if (undoToken.CanRestore)
-			ShowUndo("Cleared Current Flight.");
+			ShowUndo(global::LibationAvalonia.Properties.Resources.CurrentFlightViewModelClearedCurrentFlight);
 	}
 
 	private void Undo()
@@ -318,7 +318,7 @@ public sealed class CurrentFlightViewModel : ReactiveObject, IDisposable
 	private void ShowUndo(string message)
 	{
 		Notifications.Clear();
-		Notifications.Add(new ToastMessage(message, ToastKind.Undo, "Undo", UndoCommand));
+		Notifications.Add(new ToastMessage(message, ToastKind.Undo, global::LibationAvalonia.Properties.Resources.CurrentFlightViewModelUndo, UndoCommand));
 		this.RaisePropertyChanged(nameof(UndoActionText));
 	}
 
@@ -339,7 +339,7 @@ public sealed class CurrentFlightViewModel : ReactiveObject, IDisposable
 		}
 		catch (Exception ex)
 		{
-			ShowExceptionError(ex, "inspect Current Flight preflight", "Libation could not inspect Current Flight preflight conditions.");
+			ShowExceptionError(ex, global::LibationAvalonia.Properties.Resources.CurrentFlightViewModelInspectCurrentFlightPreflight, global::LibationAvalonia.Properties.Resources.CurrentFlightViewModelLibationCouldNotInspectCurrentFlightPreflight);
 			return;
 		}
 		CurrentError = null;
@@ -347,25 +347,25 @@ public sealed class CurrentFlightViewModel : ReactiveObject, IDisposable
 		{
 			FocusWarning = false;
 			WarningText = null;
-			Announcement = $"Preflight passed for {result.Books.Count} Current Flight title(s).";
+			Announcement = string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.CurrentFlightViewModelPreflightPassedFor0CurrentFlightTitle, result.Books.Count);
 			return;
 		}
 
 		FocusWarning = true;
 		WarningText = string.Join(Environment.NewLine, result.Issues.Select(issue => issue.Message));
 		Announcement = result.CanProceed
-			? $"Preflight found warnings. {WarningText}"
-			: $"Preflight blocked processing. {WarningText}";
+			? string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.CurrentFlightViewModelPreflightFoundWarnings0, WarningText)
+			: string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.CurrentFlightViewModelPreflightBlockedProcessing0, WarningText);
 	}
 
 	private Task ExportMetadataAsync()
-		=> RunActionAsync(actions.ExportMetadataAsync, "export Current Flight metadata");
+		=> RunActionAsync(actions.ExportMetadataAsync, global::LibationAvalonia.Properties.Resources.CurrentFlightViewModelExportCurrentFlightMetadata);
 
 	private Task AddTagsAsync()
-		=> RunActionAsync(actions.AddTagsAsync, "add Current Flight tags");
+		=> RunActionAsync(actions.AddTagsAsync, global::LibationAvalonia.Properties.Resources.CurrentFlightViewModelAddCurrentFlightTags);
 
 	private Task ReplaceTagsAsync()
-		=> RunActionAsync(actions.ReplaceTagsAsync, "replace Current Flight tags");
+		=> RunActionAsync(actions.ReplaceTagsAsync, global::LibationAvalonia.Properties.Resources.CurrentFlightViewModelReplaceCurrentFlightTags);
 
 	private async Task RunActionAsync(
 		Func<IReadOnlyList<DataLayer.LibraryBook>, Task<UserActionResult>> action,
@@ -379,7 +379,7 @@ public sealed class CurrentFlightViewModel : ReactiveObject, IDisposable
 		}
 		catch (Exception ex)
 		{
-			ShowExceptionError(ex, actionName, $"Libation could not {actionName}. No completion was recorded.");
+			ShowExceptionError(ex, actionName, string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.CurrentFlightViewModelLibationCouldNot0NoCompletionWas, actionName));
 			return;
 		}
 
@@ -411,7 +411,7 @@ public sealed class CurrentFlightViewModel : ReactiveObject, IDisposable
 		}
 		catch (Exception ex)
 		{
-			ShowExceptionError(ex, "evaluate Current Flight processing", "Libation could not inspect Current Flight processing conditions.");
+			ShowExceptionError(ex, global::LibationAvalonia.Properties.Resources.CurrentFlightViewModelEvaluateCurrentFlightProcessing, global::LibationAvalonia.Properties.Resources.CurrentFlightViewModelLibationCouldNotInspectCurrentFlightProcessing);
 			return;
 		}
 		CurrentError = null;
@@ -422,9 +422,9 @@ public sealed class CurrentFlightViewModel : ReactiveObject, IDisposable
 
 		if (blocking.Length > 0)
 		{
-			ProcessActionText = "Process";
+			ProcessActionText = global::LibationAvalonia.Properties.Resources.BookDetailsPaneProcess;
 			pendingWarningSignature = null;
-			Announcement = $"Processing blocked. {WarningText}";
+			Announcement = string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.CurrentFlightViewModelProcessingBlocked0, WarningText);
 			return;
 		}
 
@@ -432,8 +432,8 @@ public sealed class CurrentFlightViewModel : ReactiveObject, IDisposable
 		if (warnings.Length > 0 && pendingWarningSignature != signature)
 		{
 			pendingWarningSignature = signature;
-			ProcessActionText = "Process anyway";
-			Announcement = $"Review processing warnings. {WarningText}";
+			ProcessActionText = global::LibationAvalonia.Properties.Resources.CurrentFlightViewModelProcessAnyway;
+			Announcement = string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.CurrentFlightViewModelReviewProcessingWarnings0, WarningText);
 			return;
 		}
 
@@ -444,11 +444,11 @@ public sealed class CurrentFlightViewModel : ReactiveObject, IDisposable
 		}
 		catch (Exception ex)
 		{
-			ShowExceptionError(ex, "submit Current Flight to Processing", "Libation could not submit Current Flight to Processing.");
+			ShowExceptionError(ex, global::LibationAvalonia.Properties.Resources.CurrentFlightViewModelSubmitCurrentFlightToProcessing, global::LibationAvalonia.Properties.Resources.CurrentFlightViewModelLibationCouldNotSubmitCurrentFlightTo);
 			return;
 		}
 		pendingWarningSignature = null;
-		ProcessActionText = "Process";
+		ProcessActionText = global::LibationAvalonia.Properties.Resources.BookDetailsPaneProcess;
 		if (processResult.Queued)
 		{
 			CurrentError = null;
@@ -459,18 +459,18 @@ public sealed class CurrentFlightViewModel : ReactiveObject, IDisposable
 		{
 			CurrentError = UserFacingErrorFactory.FromMessage(
 				UserFacingErrorCategory.Conversion,
-				"Processing not started",
+				global::LibationAvalonia.Properties.Resources.CurrentFlightViewModelProcessingNotStarted,
 				processResult.Message,
-				"Review Current Flight preflight and the Processing queue, then try again.",
+				global::LibationAvalonia.Properties.Resources.CurrentFlightViewModelReviewCurrentFlightPreflightAndTheProcessing,
 				ErrorSeverity.Warning,
 				canRetry: true,
 				canOpenSettings: true,
 				canRevealPath: false,
-				technicalDetails: $"Operation: submit Current Flight to Processing{Environment.NewLine}Result: no eligible work was queued");
+				technicalDetails: string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.CurrentFlightViewModelOperationSubmitCurrentFlightToProcessing0, Environment.NewLine));
 			FocusWarning = true;
 			WarningText = CurrentError.PrimaryMessage;
 			Serilog.Log.Logger.Warning(
-				"Current Flight was not submitted to Processing. Correlation ID: {CorrelationId}. Category: {ErrorCategory}",
+				global::LibationAvalonia.Properties.Resources.CurrentFlightViewModelCurrentFlightWasNotSubmittedToProcessing,
 				CurrentError.CorrelationId,
 				CurrentError.Category.ToDisplayName());
 		}
@@ -485,7 +485,7 @@ public sealed class CurrentFlightViewModel : ReactiveObject, IDisposable
 	{
 		CurrentError = UserFacingErrorFactory.FromException(exception, operation, summary);
 		pendingWarningSignature = null;
-		ProcessActionText = "Process";
+		ProcessActionText = global::LibationAvalonia.Properties.Resources.BookDetailsPaneProcess;
 		FocusWarning = true;
 		WarningText = CurrentError.PrimaryMessage;
 		Announcement = WarningText;
@@ -493,7 +493,7 @@ public sealed class CurrentFlightViewModel : ReactiveObject, IDisposable
 		Notifications.Add(new ToastMessage(WarningText, ToastKind.Warning));
 		Serilog.Log.Logger.Error(
 			exception,
-			"Current Flight action failed: {CurrentFlightAction}. Correlation ID: {CorrelationId}. Category: {ErrorCategory}",
+			global::LibationAvalonia.Properties.Resources.CurrentFlightViewModelCurrentFlightActionFailedCurrentFlightActionCorrelationID,
 			operation,
 			CurrentError.CorrelationId,
 			CurrentError.Category.ToDisplayName());
@@ -511,7 +511,7 @@ public sealed class CurrentFlightViewModel : ReactiveObject, IDisposable
 		catch (Exception ex)
 		{
 			Serilog.Log.Logger.Warning(
-				"Unable to copy Current Flight diagnostics. Correlation ID: {CorrelationId}. {TechnicalDetails}",
+				global::LibationAvalonia.Properties.Resources.CurrentFlightViewModelUnableToCopyCurrentFlightDiagnosticsCorrelation,
 				error.CorrelationId,
 				UserFacingErrorFactory.Scrub(ex.ToString()));
 		}
@@ -523,11 +523,11 @@ public sealed class CurrentFlightViewModel : ReactiveObject, IDisposable
 	private void ResetPendingPreflight()
 	{
 		pendingWarningSignature = null;
-		ProcessActionText = "Process";
+		ProcessActionText = global::LibationAvalonia.Properties.Resources.BookDetailsPaneProcess;
 		FocusWarning = CurrentError is not null;
 		WarningText = CurrentError?.PrimaryMessage
 			?? (flight.HiddenCount > 0
-				? $"{flight.HiddenCount} selected title(s) are hidden by the current Library filter."
+				? string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.CurrentFlightViewModel0SelectedTitleSAreHiddenBy, flight.HiddenCount)
 				: null);
 	}
 

@@ -118,10 +118,10 @@ public sealed class ProcessingViewModel : ReactiveObject, IDisposable, IRoutePre
 		? 0
 		: (100d * FinishedCount + Active.Sum(item => item.Progress)) / QueueItemCount;
 	public string OverallProgressText => $"{Progress:0}%";
-	public string ActiveText => Active.FirstOrDefault()?.Title ?? "No active processing";
+	public string ActiveText => Active.FirstOrDefault()?.Title ?? global::LibationAvalonia.Properties.Resources.ProcessingViewModelNoActiveProcessing;
 	public string SummaryText
-		=> $"{ActiveCount} active · {WaitingCount} waiting · {CompletedCount} completed · {FailedCount} failed"
-			+ (CancelledCount > 0 ? $" · {CancelledCount} cancelled" : string.Empty);
+		=> string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.ProcessingViewModel0Active1Waiting2Completed3, ActiveCount, WaitingCount, CompletedCount, FailedCount)
+			+ (CancelledCount > 0 ? string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.ProcessingViewModel0Cancelled, CancelledCount) : string.Empty);
 	public string InQueueText => InQueueCount.ToString("N0", CultureInfo.CurrentCulture);
 	public string ConvertingText => Active.Count(item => item.Source.PresentationStage is ProcessBookPresentationStage.Converting)
 		.ToString("N0", CultureInfo.CurrentCulture);
@@ -137,15 +137,15 @@ public sealed class ProcessingViewModel : ReactiveObject, IDisposable, IRoutePre
 	public ICommand? CurrentCancelCommand => CurrentItem?.CancelCommand;
 
 	public bool HasLogEntries => Source.LogEntries.Count > 0;
-	public string LogSummary => Source.LogEntries.Count == 1 ? "1 queue log entry" : $"{Source.LogEntries.Count} queue log entries";
-	public string RouteEyebrow => "Processing";
-	public string RouteTitle => "The Decanter";
-	public string RouteSubtitle => "Follow the existing processing queue from waiting through completion.";
-	public RouteCommandPresentation? RoutePrimaryCommand => CanCancel ? new("Cancel all", CancelAllCommand) : null;
+	public string LogSummary => Source.LogEntries.Count == 1 ? global::LibationAvalonia.Properties.Resources.ProcessingViewModel1QueueLogEntry : string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.ProcessingViewModel0QueueLogEntries, Source.LogEntries.Count);
+	public string RouteEyebrow => global::LibationAvalonia.Properties.Resources.RouteProcessingLabel;
+	public string RouteTitle => global::LibationAvalonia.Properties.Resources.ProcessingViewModelTheDecanter;
+	public string RouteSubtitle => global::LibationAvalonia.Properties.Resources.ProcessingViewModelFollowTheExistingProcessingQueueFromWaiting;
+	public RouteCommandPresentation? RoutePrimaryCommand => CanCancel ? new(global::LibationAvalonia.Properties.Resources.ProcessingViewModelCancelAll, CancelAllCommand) : null;
 	public IReadOnlyList<RouteCommandPresentation> RouteSecondaryCommands =>
 	[
-		new("Clear finished", ClearFinishedCommand),
-		new("Performance", PerformanceCommand),
+		new(global::LibationAvalonia.Properties.Resources.ProcessingViewModelClearFinished, ClearFinishedCommand),
+		new(global::LibationAvalonia.Properties.Resources.ProcessingViewModelPerformance, PerformanceCommand),
 	];
 	public RouteStatusPresentation RouteStatusBadge => new(SummaryText, HasFailed
 		? LibationStatusKind.NeedsAttention
@@ -191,7 +191,7 @@ public sealed class ProcessingViewModel : ReactiveObject, IDisposable, IRoutePre
 		if (!await retryProcess(item))
 		{
 			Serilog.Log.Logger.Warning(
-				"A failed download queue item was not accepted for retry. Correlation ID: {CorrelationId}",
+				global::LibationAvalonia.Properties.Resources.ProcessingViewModelAFailedDownloadQueueItemWasNot,
 				item.CorrelationId);
 		}
 	}
@@ -311,12 +311,12 @@ public sealed class ProcessingViewModel : ReactiveObject, IDisposable, IRoutePre
 	private void RebuildRows()
 	{
 		var rows = new List<ProcessingQueueRowViewModel>();
-		AddSection(rows, "Active", Active);
-		AddSection(rows, "Waiting", Waiting);
-		AddSection(rows, "Completed", Completed);
-		AddSection(rows, "Failed", Failed);
+		AddSection(rows, global::LibationAvalonia.Properties.Resources.ProcessingViewActive, Active);
+		AddSection(rows, global::LibationAvalonia.Properties.Resources.ProcessingViewWaiting, Waiting);
+		AddSection(rows, global::LibationAvalonia.Properties.Resources.CellarOverviewViewCompleted, Completed);
+		AddSection(rows, global::LibationAvalonia.Properties.Resources.ProcessingViewFailed, Failed);
 		if (Cancelled.Count > 0)
-			AddSection(rows, "Cancelled", Cancelled);
+			AddSection(rows, global::LibationAvalonia.Properties.Resources.ProcessingViewModelCancelled, Cancelled);
 		Replace(QueueRows, rows);
 
 		static void AddSection(
@@ -396,7 +396,7 @@ public sealed class ProcessingViewModel : ReactiveObject, IDisposable, IRoutePre
 		}
 		catch (Exception ex)
 		{
-			Serilog.Log.Logger.Warning(ex, "Unable to copy the scrubbed processing queue log.");
+			Serilog.Log.Logger.Warning(ex, global::LibationAvalonia.Properties.Resources.ProcessingViewModelUnableToCopyTheScrubbedProcessingQueue);
 		}
 	}
 

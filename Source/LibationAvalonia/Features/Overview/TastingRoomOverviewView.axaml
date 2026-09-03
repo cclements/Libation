@@ -33,7 +33,7 @@
 							IsVisible="{Binding ProcessingStatusText, Converter={x:Static StringConverters.IsNullOrEmpty}}" />
 						<ProgressBar Classes="contemporary" Minimum="0" Maximum="100"
 							Value="{Binding ProcessingProgress}" IsVisible="{Binding ShowProcessingProgress}"
-							AutomationProperties.Name="Title processing progress" />
+							AutomationProperties.Name="{x:Static properties:Resources.TastingRoomOverviewViewTitleProcessingProgress}" />
 					</StackPanel>
 				</Grid>
 			</Border>
@@ -80,6 +80,12 @@
 	</UserControl.Resources>
 
 	<UserControl.Styles>
+		<Style Selector="overview|TastingRoomOverviewView UniformGrid#TastingMetrics">
+			<Setter Property="Columns" Value="4" />
+		</Style>
+		<Style Selector="overview|TastingRoomOverviewView ItemsControl#RecentCompactList">
+			<Setter Property="IsVisible" Value="False" />
+		</Style>
 		<Style Selector="overview|TastingRoomOverviewView:wide ContentControl#DecanterSurfaceHost">
 			<Setter Property="Width" Value="380" />
 			<Setter Property="DockPanel.Dock" Value="Right" />
@@ -128,6 +134,9 @@
 		<Style Selector="overview|TastingRoomOverviewView:narrow ItemsControl#RecentCompactList">
 			<Setter Property="IsVisible" Value="True" />
 		</Style>
+		<Style Selector="overview|TastingRoomOverviewView:narrow UniformGrid#TastingMetrics">
+			<Setter Property="Columns" Value="2" />
+		</Style>
 	</UserControl.Styles>
 
 	<ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
@@ -135,64 +144,64 @@
 			<Border Classes="card" IsVisible="{Binding IsLoading}"
 				AutomationProperties.LiveSetting="{x:Static designSystem:PlatformAutomationPolicy.Polite}">
 				<StackPanel Spacing="{DynamicResource Libation.Space.2}">
-					<TextBlock Text="Loading today’s selection…" FontWeight="SemiBold" />
+					<TextBlock Text="{x:Static properties:Resources.TastingRoomOverviewViewLoadingTodaySSelection}" FontWeight="SemiBold" />
 					<ProgressBar Classes="contemporary prominent" IsIndeterminate="True"
-						AutomationProperties.Name="Loading today’s selection" />
+						AutomationProperties.Name="{x:Static properties:Resources.TastingRoomOverviewViewLoadingTodaySSelection2}" />
 				</StackPanel>
 			</Border>
 
 			<components:AttentionBanner IsVisible="{Binding HasError}"
 				Severity="{x:Static components:ComponentSeverity.Danger}" FocusOnShow="True"
-				Title="Overview unavailable" Message="{Binding ErrorMessage}"
-				ActionText="Refresh" ActionCommand="{Binding RefreshCommand}"
-				SecondaryActionText="Copy technical details" SecondaryActionCommand="{Binding CopyTechnicalDetailsCommand}" />
+				Title="{x:Static properties:Resources.CellarOverviewViewOverviewUnavailable}" Message="{Binding ErrorMessage}"
+				ActionText="{x:Static properties:Resources.DownloadsViewRefresh}" ActionCommand="{Binding RefreshCommand}"
+				SecondaryActionText="{x:Static properties:Resources.AccountsViewCopyTechnicalDetails}" SecondaryActionCommand="{Binding CopyTechnicalDetailsCommand}" />
 			<components:AttentionBanner IsVisible="{Binding IsOffline}"
-				Severity="{x:Static components:ComponentSeverity.Warning}" Title="Offline"
-				Message="Your local library remains available, but account and update status cannot be confirmed."
-				ActionText="Refresh" ActionCommand="{Binding RefreshCommand}" />
+				Severity="{x:Static components:ComponentSeverity.Warning}" Title="{x:Static properties:Resources.CellarOverviewViewOffline}"
+				Message="{x:Static properties:Resources.CellarOverviewViewYourLocalLibraryRemainsAvailableButAccount}"
+				ActionText="{x:Static properties:Resources.DownloadsViewRefresh}" ActionCommand="{Binding RefreshCommand}" />
 			<components:AttentionBanner IsVisible="{Binding IsScanStale}"
-				Severity="{x:Static components:ComponentSeverity.Warning}" Title="Library scan needs attention"
-				Message="The last successful scan is stale. Scan the library to refresh title availability."
-				ActionText="Scan Library" ActionCommand="{Binding ScanLibraryCommand}" />
+				Severity="{x:Static components:ComponentSeverity.Warning}" Title="{x:Static properties:Resources.CellarOverviewViewLibraryScanNeedsAttention}"
+				Message="{x:Static properties:Resources.CellarOverviewViewTheLastSuccessfulScanIsStaleScan}"
+				ActionText="{x:Static properties:Resources.CellarOverviewViewScanLibrary}" ActionCommand="{Binding ScanLibraryCommand}" />
 			<components:AttentionBanner IsVisible="{Binding HasFailedJobs}"
-				Severity="{x:Static components:ComponentSeverity.Danger}" Title="Processing needs attention"
-				Message="{Binding FailedJobsText}" ActionText="View Processing" ActionCommand="{Binding OpenProcessingCommand}" />
+				Severity="{x:Static components:ComponentSeverity.Danger}" Title="{x:Static properties:Resources.CellarOverviewViewProcessingNeedsAttention}"
+				Message="{Binding FailedJobsText}" ActionText="{x:Static properties:Resources.TastingRoomOverviewViewViewProcessing}" ActionCommand="{Binding OpenProcessingCommand}" />
 
 			<StackPanel IsVisible="{Binding HasDashboardData}" Spacing="{DynamicResource Libation.Space.3}">
 				<Border Classes="card raised" Padding="0">
-					<UniformGrid x:Name="TastingMetrics" Columns="4" Rows="0">
+					<UniformGrid x:Name="TastingMetrics" Rows="0">
 						<components:MetricCard Classes="strip" IconData="{StaticResource glyph.library}"
-							Value="{Binding TotalTitlesText}" Label="Books in Library" DeltaText="{Binding AddedThisWeekDeltaText}"
-							CommandText="Open Library" Command="{Binding OpenLibraryCommand}" />
+							Value="{Binding TotalTitlesText}" Label="{x:Static properties:Resources.TastingRoomOverviewViewBooksInLibrary}" DeltaText="{Binding AddedThisWeekDeltaText}"
+							CommandText="{x:Static properties:Resources.CellarOverviewViewOpenLibrary}" Command="{Binding OpenLibraryCommand}" />
 						<components:MetricCard Classes="strip" IconData="{StaticResource glyph.downloads}"
-							Value="{Binding DownloadPendingText}" Label="Downloads" DeltaText="{Binding DownloadsDeltaText}"
+							Value="{Binding DownloadPendingText}" Label="{x:Static properties:Resources.RouteDownloadsLabel}" DeltaText="{Binding DownloadsDeltaText}"
 							Severity="{x:Static components:ComponentSeverity.Warning}"
-							CommandText="Download pending titles" Command="{Binding DownloadPendingCommand}" />
+							CommandText="{x:Static properties:Resources.CellarOverviewViewDownloadPendingTitles}" Command="{Binding DownloadPendingCommand}" />
 						<components:MetricCard Classes="strip" IconData="{StaticResource glyph.processing}"
-							Value="{Binding ProcessingText}" Label="Processing" DeltaText="{Binding ProcessingDeltaText}"
+							Value="{Binding ProcessingText}" Label="{x:Static properties:Resources.RouteProcessingLabel}" DeltaText="{Binding ProcessingDeltaText}"
 							Severity="{x:Static components:ComponentSeverity.Info}"
-							CommandText="Open Processing" Command="{Binding OpenProcessingCommand}" />
+							CommandText="{x:Static properties:Resources.CellarOverviewViewOpenProcessing}" Command="{Binding OpenProcessingCommand}" />
 						<components:MetricCard Classes="strip" IconData="{StaticResource glyph.completed}"
-							Value="{Binding CompletedText}" Label="Completed" DeltaText="{Binding CompletedDeltaText}"
+							Value="{Binding CompletedText}" Label="{x:Static properties:Resources.CellarOverviewViewCompleted}" DeltaText="{Binding CompletedDeltaText}"
 							Severity="{x:Static components:ComponentSeverity.Success}"
-							CommandText="Open Library" Command="{Binding OpenLibraryCommand}" />
+							CommandText="{x:Static properties:Resources.CellarOverviewViewOpenLibrary}" Command="{Binding OpenLibraryCommand}" />
 					</UniformGrid>
 				</Border>
 
 				<components:EmptyState IsVisible="{Binding ShowNoAccount}"
 					IllustrationTemplate="{StaticResource illustration.shared.account-connection}"
-					Title="Connect an Audible account"
-					Explanation="Add an account to scan the marketplaces where your audiobooks live."
-					PrimaryActionText="Add Account" PrimaryCommand="{Binding AddAccountCommand}" />
+					Title="{x:Static properties:Resources.CellarOverviewViewConnectAnAudibleAccount}"
+					Explanation="{x:Static properties:Resources.CellarOverviewViewAddAnAccountToScanTheMarketplaces}"
+					PrimaryActionText="{x:Static properties:Resources.CellarOverviewViewAddAccount}" PrimaryCommand="{Binding AddAccountCommand}" />
 				<components:EmptyState IsVisible="{Binding ShowNeedsScan}"
 					IllustrationTemplate="{StaticResource illustration.tasting-room.add-books}"
-					Title="Your cellar is ready"
-					Explanation="Scan your library to bring your titles into Libation."
-					PrimaryActionText="Scan Library" PrimaryCommand="{Binding ScanLibraryCommand}"
-					SecondaryActionText="Manage Accounts" SecondaryCommand="{Binding ManageAccountsCommand}" />
+					Title="{x:Static properties:Resources.CellarOverviewViewYourCellarIsReady}"
+					Explanation="{x:Static properties:Resources.CellarOverviewViewScanYourLibraryToBringYourTitles}"
+					PrimaryActionText="{x:Static properties:Resources.CellarOverviewViewScanLibrary}" PrimaryCommand="{Binding ScanLibraryCommand}"
+					SecondaryActionText="{x:Static properties:Resources.CellarOverviewViewManageAccounts}" SecondaryCommand="{Binding ManageAccountsCommand}" />
 				<components:EmptyState IsVisible="{Binding ShowScanningEmpty}"
 					IllustrationTemplate="{StaticResource illustration.shared.account-connection}"
-					Title="Scanning your library" Explanation="{Binding ScanStateText}" />
+					Title="{x:Static properties:Resources.CellarOverviewViewScanningYourLibrary}" Explanation="{Binding ScanStateText}" />
 
 				<DockPanel x:Name="TastingPrimaryRow" LastChildFill="True" IsVisible="{Binding HasLibrary}">
 					<ContentControl x:Name="DecanterSurfaceHost" />
@@ -200,16 +209,16 @@
 						<Grid RowDefinitions="Auto,*" RowSpacing="{DynamicResource Libation.Space.2}">
 							<Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource Libation.Space.2}">
 								<StackPanel>
-									<TextBlock Text="Current Flight" FontFamily="{DynamicResource Libation.Font.Display}"
+									<TextBlock Text="{x:Static properties:Resources.TastingRoomOverviewViewCurrentFlight}" FontFamily="{DynamicResource Libation.Font.Display}"
 										FontSize="{DynamicResource Libation.FontSize.Section}" />
-									<TextBlock Text="{Binding FlightCountText, StringFormat='A curated batch of {0}.'}"
+									<TextBlock Text="{Binding FlightCountText, StringFormat={x:Static properties:Resources.TastingRoomCuratedBatchFormat}}"
 										Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
 								</StackPanel>
-								<Button Grid.Column="1" Classes="contemporary quiet compact" Content="View Processing"
+								<Button Grid.Column="1" Classes="contemporary quiet compact" Content="{x:Static properties:Resources.TastingRoomOverviewViewViewProcessing}"
 									Command="{Binding OpenProcessingCommand}" />
 							</Grid>
 							<Grid Grid.Row="1">
-								<TextBlock IsVisible="{Binding HasNoFlight}" Text="Select titles in the Library to build a Current Flight."
+								<TextBlock IsVisible="{Binding HasNoFlight}" Text="{x:Static properties:Resources.TastingRoomOverviewViewSelectTitlesInTheLibraryToBuild}"
 									Foreground="{DynamicResource Libation.Brush.TextSecondary}" TextWrapping="Wrap" Margin="0,12" />
 								<ScrollViewer MaxHeight="280" VerticalScrollBarVisibility="Auto">
 									<ItemsControl IsVisible="{Binding HasFlight}" ItemsSource="{Binding CurrentFlightItems}"
@@ -222,10 +231,10 @@
 
 				<DockPanel x:Name="TastingLowerRow" LastChildFill="True" IsVisible="{Binding HasLibrary}">
 					<components:DropZone x:Name="TastingDropZone"
-						Title="Add books to your cellar"
-						Hint="Drag and drop audiobook files or folders, or choose them from this computer."
+						Title="{x:Static properties:Resources.TastingRoomOverviewViewAddBooksToYourCellar}"
+						Hint="{x:Static properties:Resources.TastingRoomOverviewViewDragAndDropAudiobookFilesOrFolders}"
 						AcceptedTypesText="{x:Static properties:Resources.SupportedAudiobookFileTypes}"
-						BrowseText="Browse Files" BrowseCommand="{Binding LocateAudiobooksCommand}"
+						BrowseText="{x:Static properties:Resources.TastingRoomOverviewViewBrowseFiles}" BrowseCommand="{Binding LocateAudiobooksCommand}"
 						DropCommand="{Binding DropAudiobooksCommand}">
 						<components:DropZone.IllustrationContent>
 							<Image Width="160" Height="112" Stretch="Uniform"
@@ -237,22 +246,22 @@
 						<Grid RowDefinitions="Auto,Auto,*" RowSpacing="{DynamicResource Libation.Space.2}">
 							<Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource Libation.Space.2}">
 								<StackPanel>
-									<TextBlock Text="From Your Cellar" FontFamily="{DynamicResource Libation.Font.Display}"
+									<TextBlock Text="{x:Static properties:Resources.TastingRoomOverviewViewFromYourCellar}" FontFamily="{DynamicResource Libation.Font.Display}"
 										FontSize="{DynamicResource Libation.FontSize.Section}" />
-									<TextBlock Text="Your ten most recent audiobooks."
+									<TextBlock Text="{x:Static properties:Resources.TastingRoomOverviewViewYourTenMostRecentAudiobooks}"
 										Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
 								</StackPanel>
-								<Button Grid.Column="1" Classes="contemporary quiet compact" Content="Open Library"
+								<Button Grid.Column="1" Classes="contemporary quiet compact" Content="{x:Static properties:Resources.CellarOverviewViewOpenLibrary}"
 									Command="{Binding OpenLibraryCommand}" />
 							</Grid>
 							<Grid Grid.Row="1" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{DynamicResource Libation.Space.2}">
 								<ComboBox Width="170" ItemsSource="{Binding LibraryScopes}"
 									SelectedItem="{Binding SelectedLibraryScope, Mode=TwoWay}"
-									AutomationProperties.Name="Recent Library scope" />
+									AutomationProperties.Name="{x:Static properties:Resources.TastingRoomOverviewViewRecentLibraryScope}" />
 								<TextBox Grid.Column="1" Classes="contemporary search" Text="{Binding SearchText, Mode=TwoWay}"
-									PlaceholderText="Search library" KeyDown="SearchBox_KeyDown"
-									AutomationProperties.Name="Search and open the Library" />
-								<Button Grid.Column="2" Classes="contemporary" Content="Search"
+									PlaceholderText="{x:Static properties:Resources.TastingRoomOverviewViewSearchLibrary}" KeyDown="SearchBox_KeyDown"
+									AutomationProperties.Name="{x:Static properties:Resources.TastingRoomOverviewViewSearchAndOpenTheLibrary}" />
+								<Button Grid.Column="2" Classes="contemporary" Content="{x:Static properties:Resources.TastingRoomOverviewViewSearch}"
 									Command="{Binding OpenFilteredLibraryCommand}" />
 							</Grid>
 							<Grid Grid.Row="2">
@@ -260,11 +269,11 @@
 									CornerRadius="{DynamicResource Libation.Radius.Small}" Padding="{DynamicResource Libation.Thickness.2}">
 									<Grid RowDefinitions="Auto,*" RowSpacing="{DynamicResource Libation.Space.1}">
 										<Grid ColumnDefinitions="44,2*,*,*,Auto,Auto" ColumnSpacing="{DynamicResource Libation.Space.2}">
-											<TextBlock Grid.Column="1" Text="Title" FontWeight="SemiBold" />
-											<TextBlock Grid.Column="2" Text="Author" FontWeight="SemiBold" />
-											<TextBlock Grid.Column="3" Text="Narrator" FontWeight="SemiBold" />
-											<TextBlock Grid.Column="4" Text="Length" FontWeight="SemiBold" />
-											<TextBlock Grid.Column="5" Text="Added" FontWeight="SemiBold" />
+											<TextBlock Grid.Column="1" Text="{x:Static properties:Resources.TastingRoomOverviewViewTitle}" FontWeight="SemiBold" />
+											<TextBlock Grid.Column="2" Text="{x:Static properties:Resources.TastingRoomOverviewViewAuthor}" FontWeight="SemiBold" />
+											<TextBlock Grid.Column="3" Text="{x:Static properties:Resources.TastingRoomOverviewViewNarrator}" FontWeight="SemiBold" />
+											<TextBlock Grid.Column="4" Text="{x:Static properties:Resources.TastingRoomOverviewViewLength}" FontWeight="SemiBold" />
+											<TextBlock Grid.Column="5" Text="{x:Static properties:Resources.TastingRoomOverviewViewAdded}" FontWeight="SemiBold" />
 										</Grid>
 										<ScrollViewer Grid.Row="1" MaxHeight="350" VerticalScrollBarVisibility="Auto">
 											<ItemsControl ItemsSource="{Binding TastingLibraryItems}"
@@ -272,7 +281,7 @@
 										</ScrollViewer>
 									</Grid>
 								</Border>
-								<ItemsControl x:Name="RecentCompactList" IsVisible="False"
+								<ItemsControl x:Name="RecentCompactList"
 									ItemsSource="{Binding TastingLibraryItems}"
 									ItemTemplate="{StaticResource TastingRecentCompactRow}" />
 							</Grid>
@@ -286,7 +295,7 @@
 							TextOverride="{Binding AccountHealthText}" AccessibleName="{Binding AccountHealthText}" />
 						<components:StatusBadge Margin="0,0,12,0" Status="{Binding ScanStatus}"
 							TextOverride="{Binding ScanStateText}" AccessibleName="{Binding ScanStateText}" />
-						<Button Classes="contemporary quiet compact" Content="Scan Library" Command="{Binding ScanLibraryCommand}" />
+						<Button Classes="contemporary quiet compact" Content="{x:Static properties:Resources.CellarOverviewViewScanLibrary}" Command="{Binding ScanLibraryCommand}" />
 					</WrapPanel>
 				</Border>
 			</StackPanel>

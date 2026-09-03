@@ -45,18 +45,18 @@ public sealed class TrashViewModel : SecondaryDestinationViewModel, IRoutePresen
 		RefreshCommand = Track(ReactiveCommand.CreateFromTask(RefreshAsync));
 		RestoreSelectedCommand = CreateOwnerCommand(
 			RestoreSelectedAsync,
-			"restore selected Trash titles",
-			"Libation could not restore the selected titles. Their existing Trash state remains authoritative.");
+			global::LibationAvalonia.Properties.Resources.TrashViewModelRestoreSelectedTrashTitles,
+			global::LibationAvalonia.Properties.Resources.TrashViewModelLibationCouldNotRestoreTheSelectedTitles);
 		PermanentlyDeleteSelectedCommand = CreateOwnerCommand(
 			PermanentlyDeleteSelectedAsync,
-			"permanently delete selected Trash records",
-			"Libation could not permanently delete the selected records. Review Trash before trying again.");
+			global::LibationAvalonia.Properties.Resources.TrashViewModelPermanentlyDeleteSelectedTrashRecords,
+			global::LibationAvalonia.Properties.Resources.TrashViewModelLibationCouldNotPermanentlyDeleteTheSelected);
 		main.PropertyChanged += Main_PropertyChanged;
 	}
 
 	public int Count => hasLoaded ? allItems.Count(item => item.CanSelect) : main.BooksInTrash;
 	public bool HasItems => Count > 0;
-	public string CountText => Count == 1 ? "1 title in Trash" : $"{Count.ToString("N0", CultureInfo.CurrentCulture)} titles in Trash";
+	public string CountText => Count == 1 ? global::LibationAvalonia.Properties.Resources.TrashViewModel1TitleInTrash : string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.TrashViewModel0TitlesInTrash, Count.ToString("N0", CultureInfo.CurrentCulture));
 	public LibationStatusKind Status => HasItems ? LibationStatusKind.NeedsAttention : LibationStatusKind.Completed;
 	public string SearchText
 	{
@@ -75,23 +75,23 @@ public sealed class TrashViewModel : SecondaryDestinationViewModel, IRoutePresen
 	public int SelectedCount => allItems.Count(item => item.CanSelect && item.IsSelected);
 	public bool HasSelection => SelectedCount > 0;
 	public string SelectedCountText => SelectedCount == 1
-		? "1 removed title selected"
-		: $"{SelectedCount.ToString("N0", CultureInfo.CurrentCulture)} removed titles selected";
-	public string RestoreActionAccessibleName => SelectedCount == 1 ? "Restore 1 selected title" : $"Restore {SelectedCount} selected titles";
+		? global::LibationAvalonia.Properties.Resources.TrashViewModel1RemovedTitleSelected
+		: string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.TrashViewModel0RemovedTitlesSelected, SelectedCount.ToString("N0", CultureInfo.CurrentCulture));
+	public string RestoreActionAccessibleName => SelectedCount == 1 ? global::LibationAvalonia.Properties.Resources.TrashViewModelRestore1SelectedTitle : string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.TrashViewModelRestore0SelectedTitles, SelectedCount);
 	public string DeleteActionAccessibleName => SelectedCount == 1
-		? "Permanently delete 1 selected Libation record"
-		: $"Permanently delete {SelectedCount} selected Libation records";
+		? global::LibationAvalonia.Properties.Resources.TrashViewModelPermanentlyDelete1SelectedLibationRecord
+		: string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.TrashViewModelPermanentlyDelete0SelectedLibationRecords, SelectedCount);
 	public string ResultSummary => string.IsNullOrWhiteSpace(SearchText)
 		? $"{CountText}; {SelectedCountText}"
-		: $"{VisibleItems.Count.ToString("N0", CultureInfo.CurrentCulture)} rows match the current search; {SelectedCountText}";
+		: string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.TrashViewModel0RowsMatchTheCurrentSearch1, VisibleItems.Count.ToString("N0", CultureInfo.CurrentCulture), SelectedCountText);
 	public string? LastActionText { get => field; private set => this.RaiseAndSetIfChanged(ref field, value); }
 	public ICommand RefreshCommand { get; }
 	public ICommand RestoreSelectedCommand { get; }
 	public ICommand PermanentlyDeleteSelectedCommand { get; }
-	public string RouteEyebrow => "Removed library records";
-	public string RouteTitle => "Trash";
-	public string RouteSubtitle => "Review titles hidden from the Library before restoring or permanently deleting records.";
-	public RouteCommandPresentation RoutePrimaryCommand => new("Refresh Trash", RefreshCommand);
+	public string RouteEyebrow => global::LibationAvalonia.Properties.Resources.TrashViewRemovedLibraryRecords;
+	public string RouteTitle => global::LibationAvalonia.Properties.Resources.RouteTrashLabel;
+	public string RouteSubtitle => global::LibationAvalonia.Properties.Resources.TrashViewModelReviewTitlesHiddenFromTheLibraryBefore;
+	public RouteCommandPresentation RoutePrimaryCommand => new(global::LibationAvalonia.Properties.Resources.TrashViewRefreshTrash, RefreshCommand);
 	public IReadOnlyList<RouteCommandPresentation> RouteSecondaryCommands => [];
 	public RouteStatusPresentation RouteStatusBadge => new(CountText, Status);
 
@@ -112,8 +112,8 @@ public sealed class TrashViewModel : SecondaryDestinationViewModel, IRoutePresen
 
 	public Task RefreshAsync() => RunOwnerActionAsync(
 		RefreshCoreAsync,
-		"refresh Trash",
-		"Libation could not load Trash. No library records were changed.");
+		global::LibationAvalonia.Properties.Resources.TrashViewModelRefreshTrash,
+		global::LibationAvalonia.Properties.Resources.TrashViewModelLibationCouldNotLoadTrashNoLibrary);
 
 	private async Task RefreshCoreAsync()
 	{
@@ -149,7 +149,7 @@ public sealed class TrashViewModel : SecondaryDestinationViewModel, IRoutePresen
 		if (selected.Length == 0)
 			return;
 		int changed = await commands.RestoreTrashBooksAsync(selected);
-		LastActionText = changed == 1 ? "Restored 1 title to the Library." : changed > 1 ? $"Restored {changed} titles to the Library." : "No Trash records changed.";
+		LastActionText = changed == 1 ? global::LibationAvalonia.Properties.Resources.TrashViewModelRestored1TitleToTheLibrary : changed > 1 ? string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.TrashViewModelRestored0TitlesToTheLibrary, changed) : global::LibationAvalonia.Properties.Resources.TrashViewModelNoTrashRecordsChanged;
 		if (changed > 0)
 			await RefreshCoreAsync();
 	}
@@ -161,10 +161,10 @@ public sealed class TrashViewModel : SecondaryDestinationViewModel, IRoutePresen
 			return;
 		int changed = await commands.PermanentlyDeleteTrashBooksConfirmedAsync(selected);
 		LastActionText = changed == 1
-			? "Permanently deleted 1 record from Libation. Audiobook files were left untouched."
+			? global::LibationAvalonia.Properties.Resources.TrashViewModelPermanentlyDeleted1RecordFromLibationAudiobook
 			: changed > 1
-				? $"Permanently deleted {changed} records from Libation. Audiobook files were left untouched."
-				: "No Trash records changed.";
+				? string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.TrashViewModelPermanentlyDeleted0RecordsFromLibationAudiobook, changed)
+				: global::LibationAvalonia.Properties.Resources.TrashViewModelNoTrashRecordsChanged;
 		if (changed > 0)
 			await RefreshCoreAsync();
 	}

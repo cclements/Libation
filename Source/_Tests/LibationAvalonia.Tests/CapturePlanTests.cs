@@ -42,6 +42,28 @@ public class CapturePlanTests
 	}
 
 	[TestMethod]
+	public void Parse_HonorsMotionAndLogicalScale()
+	{
+		var plan = CapturePlan.Parse("""
+			{"entries":[{"profile":"Cellar","route":"Library","width":1456,"height":1060,"motion":"Reduce","logicalScale":2}]}
+			""");
+
+		Assert.AreEqual(ReducedMotionPreference.Reduce, plan.Entries[0].Motion);
+		Assert.AreEqual(2d, plan.Entries[0].LogicalScale);
+	}
+
+	[TestMethod]
+	public void Parse_RejectsInvalidLogicalScale()
+	{
+		Assert.ThrowsExactly<CapturePlanException>(() => CapturePlan.Parse("""
+			{"entries":[{"profile":"Cellar","route":"Library","width":1456,"height":1060,"logicalScale":0}]}
+			"""));
+		Assert.ThrowsExactly<CapturePlanException>(() => CapturePlan.Parse("""
+			{"entries":[{"profile":"Cellar","route":"Library","width":1456,"height":1060,"logicalScale":-1}]}
+			"""));
+	}
+
+	[TestMethod]
 	public void Parse_ComponentGalleryDefaultsRouteAndFileName()
 	{
 		var plan = CapturePlan.Parse("""

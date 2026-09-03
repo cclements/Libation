@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -411,5 +411,2329 @@
   </data>
   <data name="ComponentGalleryWindowTitle" xml:space="preserve">
     <value>Libation Component Gallery</value>
+  </data>
+  <data name="AccountsViewMarketplaces" xml:space="preserve">
+    <value>Marketplaces</value>
+  </data>
+  <data name="AccountsViewTitles" xml:space="preserve">
+    <value>Titles</value>
+  </data>
+  <data name="AccountsViewScanning" xml:space="preserve">
+    <value>Scanning</value>
+  </data>
+  <data name="AccountsViewScanNow" xml:space="preserve">
+    <value>Scan now</value>
+  </data>
+  <data name="AccountsViewEditMarketplaces" xml:space="preserve">
+    <value>Edit marketplaces</value>
+  </data>
+  <data name="AccountsViewReauthenticate" xml:space="preserve">
+    <value>Reauthenticate</value>
+  </data>
+  <data name="AccountsViewRemove" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="AccountsViewAccountsUnavailable" xml:space="preserve">
+    <value>Accounts unavailable</value>
+  </data>
+  <data name="AccountsViewCopyTechnicalDetails" xml:space="preserve">
+    <value>Copy technical details</value>
+  </data>
+  <data name="AccountsViewConfiguredAccounts" xml:space="preserve">
+    <value>Configured accounts</value>
+  </data>
+  <data name="AccountsViewAddAccount" xml:space="preserve">
+    <value>Add account</value>
+  </data>
+  <data name="DownloadsViewLocate" xml:space="preserve">
+    <value>Locate</value>
+  </data>
+  <data name="DownloadsViewDownloadActionUnavailable" xml:space="preserve">
+    <value>Download action unavailable</value>
+  </data>
+  <data name="DownloadsViewLoadingPerTitleDownloadState" xml:space="preserve">
+    <value>Loading per-title download state…</value>
+  </data>
+  <data name="DownloadsViewLoadingPerTitleDownloadState2" xml:space="preserve">
+    <value>Loading per-title download state</value>
+  </data>
+  <data name="DownloadsViewNoCataloguedTitlesYet" xml:space="preserve">
+    <value>No catalogued titles yet</value>
+  </data>
+  <data name="DownloadsViewRefresh" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="DownloadsViewDownloadsGroupedByTitle" xml:space="preserve">
+    <value>Downloads grouped by title</value>
+  </data>
+  <data name="CurrentFlightViewDragToReorderCurrentFlight" xml:space="preserve">
+    <value>Drag to reorder Current Flight</value>
+  </data>
+  <data name="CurrentFlightViewDragHandleForCurrentFlightTitle" xml:space="preserve">
+    <value>Drag handle for Current Flight title</value>
+  </data>
+  <data name="CurrentFlightViewRemoveTitleFromCurrentFlight" xml:space="preserve">
+    <value>Remove title from Current Flight</value>
+  </data>
+  <data name="CurrentFlightViewOutputProfile" xml:space="preserve">
+    <value>Output profile</value>
+  </data>
+  <data name="CurrentFlightViewInspectPreflight" xml:space="preserve">
+    <value>Inspect preflight</value>
+  </data>
+  <data name="CurrentFlightViewExportMetadata" xml:space="preserve">
+    <value>Export metadata</value>
+  </data>
+  <data name="CurrentFlightViewAddTags" xml:space="preserve">
+    <value>Add tags</value>
+  </data>
+  <data name="CurrentFlightViewReplaceTags" xml:space="preserve">
+    <value>Replace tags</value>
+  </data>
+  <data name="HistoryViewHistoryUnavailable" xml:space="preserve">
+    <value>History unavailable</value>
+  </data>
+  <data name="HistoryViewFromDate" xml:space="preserve">
+    <value>From date</value>
+  </data>
+  <data name="HistoryViewHistoryFromDate" xml:space="preserve">
+    <value>History from date</value>
+  </data>
+  <data name="HistoryViewToDate" xml:space="preserve">
+    <value>To date</value>
+  </data>
+  <data name="HistoryViewHistoryToDate" xml:space="preserve">
+    <value>History to date</value>
+  </data>
+  <data name="HistoryViewAction" xml:space="preserve">
+    <value>Action</value>
+  </data>
+  <data name="HistoryViewFilterHistoryByAction" xml:space="preserve">
+    <value>Filter History by action</value>
+  </data>
+  <data name="HistoryViewResult" xml:space="preserve">
+    <value>Result</value>
+  </data>
+  <data name="HistoryViewFilterHistoryByResult" xml:space="preserve">
+    <value>Filter History by result</value>
+  </data>
+  <data name="HistoryViewSearchDateTitleActionResultOrRecorded" xml:space="preserve">
+    <value>Search date, title, action, result, or recorded detail</value>
+  </data>
+  <data name="HistoryViewSearchAvailableHistory" xml:space="preserve">
+    <value>Search available history</value>
+  </data>
+  <data name="HistoryViewClearFilters" xml:space="preserve">
+    <value>Clear filters</value>
+  </data>
+  <data name="HistoryViewLoadingAvailableHistory" xml:space="preserve">
+    <value>Loading available history…</value>
+  </data>
+  <data name="HistoryViewLoadingAvailableHistory2" xml:space="preserve">
+    <value>Loading available history</value>
+  </data>
+  <data name="HistoryViewNoRecordedOutcomesMatch" xml:space="preserve">
+    <value>No recorded outcomes match</value>
+  </data>
+  <data name="HistoryViewAdjustOrClearTheFiltersOrReturn" xml:space="preserve">
+    <value>Adjust or clear the filters, or return after Libation records another available outcome.</value>
+  </data>
+  <data name="HistoryViewAvailableHistoryOutcomes" xml:space="preserve">
+    <value>Available history outcomes</value>
+  </data>
+  <data name="BookDetailsPaneSelectedBookDetails" xml:space="preserve">
+    <value>Selected book details</value>
+  </data>
+  <data name="BookDetailsPaneBookDetails" xml:space="preserve">
+    <value>Book details</value>
+  </data>
+  <data name="BookDetailsPaneCloseDetails" xml:space="preserve">
+    <value>Close details</value>
+  </data>
+  <data name="BookDetailsPaneMetadata" xml:space="preserve">
+    <value>Metadata</value>
+  </data>
+  <data name="BookDetailsPaneLocalState" xml:space="preserve">
+    <value>Local state</value>
+  </data>
+  <data name="BookDetailsPaneOutputPath" xml:space="preserve">
+    <value>Output path</value>
+  </data>
+  <data name="BookDetailsPaneActions" xml:space="preserve">
+    <value>Actions</value>
+  </data>
+  <data name="BookDetailsPaneProcess" xml:space="preserve">
+    <value>Process</value>
+  </data>
+  <data name="BookDetailsPaneDownload" xml:space="preserve">
+    <value>Download</value>
+  </data>
+  <data name="BookDetailsPaneReveal" xml:space="preserve">
+    <value>Reveal</value>
+  </data>
+  <data name="BookDetailsPaneEditTags" xml:space="preserve">
+    <value>Edit tags</value>
+  </data>
+  <data name="BookDetailsPaneViewSeries" xml:space="preserve">
+    <value>View series</value>
+  </data>
+  <data name="BookDetailsPaneDescription" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="GalleryBookCardUseArrowKeysToMoveSpaceTo" xml:space="preserve">
+    <value>Use arrow keys to move, Space to select, Enter to open details, and Shift+F10 for book actions.</value>
+  </data>
+  <data name="GalleryBookCardAddOrRemoveTitleFromCurrentFlight" xml:space="preserve">
+    <value>Add or remove title from Current Flight</value>
+  </data>
+  <data name="GalleryBookCardThisCheckboxChangesOnlyThisTitleAnd" xml:space="preserve">
+    <value>This checkbox changes only this title and preserves the rest of Current Flight.</value>
+  </data>
+  <data name="LibraryGalleryViewLibraryGallery" xml:space="preserve">
+    <value>Library Gallery</value>
+  </data>
+  <data name="LibraryViewSearchTitlesAuthorsNarratorsSeriesTagsOr" xml:space="preserve">
+    <value>Search titles, authors, narrators, series, tags, or use a filter expression</value>
+  </data>
+  <data name="LibraryViewSearchAndFilterTheLibrary" xml:space="preserve">
+    <value>Search and filter the Library</value>
+  </data>
+  <data name="LibraryViewClear" xml:space="preserve">
+    <value>Clear</value>
+  </data>
+  <data name="LibraryViewClearLibrarySearch" xml:space="preserve">
+    <value>Clear Library search</value>
+  </data>
+  <data name="LibraryViewQuickFilters" xml:space="preserve">
+    <value>Quick filters</value>
+  </data>
+  <data name="LibraryViewFilterHelp" xml:space="preserve">
+    <value>Filter help</value>
+  </data>
+  <data name="LibraryViewSortLibrary" xml:space="preserve">
+    <value>Sort Library</value>
+  </data>
+  <data name="LibraryViewDetails" xml:space="preserve">
+    <value>Details</value>
+  </data>
+  <data name="LibraryViewGallery" xml:space="preserve">
+    <value>Gallery</value>
+  </data>
+  <data name="LibraryViewColumns" xml:space="preserve">
+    <value>Columns</value>
+  </data>
+  <data name="LibraryViewScan" xml:space="preserve">
+    <value>Scan</value>
+  </data>
+  <data name="LibraryViewAddBooks" xml:space="preserve">
+    <value>Add books</value>
+  </data>
+  <data name="LibraryViewProcessSelected" xml:space="preserve">
+    <value>Process selected</value>
+  </data>
+  <data name="LibraryViewLoadingLibrary" xml:space="preserve">
+    <value>Loading Library</value>
+  </data>
+  <data name="LibraryViewLoadingYourLibrary" xml:space="preserve">
+    <value>Loading your Library…</value>
+  </data>
+  <data name="LibraryViewNoLibraryResults" xml:space="preserve">
+    <value>No Library results</value>
+  </data>
+  <data name="LibraryViewClearSearch" xml:space="preserve">
+    <value>Clear search</value>
+  </data>
+  <data name="OnboardingViewWelcomeToLibation" xml:space="preserve">
+    <value>Welcome to Libation</value>
+  </data>
+  <data name="OnboardingViewOnboardingProgress" xml:space="preserve">
+    <value>Onboarding progress</value>
+  </data>
+  <data name="OnboardingViewSetupActionUnavailable" xml:space="preserve">
+    <value>Setup action unavailable</value>
+  </data>
+  <data name="OnboardingViewChooseAProfileBeforeContinuing" xml:space="preserve">
+    <value>Choose a profile before continuing</value>
+  </data>
+  <data name="OnboardingViewFollowSystem" xml:space="preserve">
+    <value>Follow System</value>
+  </data>
+  <data name="OnboardingViewUsesTheOperatingSystemAppearanceWhileKeeping" xml:space="preserve">
+    <value>Uses the operating system appearance while keeping Libation’s contemporary structure.</value>
+  </data>
+  <data name="OnboardingViewChooseFollowSystem" xml:space="preserve">
+    <value>Choose Follow System</value>
+  </data>
+  <data name="OnboardingViewCellar" xml:space="preserve">
+    <value>Cellar</value>
+  </data>
+  <data name="OnboardingViewWarmQuietCollectionFirstPresentationForFocused" xml:space="preserve">
+    <value>Warm, quiet, collection-first presentation for focused library stewardship.</value>
+  </data>
+  <data name="OnboardingViewChooseCellar" xml:space="preserve">
+    <value>Choose Cellar</value>
+  </data>
+  <data name="OnboardingViewTastingRoom" xml:space="preserve">
+    <value>Tasting Room</value>
+  </data>
+  <data name="OnboardingViewABrighterEditorialPresentationWithTheSame" xml:space="preserve">
+    <value>A brighter, editorial presentation with the same underlying library and commands.</value>
+  </data>
+  <data name="OnboardingViewChooseTastingRoom" xml:space="preserve">
+    <value>Choose Tasting Room</value>
+  </data>
+  <data name="OnboardingViewCurrentLibationInterface" xml:space="preserve">
+    <value>Current Libation interface</value>
+  </data>
+  <data name="OnboardingViewKeepsTheCurrentLibationDesktopInterfaceThis" xml:space="preserve">
+    <value>Keeps the current Libation desktop interface. This is distinct from the separately shipped Libation-Classic app.</value>
+  </data>
+  <data name="OnboardingViewKeepCurrentInterface" xml:space="preserve">
+    <value>Keep current interface</value>
+  </data>
+  <data name="OnboardingViewHighContrast" xml:space="preserve">
+    <value>High Contrast</value>
+  </data>
+  <data name="OnboardingViewChooseHighContrast" xml:space="preserve">
+    <value>Choose High Contrast</value>
+  </data>
+  <data name="OnboardingViewAccountsStayPrivate" xml:space="preserve">
+    <value>Accounts stay private</value>
+  </data>
+  <data name="OnboardingViewManageAccounts" xml:space="preserve">
+    <value>Manage accounts</value>
+  </data>
+  <data name="OnboardingViewKeepOriginalsAndConvertedFilesWhereYou" xml:space="preserve">
+    <value>Keep originals and converted files where you expect</value>
+  </data>
+  <data name="OnboardingViewOpenSettings" xml:space="preserve">
+    <value>Open Settings</value>
+  </data>
+  <data name="OnboardingViewLocateExistingFiles" xml:space="preserve">
+    <value>Locate existing files</value>
+  </data>
+  <data name="OnboardingViewBringYourLibraryIntoView" xml:space="preserve">
+    <value>Bring your library into view</value>
+  </data>
+  <data name="OnboardingViewScanAllAccounts" xml:space="preserve">
+    <value>Scan all accounts</value>
+  </data>
+  <data name="OnboardingViewStartsTheExistingNonblockingAccountScanYou" xml:space="preserve">
+    <value>Starts the existing nonblocking account scan. You can continue setup while it runs.</value>
+  </data>
+  <data name="OnboardingViewCurrentFlightStaysIntentional" xml:space="preserve">
+    <value>Current Flight stays intentional</value>
+  </data>
+  <data name="OnboardingViewAddTheThreeNewestEligibleTitlesTo" xml:space="preserve">
+    <value>Add the three newest eligible titles to Current Flight and open Library</value>
+  </data>
+  <data name="OnboardingViewYouRemainInControl" xml:space="preserve">
+    <value>You remain in control</value>
+  </data>
+  <data name="OnboardingViewChooseTheFirstFlightActionToAdd" xml:space="preserve">
+    <value>Choose the first-Flight action to add titles, or finish without adding titles. Neither choice starts a download or changes audiobook files.</value>
+  </data>
+  <data name="OnboardingViewBack" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="ProfileChoicePreviewLibraryRowPreview" xml:space="preserve">
+    <value>Library row preview</value>
+  </data>
+  <data name="ProfileChoicePreviewSemanticTypeSpacingStatusAndProgress" xml:space="preserve">
+    <value>Semantic type, spacing, status, and progress</value>
+  </data>
+  <data name="CellarOverviewViewLoadingYourLibraryOverview" xml:space="preserve">
+    <value>Loading your library overview…</value>
+  </data>
+  <data name="CellarOverviewViewLoadingLibraryOverview" xml:space="preserve">
+    <value>Loading library overview</value>
+  </data>
+  <data name="CellarOverviewViewOverviewUnavailable" xml:space="preserve">
+    <value>Overview unavailable</value>
+  </data>
+  <data name="CellarOverviewViewOffline" xml:space="preserve">
+    <value>Offline</value>
+  </data>
+  <data name="CellarOverviewViewYourLocalLibraryRemainsAvailableButAccount" xml:space="preserve">
+    <value>Your local library remains available, but account and update status cannot be confirmed.</value>
+  </data>
+  <data name="CellarOverviewViewLibraryScanNeedsAttention" xml:space="preserve">
+    <value>Library scan needs attention</value>
+  </data>
+  <data name="CellarOverviewViewTheLastSuccessfulScanIsStaleScan" xml:space="preserve">
+    <value>The last successful scan is stale. Scan the library to refresh title availability.</value>
+  </data>
+  <data name="CellarOverviewViewScanLibrary" xml:space="preserve">
+    <value>Scan Library</value>
+  </data>
+  <data name="CellarOverviewViewProcessingNeedsAttention" xml:space="preserve">
+    <value>Processing needs attention</value>
+  </data>
+  <data name="CellarOverviewViewOpenProcessing" xml:space="preserve">
+    <value>Open Processing</value>
+  </data>
+  <data name="CellarOverviewViewSearchTitlesAuthorsNarratorsOrTags" xml:space="preserve">
+    <value>Search titles, authors, narrators, or tags</value>
+  </data>
+  <data name="CellarOverviewViewSearchTheCellarLibrary" xml:space="preserve">
+    <value>Search the Cellar library</value>
+  </data>
+  <data name="CellarOverviewViewFilter" xml:space="preserve">
+    <value>Filter</value>
+  </data>
+  <data name="CellarOverviewViewOpenLibraryFilterHelp" xml:space="preserve">
+    <value>Open Library filter help</value>
+  </data>
+  <data name="CellarOverviewViewPreferredLibraryView" xml:space="preserve">
+    <value>Preferred Library view</value>
+  </data>
+  <data name="CellarOverviewViewOpenLibrary" xml:space="preserve">
+    <value>Open Library</value>
+  </data>
+  <data name="CellarOverviewViewCompleted" xml:space="preserve">
+    <value>Completed</value>
+  </data>
+  <data name="CellarOverviewViewDownloadPending" xml:space="preserve">
+    <value>Download Pending</value>
+  </data>
+  <data name="CellarOverviewViewDownloadPendingTitles" xml:space="preserve">
+    <value>Download pending titles</value>
+  </data>
+  <data name="CellarOverviewViewInProgress" xml:space="preserve">
+    <value>In Progress</value>
+  </data>
+  <data name="CellarOverviewViewTotalSize" xml:space="preserve">
+    <value>Total Size</value>
+  </data>
+  <data name="CellarOverviewViewConnectAnAudibleAccount" xml:space="preserve">
+    <value>Connect an Audible account</value>
+  </data>
+  <data name="CellarOverviewViewAddAnAccountToScanTheMarketplaces" xml:space="preserve">
+    <value>Add an account to scan the marketplaces where your audiobooks live.</value>
+  </data>
+  <data name="CellarOverviewViewAddAccount" xml:space="preserve">
+    <value>Add Account</value>
+  </data>
+  <data name="CellarOverviewViewYourCellarIsReady" xml:space="preserve">
+    <value>Your cellar is ready</value>
+  </data>
+  <data name="CellarOverviewViewScanYourLibraryToBringYourTitles" xml:space="preserve">
+    <value>Scan your library to bring your titles into Libation.</value>
+  </data>
+  <data name="CellarOverviewViewManageAccounts" xml:space="preserve">
+    <value>Manage Accounts</value>
+  </data>
+  <data name="CellarOverviewViewScanningYourLibrary" xml:space="preserve">
+    <value>Scanning your library</value>
+  </data>
+  <data name="CellarOverviewViewYourLibrary" xml:space="preserve">
+    <value>Your Library</value>
+  </data>
+  <data name="CellarOverviewViewSortTheCellarGallery" xml:space="preserve">
+    <value>Sort the Cellar gallery</value>
+  </data>
+  <data name="CellarOverviewViewSelectVisible" xml:space="preserve">
+    <value>Select visible</value>
+  </data>
+  <data name="TastingRoomOverviewViewTitleProcessingProgress" xml:space="preserve">
+    <value>Title processing progress</value>
+  </data>
+  <data name="TastingRoomOverviewViewLoadingTodaySSelection" xml:space="preserve">
+    <value>Loading today’s selection…</value>
+  </data>
+  <data name="TastingRoomOverviewViewLoadingTodaySSelection2" xml:space="preserve">
+    <value>Loading today’s selection</value>
+  </data>
+  <data name="TastingRoomOverviewViewViewProcessing" xml:space="preserve">
+    <value>View Processing</value>
+  </data>
+  <data name="TastingRoomOverviewViewBooksInLibrary" xml:space="preserve">
+    <value>Books in Library</value>
+  </data>
+  <data name="TastingRoomOverviewViewCurrentFlight" xml:space="preserve">
+    <value>Current Flight</value>
+  </data>
+  <data name="TastingRoomOverviewViewSelectTitlesInTheLibraryToBuild" xml:space="preserve">
+    <value>Select titles in the Library to build a Current Flight.</value>
+  </data>
+  <data name="TastingRoomOverviewViewAddBooksToYourCellar" xml:space="preserve">
+    <value>Add books to your cellar</value>
+  </data>
+  <data name="TastingRoomOverviewViewDragAndDropAudiobookFilesOrFolders" xml:space="preserve">
+    <value>Drag and drop audiobook files or folders, or choose them from this computer.</value>
+  </data>
+  <data name="TastingRoomOverviewViewBrowseFiles" xml:space="preserve">
+    <value>Browse Files</value>
+  </data>
+  <data name="TastingRoomOverviewViewFromYourCellar" xml:space="preserve">
+    <value>From Your Cellar</value>
+  </data>
+  <data name="TastingRoomOverviewViewYourTenMostRecentAudiobooks" xml:space="preserve">
+    <value>Your ten most recent audiobooks.</value>
+  </data>
+  <data name="TastingRoomOverviewViewRecentLibraryScope" xml:space="preserve">
+    <value>Recent Library scope</value>
+  </data>
+  <data name="TastingRoomOverviewViewSearchLibrary" xml:space="preserve">
+    <value>Search library</value>
+  </data>
+  <data name="TastingRoomOverviewViewSearchAndOpenTheLibrary" xml:space="preserve">
+    <value>Search and open the Library</value>
+  </data>
+  <data name="TastingRoomOverviewViewSearch" xml:space="preserve">
+    <value>Search</value>
+  </data>
+  <data name="TastingRoomOverviewViewTitle" xml:space="preserve">
+    <value>Title</value>
+  </data>
+  <data name="TastingRoomOverviewViewAuthor" xml:space="preserve">
+    <value>Author</value>
+  </data>
+  <data name="TastingRoomOverviewViewNarrator" xml:space="preserve">
+    <value>Narrator</value>
+  </data>
+  <data name="TastingRoomOverviewViewLength" xml:space="preserve">
+    <value>Length</value>
+  </data>
+  <data name="TastingRoomOverviewViewAdded" xml:space="preserve">
+    <value>Added</value>
+  </data>
+  <data name="ProcessingViewActive" xml:space="preserve">
+    <value>Active</value>
+  </data>
+  <data name="ProcessingViewWaiting" xml:space="preserve">
+    <value>Waiting</value>
+  </data>
+  <data name="ProcessingViewFailed" xml:space="preserve">
+    <value>Failed</value>
+  </data>
+  <data name="ProcessingViewOverallProgress" xml:space="preserve">
+    <value>Overall progress</value>
+  </data>
+  <data name="ProcessingViewOverallQueueProgress" xml:space="preserve">
+    <value>Overall queue progress</value>
+  </data>
+  <data name="ProcessingViewRunningTime" xml:space="preserve">
+    <value>Running time</value>
+  </data>
+  <data name="ProcessingViewQueueLog" xml:space="preserve">
+    <value>Queue log</value>
+  </data>
+  <data name="ProcessingViewAtOnce" xml:space="preserve">
+    <value>At once</value>
+  </data>
+  <data name="ProcessingViewHowManyBooksToDownloadAndDecrypt" xml:space="preserve">
+    <value>How many books to download and decrypt at the same time.</value>
+  </data>
+  <data name="ProcessingViewDownloadLimit" xml:space="preserve">
+    <value>Download limit</value>
+  </data>
+  <data name="ProcessingViewAutoScroll" xml:space="preserve">
+    <value>Auto-scroll</value>
+  </data>
+  <data name="ProcessingViewKeepNewlyActiveTitlesInViewWhen" xml:space="preserve">
+    <value>Keep newly active titles in view when you are already following the queue.</value>
+  </data>
+  <data name="ProcessingViewTheDecanterIsResting" xml:space="preserve">
+    <value>The Decanter is resting</value>
+  </data>
+  <data name="ProcessingViewQueueATitleFromTheLibraryWhen" xml:space="preserve">
+    <value>Queue a title from the Library when you are ready to prepare it.</value>
+  </data>
+  <data name="ProcessingViewCopyLog" xml:space="preserve">
+    <value>Copy log</value>
+  </data>
+  <data name="ProcessingViewClearLog" xml:space="preserve">
+    <value>Clear log</value>
+  </data>
+  <data name="ProcessingViewTimestamp" xml:space="preserve">
+    <value>Timestamp</value>
+  </data>
+  <data name="ProcessingViewMessage" xml:space="preserve">
+    <value>Message</value>
+  </data>
+  <data name="AppearanceProfilePreviewProfileColorTypeSpacingStatusAndProgress" xml:space="preserve">
+    <value>Profile color, type, spacing, status, and progress</value>
+  </data>
+  <data name="SettingsViewSettingsActionUnavailable" xml:space="preserve">
+    <value>Settings action unavailable</value>
+  </data>
+  <data name="SettingsViewAppearance" xml:space="preserve">
+    <value>Appearance</value>
+  </data>
+  <data name="SettingsViewAFocusedDarkWorkspaceWithTheCellar" xml:space="preserve">
+    <value>A focused dark workspace with the Cellar dashboard and Decanter dock.</value>
+  </data>
+  <data name="SettingsViewABrightEditorialWorkspaceWithTheTasting" xml:space="preserve">
+    <value>A bright editorial workspace with the Tasting Room dashboard.</value>
+  </data>
+  <data name="SettingsViewUseHighContrast" xml:space="preserve">
+    <value>Use High Contrast</value>
+  </data>
+  <data name="SettingsViewHighContrastIsAnExclusiveProfileTurning" xml:space="preserve">
+    <value>High Contrast is an exclusive profile. Turning it off returns to the profile selected in this draft.</value>
+  </data>
+  <data name="SettingsViewProfileBehavior" xml:space="preserve">
+    <value>Profile behavior</value>
+  </data>
+  <data name="SettingsViewContemporaryProfileBehavior" xml:space="preserve">
+    <value>Contemporary profile behavior</value>
+  </data>
+  <data name="SettingsViewDensity" xml:space="preserve">
+    <value>Density</value>
+  </data>
+  <data name="SettingsViewContemporaryDensity" xml:space="preserve">
+    <value>Contemporary density</value>
+  </data>
+  <data name="SettingsViewDecoration" xml:space="preserve">
+    <value>Decoration</value>
+  </data>
+  <data name="SettingsViewContemporaryDecoration" xml:space="preserve">
+    <value>Contemporary decoration</value>
+  </data>
+  <data name="SettingsViewMotion" xml:space="preserve">
+    <value>Motion</value>
+  </data>
+  <data name="SettingsViewContemporaryMotion" xml:space="preserve">
+    <value>Contemporary motion</value>
+  </data>
+  <data name="SettingsViewDefaultLibraryView" xml:space="preserve">
+    <value>Default Library view</value>
+  </data>
+  <data name="SettingsViewDefaultContemporaryLibraryView" xml:space="preserve">
+    <value>Default contemporary Library view</value>
+  </data>
+  <data name="SettingsViewNavigationRail" xml:space="preserve">
+    <value>Navigation rail</value>
+  </data>
+  <data name="SettingsViewContemporaryNavigationRail" xml:space="preserve">
+    <value>Contemporary navigation rail</value>
+  </data>
+  <data name="SettingsViewUseSystemTypography" xml:space="preserve">
+    <value>Use system typography</value>
+  </data>
+  <data name="SettingsViewShowTheDecanterProcessingDockWhenSpace" xml:space="preserve">
+    <value>Show the Decanter processing dock when space allows</value>
+  </data>
+  <data name="SettingsViewRestoreCurrentFlightAfterRestartingLibation" xml:space="preserve">
+    <value>Restore Current Flight after restarting Libation</value>
+  </data>
+  <data name="SettingsViewApplyAppearance" xml:space="preserve">
+    <value>Apply appearance</value>
+  </data>
+  <data name="SettingsViewApplyAppearanceSettings" xml:space="preserve">
+    <value>Apply appearance settings</value>
+  </data>
+  <data name="SettingsViewResetAppearance" xml:space="preserve">
+    <value>Reset appearance</value>
+  </data>
+  <data name="SettingsViewResetAppearanceToDefaults" xml:space="preserve">
+    <value>Reset appearance to defaults</value>
+  </data>
+  <data name="SettingsViewRunProfileChooserAgain" xml:space="preserve">
+    <value>Run profile chooser again</value>
+  </data>
+  <data name="SettingsViewSearchSettingsTabs" xml:space="preserve">
+    <value>Search Settings tabs</value>
+  </data>
+  <data name="SettingsViewNoSettingsTabsMatch" xml:space="preserve">
+    <value>No Settings tabs match</value>
+  </data>
+  <data name="SettingsViewAccountsAboutAndUpdates" xml:space="preserve">
+    <value>Accounts, About, and updates</value>
+  </data>
+  <data name="SettingsViewAccountIdentitiesRemainInTheProtectedAccount" xml:space="preserve">
+    <value>Account identities remain in the protected account workflow. About owns version, release notes, and update checks.</value>
+  </data>
+  <data name="SettingsViewAboutAndUpdates" xml:space="preserve">
+    <value>About and updates</value>
+  </data>
+  <data name="ToolsViewToolActionUnavailable" xml:space="preserve">
+    <value>Tool action unavailable</value>
+  </data>
+  <data name="ToolsViewTheCurrentLibraryFilterDefinesVisibleTitle" xml:space="preserve">
+    <value>The current Library filter defines visible-title scope</value>
+  </data>
+  <data name="ToolsViewCommandsThatSayVisibleTitlesOperateOn" xml:space="preserve">
+    <value>Commands that say visible titles operate on the shared Library filter, including titles outside the current viewport. Review that filter before running a scoped or destructive action.</value>
+  </data>
+  <data name="ToolsViewApplyTheFirstSavedQuickFilterAt" xml:space="preserve">
+    <value>Apply the first saved quick filter at startup</value>
+  </data>
+  <data name="ToolsViewControlsOnlyTheFilterLibationAppliesWhen" xml:space="preserve">
+    <value>Controls only the filter Libation applies when it opens; it does not change or delete any saved filter.</value>
+  </data>
+  <data name="ToolsViewChangesOnlyTheStartupQuickFilterPreference" xml:space="preserve">
+    <value>Changes only the startup quick-filter preference.</value>
+  </data>
+  <data name="TrashViewSelectionChangesOnlyWhichExistingTrashRecord" xml:space="preserve">
+    <value>Selection changes only which existing Trash record Restore or Permanently delete will receive.</value>
+  </data>
+  <data name="TrashViewTrashUnavailable" xml:space="preserve">
+    <value>Trash unavailable</value>
+  </data>
+  <data name="TrashViewSearchRemovedTitleCreatorSeriesOrAudible" xml:space="preserve">
+    <value>Search removed title, creator, series, or Audible ID</value>
+  </data>
+  <data name="TrashViewSearchTrash" xml:space="preserve">
+    <value>Search Trash</value>
+  </data>
+  <data name="TrashViewRefreshTrash" xml:space="preserve">
+    <value>Refresh Trash</value>
+  </data>
+  <data name="TrashViewLoadingTrash" xml:space="preserve">
+    <value>Loading Trash…</value>
+  </data>
+  <data name="TrashViewLoadingTrash2" xml:space="preserve">
+    <value>Loading Trash</value>
+  </data>
+  <data name="TrashViewTrashIsEmpty" xml:space="preserve">
+    <value>Trash is empty</value>
+  </data>
+  <data name="TrashViewTitlesMovedOutOfTheLibraryAppear" xml:space="preserve">
+    <value>Titles moved out of the Library appear here until they are restored or their Libation records are permanently deleted.</value>
+  </data>
+  <data name="TrashViewNoRemovedTitlesMatch" xml:space="preserve">
+    <value>No removed titles match</value>
+  </data>
+  <data name="TrashViewClearOrChangeTheCurrentTrashSearch" xml:space="preserve">
+    <value>Clear or change the current Trash search. No records were changed.</value>
+  </data>
+  <data name="TrashViewRemovedLibraryRecords" xml:space="preserve">
+    <value>Removed library records</value>
+  </data>
+  <data name="TrashViewPermanentDeletionRemovesLibationRecordsNotAudiobook" xml:space="preserve">
+    <value>Permanent deletion removes Libation records, not audiobook files. Titles can return after a later scan; every confirmation defaults to cancel.</value>
+  </data>
+  <data name="TrashViewRestore" xml:space="preserve">
+    <value>Restore</value>
+  </data>
+  <data name="TrashViewPermanentlyDelete" xml:space="preserve">
+    <value>Permanently delete</value>
+  </data>
+  <data name="TrashViewAConfirmationDefaultsToCancelAndExplains" xml:space="preserve">
+    <value>A confirmation defaults to cancel and explains that Libation records, not audiobook files, will be deleted.</value>
+  </data>
+  <data name="AccountPresentationSourceRemovingThisAccountDeletesItsSavedSign" xml:space="preserve">
+    <value>Removing this account deletes its saved sign-in and marketplace settings from Libation. </value>
+  </data>
+  <data name="AccountPresentationSourceExistingLibraryRecordsAndLocalAudiobookFiles" xml:space="preserve">
+    <value>Existing Library records and local audiobook files are not deleted.</value>
+  </data>
+  <data name="AccountPresentationSourceNoAccountScanIsRunning" xml:space="preserve">
+    <value>No account scan is running.</value>
+  </data>
+  <data name="AccountPresentationSourceThatAccountCardIsNoLongerCurrent" xml:space="preserve">
+    <value>That account card is no longer current. Refresh Accounts and try again.</value>
+  </data>
+  <data name="AccountsViewModelMarketplaceUnavailable" xml:space="preserve">
+    <value>Marketplace unavailable</value>
+  </data>
+  <data name="AccountsViewModel1Marketplace" xml:space="preserve">
+    <value>1 marketplace</value>
+  </data>
+  <data name="AccountsViewModel0Marketplaces" xml:space="preserve">
+    <value>{0} marketplaces</value>
+  </data>
+  <data name="AccountsViewModelTitleCountIsLoading" xml:space="preserve">
+    <value>Title count is loading</value>
+  </data>
+  <data name="AccountsViewModel1CataloguedTitle" xml:space="preserve">
+    <value>1 catalogued title</value>
+  </data>
+  <data name="AccountsViewModel0CataloguedTitles" xml:space="preserve">
+    <value>{0} catalogued titles</value>
+  </data>
+  <data name="AccountsViewModelIncludedInAutomaticScans" xml:space="preserve">
+    <value>Included in automatic scans</value>
+  </data>
+  <data name="AccountsViewModelExcludedFromAutomaticScans" xml:space="preserve">
+    <value>Excluded from automatic scans</value>
+  </data>
+  <data name="AccountsViewModelScan0Now" xml:space="preserve">
+    <value>Scan {0} now</value>
+  </data>
+  <data name="AccountsViewModelEditMarketplacesFor0" xml:space="preserve">
+    <value>Edit marketplaces for {0}</value>
+  </data>
+  <data name="AccountsViewModelReauthenticate0" xml:space="preserve">
+    <value>Reauthenticate {0}</value>
+  </data>
+  <data name="AccountsViewModelRemove0FromLibation" xml:space="preserve">
+    <value>Remove {0} from Libation</value>
+  </data>
+  <data name="AccountsViewModelAnAccountCardSStablePresentationIdentity" xml:space="preserve">
+    <value>An account card's stable presentation identity cannot change during refresh.</value>
+  </data>
+  <data name="AccountsViewModelAddAnAudibleAccount" xml:space="preserve">
+    <value>add an Audible account</value>
+  </data>
+  <data name="AccountsViewModelLibationCouldNotOpenAccountSetupNo" xml:space="preserve">
+    <value>Libation could not open account setup. No account data was changed.</value>
+  </data>
+  <data name="AccountsViewModelOpenAccountManagement" xml:space="preserve">
+    <value>open account management</value>
+  </data>
+  <data name="AccountsViewModelLibationCouldNotOpenAccountManagementNo" xml:space="preserve">
+    <value>Libation could not open account management. No account data was changed.</value>
+  </data>
+  <data name="AccountsViewModelScanAnAccount" xml:space="preserve">
+    <value>scan an account</value>
+  </data>
+  <data name="AccountsViewModelLibationCouldNotScanThatAccountReview" xml:space="preserve">
+    <value>Libation could not scan that account. Review its stored authorization and try again.</value>
+  </data>
+  <data name="AccountsViewModelEditAccountMarketplaces" xml:space="preserve">
+    <value>edit account marketplaces</value>
+  </data>
+  <data name="AccountsViewModelLibationCouldNotOpenMarketplaceSettingsNo" xml:space="preserve">
+    <value>Libation could not open marketplace settings. No account data was changed.</value>
+  </data>
+  <data name="AccountsViewModelReauthenticateAnAccount" xml:space="preserve">
+    <value>reauthenticate an account</value>
+  </data>
+  <data name="AccountsViewModelLibationCouldNotReauthenticateThatAccountIts" xml:space="preserve">
+    <value>Libation could not reauthenticate that account. Its existing stored authorization was not removed.</value>
+  </data>
+  <data name="AccountsViewModelRemoveAnAccount" xml:space="preserve">
+    <value>remove an account</value>
+  </data>
+  <data name="AccountsViewModelLibationCouldNotRemoveThatAccountIts" xml:space="preserve">
+    <value>Libation could not remove that account. Its settings and Library records were left unchanged.</value>
+  </data>
+  <data name="AccountsViewModel1ConfiguredAccount" xml:space="preserve">
+    <value>1 configured account</value>
+  </data>
+  <data name="AccountsViewModel0ConfiguredAccounts" xml:space="preserve">
+    <value>{0} configured accounts</value>
+  </data>
+  <data name="AccountsViewModelNoAudibleAccountsConfigured" xml:space="preserve">
+    <value>No Audible accounts configured</value>
+  </data>
+  <data name="AccountsViewModelLibationCouldNotSafelyReadTheAccount" xml:space="preserve">
+    <value>Libation could not safely read the account list. Use the preserved account manager to review the problem.</value>
+  </data>
+  <data name="AccountsViewModelAddAnAudibleAccountToScanIts" xml:space="preserve">
+    <value>Add an Audible account to scan its marketplaces and catalogue titles.</value>
+  </data>
+  <data name="AccountsViewModelAudibleAccess" xml:space="preserve">
+    <value>Audible access</value>
+  </data>
+  <data name="AccountsViewModelReviewEachAccountSLocalAuthorizationMarketplaces" xml:space="preserve">
+    <value>Review each account's local authorization, marketplaces, titles, and scan participation.</value>
+  </data>
+  <data name="AccountsViewModelReadAccountPresentation" xml:space="preserve">
+    <value>read account presentation</value>
+  </data>
+  <data name="AccountsViewModelLibationCouldNotSafelyReadTheAccount2" xml:space="preserve">
+    <value>Libation could not safely read the account list. Open Manage Accounts and try again.</value>
+  </data>
+  <data name="AccountsViewModelTheContemporaryAccountsDestinationCouldNotLoad" xml:space="preserve">
+    <value>The contemporary Accounts destination could not load its privacy-safe account projection. Correlation ID: {CorrelationId}. {TechnicalDetails}</value>
+  </data>
+  <data name="IAccountPresentationSourceStoredAuthorizationIsReady" xml:space="preserve">
+    <value>Stored authorization is ready</value>
+  </data>
+  <data name="IAccountPresentationSourceStoredSessionNeedsRenewal" xml:space="preserve">
+    <value>Stored session needs renewal</value>
+  </data>
+  <data name="IAccountPresentationSourceSignInRequired" xml:space="preserve">
+    <value>Sign-in required</value>
+  </data>
+  <data name="DownloadsModelsUntitledAudiobook" xml:space="preserve">
+    <value>Untitled audiobook</value>
+  </data>
+  <data name="DownloadsModelsUnknownAuthor" xml:space="preserve">
+    <value>Unknown author</value>
+  </data>
+  <data name="DownloadsModelsAccountUnavailable" xml:space="preserve">
+    <value>Account unavailable</value>
+  </data>
+  <data name="DownloadsModelsAccount0" xml:space="preserve">
+    <value>Account {0}</value>
+  </data>
+  <data name="DownloadsModelsMarketplace0" xml:space="preserve">
+    <value>Marketplace {0}</value>
+  </data>
+  <data name="DownloadsModels01N0Kbps" xml:space="preserve">
+    <value>{0} {1:N0} kbps</value>
+  </data>
+  <data name="DownloadsModels0Progress10Percent" xml:space="preserve">
+    <value>{0} progress {1:0} percent</value>
+  </data>
+  <data name="DownloadsModelsRetry" xml:space="preserve">
+    <value>Retry</value>
+  </data>
+  <data name="DownloadsModelsLocateAnExistingFileFor0" xml:space="preserve">
+    <value>Locate an existing file for {0}</value>
+  </data>
+  <data name="DownloadsModelsQueued" xml:space="preserve">
+    <value>Queued</value>
+  </data>
+  <data name="DownloadsModelsDownloading" xml:space="preserve">
+    <value>Downloading</value>
+  </data>
+  <data name="DownloadsModelsDecrypting" xml:space="preserve">
+    <value>Decrypting</value>
+  </data>
+  <data name="DownloadsModelsConverting" xml:space="preserve">
+    <value>Converting</value>
+  </data>
+  <data name="DownloadsModelsUnavailable" xml:space="preserve">
+    <value>Unavailable</value>
+  </data>
+  <data name="DownloadsModelsAudibleFileDownloaded" xml:space="preserve">
+    <value>Audible file downloaded</value>
+  </data>
+  <data name="DownloadsModelsProcessedOpenCopy" xml:space="preserve">
+    <value>Processed open copy</value>
+  </data>
+  <data name="DownloadsModelsNeedsAttention" xml:space="preserve">
+    <value>Needs attention</value>
+  </data>
+  <data name="DownloadsModelsDownloadPending" xml:space="preserve">
+    <value>Download pending</value>
+  </data>
+  <data name="DownloadsViewModelDownloadAndProcessPendingAudiobooks" xml:space="preserve">
+    <value>download and process pending audiobooks</value>
+  </data>
+  <data name="DownloadsViewModelLibationCouldNotStartThePendingAudiobook" xml:space="preserve">
+    <value>Libation could not start the pending audiobook workflow. Review account access and the Books location, then try again.</value>
+  </data>
+  <data name="DownloadsViewModelDownloadPendingPDFSupplements" xml:space="preserve">
+    <value>download pending PDF supplements</value>
+  </data>
+  <data name="DownloadsViewModelLibationCouldNotStartPendingPDFDownloads" xml:space="preserve">
+    <value>Libation could not start pending PDF downloads. Review account access and try again.</value>
+  </data>
+  <data name="DownloadsViewModelLocateExistingAudiobookFiles" xml:space="preserve">
+    <value>locate existing audiobook files</value>
+  </data>
+  <data name="DownloadsViewModelLibationCouldNotOpenTheAudiobookLocator" xml:space="preserve">
+    <value>Libation could not open the audiobook locator. Check the configured Books location and try again.</value>
+  </data>
+  <data name="DownloadsViewModelConvertTheLibraryToMP3" xml:space="preserve">
+    <value>convert the library to MP3</value>
+  </data>
+  <data name="DownloadsViewModelLibationCouldNotStartTheMP3Conversion" xml:space="preserve">
+    <value>Libation could not start the MP3 conversion workflow. Review Processing and the application log.</value>
+  </data>
+  <data name="DownloadsViewModelRefreshDownloadState" xml:space="preserve">
+    <value>refresh download state</value>
+  </data>
+  <data name="DownloadsViewModelOpenAccountManagementFromDownloads" xml:space="preserve">
+    <value>open account management from Downloads</value>
+  </data>
+  <data name="DownloadsViewModelScanAccountsFromDownloads" xml:space="preserve">
+    <value>scan accounts from Downloads</value>
+  </data>
+  <data name="DownloadsViewModelLibationCouldNotStartTheLibraryScan" xml:space="preserve">
+    <value>Libation could not start the library scan. Review account access and try again.</value>
+  </data>
+  <data name="DownloadsViewModelScanTheConnectedAccountsToCatalogueTitles" xml:space="preserve">
+    <value>Scan the connected accounts to catalogue titles before starting a download workflow.</value>
+  </data>
+  <data name="DownloadsViewModelAddAnAudibleAccountThenScanIt" xml:space="preserve">
+    <value>Add an Audible account, then scan it to catalogue titles before starting a download workflow.</value>
+  </data>
+  <data name="DownloadsViewModelScanAccounts" xml:space="preserve">
+    <value>Scan accounts</value>
+  </data>
+  <data name="DownloadsViewModel0N0Pending1N0Downloading2" xml:space="preserve">
+    <value>{0:N0} pending · {1:N0} downloading · {2:N0} downloaded · {3:N0} unavailable</value>
+  </data>
+  <data name="DownloadsViewModelAcquisition" xml:space="preserve">
+    <value>Acquisition</value>
+  </data>
+  <data name="DownloadsViewModelSeeWhatIsPendingDownloadingDownloadedOr" xml:space="preserve">
+    <value>See what is pending, downloading, downloaded, or unavailable.</value>
+  </data>
+  <data name="DownloadsViewModelDownloadPDFs" xml:space="preserve">
+    <value>Download PDFs</value>
+  </data>
+  <data name="DownloadsViewModelLocateFiles" xml:space="preserve">
+    <value>Locate files</value>
+  </data>
+  <data name="DownloadsViewModelConvertToMP3" xml:space="preserve">
+    <value>Convert to MP3</value>
+  </data>
+  <data name="DownloadsViewModelStartTheDownloadWorkflowFor0" xml:space="preserve">
+    <value>start the download workflow for {0}</value>
+  </data>
+  <data name="DownloadsViewModelLibationCouldNotStartThisTitleReview" xml:space="preserve">
+    <value>Libation could not start this title. Review its download state, account access, and Books location, then try again.</value>
+  </data>
+  <data name="DownloadsViewModelRetryTheDownloadWorkflowFor0" xml:space="preserve">
+    <value>retry the download workflow for {0}</value>
+  </data>
+  <data name="DownloadsViewModelLibationCouldNotRetryThisTitleReview" xml:space="preserve">
+    <value>Libation could not retry this title. Review its current queue state and account access, then try again.</value>
+  </data>
+  <data name="DownloadsViewModelLocateAnExistingFileFor0" xml:space="preserve">
+    <value>locate an existing file for {0}</value>
+  </data>
+  <data name="DownloadsViewModelLibationCouldNotOpenTheFilePicker" xml:space="preserve">
+    <value>Libation could not open the file picker for this title. No library or file data was changed.</value>
+  </data>
+  <data name="DownloadsViewModelBuildTheDownloadsTitleList" xml:space="preserve">
+    <value>build the Downloads title list</value>
+  </data>
+  <data name="DownloadsViewModelLibationCouldNotReadTheCurrentPer" xml:space="preserve">
+    <value>Libation could not read the current per-title download state. Refresh the page after checking the Books location.</value>
+  </data>
+  <data name="DownloadsViewModelDownloaded" xml:space="preserve">
+    <value>Downloaded</value>
+  </data>
+  <data name="CurrentFlightViewaxamlLibationCurrentFlightItem" xml:space="preserve">
+    <value>libation.current-flight-item</value>
+  </data>
+  <data name="CurrentFlightViewModel0Hr1Min" xml:space="preserve">
+    <value>{0} hr {1} min</value>
+  </data>
+  <data name="CurrentFlightViewModelCurrentFlightIsEmpty" xml:space="preserve">
+    <value>Current Flight is empty.</value>
+  </data>
+  <data name="CurrentFlightViewModelCurrentSettings" xml:space="preserve">
+    <value>Current settings</value>
+  </data>
+  <data name="CurrentFlightViewModelUseTheSavedDownloadDecryptSettings" xml:space="preserve">
+    <value>Use the saved Download/Decrypt settings.</value>
+  </data>
+  <data name="CurrentFlightViewModelM4B" xml:space="preserve">
+    <value>M4B</value>
+  </data>
+  <data name="CurrentFlightViewModelCreateOneM4BFilePerTitle" xml:space="preserve">
+    <value>Create one M4B file per title.</value>
+  </data>
+  <data name="CurrentFlightViewModelMP3" xml:space="preserve">
+    <value>MP3</value>
+  </data>
+  <data name="CurrentFlightViewModelCreateMP3OutputWithoutChangingSavedSettings" xml:space="preserve">
+    <value>Create MP3 output without changing saved settings.</value>
+  </data>
+  <data name="CurrentFlightViewModelSplitByChapter" xml:space="preserve">
+    <value>Split by chapter</value>
+  </data>
+  <data name="CurrentFlightViewModelCreateChapterSeparatedOutputWithoutChangingSaved" xml:space="preserve">
+    <value>Create chapter-separated output without changing saved settings.</value>
+  </data>
+  <data name="CurrentFlightViewModel1Title" xml:space="preserve">
+    <value>1 title</value>
+  </data>
+  <data name="CurrentFlightViewModel0Titles" xml:space="preserve">
+    <value>{0} titles</value>
+  </data>
+  <data name="CurrentFlightViewModelCurrentFlightIsEmpty2" xml:space="preserve">
+    <value>Current Flight is empty</value>
+  </data>
+  <data name="CurrentFlightViewModelSelectTitlesInTheLibraryToBuild" xml:space="preserve">
+    <value>Select titles in the Library to build a Flight</value>
+  </data>
+  <data name="CurrentFlightViewModel0Hr1MinTotal" xml:space="preserve">
+    <value>{0} hr {1} min total</value>
+  </data>
+  <data name="CurrentFlightViewModelAbout0" xml:space="preserve">
+    <value>about {0}</value>
+  </data>
+  <data name="CurrentFlightViewModelOutput0" xml:space="preserve">
+    <value>Output: {0}</value>
+  </data>
+  <data name="CurrentFlightViewModelUndo" xml:space="preserve">
+    <value>Undo</value>
+  </data>
+  <data name="CurrentFlightViewModel0CurrentFlightTitleSAreOutside" xml:space="preserve">
+    <value>{0} Current Flight title(s) are outside the current Library results.</value>
+  </data>
+  <data name="CurrentFlightViewModelAllCurrentFlightTitlesAreVisibleIn" xml:space="preserve">
+    <value>All Current Flight titles are visible in the current Library results.</value>
+  </data>
+  <data name="CurrentFlightViewModel0SelectedTitleSAreHiddenBy" xml:space="preserve">
+    <value>{0} selected title(s) are hidden by the current Library filter.</value>
+  </data>
+  <data name="CurrentFlightViewModelRemovedATitleFromCurrentFlight" xml:space="preserve">
+    <value>Removed a title from Current Flight.</value>
+  </data>
+  <data name="CurrentFlightViewModelClearedCurrentFlight" xml:space="preserve">
+    <value>Cleared Current Flight.</value>
+  </data>
+  <data name="CurrentFlightViewModelInspectCurrentFlightPreflight" xml:space="preserve">
+    <value>inspect Current Flight preflight</value>
+  </data>
+  <data name="CurrentFlightViewModelLibationCouldNotInspectCurrentFlightPreflight" xml:space="preserve">
+    <value>Libation could not inspect Current Flight preflight conditions.</value>
+  </data>
+  <data name="CurrentFlightViewModelPreflightPassedFor0CurrentFlightTitle" xml:space="preserve">
+    <value>Preflight passed for {0} Current Flight title(s).</value>
+  </data>
+  <data name="CurrentFlightViewModelPreflightFoundWarnings0" xml:space="preserve">
+    <value>Preflight found warnings. {0}</value>
+  </data>
+  <data name="CurrentFlightViewModelPreflightBlockedProcessing0" xml:space="preserve">
+    <value>Preflight blocked processing. {0}</value>
+  </data>
+  <data name="CurrentFlightViewModelExportCurrentFlightMetadata" xml:space="preserve">
+    <value>export Current Flight metadata</value>
+  </data>
+  <data name="CurrentFlightViewModelAddCurrentFlightTags" xml:space="preserve">
+    <value>add Current Flight tags</value>
+  </data>
+  <data name="CurrentFlightViewModelReplaceCurrentFlightTags" xml:space="preserve">
+    <value>replace Current Flight tags</value>
+  </data>
+  <data name="CurrentFlightViewModelLibationCouldNot0NoCompletionWas" xml:space="preserve">
+    <value>Libation could not {0}. No completion was recorded.</value>
+  </data>
+  <data name="CurrentFlightViewModelEvaluateCurrentFlightProcessing" xml:space="preserve">
+    <value>evaluate Current Flight processing</value>
+  </data>
+  <data name="CurrentFlightViewModelLibationCouldNotInspectCurrentFlightProcessing" xml:space="preserve">
+    <value>Libation could not inspect Current Flight processing conditions.</value>
+  </data>
+  <data name="CurrentFlightViewModelProcessingBlocked0" xml:space="preserve">
+    <value>Processing blocked. {0}</value>
+  </data>
+  <data name="CurrentFlightViewModelProcessAnyway" xml:space="preserve">
+    <value>Process anyway</value>
+  </data>
+  <data name="CurrentFlightViewModelReviewProcessingWarnings0" xml:space="preserve">
+    <value>Review processing warnings. {0}</value>
+  </data>
+  <data name="CurrentFlightViewModelSubmitCurrentFlightToProcessing" xml:space="preserve">
+    <value>submit Current Flight to Processing</value>
+  </data>
+  <data name="CurrentFlightViewModelLibationCouldNotSubmitCurrentFlightTo" xml:space="preserve">
+    <value>Libation could not submit Current Flight to Processing.</value>
+  </data>
+  <data name="CurrentFlightViewModelProcessingNotStarted" xml:space="preserve">
+    <value>Processing not started</value>
+  </data>
+  <data name="CurrentFlightViewModelReviewCurrentFlightPreflightAndTheProcessing" xml:space="preserve">
+    <value>Review Current Flight preflight and the Processing queue, then try again.</value>
+  </data>
+  <data name="CurrentFlightViewModelOperationSubmitCurrentFlightToProcessing0" xml:space="preserve">
+    <value>Operation: submit Current Flight to Processing{0}Result: no eligible work was queued</value>
+  </data>
+  <data name="CurrentFlightViewModelCurrentFlightWasNotSubmittedToProcessing" xml:space="preserve">
+    <value>Current Flight was not submitted to Processing. Correlation ID: {CorrelationId}. Category: {ErrorCategory}</value>
+  </data>
+  <data name="CurrentFlightViewModelCurrentFlightActionFailedCurrentFlightActionCorrelationID" xml:space="preserve">
+    <value>Current Flight action failed: {CurrentFlightAction}. Correlation ID: {CorrelationId}. Category: {ErrorCategory}</value>
+  </data>
+  <data name="CurrentFlightViewModelUnableToCopyCurrentFlightDiagnosticsCorrelation" xml:space="preserve">
+    <value>Unable to copy Current Flight diagnostics. Correlation ID: {CorrelationId}. {TechnicalDetails}</value>
+  </data>
+  <data name="FlightPreflightSelectAtLeastOneTitleBeforeProcessing" xml:space="preserve">
+    <value>Select at least one title before processing.</value>
+  </data>
+  <data name="FlightPreflightTheSelectedOutputProfileIsNotSupported" xml:space="preserve">
+    <value>The selected output profile is not supported. Choose a listed output profile before processing.</value>
+  </data>
+  <data name="FlightPreflightChooseAValidBooksLocationInSettings" xml:space="preserve">
+    <value>Choose a valid Books location in Settings before processing.</value>
+  </data>
+  <data name="FlightPreflight0SelectedTitleSAreUnavailableIn" xml:space="preserve">
+    <value>{0} selected title(s) are unavailable in the latest account scan. Remove them or scan the account again.</value>
+  </data>
+  <data name="FlightPreflight0SelectedTitleSAlreadyHaveActive" xml:space="preserve">
+    <value>{0} selected title(s) already have active processing work and will be skipped.</value>
+  </data>
+  <data name="FlightPreflightAllSelectedTitlesAlreadyHaveActiveProcessing" xml:space="preserve">
+    <value>All selected titles already have active processing work.</value>
+  </data>
+  <data name="FlightPreflight0SelectedTitleSDoNotCurrently" xml:space="preserve">
+    <value>{0} selected title(s) do not currently have valid stored account authorization. Open Accounts and sign in again if Processing cannot refresh authorization.</value>
+  </data>
+  <data name="FlightPreflightUnableToInspectCurrentFlightAccountAuthorization" xml:space="preserve">
+    <value>Unable to inspect Current Flight account authorization</value>
+  </data>
+  <data name="FlightPreflightLibationCouldNotInspectStoredAccountAuthorization" xml:space="preserve">
+    <value>Libation could not inspect stored account authorization. Processing may ask you to sign in.</value>
+  </data>
+  <data name="FlightPreflightAConfiguredBooksOrInProgressDrive" xml:space="preserve">
+    <value>A configured Books or In progress drive is critically low on free space. Current Flight estimates about {0} for {1} title(s); free space or change the locations in Settings.</value>
+  </data>
+  <data name="FlightServiceACurrentFlightTitleMustHaveA" xml:space="preserve">
+    <value>A Current Flight title must have a stable product identifier.</value>
+  </data>
+  <data name="FlightServiceAFlightItemSStableIdentityCannot" xml:space="preserve">
+    <value>A Flight item's stable identity cannot change.</value>
+  </data>
+  <data name="FlightServiceAdded0ToCurrentFlight1Selected" xml:space="preserve">
+    <value>Added {0} to Current Flight. {1} selected.</value>
+  </data>
+  <data name="FlightServiceAdded0TitlesToCurrentFlight1" xml:space="preserve">
+    <value>Added {0} titles to Current Flight. {1} selected.</value>
+  </data>
+  <data name="FlightServiceCurrentFlightNowContains0TitleS" xml:space="preserve">
+    <value>Current Flight now contains {0} title(s).</value>
+  </data>
+  <data name="FlightServiceMoved0ToPosition1InCurrent" xml:space="preserve">
+    <value>Moved {0} to position {1} in Current Flight.</value>
+  </data>
+  <data name="FlightServiceRemoved0FromCurrentFlight1Selected" xml:space="preserve">
+    <value>Removed {0} from Current Flight. {1} selected.</value>
+  </data>
+  <data name="FlightServiceRestoredCurrentFlight0Selected" xml:space="preserve">
+    <value>Restored Current Flight. {0} selected.</value>
+  </data>
+  <data name="FlightServiceRemoved0UnavailableTitlesFromCurrentFlight" xml:space="preserve">
+    <value>Removed {0} unavailable titles from Current Flight. {1} selected.</value>
+  </data>
+  <data name="FlightServiceCurrentFlightContains0Titles" xml:space="preserve">
+    <value>Current Flight contains {0} titles.</value>
+  </data>
+  <data name="HistoryViewModelAllActions" xml:space="preserve">
+    <value>All actions</value>
+  </data>
+  <data name="HistoryViewModelAllResults" xml:space="preserve">
+    <value>All results</value>
+  </data>
+  <data name="HistoryViewModel0OutcomesMatchTheCurrentFilters" xml:space="preserve">
+    <value>{0} outcomes match the current filters</value>
+  </data>
+  <data name="HistoryViewModel0AvailableTimestampedOutcomes" xml:space="preserve">
+    <value>{0} available timestamped outcomes</value>
+  </data>
+  <data name="HistoryViewModelRefreshTheAvailableHistoryProjection" xml:space="preserve">
+    <value>refresh the available History projection</value>
+  </data>
+  <data name="HistoryViewModelLibationCouldNotRefreshTheAvailableHistory" xml:space="preserve">
+    <value>Libation could not refresh the available history timestamps. No library or queue data was changed.</value>
+  </data>
+  <data name="HistoryViewModelFailedToBuildTheAvailableHistoryProjection" xml:space="preserve">
+    <value>Failed to build the available History projection. Correlation ID: {CorrelationId}. Category: {ErrorCategory}</value>
+  </data>
+  <data name="HistoryViewModelCatalogued" xml:space="preserve">
+    <value>Catalogued</value>
+  </data>
+  <data name="HistoryViewModelAddedToLibationSLibrary" xml:space="preserve">
+    <value>Added to Libation’s library.</value>
+  </data>
+  <data name="HistoryViewModelRecorded" xml:space="preserve">
+    <value>Recorded</value>
+  </data>
+  <data name="HistoryViewModelLastCompletedDownloadTimestampRecordedForThis" xml:space="preserve">
+    <value>Last completed download timestamp recorded for this title.</value>
+  </data>
+  <data name="HistoryViewModelProcessingSession" xml:space="preserve">
+    <value>Processing session</value>
+  </data>
+  <data name="HistoryViewModelQueueActivity" xml:space="preserve">
+    <value>Queue activity</value>
+  </data>
+  <data name="CachedCoveraxamlUnableToLoadTheCachedCoverFor" xml:space="preserve">
+    <value>Unable to load the cached cover for {ProductId}.</value>
+  </data>
+  <data name="GalleryBookCardaxamlUnableToLoadAGalleryCoverFor" xml:space="preserve">
+    <value>Unable to load a Gallery cover for {ProductId}.</value>
+  </data>
+  <data name="LibraryModelsNotRated" xml:space="preserve">
+    <value>Not rated</value>
+  </data>
+  <data name="LibraryModelsNotRecorded" xml:space="preserve">
+    <value>Not recorded</value>
+  </data>
+  <data name="LibraryModelsNotCreatedYet" xml:space="preserve">
+    <value>Not created yet</value>
+  </data>
+  <data name="LibraryModelsLocalAudioAvailable" xml:space="preserve">
+    <value>Local audio available</value>
+  </data>
+  <data name="LibraryModelsLocalAudioNotCreated" xml:space="preserve">
+    <value>Local audio not created</value>
+  </data>
+  <data name="LibraryModelsPDFAvailableFromAudible" xml:space="preserve">
+    <value>PDF available from Audible</value>
+  </data>
+  <data name="LibraryModelsNoPDFIsAssociatedWithThisTitle" xml:space="preserve">
+    <value>No PDF is associated with this title</value>
+  </data>
+  <data name="LibraryModelsUnavailableAfterTheLatestScan" xml:space="preserve">
+    <value>Unavailable after the latest scan</value>
+  </data>
+  <data name="LibraryModelsDownloadedProcessingPending" xml:space="preserve">
+    <value>Downloaded; processing pending</value>
+  </data>
+  <data name="LibraryModelsSelected" xml:space="preserve">
+    <value>Selected</value>
+  </data>
+  <data name="LibraryModelsSelected2" xml:space="preserve">
+    <value>selected</value>
+  </data>
+  <data name="LibraryModelsFocused" xml:space="preserve">
+    <value>focused</value>
+  </data>
+  <data name="LibraryModelsNoCompletedDownloadRecorded" xml:space="preserve">
+    <value>No completed download recorded</value>
+  </data>
+  <data name="LibraryModelsAudio" xml:space="preserve">
+    <value>Audio</value>
+  </data>
+  <data name="LibraryModelsFileV0" xml:space="preserve">
+    <value>file v{0}</value>
+  </data>
+  <data name="LibraryModelsLibation0" xml:space="preserve">
+    <value>Libation {0}</value>
+  </data>
+  <data name="LibraryViewModelCurrentDetailsOrder" xml:space="preserve">
+    <value>Current Details order</value>
+  </data>
+  <data name="LibraryViewModelRecentlyAdded" xml:space="preserve">
+    <value>Recently added</value>
+  </data>
+  <data name="LibraryViewModelTitleAZ" xml:space="preserve">
+    <value>Title A–Z</value>
+  </data>
+  <data name="LibraryViewModelAuthorAZ" xml:space="preserve">
+    <value>Author A–Z</value>
+  </data>
+  <data name="LibraryViewModelLibraryWorkspace" xml:space="preserve">
+    <value>Library workspace</value>
+  </data>
+  <data name="LibraryViewModelLibrary1Title" xml:space="preserve">
+    <value>Library — 1 title</value>
+  </data>
+  <data name="LibraryViewModelLibrary0Titles" xml:space="preserve">
+    <value>Library — {0} titles</value>
+  </data>
+  <data name="LibraryViewModelScanLibrary" xml:space="preserve">
+    <value>Scan library</value>
+  </data>
+  <data name="LibraryViewModelHideDetails" xml:space="preserve">
+    <value>Hide details</value>
+  </data>
+  <data name="LibraryViewModelShowDetails" xml:space="preserve">
+    <value>Show details</value>
+  </data>
+  <data name="LibraryViewModelCurrentFlight1" xml:space="preserve">
+    <value>Current Flight (1)</value>
+  </data>
+  <data name="LibraryViewModelCurrentFlight0" xml:space="preserve">
+    <value>Current Flight ({0})</value>
+  </data>
+  <data name="LibraryViewModelAddAudibleAccount" xml:space="preserve">
+    <value>Add Audible account</value>
+  </data>
+  <data name="LibraryViewModelOpenTrash" xml:space="preserve">
+    <value>Open Trash</value>
+  </data>
+  <data name="LibraryViewModel1TitleShown" xml:space="preserve">
+    <value>1 title shown</value>
+  </data>
+  <data name="LibraryViewModel0TitlesShown" xml:space="preserve">
+    <value>{0} titles shown</value>
+  </data>
+  <data name="LibraryViewModelNoTitlesSelected" xml:space="preserve">
+    <value>No titles selected</value>
+  </data>
+  <data name="LibraryViewModel1TitleSelected" xml:space="preserve">
+    <value>1 title selected</value>
+  </data>
+  <data name="LibraryViewModel0TitlesSelected" xml:space="preserve">
+    <value>{0} titles selected</value>
+  </data>
+  <data name="LibraryViewModel0TitlesSelected1HiddenByFilter" xml:space="preserve">
+    <value>{0} titles selected, {1} hidden by filter</value>
+  </data>
+  <data name="LibraryViewModel1ShownTitle" xml:space="preserve">
+    <value>1 shown title</value>
+  </data>
+  <data name="LibraryViewModel0ShownTitles" xml:space="preserve">
+    <value>{0} shown titles</value>
+  </data>
+  <data name="LibraryViewModelAdd0ToCurrentFlightThisChanges" xml:space="preserve">
+    <value>Add {0} to Current Flight?
+
+This changes the explicit Flight selection only. It does not download, process, or remove any title.</value>
+  </data>
+  <data name="LibraryViewModelAddShownTitlesToCurrentFlight" xml:space="preserve">
+    <value>Add shown titles to Current Flight</value>
+  </data>
+  <data name="LibraryViewModelUnableToApplyTheLibraryFilter" xml:space="preserve">
+    <value>Unable to apply the Library filter.</value>
+  </data>
+  <data name="OnboardingViewModelAddAnAccountDuringOnboarding" xml:space="preserve">
+    <value>add an account during onboarding</value>
+  </data>
+  <data name="OnboardingViewModelLibationCouldNotOpenAccountSetupYou" xml:space="preserve">
+    <value>Libation could not open account setup. You can skip this step and add an account later.</value>
+  </data>
+  <data name="OnboardingViewModelManageAccountsDuringOnboarding" xml:space="preserve">
+    <value>manage accounts during onboarding</value>
+  </data>
+  <data name="OnboardingViewModelLibationCouldNotOpenAccountManagementYou" xml:space="preserve">
+    <value>Libation could not open account management. You can continue and return later.</value>
+  </data>
+  <data name="OnboardingViewModelChooseFoldersDuringOnboarding" xml:space="preserve">
+    <value>choose folders during onboarding</value>
+  </data>
+  <data name="OnboardingViewModelLibationCouldNotOpenSettingsYouCan" xml:space="preserve">
+    <value>Libation could not open Settings. You can continue and choose folders later.</value>
+  </data>
+  <data name="OnboardingViewModelLocateExistingFilesDuringOnboarding" xml:space="preserve">
+    <value>locate existing files during onboarding</value>
+  </data>
+  <data name="OnboardingViewModelLibationCouldNotOpenTheFileLocator" xml:space="preserve">
+    <value>Libation could not open the file locator. You can continue and locate files later.</value>
+  </data>
+  <data name="OnboardingViewModelScanAccountsDuringOnboarding" xml:space="preserve">
+    <value>scan accounts during onboarding</value>
+  </data>
+  <data name="OnboardingViewModelLibationCouldNotStartTheLibraryScan" xml:space="preserve">
+    <value>Libation could not start the library scan. Review account authorization and try again later.</value>
+  </data>
+  <data name="OnboardingViewModelFinishWithoutAddingTitles" xml:space="preserve">
+    <value>Finish without adding titles</value>
+  </data>
+  <data name="OnboardingViewModelContinue" xml:space="preserve">
+    <value>Continue</value>
+  </data>
+  <data name="OnboardingViewModelCloseWithoutChanges" xml:space="preserve">
+    <value>Close without changes</value>
+  </data>
+  <data name="OnboardingViewModelSkipForNow" xml:space="preserve">
+    <value>Skip for now</value>
+  </data>
+  <data name="OnboardingViewModelChooseHowLibationShouldFeel" xml:space="preserve">
+    <value>Choose how Libation should feel</value>
+  </data>
+  <data name="OnboardingViewModelChooseWhereLocalFilesBelong" xml:space="preserve">
+    <value>Choose where local files belong</value>
+  </data>
+  <data name="OnboardingViewModelScanWithoutBlockingYourWork" xml:space="preserve">
+    <value>Scan without blocking your work</value>
+  </data>
+  <data name="OnboardingViewModelCreateYourFirstCurrentFlight" xml:space="preserve">
+    <value>Create your first Current Flight</value>
+  </data>
+  <data name="OnboardingViewModelStep0Of5" xml:space="preserve">
+    <value>Step {0} of 5</value>
+  </data>
+  <data name="OnboardingViewModel0ReflectsTheCurrentSavedChoiceSelect" xml:space="preserve">
+    <value>{0} reflects the current saved choice. Select another preview only if you want to change it.</value>
+  </data>
+  <data name="OnboardingViewModel0WillBeAppliedOnlyWhenYou" xml:space="preserve">
+    <value>{0} will be applied only when you finish onboarding.</value>
+  </data>
+  <data name="OnboardingViewModelFollowSystemIsTheStartingPreviewChoose" xml:space="preserve">
+    <value>Follow System is the starting preview. Choose it or another profile explicitly before continuing; Skip leaves the current interface unchanged.</value>
+  </data>
+  <data name="OnboardingViewModel1AccountConnected" xml:space="preserve">
+    <value>1 account connected</value>
+  </data>
+  <data name="OnboardingViewModel0AccountsConnected" xml:space="preserve">
+    <value>{0} accounts connected</value>
+  </data>
+  <data name="OnboardingViewModelNoAudibleAccountConnected" xml:space="preserve">
+    <value>No Audible account connected</value>
+  </data>
+  <data name="OnboardingViewModelReadingAccountCataloguesAndUpdatingTheLocal" xml:space="preserve">
+    <value>Reading account catalogues and updating the local Library…</value>
+  </data>
+  <data name="OnboardingViewModelLastScanCompleted0" xml:space="preserve">
+    <value>Last scan completed {0}.</value>
+  </data>
+  <data name="OnboardingViewModelReadyToScanWhenYouChoose" xml:space="preserve">
+    <value>Ready to scan when you choose</value>
+  </data>
+  <data name="OnboardingViewModelConnectAnAccountBeforeScanning" xml:space="preserve">
+    <value>Connect an account before scanning</value>
+  </data>
+  <data name="OnboardingViewModelScanInProgress" xml:space="preserve">
+    <value>Scan in progress</value>
+  </data>
+  <data name="OnboardingViewModelLastScanCompleted" xml:space="preserve">
+    <value>Last scan completed</value>
+  </data>
+  <data name="OnboardingViewModelReady" xml:space="preserve">
+    <value>Ready</value>
+  </data>
+  <data name="OnboardingViewModelAccountRequired" xml:space="preserve">
+    <value>Account required</value>
+  </data>
+  <data name="OnboardingViewModelLibraryScanInProgress0" xml:space="preserve">
+    <value>Library scan in progress. {0}</value>
+  </data>
+  <data name="OnboardingViewModelTheCurrentLibationInterfaceDoesNotHost" xml:space="preserve">
+    <value>The current Libation interface does not host the contemporary Current Flight. Finish without adding titles to return to that interface.</value>
+  </data>
+  <data name="OnboardingViewModelWaitForTheCurrentLibraryScanTo" xml:space="preserve">
+    <value>Wait for the current library scan to finish so Libation can choose from the completed catalogue. You can still finish without adding titles.</value>
+  </data>
+  <data name="OnboardingViewModelLibationWillRequestUpToTheThree" xml:space="preserve">
+    <value>Libation will request up to the three newest eligible titles after setup, add them through the shell-owned Current Flight, and open Library. No processing starts automatically.</value>
+  </data>
+  <data name="OnboardingViewModelAddTheThreeNewestTitlesToYour" xml:space="preserve">
+    <value>Add the three newest titles to your Flight</value>
+  </data>
+  <data name="OnboardingViewModelUnavailableForTheCurrentLibationInterfaceBecause" xml:space="preserve">
+    <value>Unavailable for the current Libation interface because Current Flight belongs to the contemporary shell.</value>
+  </data>
+  <data name="OnboardingViewModelUnavailableUntilTheCurrentLibraryScanFinishes" xml:space="preserve">
+    <value>Unavailable until the current library scan finishes.</value>
+  </data>
+  <data name="OnboardingViewModelAddsUpToThreeAvailableNonSeries" xml:space="preserve">
+    <value>Adds up to three available non-series-parent titles. It does not start processing.</value>
+  </data>
+  <data name="OnboardingViewModelAValidBooksLocationIsStillRequired" xml:space="preserve">
+    <value>A valid Books location is still required before processing.</value>
+  </data>
+  <data name="OnboardingViewModelOpenCopiesWillUseTheConfiguredBooks" xml:space="preserve">
+    <value>Open copies will use the configured Books location: {0}</value>
+  </data>
+  <data name="OnboardingViewModelOnboardingCaptureStepMustBeFrom1" xml:space="preserve">
+    <value>Onboarding capture step must be from 1 through 5.</value>
+  </data>
+  <data name="ProfileChoicePreviewaxamlProfile" xml:space="preserve">
+    <value>Profile</value>
+  </data>
+  <data name="ProfileChoicePreviewaxamlChooseProfile" xml:space="preserve">
+    <value>Choose profile</value>
+  </data>
+  <data name="ProfileChoicePreviewaxamlPreview" xml:space="preserve">
+    <value>Preview</value>
+  </data>
+  <data name="DashboardViewModelRecentAdditions" xml:space="preserve">
+    <value>Recent additions</value>
+  </data>
+  <data name="DashboardViewModelRecentlyCompleted" xml:space="preserve">
+    <value>Recently completed</value>
+  </data>
+  <data name="DashboardViewModelAddAnAccount" xml:space="preserve">
+    <value>add an account</value>
+  </data>
+  <data name="DashboardViewModelLibationCouldNotOpenAccountSetupTry" xml:space="preserve">
+    <value>Libation could not open account setup. Try Accounts from the navigation.</value>
+  </data>
+  <data name="DashboardViewModelManageAccounts" xml:space="preserve">
+    <value>manage accounts</value>
+  </data>
+  <data name="DashboardViewModelLibationCouldNotOpenAccountManagementTry" xml:space="preserve">
+    <value>Libation could not open account management. Try Accounts from the navigation.</value>
+  </data>
+  <data name="DashboardViewModelScanTheLibrary" xml:space="preserve">
+    <value>scan the library</value>
+  </data>
+  <data name="DashboardViewModelLibationCouldNotStartTheLibraryScan" xml:space="preserve">
+    <value>Libation could not start the library scan. Check the account connection and try again.</value>
+  </data>
+  <data name="DashboardViewModelLocateAudiobooks" xml:space="preserve">
+    <value>locate audiobooks</value>
+  </data>
+  <data name="DashboardViewModelDownloadPendingTitles" xml:space="preserve">
+    <value>download pending titles</value>
+  </data>
+  <data name="DashboardViewModelLibationCouldNotQueueThePendingTitles" xml:space="preserve">
+    <value>Libation could not queue the pending titles. Open Downloads or Processing for title-level details.</value>
+  </data>
+  <data name="DashboardViewModelLocateDroppedAudiobooks" xml:space="preserve">
+    <value>locate dropped audiobooks</value>
+  </data>
+  <data name="DashboardViewModelLibationCouldNotInspectTheDroppedLocation" xml:space="preserve">
+    <value>Libation could not inspect the dropped location. Use Browse and choose a local folder instead.</value>
+  </data>
+  <data name="DashboardViewModelSearchTheLibrary" xml:space="preserve">
+    <value>search the library</value>
+  </data>
+  <data name="DashboardViewModelLibationCouldNotApplyThatLibrarySearch" xml:space="preserve">
+    <value>Libation could not apply that library search. Clear the search and try again.</value>
+  </data>
+  <data name="DashboardViewModelLibationCouldNotOpenTheFilteredLibrary" xml:space="preserve">
+    <value>Libation could not open the filtered Library. Clear the search and try again.</value>
+  </data>
+  <data name="DashboardViewModelOpenTheLibrary" xml:space="preserve">
+    <value>open the library</value>
+  </data>
+  <data name="DashboardViewModelLibationCouldNotOpenTheLibraryView" xml:space="preserve">
+    <value>Libation could not open the Library view. Try Library from the navigation.</value>
+  </data>
+  <data name="DashboardViewModelOpenProcessing" xml:space="preserve">
+    <value>open processing</value>
+  </data>
+  <data name="DashboardViewModelLibationCouldNotOpenProcessingTryProcessing" xml:space="preserve">
+    <value>Libation could not open Processing. Try Processing from the navigation.</value>
+  </data>
+  <data name="DashboardViewModelNotMeasured" xml:space="preserve">
+    <value>Not measured</value>
+  </data>
+  <data name="DashboardViewModelNoAdditionsThisWeek" xml:space="preserve">
+    <value>No additions this week</value>
+  </data>
+  <data name="DashboardViewModel1ThisWeek" xml:space="preserve">
+    <value>+1 this week</value>
+  </data>
+  <data name="DashboardViewModel0ThisWeek" xml:space="preserve">
+    <value>+{0} this week</value>
+  </data>
+  <data name="DashboardViewModelNoneRunning" xml:space="preserve">
+    <value>None running</value>
+  </data>
+  <data name="DashboardViewModel1Running" xml:space="preserve">
+    <value>1 running</value>
+  </data>
+  <data name="DashboardViewModel0Running" xml:space="preserve">
+    <value>{0} running</value>
+  </data>
+  <data name="DashboardViewModel0Running1Queued" xml:space="preserve">
+    <value>{0} running · {1} queued</value>
+  </data>
+  <data name="DashboardViewModelAllLooksGood" xml:space="preserve">
+    <value>All looks good</value>
+  </data>
+  <data name="DashboardViewModel1Failed" xml:space="preserve">
+    <value>1 failed</value>
+  </data>
+  <data name="DashboardViewModel0Failed" xml:space="preserve">
+    <value>{0} failed</value>
+  </data>
+  <data name="DashboardViewModelLocalAudiobookStorage" xml:space="preserve">
+    <value>Local audiobook storage</value>
+  </data>
+  <data name="DashboardViewModelStorageHasNotBeenMeasured" xml:space="preserve">
+    <value>Storage has not been measured</value>
+  </data>
+  <data name="DashboardViewModel1AudibleAccountConnected" xml:space="preserve">
+    <value>1 Audible account connected</value>
+  </data>
+  <data name="DashboardViewModel0AudibleAccountsConnected" xml:space="preserve">
+    <value>{0} Audible accounts connected</value>
+  </data>
+  <data name="DashboardViewModelTheLastSuccessfulScanIsStale" xml:space="preserve">
+    <value>The last successful scan is stale</value>
+  </data>
+  <data name="DashboardViewModelLastSuccessfulScan0G" xml:space="preserve">
+    <value>Last successful scan: {0:g}</value>
+  </data>
+  <data name="DashboardViewModelReadyToScan" xml:space="preserve">
+    <value>Ready to scan</value>
+  </data>
+  <data name="DashboardViewModel1ProcessingJobFailedOpenProcessingFor" xml:space="preserve">
+    <value>1 processing job failed. Open Processing for details.</value>
+  </data>
+  <data name="DashboardViewModel0ProcessingJobsFailedOpenProcessingFor" xml:space="preserve">
+    <value>{0} processing jobs failed. Open Processing for details.</value>
+  </data>
+  <data name="DashboardViewModel0TitlesVisible" xml:space="preserve">
+    <value>{0} titles visible</value>
+  </data>
+  <data name="DashboardViewModel0TitlesMatchTheCurrentLibrarySearch" xml:space="preserve">
+    <value>{0} titles match the current library search</value>
+  </data>
+  <data name="DashboardViewModelEditorialLibraryWorkspace" xml:space="preserve">
+    <value>Editorial library workspace</value>
+  </data>
+  <data name="DashboardViewModelTodaySSelection" xml:space="preserve">
+    <value>Today’s Selection</value>
+  </data>
+  <data name="DashboardViewModelTheCellar" xml:space="preserve">
+    <value>The Cellar</value>
+  </data>
+  <data name="DashboardViewModelWelcomeBackHereSWhatSHappening" xml:space="preserve">
+    <value>Welcome back. Here’s what’s happening in your cellar.</value>
+  </data>
+  <data name="DashboardViewModelYourCuratedCollectionOfStoriesNeatlyAged" xml:space="preserve">
+    <value>Your curated collection of stories, neatly aged and ready to enjoy.</value>
+  </data>
+  <data name="DashboardViewModelRefreshTheContemporaryOverview" xml:space="preserve">
+    <value>refresh the contemporary overview</value>
+  </data>
+  <data name="DashboardViewModelLibationCouldNotRefreshTheOverviewYour" xml:space="preserve">
+    <value>Libation could not refresh the overview. Your library data was not changed.</value>
+  </data>
+  <data name="DashboardViewModelFailedToRefreshTheContemporaryOverviewCorrelation" xml:space="preserve">
+    <value>Failed to refresh the contemporary overview. Correlation ID: {CorrelationId}. Category: {ErrorCategory}</value>
+  </data>
+  <data name="DashboardViewModelOpenABook" xml:space="preserve">
+    <value>open a book</value>
+  </data>
+  <data name="DashboardViewModelLibationCouldNotOpenThatBookOpen" xml:space="preserve">
+    <value>Libation could not open that book. Open it from the Library instead.</value>
+  </data>
+  <data name="DashboardViewModelDashboardActionFailedDashboardActionCorrelationIDCorrelationId" xml:space="preserve">
+    <value>Dashboard action failed: {DashboardAction}. Correlation ID: {CorrelationId}. Category: {ErrorCategory}</value>
+  </data>
+  <data name="DashboardViewModelUnableToCopyOverviewDiagnosticsCorrelationID" xml:space="preserve">
+    <value>Unable to copy overview diagnostics. Correlation ID: {CorrelationId}. {TechnicalDetails}</value>
+  </data>
+  <data name="MainDashboardDataSourceReadyToProcess" xml:space="preserve">
+    <value>Ready to process</value>
+  </data>
+  <data name="MainDashboardDataSource0M" xml:space="preserve">
+    <value>{0}m</value>
+  </data>
+  <data name="MainDashboardDataSource0H1M" xml:space="preserve">
+    <value>{0}h {1}m</value>
+  </data>
+  <data name="MainDashboardDataSourceNarratedBy0" xml:space="preserve">
+    <value>Narrated by {0}</value>
+  </data>
+  <data name="MainDashboardDataSource0NarratedBy1" xml:space="preserve">
+    <value>{0} · Narrated by {1}</value>
+  </data>
+  <data name="MainDashboardSupplementSourceUnableToMeasureLocalAudiobookStorageFor" xml:space="preserve">
+    <value>Unable to measure local audiobook storage for the dashboard</value>
+  </data>
+  <data name="ProcessingQueueItemViewModelMP3Output" xml:space="preserve">
+    <value>MP3 output</value>
+  </data>
+  <data name="ProcessingQueueItemViewModelMP3SplitByChapter" xml:space="preserve">
+    <value>MP3 split by chapter</value>
+  </data>
+  <data name="ProcessingQueueItemViewModelM4BSplitByChapter" xml:space="preserve">
+    <value>M4B split by chapter</value>
+  </data>
+  <data name="ProcessingQueueItemViewModelM4BOutput" xml:space="preserve">
+    <value>M4B output</value>
+  </data>
+  <data name="ProcessingQueueItemViewModelPDFSupplement" xml:space="preserve">
+    <value>PDF supplement</value>
+  </data>
+  <data name="ProcessingQueueItemViewModelInspectTheOutputFolderBeforeStartingThis" xml:space="preserve">
+    <value>Inspect the output folder before starting this title again; partial output may remain.</value>
+  </data>
+  <data name="ProcessingQueueItemViewModelReference0" xml:space="preserve">
+    <value>Reference: {0}</value>
+  </data>
+  <data name="ProcessingQueueItemViewModelCancel0" xml:space="preserve">
+    <value>Cancel {0}</value>
+  </data>
+  <data name="ProcessingQueueItemViewModelRetry0" xml:space="preserve">
+    <value>Retry {0}</value>
+  </data>
+  <data name="ProcessingQueueItemViewModelMove0UpOnePosition" xml:space="preserve">
+    <value>Move {0} up one position</value>
+  </data>
+  <data name="ProcessingQueueItemViewModelMove0DownOnePosition" xml:space="preserve">
+    <value>Move {0} down one position</value>
+  </data>
+  <data name="ProcessingQueueItemViewModelOpenTheQueueLogFor0" xml:space="preserve">
+    <value>Open the queue log for {0}</value>
+  </data>
+  <data name="ProcessingQueueItemViewModelCopyTechnicalDetailsFor0" xml:space="preserve">
+    <value>Copy technical details for {0}</value>
+  </data>
+  <data name="ProcessingQueueItemViewModelRevealTheOutputFor0" xml:space="preserve">
+    <value>Reveal the output for {0}</value>
+  </data>
+  <data name="ProcessingQueueItemViewModelFreeSpaceOrChangeBooksInProgress" xml:space="preserve">
+    <value>Free space or change Books / In progress in Settings before trying again.</value>
+  </data>
+  <data name="ProcessingQueueItemViewModelConfirmTheTitleIsAvailableToThe" xml:space="preserve">
+    <value>Confirm the title is available to the connected Audible account, then try again.</value>
+  </data>
+  <data name="ProcessingQueueItemViewModelOpenTheQueueLogAndFollowIts" xml:space="preserve">
+    <value>Open the queue log and follow its Widevine guidance before trying again.</value>
+  </data>
+  <data name="ProcessingQueueItemViewModelReviewTheSourceTitleAndOutputSettings" xml:space="preserve">
+    <value>Review the source title and output settings before trying again.</value>
+  </data>
+  <data name="ProcessingQueueItemViewModelRetryThisTitleOrOpenTheQueue" xml:space="preserve">
+    <value>Retry this title, or open the queue log for the matching reference.</value>
+  </data>
+  <data name="ProcessingQueueItemViewModelOpenTheQueueLogForTheMatching" xml:space="preserve">
+    <value>Open the queue log for the matching reference, then requeue the title from the Library if appropriate.</value>
+  </data>
+  <data name="ProcessingQueueItemViewModelTitle0" xml:space="preserve">
+    <value>Title: {0}</value>
+  </data>
+  <data name="ProcessingQueueItemViewModelStatus0" xml:space="preserve">
+    <value>Status: {0}</value>
+  </data>
+  <data name="ProcessingQueueItemViewModelStage0" xml:space="preserve">
+    <value>Stage: {0}</value>
+  </data>
+  <data name="ProcessingQueueItemViewModelResult0" xml:space="preserve">
+    <value>Result: {0}</value>
+  </data>
+  <data name="ProcessingQueueItemViewModelCorrelationID0" xml:space="preserve">
+    <value>Correlation ID: {0}</value>
+  </data>
+  <data name="ProcessingQueueItemViewModelSummary0" xml:space="preserve">
+    <value>Summary: {0}</value>
+  </data>
+  <data name="ProcessingQueueItemViewModelRecommendedAction0" xml:space="preserve">
+    <value>Recommended action: {0}</value>
+  </data>
+  <data name="ProcessingQueueItemViewModelUnableToCopyQueueItemDiagnosticsCorrelation" xml:space="preserve">
+    <value>Unable to copy queue-item diagnostics. Correlation ID: {CorrelationId}. {TechnicalDetails}</value>
+  </data>
+  <data name="ProcessingQueueItemViewModelUnableToRevealCompletedQueueOutputCorrelation" xml:space="preserve">
+    <value>Unable to reveal completed queue output. Correlation ID: {CorrelationId}</value>
+  </data>
+  <data name="ProcessingViewModelNoActiveProcessing" xml:space="preserve">
+    <value>No active processing</value>
+  </data>
+  <data name="ProcessingViewModel0Active1Waiting2Completed3" xml:space="preserve">
+    <value>{0} active · {1} waiting · {2} completed · {3} failed</value>
+  </data>
+  <data name="ProcessingViewModel0Cancelled" xml:space="preserve">
+    <value> · {0} cancelled</value>
+  </data>
+  <data name="ProcessingViewModel1QueueLogEntry" xml:space="preserve">
+    <value>1 queue log entry</value>
+  </data>
+  <data name="ProcessingViewModel0QueueLogEntries" xml:space="preserve">
+    <value>{0} queue log entries</value>
+  </data>
+  <data name="ProcessingViewModelTheDecanter" xml:space="preserve">
+    <value>The Decanter</value>
+  </data>
+  <data name="ProcessingViewModelFollowTheExistingProcessingQueueFromWaiting" xml:space="preserve">
+    <value>Follow the existing processing queue from waiting through completion.</value>
+  </data>
+  <data name="ProcessingViewModelCancelAll" xml:space="preserve">
+    <value>Cancel all</value>
+  </data>
+  <data name="ProcessingViewModelClearFinished" xml:space="preserve">
+    <value>Clear finished</value>
+  </data>
+  <data name="ProcessingViewModelPerformance" xml:space="preserve">
+    <value>Performance</value>
+  </data>
+  <data name="ProcessingViewModelAFailedDownloadQueueItemWasNot" xml:space="preserve">
+    <value>A failed download queue item was not accepted for retry. Correlation ID: {CorrelationId}</value>
+  </data>
+  <data name="ProcessingViewModelCancelled" xml:space="preserve">
+    <value>Cancelled</value>
+  </data>
+  <data name="ProcessingViewModelUnableToCopyTheScrubbedProcessingQueue" xml:space="preserve">
+    <value>Unable to copy the scrubbed processing queue log.</value>
+  </data>
+  <data name="AppearanceSettingsViewModelAppearanceChangesAreReadyToApply" xml:space="preserve">
+    <value>Appearance changes are ready to apply.</value>
+  </data>
+  <data name="AppearanceSettingsViewModelAppearanceMatchesTheSavedSettings" xml:space="preserve">
+    <value>Appearance matches the saved settings.</value>
+  </data>
+  <data name="SettingsViewModelOpenSettings" xml:space="preserve">
+    <value>open settings</value>
+  </data>
+  <data name="SettingsViewModelLibationCouldNotOpenSettingsNoSettings" xml:space="preserve">
+    <value>Libation could not open Settings. No settings were changed.</value>
+  </data>
+  <data name="SettingsViewModelImportantSettings" xml:space="preserve">
+    <value>Important Settings</value>
+  </data>
+  <data name="SettingsViewModelImportLibrary" xml:space="preserve">
+    <value>Import Library</value>
+  </data>
+  <data name="SettingsViewModelDownloadDecrypt" xml:space="preserve">
+    <value>Download/Decrypt</value>
+  </data>
+  <data name="SettingsViewModelAudioFileSettings" xml:space="preserve">
+    <value>Audio File Settings</value>
+  </data>
+  <data name="SettingsViewModelAudiobookshelf" xml:space="preserve">
+    <value>Audiobookshelf</value>
+  </data>
+  <data name="SettingsViewModelOpenAccountSettings" xml:space="preserve">
+    <value>open account settings</value>
+  </data>
+  <data name="SettingsViewModelOpenAboutAndUpdateStatus" xml:space="preserve">
+    <value>open About and update status</value>
+  </data>
+  <data name="SettingsViewModelLibationCouldNotOpenAboutTryThe" xml:space="preserve">
+    <value>Libation could not open About. Try the native application menu instead.</value>
+  </data>
+  <data name="SettingsViewModelApplyContemporaryAppearance" xml:space="preserve">
+    <value>apply contemporary appearance</value>
+  </data>
+  <data name="SettingsViewModelLibationCouldNotApplyTheAppearanceDraft" xml:space="preserve">
+    <value>Libation could not apply the appearance draft. The saved appearance was not partially changed.</value>
+  </data>
+  <data name="SettingsViewModelResetContemporaryAppearance" xml:space="preserve">
+    <value>reset contemporary appearance</value>
+  </data>
+  <data name="SettingsViewModelLibationCouldNotResetAppearanceTheSaved" xml:space="preserve">
+    <value>Libation could not reset appearance. The saved appearance was not partially changed.</value>
+  </data>
+  <data name="SettingsViewModelBooksLocationStartupUpdatesAuthenticationTokenStorage" xml:space="preserve">
+    <value>Books location, startup updates, authentication-token storage, logging, display scaling, and Classic theme access.</value>
+  </data>
+  <data name="SettingsViewModelGeneralBooksFolderStartupUpdatesPrivacyCredentials" xml:space="preserve">
+    <value>general books folder startup updates privacy credentials tokens logging display classic chardonnay</value>
+  </data>
+  <data name="SettingsViewModelOpenImportantSettings" xml:space="preserve">
+    <value>Open Important Settings</value>
+  </data>
+  <data name="SettingsViewModelAutomaticScansImportedTitleSummariesPodcastsEpisodes" xml:space="preserve">
+    <value>Automatic scans, imported-title summaries, podcasts, episodes, and Plus titles.</value>
+  </data>
+  <data name="SettingsViewModelImportLibraryAutomaticAutoScanPodcastsEpisodes" xml:space="preserve">
+    <value>import library automatic auto scan podcasts episodes plus</value>
+  </data>
+  <data name="SettingsViewModelOpenImportLibrary" xml:space="preserve">
+    <value>Open Import Library</value>
+  </data>
+  <data name="SettingsViewModelDownloadDecrypt2" xml:space="preserve">
+    <value>Download / Decrypt</value>
+  </data>
+  <data name="SettingsViewModelDailyDownloadLimitsUnavailableTitleBehaviorNaming" xml:space="preserve">
+    <value>Daily download limits, unavailable-title behavior, naming templates, temporary files, and metadata sidecars.</value>
+  </data>
+  <data name="SettingsViewModelDownloadDecryptLimitUnavailableNamingFoldersTemplates" xml:space="preserve">
+    <value>download decrypt limit unavailable naming folders templates temporary metadata</value>
+  </data>
+  <data name="SettingsViewModelOpenDownloadDecrypt" xml:space="preserve">
+    <value>Open Download / Decrypt</value>
+  </data>
+  <data name="SettingsViewModelAudioQualityCodecsOutputFormatChaptersCover" xml:space="preserve">
+    <value>Audio quality, codecs, output format, chapters, cover art, and processing fix-ups.</value>
+  </data>
+  <data name="SettingsViewModelAudioQualityCodecWidevineXheAacSpatial" xml:space="preserve">
+    <value>audio quality codec widevine xhe aac spatial mp3 m4b chapters cover processing</value>
+  </data>
+  <data name="SettingsViewModelOpenAudioFileSettings" xml:space="preserve">
+    <value>Open Audio File Settings</value>
+  </data>
+  <data name="SettingsViewModelServerConnectionAPITokenRemoteLibraryAnd" xml:space="preserve">
+    <value>Server connection, API token, remote library, and destination folder.</value>
+  </data>
+  <data name="SettingsViewModelAudiobookshelfServerApiTokenIntegrationRemoteLibrary" xml:space="preserve">
+    <value>audiobookshelf server api token integration remote library folder advanced</value>
+  </data>
+  <data name="SettingsViewModelOpenAudiobookshelf" xml:space="preserve">
+    <value>Open Audiobookshelf</value>
+  </data>
+  <data name="SettingsViewModelFiveSettingsTabs" xml:space="preserve">
+    <value>Five Settings tabs</value>
+  </data>
+  <data name="SettingsViewModel1SettingsTabMatchesTheCurrentSearch" xml:space="preserve">
+    <value>1 Settings tab matches the current search</value>
+  </data>
+  <data name="SettingsViewModel0SettingsTabsMatchTheCurrentSearch" xml:space="preserve">
+    <value>{0} Settings tabs match the current search</value>
+  </data>
+  <data name="SettingsViewModelCompact" xml:space="preserve">
+    <value>Compact</value>
+  </data>
+  <data name="SettingsViewModelComfortable" xml:space="preserve">
+    <value>Comfortable</value>
+  </data>
+  <data name="SettingsViewModelReducedMotionOn" xml:space="preserve">
+    <value>Reduced motion on</value>
+  </data>
+  <data name="SettingsViewModelReducedMotionOff" xml:space="preserve">
+    <value>Reduced motion off</value>
+  </data>
+  <data name="SettingsViewModelFollowSystemMotion" xml:space="preserve">
+    <value>Follow system motion</value>
+  </data>
+  <data name="SettingsViewModel01Density2Decoration3" xml:space="preserve">
+    <value>{0} · {1} density · {2} decoration · {3}</value>
+  </data>
+  <data name="SettingsViewModelPreferences" xml:space="preserve">
+    <value>Preferences</value>
+  </data>
+  <data name="SettingsViewModelAdjustContemporaryAppearanceHereOrOpenOne" xml:space="preserve">
+    <value>Adjust contemporary appearance here or open one exact Settings tab.</value>
+  </data>
+  <data name="SettingsViewModelOpenThe0Tab" xml:space="preserve">
+    <value>open the {0} tab</value>
+  </data>
+  <data name="SettingsViewModelLibationCouldNotOpen0NoSettings" xml:space="preserve">
+    <value>Libation could not open {0}. No settings were changed.</value>
+  </data>
+  <data name="SecondaryDestinationViewModelTheDestinationActionGateIsAlreadyHeld" xml:space="preserve">
+    <value>The destination action gate is already held.</value>
+  </data>
+  <data name="SecondaryDestinationViewModelAnotherActionOnThisPageIsStill" xml:space="preserve">
+    <value>Another action on this page is still running. Wait for it to finish, then try again.</value>
+  </data>
+  <data name="SecondaryDestinationViewModelContemporaryDestinationActionWasAlreadyRunningSecondaryOperation" xml:space="preserve">
+    <value>Contemporary destination action was already running: {SecondaryOperation}. Correlation ID: {CorrelationId}. Category: {ErrorCategory}</value>
+  </data>
+  <data name="SecondaryDestinationViewModelContemporaryDestinationActionFailedSecondaryOperationCorrelationID" xml:space="preserve">
+    <value>Contemporary destination action failed: {SecondaryOperation}. Correlation ID: {CorrelationId}. Category: {ErrorCategory}</value>
+  </data>
+  <data name="SecondaryDestinationViewModelUnableToCopyContemporaryErrorDiagnosticsCorrelation" xml:space="preserve">
+    <value>Unable to copy contemporary error diagnostics. Correlation ID: {CorrelationId}. Exception: {ExceptionType}. {TechnicalDetails}</value>
+  </data>
+  <data name="ToolsViewModelProcessVisibleTitles" xml:space="preserve">
+    <value>process visible titles</value>
+  </data>
+  <data name="ToolsViewModelLibationCouldNotQueueTheVisibleTitles" xml:space="preserve">
+    <value>Libation could not queue the visible titles. Review the current Library filter and try again.</value>
+  </data>
+  <data name="ToolsViewModelReplaceVisibleTitleTags" xml:space="preserve">
+    <value>replace visible-title tags</value>
+  </data>
+  <data name="ToolsViewModelLibationCouldNotOpenTheTagReplacement" xml:space="preserve">
+    <value>Libation could not open the tag replacement workflow. No metadata was changed.</value>
+  </data>
+  <data name="ToolsViewModelSetVisibleAudiobookStatus" xml:space="preserve">
+    <value>set visible audiobook status</value>
+  </data>
+  <data name="ToolsViewModelLibationCouldNotOpenTheAudiobookStatus" xml:space="preserve">
+    <value>Libation could not open the audiobook-status workflow. No status was changed.</value>
+  </data>
+  <data name="ToolsViewModelSetVisiblePDFStatus" xml:space="preserve">
+    <value>set visible PDF status</value>
+  </data>
+  <data name="ToolsViewModelLibationCouldNotOpenThePDFStatus" xml:space="preserve">
+    <value>Libation could not open the PDF-status workflow. No status was changed.</value>
+  </data>
+  <data name="ToolsViewModelDetectVisibleDownloadStatus" xml:space="preserve">
+    <value>detect visible download status</value>
+  </data>
+  <data name="ToolsViewModelLibationCouldNotInspectVisibleTitleFiles" xml:space="preserve">
+    <value>Libation could not inspect visible-title files. No status was changed.</value>
+  </data>
+  <data name="ToolsViewModelRemoveVisibleTitles" xml:space="preserve">
+    <value>remove visible titles</value>
+  </data>
+  <data name="ToolsViewModelLibationCouldNotOpenTheRemoveVisible" xml:space="preserve">
+    <value>Libation could not open the remove-visible workflow. No titles were removed.</value>
+  </data>
+  <data name="ToolsViewModelLocateAudiobookFiles" xml:space="preserve">
+    <value>locate audiobook files</value>
+  </data>
+  <data name="ToolsViewModelLibationCouldNotOpenTheAudiobookLocator" xml:space="preserve">
+    <value>Libation could not open the audiobook locator. No files were changed.</value>
+  </data>
+  <data name="ToolsViewModelScanForBetterQualityAudiobooks" xml:space="preserve">
+    <value>scan for better-quality audiobooks</value>
+  </data>
+  <data name="ToolsViewModelLibationCouldNotOpenTheQualityScan" xml:space="preserve">
+    <value>Libation could not open the quality scan. No library data was changed.</value>
+  </data>
+  <data name="ToolsViewModelExportTheLibrary" xml:space="preserve">
+    <value>export the library</value>
+  </data>
+  <data name="ToolsViewModelLibationCouldNotOpenTheLibraryExport" xml:space="preserve">
+    <value>Libation could not open the library export workflow. No export was written.</value>
+  </data>
+  <data name="ToolsViewModelEditQuickFilters" xml:space="preserve">
+    <value>edit quick filters</value>
+  </data>
+  <data name="ToolsViewModelLibationCouldNotOpenTheQuickFilter" xml:space="preserve">
+    <value>Libation could not open the quick-filter editor. No filters were changed.</value>
+  </data>
+  <data name="ToolsViewModelSaveTheCurrentFilter" xml:space="preserve">
+    <value>save the current filter</value>
+  </data>
+  <data name="ToolsViewModelLibationCouldNotSaveTheCurrentFilter" xml:space="preserve">
+    <value>Libation could not save the current filter.</value>
+  </data>
+  <data name="ToolsViewModelOpenFilterSyntaxHelp" xml:space="preserve">
+    <value>open filter syntax help</value>
+  </data>
+  <data name="ToolsViewModelLibationCouldNotOpenFilterSyntaxHelp" xml:space="preserve">
+    <value>Libation could not open filter syntax help.</value>
+  </data>
+  <data name="ToolsViewModelProcessVisibleTitles2" xml:space="preserve">
+    <value>Process visible titles</value>
+  </data>
+  <data name="ToolsViewModelReviewsTheCurrentFilteredScopeThenQueues" xml:space="preserve">
+    <value>Reviews the current filtered scope, then queues every visible title still awaiting an open local copy only after you confirm.</value>
+  </data>
+  <data name="ToolsViewModelConfirmationRequired" xml:space="preserve">
+    <value>Confirmation required</value>
+  </data>
+  <data name="ToolsViewModelReviewAndProcess" xml:space="preserve">
+    <value>Review and process</value>
+  </data>
+  <data name="ToolsViewModelTheConfirmationCountsTheExactEligibleScope" xml:space="preserve">
+    <value>The confirmation counts the exact eligible scope, including titles that need only a PDF.</value>
+  </data>
+  <data name="ToolsViewModelAboutVersionAndUpdates" xml:space="preserve">
+    <value>About, version, and updates</value>
+  </data>
+  <data name="ToolsViewModelNetworkOnlyOnRequest" xml:space="preserve">
+    <value>Network only on request</value>
+  </data>
+  <data name="ToolsViewModelLibraryMaintenance" xml:space="preserve">
+    <value>Library maintenance</value>
+  </data>
+  <data name="ToolsViewModelOperateOnTheTitlesCurrentlyVisibleIn" xml:space="preserve">
+    <value>Operate on the titles currently visible in the shared Library filter.</value>
+  </data>
+  <data name="ToolsViewModelDetectDownloadedStatus" xml:space="preserve">
+    <value>Detect downloaded status</value>
+  </data>
+  <data name="ToolsViewModelInspectsFilesForVisibleTitlesPreviewsProposed" xml:space="preserve">
+    <value>Inspects files for visible titles, previews proposed status changes, and asks before applying them.</value>
+  </data>
+  <data name="ToolsViewModelChangesStatusAfterReview" xml:space="preserve">
+    <value>Changes status after review</value>
+  </data>
+  <data name="ToolsViewModelReviewDetectedStatus" xml:space="preserve">
+    <value>Review detected status</value>
+  </data>
+  <data name="ToolsViewModelSetAudiobookStatusManually" xml:space="preserve">
+    <value>Set audiobook status manually</value>
+  </data>
+  <data name="ToolsViewModelChangesStatusAfterConfirmation" xml:space="preserve">
+    <value>Changes status after confirmation</value>
+  </data>
+  <data name="ToolsViewModelSetAudiobookStatus" xml:space="preserve">
+    <value>Set audiobook status</value>
+  </data>
+  <data name="ToolsViewModelSetPDFStatusManually" xml:space="preserve">
+    <value>Set PDF status manually</value>
+  </data>
+  <data name="ToolsViewModelSetPDFStatus" xml:space="preserve">
+    <value>Set PDF status</value>
+  </data>
+  <data name="ToolsViewModelMoveVisibleTitlesToTrash" xml:space="preserve">
+    <value>Move visible titles to Trash</value>
+  </data>
+  <data name="ToolsViewModelMovesRecordsAfterConfirmation" xml:space="preserve">
+    <value>Moves records after confirmation</value>
+  </data>
+  <data name="ToolsViewModelReviewAndMove" xml:space="preserve">
+    <value>Review and move</value>
+  </data>
+  <data name="ToolsViewModelFileDiscovery" xml:space="preserve">
+    <value>File discovery</value>
+  </data>
+  <data name="ToolsViewModelLocatePreviouslyProcessedAudiobooks" xml:space="preserve">
+    <value>Locate previously processed audiobooks</value>
+  </data>
+  <data name="ToolsViewModelRecordsMatchesAndUpdatesTitleStatus" xml:space="preserve">
+    <value>Records matches and updates title status</value>
+  </data>
+  <data name="ToolsViewModelChooseFolders" xml:space="preserve">
+    <value>Choose folders</value>
+  </data>
+  <data name="ToolsViewModelChangeMetadataForTheCurrentVisibleTitle" xml:space="preserve">
+    <value>Change metadata for the current visible-title scope.</value>
+  </data>
+  <data name="ToolsViewModelReplaceTagsForVisibleTitles" xml:space="preserve">
+    <value>Replace tags for visible titles</value>
+  </data>
+  <data name="ToolsViewModelOpensTagInputShowsTheAffectedVisible" xml:space="preserve">
+    <value>Opens tag input, shows the affected visible-title scope, and asks before replacing tags.</value>
+  </data>
+  <data name="ToolsViewModelReplacesMetadataAfterConfirmation" xml:space="preserve">
+    <value>Replaces metadata after confirmation</value>
+  </data>
+  <data name="ToolsViewModelReviewAndReplace" xml:space="preserve">
+    <value>Review and replace</value>
+  </data>
+  <data name="ToolsViewModelQuality" xml:space="preserve">
+    <value>Quality</value>
+  </data>
+  <data name="ToolsViewModelInspectTheLibraryForSourceQualityImprovements" xml:space="preserve">
+    <value>Inspect the library for source-quality improvements without changing files immediately.</value>
+  </data>
+  <data name="ToolsViewModelScanForBetterQualityAudiobooks2" xml:space="preserve">
+    <value>Scan for better-quality audiobooks</value>
+  </data>
+  <data name="ToolsViewModelReadOnlyScan" xml:space="preserve">
+    <value>Read-only scan</value>
+  </data>
+  <data name="ToolsViewModelStartQualityScan" xml:space="preserve">
+    <value>Start quality scan</value>
+  </data>
+  <data name="ToolsViewModelImportExportAndFilters" xml:space="preserve">
+    <value>Import, export, and filters</value>
+  </data>
+  <data name="ToolsViewModelExportLibrary" xml:space="preserve">
+    <value>Export library</value>
+  </data>
+  <data name="ToolsViewModelWritesTheCurrentLibraryCatalogueToA" xml:space="preserve">
+    <value>Writes the current library catalogue to a user-selected XLSX, CSV, or JSON file.</value>
+  </data>
+  <data name="ToolsViewModelWritesSelectedFile" xml:space="preserve">
+    <value>Writes selected file</value>
+  </data>
+  <data name="ToolsViewModelChooseExport" xml:space="preserve">
+    <value>Choose export</value>
+  </data>
+  <data name="ToolsViewModelEditQuickFilters2" xml:space="preserve">
+    <value>Edit quick filters</value>
+  </data>
+  <data name="ToolsViewModelChangesSavedFilters" xml:space="preserve">
+    <value>Changes saved filters</value>
+  </data>
+  <data name="ToolsViewModelEditFilters" xml:space="preserve">
+    <value>Edit filters</value>
+  </data>
+  <data name="ToolsViewModelSaveCurrentFilter" xml:space="preserve">
+    <value>Save current filter</value>
+  </data>
+  <data name="ToolsViewModelSaveFilter" xml:space="preserve">
+    <value>Save filter</value>
+  </data>
+  <data name="ToolsViewModelOpenFilterSyntaxHelp2" xml:space="preserve">
+    <value>Open filter syntax help</value>
+  </data>
+  <data name="ToolsViewModelNoDataChange" xml:space="preserve">
+    <value>No data change</value>
+  </data>
+  <data name="ToolsViewModelOpenHelp" xml:space="preserve">
+    <value>Open help</value>
+  </data>
+  <data name="ToolsViewModelDiagnosticsAndLegacyUtilities" xml:space="preserve">
+    <value>Diagnostics and legacy utilities</value>
+  </data>
+  <data name="ToolsViewModelLaunchHangover" xml:space="preserve">
+    <value>Launch Hangover</value>
+  </data>
+  <data name="ToolsViewModelOpensExternalApplication" xml:space="preserve">
+    <value>Opens external application</value>
+  </data>
+  <data name="ToolsViewModelChangeTheStartupQuickFilterPreference" xml:space="preserve">
+    <value>change the startup quick-filter preference</value>
+  </data>
+  <data name="ToolsViewModelLibationCouldNotChangeTheStartupQuick" xml:space="preserve">
+    <value>Libation could not change the startup quick-filter preference. Your previous setting remains in effect.</value>
+  </data>
+  <data name="ToolsViewModelUnableToChangeStartupQuickFilterPreference" xml:space="preserve">
+    <value>Unable to change startup quick-filter preference. Correlation ID: {CorrelationId}.</value>
+  </data>
+  <data name="ToolsViewModelOnTheFirstSavedQuickFilterIs" xml:space="preserve">
+    <value>On — the first saved quick filter is applied when Libation starts.</value>
+  </data>
+  <data name="ToolsViewModelOffLibationStartsWithoutAutomaticallyApplyingThe" xml:space="preserve">
+    <value>Off — Libation starts without automatically applying the first saved quick filter.</value>
+  </data>
+  <data name="ToolsViewModelOn" xml:space="preserve">
+    <value>On</value>
+  </data>
+  <data name="ToolsViewModelOff" xml:space="preserve">
+    <value>Off</value>
+  </data>
+  <data name="ToolsViewModelAdvancedOperations" xml:space="preserve">
+    <value>Advanced operations</value>
+  </data>
+  <data name="TrashModelsATrashRowSStableIdentityCannot" xml:space="preserve">
+    <value>A Trash row's stable identity cannot change during refresh.</value>
+  </data>
+  <data name="TrashModelsPodcastSeriesContext" xml:space="preserve">
+    <value>Podcast series context</value>
+  </data>
+  <data name="TrashModelsPodcastEpisode" xml:space="preserve">
+    <value>Podcast episode</value>
+  </data>
+  <data name="TrashModelsAudiobook" xml:space="preserve">
+    <value>Audiobook</value>
+  </data>
+  <data name="TrashModelsAddedDateUnavailable" xml:space="preserve">
+    <value>Added date unavailable</value>
+  </data>
+  <data name="TrashModelsAdded0" xml:space="preserve">
+    <value>Added {0}</value>
+  </data>
+  <data name="TrashModelsSeriesContextForRemovedEpisodesThisRow" xml:space="preserve">
+    <value>Series context for removed episodes — this row is never selected for an action.</value>
+  </data>
+  <data name="TrashModels0In12" xml:space="preserve">
+    <value>{0} in {1} · {2}</value>
+  </data>
+  <data name="TrashModelsSeriesContext" xml:space="preserve">
+    <value>Series context</value>
+  </data>
+  <data name="TrashModelsRemovedAudiblePlus" xml:space="preserve">
+    <value>Removed · Audible Plus</value>
+  </data>
+  <data name="TrashModelsRemoved" xml:space="preserve">
+    <value>Removed</value>
+  </data>
+  <data name="TrashModelsSelect0ForRestoreOrPermanentDeletion" xml:space="preserve">
+    <value>Select {0} for restore or permanent deletion. {1}</value>
+  </data>
+  <data name="TrashViewModelRestoreSelectedTrashTitles" xml:space="preserve">
+    <value>restore selected Trash titles</value>
+  </data>
+  <data name="TrashViewModelLibationCouldNotRestoreTheSelectedTitles" xml:space="preserve">
+    <value>Libation could not restore the selected titles. Their existing Trash state remains authoritative.</value>
+  </data>
+  <data name="TrashViewModelPermanentlyDeleteSelectedTrashRecords" xml:space="preserve">
+    <value>permanently delete selected Trash records</value>
+  </data>
+  <data name="TrashViewModelLibationCouldNotPermanentlyDeleteTheSelected" xml:space="preserve">
+    <value>Libation could not permanently delete the selected records. Review Trash before trying again.</value>
+  </data>
+  <data name="TrashViewModel1TitleInTrash" xml:space="preserve">
+    <value>1 title in Trash</value>
+  </data>
+  <data name="TrashViewModel0TitlesInTrash" xml:space="preserve">
+    <value>{0} titles in Trash</value>
+  </data>
+  <data name="TrashViewModel1RemovedTitleSelected" xml:space="preserve">
+    <value>1 removed title selected</value>
+  </data>
+  <data name="TrashViewModel0RemovedTitlesSelected" xml:space="preserve">
+    <value>{0} removed titles selected</value>
+  </data>
+  <data name="TrashViewModelRestore1SelectedTitle" xml:space="preserve">
+    <value>Restore 1 selected title</value>
+  </data>
+  <data name="TrashViewModelRestore0SelectedTitles" xml:space="preserve">
+    <value>Restore {0} selected titles</value>
+  </data>
+  <data name="TrashViewModelPermanentlyDelete1SelectedLibationRecord" xml:space="preserve">
+    <value>Permanently delete 1 selected Libation record</value>
+  </data>
+  <data name="TrashViewModelPermanentlyDelete0SelectedLibationRecords" xml:space="preserve">
+    <value>Permanently delete {0} selected Libation records</value>
+  </data>
+  <data name="TrashViewModel0RowsMatchTheCurrentSearch1" xml:space="preserve">
+    <value>{0} rows match the current search; {1}</value>
+  </data>
+  <data name="TrashViewModelReviewTitlesHiddenFromTheLibraryBefore" xml:space="preserve">
+    <value>Review titles hidden from the Library before restoring or permanently deleting records.</value>
+  </data>
+  <data name="TrashViewModelRefreshTrash" xml:space="preserve">
+    <value>refresh Trash</value>
+  </data>
+  <data name="TrashViewModelLibationCouldNotLoadTrashNoLibrary" xml:space="preserve">
+    <value>Libation could not load Trash. No library records were changed.</value>
+  </data>
+  <data name="TrashViewModelRestored1TitleToTheLibrary" xml:space="preserve">
+    <value>Restored 1 title to the Library.</value>
+  </data>
+  <data name="TrashViewModelRestored0TitlesToTheLibrary" xml:space="preserve">
+    <value>Restored {0} titles to the Library.</value>
+  </data>
+  <data name="TrashViewModelNoTrashRecordsChanged" xml:space="preserve">
+    <value>No Trash records changed.</value>
+  </data>
+  <data name="TrashViewModelPermanentlyDeleted1RecordFromLibationAudiobook" xml:space="preserve">
+    <value>Permanently deleted 1 record from Libation. Audiobook files were left untouched.</value>
+  </data>
+  <data name="TrashViewModelPermanentlyDeleted0RecordsFromLibationAudiobook" xml:space="preserve">
+    <value>Permanently deleted {0} records from Libation. Audiobook files were left untouched.</value>
+  </data>
+  <data name="BookDetailsNarratedByFormat" xml:space="preserve">
+    <value>Narrated by {0}</value>
+  </data>
+  <data name="BookDetailsMarketplaceFormat" xml:space="preserve">
+    <value>Marketplace: {0}</value>
+  </data>
+  <data name="BookDetailsReleaseDateFormat" xml:space="preserve">
+    <value>Release date: {0}</value>
+  </data>
+  <data name="BookDetailsSeriesFormat" xml:space="preserve">
+    <value>Series: {0}</value>
+  </data>
+  <data name="BookDetailsDurationFormat" xml:space="preserve">
+    <value>Duration: {0}</value>
+  </data>
+  <data name="BookDetailsAccountFormat" xml:space="preserve">
+    <value>Account: {0}</value>
+  </data>
+  <data name="BookDetailsAddedFormat" xml:space="preserve">
+    <value>Added: {0}</value>
+  </data>
+  <data name="BookDetailsCategoriesFormat" xml:space="preserve">
+    <value>Categories: {0}</value>
+  </data>
+  <data name="BookDetailsTagsFormat" xml:space="preserve">
+    <value>Tags: {0}</value>
+  </data>
+  <data name="BookDetailsRatingFormat" xml:space="preserve">
+    <value>Rating: {0}</value>
+  </data>
+  <data name="BookDetailsQualityAndVersionFormat" xml:space="preserve">
+    <value>Quality and version: {0}</value>
+  </data>
+  <data name="AppearanceProfilePreviewChooseFormat" xml:space="preserve">
+    <value>Choose {0}</value>
+  </data>
+  <data name="TastingRoomCuratedBatchFormat" xml:space="preserve">
+    <value>A curated batch of {0}.</value>
   </data>
 </root>

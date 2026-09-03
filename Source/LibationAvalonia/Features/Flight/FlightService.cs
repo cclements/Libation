@@ -17,7 +17,7 @@ public readonly record struct FlightItemId(string ProductId)
 	{
 		ArgumentNullException.ThrowIfNull(book);
 		if (string.IsNullOrWhiteSpace(book.Book?.AudibleProductId))
-			throw new ArgumentException("A Current Flight title must have a stable product identifier.", nameof(book));
+			throw new ArgumentException(global::LibationAvalonia.Properties.Resources.FlightServiceACurrentFlightTitleMustHaveA, nameof(book));
 		return new(book.Book.AudibleProductId);
 	}
 
@@ -35,7 +35,7 @@ public sealed class FlightItemViewModel(LibraryBook libraryBook) : ViewModelBase
 		internal set
 		{
 			if (FlightItemId.From(value) != Id)
-				throw new InvalidOperationException("A Flight item's stable identity cannot change.");
+				throw new InvalidOperationException(global::LibationAvalonia.Properties.Resources.FlightServiceAFlightItemSStableIdentityCannot);
 			this.RaiseAndSetIfChanged(ref book, value);
 			this.RaisePropertyChanged(nameof(Title));
 			this.RaisePropertyChanged(nameof(Author));
@@ -139,7 +139,7 @@ public sealed class FlightService : ViewModelBase, IFlightService, IDisposable
 		var item = new FlightItemViewModel(book);
 		byId.Add(id, item);
 		items.Add(item);
-		OnChanged($"Added {item.Title} to Current Flight. {Count} selected.", FlightChangeKind.Add);
+		OnChanged(string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.FlightServiceAdded0ToCurrentFlight1Selected, item.Title, Count), FlightChangeKind.Add);
 		return true;
 	}
 
@@ -159,7 +159,7 @@ public sealed class FlightService : ViewModelBase, IFlightService, IDisposable
 			added++;
 		}
 		if (added > 0)
-			OnChanged($"Added {added} titles to Current Flight. {Count} selected.", FlightChangeKind.Add);
+			OnChanged(string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.FlightServiceAdded0TitlesToCurrentFlight1, added, Count), FlightChangeKind.Add);
 		return added;
 	}
 
@@ -197,7 +197,7 @@ public sealed class FlightService : ViewModelBase, IFlightService, IDisposable
 		byId.Clear();
 		foreach (var item in items)
 			byId.Add(item.Id, item);
-		OnChanged($"Current Flight now contains {Count} title(s).", FlightChangeKind.Replace);
+		OnChanged(string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.FlightServiceCurrentFlightNowContains0TitleS, Count), FlightChangeKind.Replace);
 		return true;
 	}
 
@@ -210,7 +210,7 @@ public sealed class FlightService : ViewModelBase, IFlightService, IDisposable
 		if (currentIndex == targetIndex)
 			return false;
 		items.Move(currentIndex, targetIndex);
-		OnChanged($"Moved {item.Title} to position {targetIndex + 1} in Current Flight.", FlightChangeKind.Move);
+		OnChanged(string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.FlightServiceMoved0ToPosition1InCurrent, item.Title, targetIndex + 1), FlightChangeKind.Move);
 		return true;
 	}
 
@@ -232,7 +232,7 @@ public sealed class FlightService : ViewModelBase, IFlightService, IDisposable
 			return new([]);
 		int index = items.IndexOf(item);
 		items.RemoveAt(index);
-		OnChanged($"Removed {item.Title} from Current Flight. {Count} selected.", FlightChangeKind.Remove);
+		OnChanged(string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.FlightServiceRemoved0FromCurrentFlight1Selected, item.Title, Count), FlightChangeKind.Remove);
 		return new([new(item, index)]);
 	}
 
@@ -243,7 +243,7 @@ public sealed class FlightService : ViewModelBase, IFlightService, IDisposable
 		var entries = items.Select((item, index) => new FlightUndoEntry(item, index)).ToArray();
 		items.Clear();
 		byId.Clear();
-		OnChanged("Cleared Current Flight.", FlightChangeKind.Clear);
+		OnChanged(global::LibationAvalonia.Properties.Resources.CurrentFlightViewModelClearedCurrentFlight, FlightChangeKind.Clear);
 		return new(entries);
 	}
 
@@ -261,7 +261,7 @@ public sealed class FlightService : ViewModelBase, IFlightService, IDisposable
 			restored = true;
 		}
 		if (restored)
-			OnChanged($"Restored Current Flight. {Count} selected.", FlightChangeKind.Restore);
+			OnChanged(string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.FlightServiceRestoredCurrentFlight0Selected, Count), FlightChangeKind.Restore);
 		return restored;
 	}
 
@@ -316,8 +316,8 @@ public sealed class FlightService : ViewModelBase, IFlightService, IDisposable
 		// Reconciliation can replace the live LibraryBook instances without changing IDs.
 		// Publish once so aggregate duration/size and row metadata refresh together.
 		OnChanged(removed > 0
-			? $"Removed {removed} unavailable titles from Current Flight. {Count} selected."
-			: $"Current Flight contains {Count} titles.", FlightChangeKind.Reconcile);
+			? string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.FlightServiceRemoved0UnavailableTitlesFromCurrentFlight, removed, Count)
+			: string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.FlightServiceCurrentFlightContains0Titles, Count), FlightChangeKind.Reconcile);
 	}
 
 	private void OnChanged(string announcement, FlightChangeKind kind)

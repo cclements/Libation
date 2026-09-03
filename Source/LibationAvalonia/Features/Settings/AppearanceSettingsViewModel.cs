@@ -151,14 +151,14 @@ public sealed class AppearanceSettingsViewModel : ViewModelBase, IDisposable
 	public bool IsTastingRoomSelected => !IsHighContrast && SelectedBaseStyle.Value == ExperienceStyle.TastingRoom;
 	public string SelectedStyleText => EffectiveStyle switch
 	{
-		ExperienceStyle.HighContrast => "High Contrast",
-		ExperienceStyle.TastingRoom => "Tasting Room",
-		ExperienceStyle.Cellar => "Cellar",
-		_ => "Follow System",
+		ExperienceStyle.HighContrast => global::LibationAvalonia.Properties.Resources.OnboardingViewHighContrast,
+		ExperienceStyle.TastingRoom => global::LibationAvalonia.Properties.Resources.OnboardingViewTastingRoom,
+		ExperienceStyle.Cellar => global::LibationAvalonia.Properties.Resources.OnboardingViewCellar,
+		_ => global::LibationAvalonia.Properties.Resources.OnboardingViewFollowSystem,
 	};
 	public string DraftStateText => HasUnsavedChanges
-		? "Appearance changes are ready to apply."
-		: "Appearance matches the saved settings.";
+		? global::LibationAvalonia.Properties.Resources.AppearanceSettingsViewModelAppearanceChangesAreReadyToApply
+		: global::LibationAvalonia.Properties.Resources.AppearanceSettingsViewModelAppearanceMatchesTheSavedSettings;
 	public bool HasUnsavedChanges
 	{
 		get

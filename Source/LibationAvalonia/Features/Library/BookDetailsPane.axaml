@@ -1,21 +1,22 @@
 <UserControl xmlns="https://github.com/avaloniaui"
 			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:properties="using:LibationAvalonia.Properties"
 			 xmlns:components="using:LibationAvalonia.DesignSystem.Components"
 			 xmlns:library="using:LibationAvalonia.Features.Library"
 			 x:Class="LibationAvalonia.Features.Library.BookDetailsPane"
 			 x:DataType="library:LibraryViewModel">
 	<Border Classes="card raised"
 			BorderBrush="{DynamicResource Libation.Brush.BorderStrong}"
-			AutomationProperties.Name="Selected book details">
+			AutomationProperties.Name="{x:Static properties:Resources.BookDetailsPaneSelectedBookDetails}">
 		<Grid RowDefinitions="Auto,*" RowSpacing="{DynamicResource Libation.Space.3}">
 			<Grid ColumnDefinitions="*,Auto">
-				<TextBlock Text="Book details"
+				<TextBlock Text="{x:Static properties:Resources.BookDetailsPaneBookDetails}"
 						   FontSize="{DynamicResource Libation.FontSize.Section}"
 						   FontWeight="SemiBold"
 						   Foreground="{DynamicResource Libation.Brush.TextPrimary}" />
 				<Button Grid.Column="1"
 						Classes="contemporary quiet compact"
-						Content="Close details"
+						Content="{x:Static properties:Resources.BookDetailsPaneCloseDetails}"
 						Command="{Binding CloseDetailsCommand}" />
 			</Grid>
 
@@ -32,37 +33,37 @@
 							   TextWrapping="Wrap"
 							   Foreground="{DynamicResource Libation.Brush.TextPrimary}" />
 					<TextBlock Text="{Binding Author}" TextWrapping="Wrap" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
-					<TextBlock Text="{Binding Narrator, StringFormat='Narrated by {0}'}" TextWrapping="Wrap" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+					<TextBlock Text="{Binding Narrator, StringFormat={x:Static properties:Resources.BookDetailsNarratedByFormat}}" TextWrapping="Wrap" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
 					<components:StatusBadge Status="{Binding Status}" TextOverride="{Binding StatusText}" HorizontalAlignment="Left" />
 					<Separator />
-					<TextBlock Text="Metadata" FontWeight="SemiBold" />
-					<TextBlock Text="{Binding MarketplaceText, StringFormat='Marketplace: {0}'}" TextWrapping="Wrap" />
-					<TextBlock Text="{Binding ReleaseDateText, StringFormat='Release date: {0}'}" />
-					<TextBlock Text="{Binding Series, StringFormat='Series: {0}'}" TextWrapping="Wrap" />
-					<TextBlock Text="{Binding Duration, StringFormat='Duration: {0}'}" />
-					<TextBlock Text="{Binding Account, StringFormat='Account: {0}'}" TextWrapping="Wrap" />
-					<TextBlock Text="{Binding DateAdded, StringFormat='Added: {0}'}" />
-					<TextBlock Text="{Binding Category, StringFormat='Categories: {0}'}" TextWrapping="Wrap" />
-					<TextBlock Text="{Binding Tags, StringFormat='Tags: {0}'}" TextWrapping="Wrap" />
-					<TextBlock Text="{Binding RatingText, StringFormat='Rating: {0}'}" />
+					<TextBlock Text="{x:Static properties:Resources.BookDetailsPaneMetadata}" FontWeight="SemiBold" />
+					<TextBlock Text="{Binding MarketplaceText, StringFormat={x:Static properties:Resources.BookDetailsMarketplaceFormat}}" TextWrapping="Wrap" />
+					<TextBlock Text="{Binding ReleaseDateText, StringFormat={x:Static properties:Resources.BookDetailsReleaseDateFormat}}" />
+					<TextBlock Text="{Binding Series, StringFormat={x:Static properties:Resources.BookDetailsSeriesFormat}}" TextWrapping="Wrap" />
+					<TextBlock Text="{Binding Duration, StringFormat={x:Static properties:Resources.BookDetailsDurationFormat}}" />
+					<TextBlock Text="{Binding Account, StringFormat={x:Static properties:Resources.BookDetailsAccountFormat}}" TextWrapping="Wrap" />
+					<TextBlock Text="{Binding DateAdded, StringFormat={x:Static properties:Resources.BookDetailsAddedFormat}}" />
+					<TextBlock Text="{Binding Category, StringFormat={x:Static properties:Resources.BookDetailsCategoriesFormat}}" TextWrapping="Wrap" />
+					<TextBlock Text="{Binding Tags, StringFormat={x:Static properties:Resources.BookDetailsTagsFormat}}" TextWrapping="Wrap" />
+					<TextBlock Text="{Binding RatingText, StringFormat={x:Static properties:Resources.BookDetailsRatingFormat}}" />
 					<Separator />
-					<TextBlock Text="Local state" FontWeight="SemiBold" />
+					<TextBlock Text="{x:Static properties:Resources.BookDetailsPaneLocalState}" FontWeight="SemiBold" />
 					<TextBlock Text="{Binding LocalStateText}" TextWrapping="Wrap" />
 					<TextBlock Text="{Binding PdfStateText}" TextWrapping="Wrap" />
-					<TextBlock Text="{Binding QualityVersionText, StringFormat='Quality and version: {0}'}" TextWrapping="Wrap" />
-					<TextBlock Text="Output path" FontWeight="SemiBold" />
+					<TextBlock Text="{Binding QualityVersionText, StringFormat={x:Static properties:Resources.BookDetailsQualityAndVersionFormat}}" TextWrapping="Wrap" />
+					<TextBlock Text="{x:Static properties:Resources.BookDetailsPaneOutputPath}" FontWeight="SemiBold" />
 					<TextBlock Text="{Binding OutputPathText}" TextWrapping="Wrap" FontFamily="{DynamicResource Libation.Font.Mono}" />
 					<Separator />
-					<TextBlock Text="Actions" FontWeight="SemiBold" />
+					<TextBlock Text="{x:Static properties:Resources.BookDetailsPaneActions}" FontWeight="SemiBold" />
 					<WrapPanel Orientation="Horizontal">
-						<Button Classes="contemporary primary compact" Content="Process" Click="Process_Click" Margin="0,0,8,8" />
-						<Button Classes="contemporary quiet compact" Content="Download" Click="Download_Click" IsEnabled="{Binding CanDownload}" Margin="0,0,8,8" />
-						<Button Classes="contemporary quiet compact" Content="Reveal" Click="Reveal_Click" IsEnabled="{Binding CanReveal}" Margin="0,0,8,8" />
-						<Button Classes="contemporary quiet compact" Content="Edit tags" Click="EditTags_Click" Margin="0,0,8,8" />
-						<Button Classes="contemporary quiet compact" Content="View series" Click="ViewSeries_Click" IsEnabled="{Binding CanViewSeries}" Margin="0,0,0,8" />
+						<Button Classes="contemporary primary compact" Content="{x:Static properties:Resources.BookDetailsPaneProcess}" Click="Process_Click" Margin="0,0,8,8" />
+						<Button Classes="contemporary quiet compact" Content="{x:Static properties:Resources.BookDetailsPaneDownload}" Click="Download_Click" IsEnabled="{Binding CanDownload}" Margin="0,0,8,8" />
+						<Button Classes="contemporary quiet compact" Content="{x:Static properties:Resources.BookDetailsPaneReveal}" Click="Reveal_Click" IsEnabled="{Binding CanReveal}" Margin="0,0,8,8" />
+						<Button Classes="contemporary quiet compact" Content="{x:Static properties:Resources.BookDetailsPaneEditTags}" Click="EditTags_Click" Margin="0,0,8,8" />
+						<Button Classes="contemporary quiet compact" Content="{x:Static properties:Resources.BookDetailsPaneViewSeries}" Click="ViewSeries_Click" IsEnabled="{Binding CanViewSeries}" Margin="0,0,0,8" />
 					</WrapPanel>
 					<Separator />
-					<TextBlock Text="Description" FontWeight="SemiBold" />
+					<TextBlock Text="{x:Static properties:Resources.BookDetailsPaneDescription}" FontWeight="SemiBold" />
 					<TextBlock Text="{Binding Description}" TextWrapping="Wrap" />
 							</StackPanel>
 						</DataTemplate>

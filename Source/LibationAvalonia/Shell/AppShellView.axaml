@@ -241,12 +241,11 @@
 				Opacity="1" RenderTransform="translateY(0px)">
 				<Grid.Transitions>
 					<Transitions>
-						<DoubleTransition Property="Opacity" Duration="{DynamicResource Libation.Motion.EffectiveDuration.Fast}" />
 						<TransformOperationsTransition Property="RenderTransform" Duration="{DynamicResource Libation.Motion.EffectiveDuration.Default}" />
 					</Transitions>
 				</Grid.Transitions>
 				<Panel Grid.Column="0">
-				<Grid IsVisible="{Binding IsLibraryRoute}">
+				<Grid x:Name="LibraryRouteHost" IsVisible="{Binding IsLibraryRoute}">
 					<library:LibraryView x:Name="LibraryDisplay"
 						DataContext="{Binding Library, Mode=OneTime}"
 						LiberateClicked="ProductsDisplay_LiberateClicked"
@@ -255,31 +254,31 @@
 						ConvertToMp3Clicked="ProductsDisplay_ConvertToMp3Clicked" />
 				</Grid>
 
-				<Grid IsVisible="{Binding IsProcessingRoute}">
+				<Grid x:Name="ProcessingRouteHost" IsVisible="{Binding IsProcessingRoute}">
 					<processing:ProcessingView DataContext="{Binding Processing, Mode=OneTime}" />
 				</Grid>
 
-				<Grid IsVisible="{Binding IsDownloadsRoute}">
+				<Grid x:Name="DownloadsRouteHost" IsVisible="{Binding IsDownloadsRoute}">
 					<downloads:DownloadsView DataContext="{Binding Downloads, Mode=OneTime}" />
 				</Grid>
 
-				<Grid IsVisible="{Binding IsHistoryRoute}">
+				<Grid x:Name="HistoryRouteHost" IsVisible="{Binding IsHistoryRoute}">
 					<history:HistoryView DataContext="{Binding History, Mode=OneTime}" />
 				</Grid>
 
-				<Grid IsVisible="{Binding IsAccountsRoute}">
+				<Grid x:Name="AccountsRouteHost" IsVisible="{Binding IsAccountsRoute}">
 					<accounts:AccountsView DataContext="{Binding Accounts, Mode=OneTime}" />
 				</Grid>
 
-				<Grid IsVisible="{Binding IsSettingsRoute}">
+				<Grid x:Name="SettingsRouteHost" IsVisible="{Binding IsSettingsRoute}">
 					<settings:SettingsView DataContext="{Binding Settings, Mode=OneTime}" />
 				</Grid>
 
-				<Grid IsVisible="{Binding IsToolsRoute}">
+				<Grid x:Name="ToolsRouteHost" IsVisible="{Binding IsToolsRoute}">
 					<tools:ToolsView DataContext="{Binding Tools, Mode=OneTime}" />
 				</Grid>
 
-				<Grid IsVisible="{Binding IsTrashRoute}">
+				<Grid x:Name="TrashRouteHost" IsVisible="{Binding IsTrashRoute}">
 					<trash:TrashView DataContext="{Binding Trash, Mode=OneTime}" />
 				</Grid>
 

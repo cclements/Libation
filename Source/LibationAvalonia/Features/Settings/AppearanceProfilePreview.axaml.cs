@@ -13,7 +13,7 @@ public partial class AppearanceProfilePreview : UserControl
 	public static readonly StyledProperty<ExperienceStyle> ProfileStyleProperty =
 		AvaloniaProperty.Register<AppearanceProfilePreview, ExperienceStyle>(nameof(ProfileStyle), ExperienceStyle.Cellar);
 	public static readonly StyledProperty<string> ProfileNameProperty =
-		AvaloniaProperty.Register<AppearanceProfilePreview, string>(nameof(ProfileName), "Profile");
+		AvaloniaProperty.Register<AppearanceProfilePreview, string>(nameof(ProfileName), global::LibationAvalonia.Properties.Resources.ProfileChoicePreviewaxamlProfile);
 	public static readonly StyledProperty<string?> DescriptionProperty =
 		AvaloniaProperty.Register<AppearanceProfilePreview, string?>(nameof(Description));
 	public static readonly StyledProperty<ICommand?> SelectCommandProperty =
@@ -31,7 +31,7 @@ public partial class AppearanceProfilePreview : UserControl
 	public static readonly StyledProperty<LibationStatusKind> SelectionStatusProperty =
 		AvaloniaProperty.Register<AppearanceProfilePreview, LibationStatusKind>(nameof(SelectionStatus), LibationStatusKind.DownloadPending);
 	public static readonly StyledProperty<string> SelectionTextProperty =
-		AvaloniaProperty.Register<AppearanceProfilePreview, string>(nameof(SelectionText), "Preview");
+		AvaloniaProperty.Register<AppearanceProfilePreview, string>(nameof(SelectionText), global::LibationAvalonia.Properties.Resources.ProfileChoicePreviewaxamlPreview);
 
 	public AppearanceProfilePreview()
 	{
@@ -57,7 +57,7 @@ public partial class AppearanceProfilePreview : UserControl
 		if (change.Property == IsSelectedProperty)
 		{
 			SelectionStatus = IsSelected ? LibationStatusKind.Completed : LibationStatusKind.DownloadPending;
-			SelectionText = IsSelected ? "Selected" : "Preview";
+			SelectionText = IsSelected ? global::LibationAvalonia.Properties.Resources.LibraryModelsSelected : global::LibationAvalonia.Properties.Resources.ProfileChoicePreviewaxamlPreview;
 		}
 		if (change.Property == ProfileStyleProperty
 			|| change.Property == DensityProperty

@@ -37,63 +37,63 @@ public sealed class SettingsViewModel : SecondaryDestinationViewModel, IRoutePre
 		Appearance = new(this.configuration);
 		OpenSettingsCommand = CreateOwnerCommand(
 			commands.ShowSettingsAsync,
-			"open settings",
-			"Libation could not open Settings. No settings were changed.");
-		OpenImportantSettingsCommand = CreateSectionCommand(commands, SettingsDialogSection.Important, "Important Settings");
-		OpenImportLibraryCommand = CreateSectionCommand(commands, SettingsDialogSection.ImportLibrary, "Import Library");
-		OpenDownloadDecryptCommand = CreateSectionCommand(commands, SettingsDialogSection.DownloadDecrypt, "Download/Decrypt");
-		OpenAudioFilesCommand = CreateSectionCommand(commands, SettingsDialogSection.AudioFiles, "Audio File Settings");
-		OpenAudiobookshelfCommand = CreateSectionCommand(commands, SettingsDialogSection.Audiobookshelf, "Audiobookshelf");
+			global::LibationAvalonia.Properties.Resources.SettingsViewModelOpenSettings,
+			global::LibationAvalonia.Properties.Resources.SettingsViewModelLibationCouldNotOpenSettingsNoSettings);
+		OpenImportantSettingsCommand = CreateSectionCommand(commands, SettingsDialogSection.Important, global::LibationAvalonia.Properties.Resources.SettingsViewModelImportantSettings);
+		OpenImportLibraryCommand = CreateSectionCommand(commands, SettingsDialogSection.ImportLibrary, global::LibationAvalonia.Properties.Resources.SettingsViewModelImportLibrary);
+		OpenDownloadDecryptCommand = CreateSectionCommand(commands, SettingsDialogSection.DownloadDecrypt, global::LibationAvalonia.Properties.Resources.SettingsViewModelDownloadDecrypt);
+		OpenAudioFilesCommand = CreateSectionCommand(commands, SettingsDialogSection.AudioFiles, global::LibationAvalonia.Properties.Resources.SettingsViewModelAudioFileSettings);
+		OpenAudiobookshelfCommand = CreateSectionCommand(commands, SettingsDialogSection.Audiobookshelf, global::LibationAvalonia.Properties.Resources.SettingsViewModelAudiobookshelf);
 		OpenAccountsCommand = CreateOwnerCommand(
 			commands.ShowAccountsAsync,
-			"open account settings",
-			"Libation could not open account management. No account data was changed.");
+			global::LibationAvalonia.Properties.Resources.SettingsViewModelOpenAccountSettings,
+			global::LibationAvalonia.Properties.Resources.AccountsViewModelLibationCouldNotOpenAccountManagementNo);
 		OpenAboutCommand = CreateOwnerCommand(
 			commands.ShowAboutAsync,
-			"open About and update status",
-			"Libation could not open About. Try the native application menu instead.");
+			global::LibationAvalonia.Properties.Resources.SettingsViewModelOpenAboutAndUpdateStatus,
+			global::LibationAvalonia.Properties.Resources.SettingsViewModelLibationCouldNotOpenAboutTryThe);
 		ApplyAppearanceCommand = CreateOwnerCommand(
 			() => { Appearance.Apply(); return Task.CompletedTask; },
-			"apply contemporary appearance",
-			"Libation could not apply the appearance draft. The saved appearance was not partially changed.");
+			global::LibationAvalonia.Properties.Resources.SettingsViewModelApplyContemporaryAppearance,
+			global::LibationAvalonia.Properties.Resources.SettingsViewModelLibationCouldNotApplyTheAppearanceDraft);
 		ResetAppearanceCommand = CreateOwnerCommand(
 			() => { Appearance.ResetAndApply(); return Task.CompletedTask; },
-			"reset contemporary appearance",
-			"Libation could not reset appearance. The saved appearance was not partially changed.");
+			global::LibationAvalonia.Properties.Resources.SettingsViewModelResetContemporaryAppearance,
+			global::LibationAvalonia.Properties.Resources.SettingsViewModelLibationCouldNotResetAppearanceTheSaved);
 		RequestOnboardingCommand = Track(ReactiveCommand.Create(() => OnboardingRequested?.Invoke(this, EventArgs.Empty)));
 
 		allCategories =
 		[
 			new(
-				"Important Settings",
-				"Books location, startup updates, authentication-token storage, logging, display scaling, and Classic theme access.",
-				"general books folder startup updates privacy credentials tokens logging display classic chardonnay",
+				global::LibationAvalonia.Properties.Resources.SettingsViewModelImportantSettings,
+				global::LibationAvalonia.Properties.Resources.SettingsViewModelBooksLocationStartupUpdatesAuthenticationTokenStorage,
+				global::LibationAvalonia.Properties.Resources.SettingsViewModelGeneralBooksFolderStartupUpdatesPrivacyCredentials,
 				OpenImportantSettingsCommand,
-				"Open Important Settings"),
+				global::LibationAvalonia.Properties.Resources.SettingsViewModelOpenImportantSettings),
 			new(
-				"Import Library",
-				"Automatic scans, imported-title summaries, podcasts, episodes, and Plus titles.",
-				"import library automatic auto scan podcasts episodes plus",
+				global::LibationAvalonia.Properties.Resources.SettingsViewModelImportLibrary,
+				global::LibationAvalonia.Properties.Resources.SettingsViewModelAutomaticScansImportedTitleSummariesPodcastsEpisodes,
+				global::LibationAvalonia.Properties.Resources.SettingsViewModelImportLibraryAutomaticAutoScanPodcastsEpisodes,
 				OpenImportLibraryCommand,
-				"Open Import Library"),
+				global::LibationAvalonia.Properties.Resources.SettingsViewModelOpenImportLibrary),
 			new(
-				"Download / Decrypt",
-				"Daily download limits, unavailable-title behavior, naming templates, temporary files, and metadata sidecars.",
-				"download decrypt limit unavailable naming folders templates temporary metadata",
+				global::LibationAvalonia.Properties.Resources.SettingsViewModelDownloadDecrypt2,
+				global::LibationAvalonia.Properties.Resources.SettingsViewModelDailyDownloadLimitsUnavailableTitleBehaviorNaming,
+				global::LibationAvalonia.Properties.Resources.SettingsViewModelDownloadDecryptLimitUnavailableNamingFoldersTemplates,
 				OpenDownloadDecryptCommand,
-				"Open Download / Decrypt"),
+				global::LibationAvalonia.Properties.Resources.SettingsViewModelOpenDownloadDecrypt),
 			new(
-				"Audio File Settings",
-				"Audio quality, codecs, output format, chapters, cover art, and processing fix-ups.",
-				"audio quality codec widevine xhe aac spatial mp3 m4b chapters cover processing",
+				global::LibationAvalonia.Properties.Resources.SettingsViewModelAudioFileSettings,
+				global::LibationAvalonia.Properties.Resources.SettingsViewModelAudioQualityCodecsOutputFormatChaptersCover,
+				global::LibationAvalonia.Properties.Resources.SettingsViewModelAudioQualityCodecWidevineXheAacSpatial,
 				OpenAudioFilesCommand,
-				"Open Audio File Settings"),
+				global::LibationAvalonia.Properties.Resources.SettingsViewModelOpenAudioFileSettings),
 			new(
-				"Audiobookshelf",
-				"Server connection, API token, remote library, and destination folder.",
-				"audiobookshelf server api token integration remote library folder advanced",
+				global::LibationAvalonia.Properties.Resources.SettingsViewModelAudiobookshelf,
+				global::LibationAvalonia.Properties.Resources.SettingsViewModelServerConnectionAPITokenRemoteLibraryAnd,
+				global::LibationAvalonia.Properties.Resources.SettingsViewModelAudiobookshelfServerApiTokenIntegrationRemoteLibrary,
 				OpenAudiobookshelfCommand,
-				"Open Audiobookshelf"),
+				global::LibationAvalonia.Properties.Resources.SettingsViewModelOpenAudiobookshelf),
 		];
 		VisibleCategories = allCategories;
 		this.configuration.PropertyChanged += Configuration_PropertyChanged;
@@ -115,29 +115,29 @@ public sealed class SettingsViewModel : SecondaryDestinationViewModel, IRoutePre
 	public IReadOnlyList<SettingsCategoryItem> VisibleCategories { get => field; private set => this.RaiseAndSetIfChanged(ref field, value); } = [];
 	public bool HasCategories => VisibleCategories.Count > 0;
 	public string CategorySummary => string.IsNullOrWhiteSpace(SearchText)
-		? "Five Settings tabs"
+		? global::LibationAvalonia.Properties.Resources.SettingsViewModelFiveSettingsTabs
 		: VisibleCategories.Count == 1
-			? "1 Settings tab matches the current search"
-			: $"{VisibleCategories.Count} Settings tabs match the current search";
+			? global::LibationAvalonia.Properties.Resources.SettingsViewModel1SettingsTabMatchesTheCurrentSearch
+			: string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.SettingsViewModel0SettingsTabsMatchTheCurrentSearch, VisibleCategories.Count);
 	public string AppearanceProfileText => !configuration.UseContemporaryShell
-		? "Current Libation interface"
+		? global::LibationAvalonia.Properties.Resources.OnboardingViewCurrentLibationInterface
 		: configuration.ExperienceStyle switch
 		{
-			ExperienceStyle.FollowSystem => "Follow System",
-			ExperienceStyle.TastingRoom => "Tasting Room",
-			ExperienceStyle.CurrentAvalonia => "Current Libation interface",
-			ExperienceStyle.HighContrast => "High Contrast",
-			_ => "Cellar",
+			ExperienceStyle.FollowSystem => global::LibationAvalonia.Properties.Resources.OnboardingViewFollowSystem,
+			ExperienceStyle.TastingRoom => global::LibationAvalonia.Properties.Resources.OnboardingViewTastingRoom,
+			ExperienceStyle.CurrentAvalonia => global::LibationAvalonia.Properties.Resources.OnboardingViewCurrentLibationInterface,
+			ExperienceStyle.HighContrast => global::LibationAvalonia.Properties.Resources.OnboardingViewHighContrast,
+			_ => global::LibationAvalonia.Properties.Resources.OnboardingViewCellar,
 		};
-	public string DensityText => configuration.DensityMode == DensityMode.Compact ? "Compact" : "Comfortable";
+	public string DensityText => configuration.DensityMode == DensityMode.Compact ? global::LibationAvalonia.Properties.Resources.SettingsViewModelCompact : global::LibationAvalonia.Properties.Resources.SettingsViewModelComfortable;
 	public string DecorationText => configuration.DecorationLevel.ToString();
 	public string MotionText => configuration.ReducedMotionPreference switch
 	{
-		ReducedMotionPreference.Reduce => "Reduced motion on",
-		ReducedMotionPreference.Full => "Reduced motion off",
-		_ => "Follow system motion",
+		ReducedMotionPreference.Reduce => global::LibationAvalonia.Properties.Resources.SettingsViewModelReducedMotionOn,
+		ReducedMotionPreference.Full => global::LibationAvalonia.Properties.Resources.SettingsViewModelReducedMotionOff,
+		_ => global::LibationAvalonia.Properties.Resources.SettingsViewModelFollowSystemMotion,
 	};
-	public string AppearanceSummary => $"{AppearanceProfileText} · {DensityText} density · {DecorationText} decoration · {MotionText}";
+	public string AppearanceSummary => string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.SettingsViewModel01Density2Decoration3, AppearanceProfileText, DensityText, DecorationText, MotionText);
 	public string LegacyThemeSummary => Resources.SettingsClassicColorSummary;
 
 	public ICommand OpenSettingsCommand { get; }
@@ -151,22 +151,22 @@ public sealed class SettingsViewModel : SecondaryDestinationViewModel, IRoutePre
 	public ICommand ApplyAppearanceCommand { get; }
 	public ICommand ResetAppearanceCommand { get; }
 	public ICommand RequestOnboardingCommand { get; }
-	public string RouteEyebrow => "Preferences";
-	public string RouteTitle => "Settings";
-	public string RouteSubtitle => "Adjust contemporary appearance here or open one exact Settings tab.";
-	public RouteCommandPresentation RoutePrimaryCommand => new("Apply appearance", ApplyAppearanceCommand);
+	public string RouteEyebrow => global::LibationAvalonia.Properties.Resources.SettingsViewModelPreferences;
+	public string RouteTitle => global::LibationAvalonia.Properties.Resources.RouteSettingsLabel;
+	public string RouteSubtitle => global::LibationAvalonia.Properties.Resources.SettingsViewModelAdjustContemporaryAppearanceHereOrOpenOne;
+	public RouteCommandPresentation RoutePrimaryCommand => new(global::LibationAvalonia.Properties.Resources.SettingsViewApplyAppearance, ApplyAppearanceCommand);
 	public IReadOnlyList<RouteCommandPresentation> RouteSecondaryCommands =>
 	[
-		new("Open Settings", OpenSettingsCommand),
-		new("Manage accounts", OpenAccountsCommand),
+		new(global::LibationAvalonia.Properties.Resources.OnboardingViewOpenSettings, OpenSettingsCommand),
+		new(global::LibationAvalonia.Properties.Resources.OnboardingViewManageAccounts, OpenAccountsCommand),
 	];
 	public RouteStatusPresentation RouteStatusBadge => new(AppearanceProfileText, LibationStatusKind.Completed);
 
 	private ICommand CreateSectionCommand(ILibationCommandAdapter commands, SettingsDialogSection section, string sectionName)
 		=> CreateOwnerCommand(
 			() => commands.ShowSettingsAsync(section),
-			$"open the {sectionName} tab",
-			$"Libation could not open {sectionName}. No settings were changed.");
+			string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.SettingsViewModelOpenThe0Tab, sectionName),
+			string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.SettingsViewModelLibationCouldNotOpen0NoSettings, sectionName));
 
 	private void ApplySearch()
 	{

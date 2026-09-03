@@ -11,7 +11,7 @@
 	<Grid RowDefinitions="*,Auto">
 		<ScrollViewer HorizontalScrollBarVisibility="Disabled">
 			<StackPanel Margin="{DynamicResource Libation.Thickness.5}" Spacing="{DynamicResource Libation.Space.4}">
-				<components:PageHeader Eyebrow="Welcome to Libation" Title="{Binding StepTitle}"
+				<components:PageHeader Eyebrow="{x:Static properties:Resources.OnboardingViewWelcomeToLibation}" Title="{Binding StepTitle}"
 					SupportingText="{x:Static properties:Resources.OnboardingSupportingText}" />
 				<StackPanel Spacing="{DynamicResource Libation.Space.2}">
 					<Grid ColumnDefinitions="*,Auto">
@@ -20,12 +20,12 @@
 							Foreground="{DynamicResource Libation.Brush.AccentSecondary}" />
 					</Grid>
 					<ProgressBar Classes="contemporary prominent" Minimum="0" Maximum="100" Value="{Binding Progress}"
-						AutomationProperties.Name="Onboarding progress" />
+						AutomationProperties.Name="{x:Static properties:Resources.OnboardingViewOnboardingProgress}" />
 				</StackPanel>
 
 				<components:AttentionBanner IsVisible="{Binding HasError}" Severity="{x:Static components:ComponentSeverity.Danger}" FocusOnShow="True"
-					Title="Setup action unavailable" Message="{Binding ErrorMessage}"
-					ActionText="Copy technical details" ActionCommand="{Binding CopyTechnicalDetailsCommand}" />
+					Title="{x:Static properties:Resources.OnboardingViewSetupActionUnavailable}" Message="{Binding ErrorMessage}"
+					ActionText="{x:Static properties:Resources.AccountsViewCopyTechnicalDetails}" ActionCommand="{Binding CopyTechnicalDetailsCommand}" />
 
 				<StackPanel IsVisible="{Binding IsWelcomeStep}" Spacing="{DynamicResource Libation.Space.3}">
 					<TextBlock Text="{x:Static properties:Resources.OnboardingWelcomeBody}"
@@ -34,33 +34,33 @@
 						Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
 					<components:AttentionBanner IsVisible="{Binding NeedsExplicitProfileChoice}"
 						Severity="{x:Static components:ComponentSeverity.Warning}"
-						Title="Choose a profile before continuing"
+						Title="{x:Static properties:Resources.OnboardingViewChooseAProfileBeforeContinuing}"
 						Message="{x:Static properties:Resources.OnboardingProfileChoiceWarning}" />
 					<Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="{DynamicResource Libation.Space.3}"
 						RowSpacing="{DynamicResource Libation.Space.3}">
 						<onboarding:ProfileChoicePreview ProfileStyle="{x:Static experience:ExperienceStyle.FollowSystem}"
-							ProfileName="Follow System" Description="Uses the operating system appearance while keeping Libation’s contemporary structure."
-							ActionText="Choose Follow System" SelectCommand="{Binding SelectFollowSystemCommand}"
+							ProfileName="{x:Static properties:Resources.OnboardingViewFollowSystem}" Description="{x:Static properties:Resources.OnboardingViewUsesTheOperatingSystemAppearanceWhileKeeping}"
+							ActionText="{x:Static properties:Resources.OnboardingViewChooseFollowSystem}" SelectCommand="{Binding SelectFollowSystemCommand}"
 							IsSelected="{Binding IsFollowSystemSelected}" />
 						<onboarding:ProfileChoicePreview Grid.Column="1" ProfileStyle="{x:Static experience:ExperienceStyle.Cellar}"
-							ProfileName="Cellar" Description="Warm, quiet, collection-first presentation for focused library stewardship."
-							ActionText="Choose Cellar" SelectCommand="{Binding SelectCellarCommand}"
+							ProfileName="{x:Static properties:Resources.OnboardingViewCellar}" Description="{x:Static properties:Resources.OnboardingViewWarmQuietCollectionFirstPresentationForFocused}"
+							ActionText="{x:Static properties:Resources.OnboardingViewChooseCellar}" SelectCommand="{Binding SelectCellarCommand}"
 							IsSelected="{Binding IsCellarSelected}" />
 						<onboarding:ProfileChoicePreview Grid.Row="1" ProfileStyle="{x:Static experience:ExperienceStyle.TastingRoom}"
-							ProfileName="Tasting Room" Description="A brighter, editorial presentation with the same underlying library and commands."
-							ActionText="Choose Tasting Room" SelectCommand="{Binding SelectTastingRoomCommand}"
+							ProfileName="{x:Static properties:Resources.OnboardingViewTastingRoom}" Description="{x:Static properties:Resources.OnboardingViewABrighterEditorialPresentationWithTheSame}"
+							ActionText="{x:Static properties:Resources.OnboardingViewChooseTastingRoom}" SelectCommand="{Binding SelectTastingRoomCommand}"
 							IsSelected="{Binding IsTastingRoomSelected}" />
 						<onboarding:ProfileChoicePreview Grid.Row="1" Grid.Column="1"
 							ProfileStyle="{x:Static experience:ExperienceStyle.CurrentAvalonia}"
-							ProfileName="Current Libation interface"
-							Description="Keeps the current Libation desktop interface. This is distinct from the separately shipped Libation-Classic app."
-							ActionText="Keep current interface" SelectCommand="{Binding SelectCurrentInterfaceCommand}"
+							ProfileName="{x:Static properties:Resources.OnboardingViewCurrentLibationInterface}"
+							Description="{x:Static properties:Resources.OnboardingViewKeepsTheCurrentLibationDesktopInterfaceThis}"
+							ActionText="{x:Static properties:Resources.OnboardingViewKeepCurrentInterface}" SelectCommand="{Binding SelectCurrentInterfaceCommand}"
 							IsSelected="{Binding IsCurrentInterfaceSelected}" />
 						<onboarding:ProfileChoicePreview Grid.Row="2" Grid.ColumnSpan="2"
 							ProfileStyle="{x:Static experience:ExperienceStyle.HighContrast}"
-							ProfileName="High Contrast"
+							ProfileName="{x:Static properties:Resources.OnboardingViewHighContrast}"
 							Description="{x:Static properties:Resources.OnboardingHighContrastDescription}"
-							ActionText="Choose High Contrast" SelectCommand="{Binding SelectHighContrastCommand}"
+							ActionText="{x:Static properties:Resources.OnboardingViewChooseHighContrast}" SelectCommand="{Binding SelectHighContrastCommand}"
 							IsSelected="{Binding IsHighContrastSelected}" />
 					</Grid>
 				</StackPanel>
@@ -68,14 +68,14 @@
 				<Border Classes="card raised" IsVisible="{Binding IsAccountStep}">
 					<Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource Libation.Space.4}">
 						<StackPanel Spacing="{DynamicResource Libation.Space.2}">
-							<TextBlock Text="Accounts stay private" FontFamily="{DynamicResource Libation.Font.Display}"
+							<TextBlock Text="{x:Static properties:Resources.OnboardingViewAccountsStayPrivate}" FontFamily="{DynamicResource Libation.Font.Display}"
 								FontSize="{DynamicResource Libation.FontSize.Section}" />
 							<TextBlock Text="{Binding AccountStateText}" FontWeight="SemiBold" />
 							<TextBlock Text="{x:Static properties:Resources.OnboardingAccountPrivacy}"
 								TextWrapping="Wrap" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
 							<StackPanel Orientation="Horizontal" Spacing="8">
-								<Button Classes="contemporary primary" Content="Add account" Command="{Binding AddAccountCommand}" />
-								<Button Classes="contemporary" Content="Manage accounts" Command="{Binding ManageAccountsCommand}" />
+								<Button Classes="contemporary primary" Content="{x:Static properties:Resources.AccountsViewAddAccount}" Command="{Binding AddAccountCommand}" />
+								<Button Classes="contemporary" Content="{x:Static properties:Resources.OnboardingViewManageAccounts}" Command="{Binding ManageAccountsCommand}" />
 							</StackPanel>
 						</StackPanel>
 						<ContentControl Grid.Column="1" Width="180" Height="120"
@@ -88,7 +88,7 @@
 
 				<Border Classes="card raised" IsVisible="{Binding IsLocationStep}">
 					<StackPanel Spacing="{DynamicResource Libation.Space.3}">
-						<TextBlock Text="Keep originals and converted files where you expect" FontFamily="{DynamicResource Libation.Font.Display}"
+						<TextBlock Text="{x:Static properties:Resources.OnboardingViewKeepOriginalsAndConvertedFilesWhereYou}" FontFamily="{DynamicResource Libation.Font.Display}"
 							FontSize="{DynamicResource Libation.FontSize.Section}" />
 						<TextBlock Text="{Binding LocationStateText}" TextWrapping="Wrap" />
 						<TextBlock Text="{x:Static properties:Resources.OnboardingLocationExplanation}"
@@ -96,8 +96,8 @@
 						<TextBlock Text="{x:Static properties:Resources.OnboardingStorageReminder}"
 							TextWrapping="Wrap" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
 						<StackPanel Orientation="Horizontal" Spacing="8">
-							<Button Classes="contemporary primary" Content="Open Settings" Command="{Binding OpenSettingsCommand}" />
-							<Button Classes="contemporary" Content="Locate existing files" Command="{Binding LocateFilesCommand}" />
+							<Button Classes="contemporary primary" Content="{x:Static properties:Resources.OnboardingViewOpenSettings}" Command="{Binding OpenSettingsCommand}" />
+							<Button Classes="contemporary" Content="{x:Static properties:Resources.OnboardingViewLocateExistingFiles}" Command="{Binding LocateFilesCommand}" />
 						</StackPanel>
 					</StackPanel>
 				</Border>
@@ -106,7 +106,7 @@
 					<StackPanel Spacing="{DynamicResource Libation.Space.3}">
 						<Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource Libation.Space.3}">
 							<StackPanel Spacing="{DynamicResource Libation.Space.1}">
-								<TextBlock Text="Bring your library into view" FontFamily="{DynamicResource Libation.Font.Display}"
+								<TextBlock Text="{x:Static properties:Resources.OnboardingViewBringYourLibraryIntoView}" FontFamily="{DynamicResource Libation.Font.Display}"
 									FontSize="{DynamicResource Libation.FontSize.Section}" />
 								<TextBlock Text="{Binding ScanStateText}" TextWrapping="Wrap" />
 							</StackPanel>
@@ -118,9 +118,9 @@
 							AutomationProperties.LiveSetting="{x:Static designSystem:PlatformAutomationPolicy.Polite}" />
 						<TextBlock Text="{x:Static properties:Resources.OnboardingScanExplanation}"
 							TextWrapping="Wrap" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
-						<Button Classes="contemporary primary" Content="Scan all accounts" Command="{Binding ScanCommand}"
+						<Button Classes="contemporary primary" Content="{x:Static properties:Resources.OnboardingViewScanAllAccounts}" Command="{Binding ScanCommand}"
 							IsEnabled="{Binding CanStartScan}" HorizontalAlignment="Left"
-							AutomationProperties.HelpText="Starts the existing nonblocking account scan. You can continue setup while it runs." />
+							AutomationProperties.HelpText="{x:Static properties:Resources.OnboardingViewStartsTheExistingNonblockingAccountScanYou}" />
 					</StackPanel>
 				</Border>
 
@@ -130,7 +130,7 @@
 							<Path Data="{StaticResource glyph.flight}" Width="32" Height="32" Stretch="Uniform"
 								Stroke="{DynamicResource Libation.Brush.AccentSecondary}" StrokeThickness="1.5" />
 							<StackPanel Grid.Column="1" Spacing="{DynamicResource Libation.Space.1}">
-								<TextBlock Text="Current Flight stays intentional" FontFamily="{DynamicResource Libation.Font.Display}"
+								<TextBlock Text="{x:Static properties:Resources.OnboardingViewCurrentFlightStaysIntentional}" FontFamily="{DynamicResource Libation.Font.Display}"
 									FontSize="{DynamicResource Libation.FontSize.Section}" />
 								<TextBlock Text="{x:Static properties:Resources.OnboardingFlightExplanation}"
 									TextWrapping="Wrap" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
@@ -145,11 +145,11 @@
 					<Button Classes="contemporary primary" Content="{Binding FirstFlightActionText}"
 						Command="{Binding AddNewestToFlightCommand}" IsEnabled="{Binding CanShowFirstFlightAction}"
 							HorizontalAlignment="Left"
-							AutomationProperties.Name="Add the three newest eligible titles to Current Flight and open Library"
+							AutomationProperties.Name="{x:Static properties:Resources.OnboardingViewAddTheThreeNewestEligibleTitlesTo}"
 							AutomationProperties.HelpText="{Binding FirstFlightActionHelpText}" />
 						<components:AttentionBanner Severity="{x:Static components:ComponentSeverity.Info}"
-							Title="You remain in control"
-							Message="Choose the first-Flight action to add titles, or finish without adding titles. Neither choice starts a download or changes audiobook files." />
+							Title="{x:Static properties:Resources.OnboardingViewYouRemainInControl}"
+							Message="{x:Static properties:Resources.OnboardingViewChooseTheFirstFlightActionToAdd}" />
 					</StackPanel>
 				</Border>
 			</StackPanel>
@@ -157,7 +157,7 @@
 
 		<Border Grid.Row="1" Classes="card" CornerRadius="0" BorderThickness="0,1,0,0">
 			<Grid Margin="{DynamicResource Libation.Thickness.4}" ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="{DynamicResource Libation.Space.2}">
-				<Button Classes="contemporary" Content="Back" Command="{Binding BackCommand}" IsEnabled="{Binding CanGoBack}" />
+				<Button Classes="contemporary" Content="{x:Static properties:Resources.OnboardingViewBack}" Command="{Binding BackCommand}" IsEnabled="{Binding CanGoBack}" />
 				<Button Grid.Column="2" Classes="contemporary" Content="{Binding SkipText}" Command="{Binding SkipCommand}" />
 				<Button Grid.Column="3" Classes="contemporary primary" Content="{Binding NextText}" Command="{Binding NextCommand}" />
 			</Grid>

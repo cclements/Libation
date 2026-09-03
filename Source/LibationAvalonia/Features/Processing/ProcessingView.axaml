@@ -1,5 +1,6 @@
 <UserControl xmlns="https://github.com/avaloniaui"
 			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:properties="using:LibationAvalonia.Properties"
 			 xmlns:components="using:LibationAvalonia.DesignSystem.Components"
 			 xmlns:processing="using:LibationAvalonia.Features.Processing"
 			 xmlns:views="using:LibationAvalonia.Views"
@@ -12,45 +13,45 @@
 
 	<Grid RowDefinitions="Auto,Auto,*,Auto" RowSpacing="{DynamicResource Libation.Space.3}">
 		<Border Classes="card raised" Padding="{DynamicResource Libation.Thickness.3}">
-			<Grid ColumnDefinitions="Auto,Auto,Auto,Auto,*,Auto,Auto,Auto" ColumnSpacing="{DynamicResource Libation.Space.3}">
+			<WrapPanel Orientation="Horizontal">
 				<Border Background="{DynamicResource Libation.Brush.SurfaceInteractive}" BorderBrush="{DynamicResource Libation.Brush.BorderSubtle}" BorderThickness="1" CornerRadius="{DynamicResource Libation.Radius.Small}" Padding="10,6">
 					<StackPanel Orientation="Horizontal" Spacing="{DynamicResource Libation.Space.1}">
-						<TextBlock Text="Active" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+						<TextBlock Text="{x:Static properties:Resources.ProcessingViewActive}" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
 						<TextBlock Text="{Binding ActiveCount}" FontWeight="SemiBold" />
 					</StackPanel>
 				</Border>
-				<Border Grid.Column="1" Background="{DynamicResource Libation.Brush.SurfaceInteractive}" BorderBrush="{DynamicResource Libation.Brush.BorderSubtle}" BorderThickness="1" CornerRadius="{DynamicResource Libation.Radius.Small}" Padding="10,6">
+				<Border Margin="8,0,0,0" Background="{DynamicResource Libation.Brush.SurfaceInteractive}" BorderBrush="{DynamicResource Libation.Brush.BorderSubtle}" BorderThickness="1" CornerRadius="{DynamicResource Libation.Radius.Small}" Padding="10,6">
 					<StackPanel Orientation="Horizontal" Spacing="{DynamicResource Libation.Space.1}">
-						<TextBlock Text="Waiting" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+						<TextBlock Text="{x:Static properties:Resources.ProcessingViewWaiting}" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
 						<TextBlock Text="{Binding WaitingCount}" FontWeight="SemiBold" />
 					</StackPanel>
 				</Border>
-				<Border Grid.Column="2" Background="{DynamicResource Libation.Brush.SurfaceInteractive}" BorderBrush="{DynamicResource Libation.Brush.BorderSubtle}" BorderThickness="1" CornerRadius="{DynamicResource Libation.Radius.Small}" Padding="10,6">
+				<Border Margin="8,0,0,0" Background="{DynamicResource Libation.Brush.SurfaceInteractive}" BorderBrush="{DynamicResource Libation.Brush.BorderSubtle}" BorderThickness="1" CornerRadius="{DynamicResource Libation.Radius.Small}" Padding="10,6">
 					<StackPanel Orientation="Horizontal" Spacing="{DynamicResource Libation.Space.1}">
-						<TextBlock Text="Completed" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+						<TextBlock Text="{x:Static properties:Resources.CellarOverviewViewCompleted}" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
 						<TextBlock Text="{Binding CompletedCount}" FontWeight="SemiBold" />
 					</StackPanel>
 				</Border>
-				<Border Grid.Column="3" Background="{DynamicResource Libation.Brush.SurfaceInteractive}" BorderBrush="{DynamicResource Libation.Brush.BorderSubtle}" BorderThickness="1" CornerRadius="{DynamicResource Libation.Radius.Small}" Padding="10,6">
+				<Border Margin="8,0,0,0" Background="{DynamicResource Libation.Brush.SurfaceInteractive}" BorderBrush="{DynamicResource Libation.Brush.BorderSubtle}" BorderThickness="1" CornerRadius="{DynamicResource Libation.Radius.Small}" Padding="10,6">
 					<StackPanel Orientation="Horizontal" Spacing="{DynamicResource Libation.Space.1}">
-						<TextBlock Text="Failed" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+						<TextBlock Text="{x:Static properties:Resources.ProcessingViewFailed}" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
 						<TextBlock Text="{Binding FailedCount}" FontWeight="SemiBold" />
 					</StackPanel>
 				</Border>
 
-				<StackPanel Grid.Column="5" MinWidth="170" VerticalAlignment="Center">
-					<TextBlock Text="Overall progress" FontSize="{DynamicResource Libation.FontSize.Caption}" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+				<StackPanel Margin="16,0,0,0" MinWidth="170" VerticalAlignment="Center">
+					<TextBlock Text="{x:Static properties:Resources.ProcessingViewOverallProgress}" FontSize="{DynamicResource Libation.FontSize.Caption}" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
 					<Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource Libation.Space.2}">
-						<ProgressBar Classes="contemporary" Minimum="0" Maximum="100" Value="{Binding Progress}" MinWidth="112" AutomationProperties.Name="Overall queue progress" />
+						<ProgressBar Classes="contemporary" Minimum="0" Maximum="100" Value="{Binding Progress}" MinWidth="112" AutomationProperties.Name="{x:Static properties:Resources.ProcessingViewOverallQueueProgress}" />
 						<TextBlock Grid.Column="1" Text="{Binding OverallProgressText}" MinWidth="34" HorizontalAlignment="Right" />
 					</Grid>
 				</StackPanel>
-				<StackPanel Grid.Column="6" VerticalAlignment="Center">
-					<TextBlock Text="Running time" FontSize="{DynamicResource Libation.FontSize.Caption}" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+				<StackPanel Margin="16,0,0,0" VerticalAlignment="Center">
+					<TextBlock Text="{x:Static properties:Resources.ProcessingViewRunningTime}" FontSize="{DynamicResource Libation.FontSize.Caption}" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
 					<TextBlock Text="{Binding RunningTimeText}" FontWeight="SemiBold" />
 				</StackPanel>
-				<Button Grid.Column="7" Classes="contemporary quiet compact" Content="Queue log" Command="{Binding OpenLogCommand}" />
-			</Grid>
+				<Button Margin="16,0,0,0" Classes="contemporary quiet compact" Content="{x:Static properties:Resources.ProcessingViewQueueLog}" Command="{Binding OpenLogCommand}" />
+			</WrapPanel>
 		</Border>
 
 		<Border Grid.Row="1" IsVisible="{Binding IsPerformanceExpanded}"
@@ -58,33 +59,33 @@
 				BorderBrush="{DynamicResource Libation.Brush.BorderSubtle}" BorderThickness="1"
 				CornerRadius="{DynamicResource Libation.Radius.Medium}" Padding="{DynamicResource Libation.Thickness.3}">
 				<Grid ColumnDefinitions="Auto,Auto,*,Auto,Auto,Auto" ColumnSpacing="{DynamicResource Libation.Space.3}">
-					<TextBlock Text="At once" VerticalAlignment="Center" />
+					<TextBlock Text="{x:Static properties:Resources.ProcessingViewAtOnce}" VerticalAlignment="Center" />
 					<NumericUpDown Grid.Column="1" MinWidth="96"
 								   Value="{Binding Source.MaxConcurrentDownloads, Mode=TwoWay}"
 								   Minimum="{Binding Source.MinConcurrentDownloads}"
 								   Maximum="{Binding Source.MaxAllowedConcurrentDownloads}"
 								   Increment="1" FormatString="0"
-								   ToolTip.Tip="How many books to download and decrypt at the same time." />
+								   ToolTip.Tip="{x:Static properties:Resources.ProcessingViewHowManyBooksToDownloadAndDecrypt}" />
 					<TextBlock Grid.Column="2" Text="{Binding Source.ConcurrencyHint}"
 							   VerticalAlignment="Center" Foreground="{DynamicResource Libation.Brush.TextSecondary}"
 							   IsVisible="{Binding Source.ConcurrencyHint, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
-					<TextBlock Grid.Column="3" Text="Download limit" VerticalAlignment="Center" />
+					<TextBlock Grid.Column="3" Text="{x:Static properties:Resources.ProcessingViewDownloadLimit}" VerticalAlignment="Center" />
 					<NumericUpDown Grid.Column="4" MinWidth="112"
 								   TextConverter="{StaticResource SpeedLimitConverter}"
 								   Value="{Binding Source.SpeedLimit, Mode=TwoWay}"
 								   Minimum="0" Maximum="999"
 								   Increment="{Binding Source.SpeedLimitIncrement}"
 								   KeyDown="NumericUpDown_KeyDown" />
-					<CheckBox Grid.Column="5" Content="Auto-scroll"
+					<CheckBox Grid.Column="5" Content="{x:Static properties:Resources.ProcessingViewAutoScroll}"
 							  IsChecked="{Binding Source.AutoScrollQueue, Mode=TwoWay}"
-							  ToolTip.Tip="Keep newly active titles in view when you are already following the queue." />
+							  ToolTip.Tip="{x:Static properties:Resources.ProcessingViewKeepNewlyActiveTitlesInViewWhen}" />
 				</Grid>
 		</Border>
 
 		<Grid Grid.Row="2">
 			<components:EmptyState IsVisible="{Binding !HasWork}"
-				Title="The Decanter is resting"
-				Explanation="Queue a title from the Library when you are ready to prepare it."
+				Title="{x:Static properties:Resources.ProcessingViewTheDecanterIsResting}"
+				Explanation="{x:Static properties:Resources.ProcessingViewQueueATitleFromTheLibraryWhen}"
 				IllustrationTemplate="{DynamicResource illustration.decanter.empty}" />
 
 			<ListBox x:Name="QueueListControl" ItemsSource="{Binding QueueRows}" IsVisible="{Binding HasWork}">
@@ -153,17 +154,17 @@
 			<Grid RowDefinitions="Auto,*" RowSpacing="{DynamicResource Libation.Space.2}">
 				<Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="{DynamicResource Libation.Space.2}">
 					<StackPanel>
-						<TextBlock Text="Queue log" FontFamily="{DynamicResource Libation.Font.Display}" FontSize="{DynamicResource Libation.FontSize.Section}" />
+						<TextBlock Text="{x:Static properties:Resources.ProcessingViewQueueLog}" FontFamily="{DynamicResource Libation.Font.Display}" FontSize="{DynamicResource Libation.FontSize.Section}" />
 						<TextBlock Text="{Binding LogSummary}" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
 					</StackPanel>
-					<Button Grid.Column="1" Classes="contemporary quiet compact" Content="Copy log" Command="{Binding CopyLogCommand}" IsEnabled="{Binding HasLogEntries}" />
-					<Button Grid.Column="2" Classes="contemporary quiet compact" Content="Clear log" Command="{Binding ClearLogCommand}" IsEnabled="{Binding HasLogEntries}" />
-					<Button Grid.Column="3" Classes="contemporary quiet compact" Content="Close" Command="{Binding CloseLogCommand}" />
+					<Button Grid.Column="1" Classes="contemporary quiet compact" Content="{x:Static properties:Resources.ProcessingViewCopyLog}" Command="{Binding CopyLogCommand}" IsEnabled="{Binding HasLogEntries}" />
+					<Button Grid.Column="2" Classes="contemporary quiet compact" Content="{x:Static properties:Resources.ProcessingViewClearLog}" Command="{Binding ClearLogCommand}" IsEnabled="{Binding HasLogEntries}" />
+					<Button Grid.Column="3" Classes="contemporary quiet compact" Content="{x:Static properties:Resources.ShellCloseCommandLabel}" Command="{Binding CloseLogCommand}" />
 				</Grid>
 				<DataGrid Grid.Row="1" AutoGenerateColumns="False" ItemsSource="{Binding Source.LogEntries}" IsReadOnly="True">
 					<DataGrid.Columns>
-						<DataGridTextColumn SortMemberPath="LogDate" Header="Timestamp" CanUserSort="True" Binding="{Binding LogDateString}" Width="100" />
-						<DataGridTemplateColumn SortMemberPath="LogMessage" Header="Message" CanUserSort="True" Width="*">
+						<DataGridTextColumn SortMemberPath="LogDate" Header="{x:Static properties:Resources.ProcessingViewTimestamp}" CanUserSort="True" Binding="{Binding LogDateString}" Width="100" />
+						<DataGridTemplateColumn SortMemberPath="LogMessage" Header="{x:Static properties:Resources.ProcessingViewMessage}" CanUserSort="True" Width="*">
 							<DataGridTemplateColumn.CellTemplate>
 								<DataTemplate>
 									<TextBlock Text="{Binding LogMessage}" TextWrapping="Wrap" Margin="4" />

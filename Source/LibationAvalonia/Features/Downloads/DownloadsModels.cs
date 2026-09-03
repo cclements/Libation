@@ -93,12 +93,12 @@ public sealed class DownloadBookItemViewModel : ReactiveObject, IDisposable
 	internal ProcessBookViewModel? QueueItem => queueItem;
 
 	public LibraryBook Book => book;
-	public string Title => string.IsNullOrWhiteSpace(Book.Book.TitleWithSubtitle) ? "Untitled audiobook" : Book.Book.TitleWithSubtitle;
-	public string SupportingText => string.IsNullOrWhiteSpace(Book.Book.AuthorNames) ? "Unknown author" : Book.Book.AuthorNames;
-	public string MaskedAccount => string.IsNullOrWhiteSpace(Book.Account) ? "Account unavailable" : $"Account {Book.Account.ToMask()}";
-	public string Marketplace => string.IsNullOrWhiteSpace(Book.Book.Locale) ? "Marketplace unavailable" : $"Marketplace {Book.Book.Locale}";
+	public string Title => string.IsNullOrWhiteSpace(Book.Book.TitleWithSubtitle) ? global::LibationAvalonia.Properties.Resources.DownloadsModelsUntitledAudiobook : Book.Book.TitleWithSubtitle;
+	public string SupportingText => string.IsNullOrWhiteSpace(Book.Book.AuthorNames) ? global::LibationAvalonia.Properties.Resources.DownloadsModelsUnknownAuthor : Book.Book.AuthorNames;
+	public string MaskedAccount => string.IsNullOrWhiteSpace(Book.Account) ? global::LibationAvalonia.Properties.Resources.DownloadsModelsAccountUnavailable : string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.DownloadsModelsAccount0, Book.Account.ToMask());
+	public string Marketplace => string.IsNullOrWhiteSpace(Book.Book.Locale) ? global::LibationAvalonia.Properties.Resources.AccountsViewModelMarketplaceUnavailable : string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.DownloadsModelsMarketplace0, Book.Book.Locale);
 	public string? QualityText => Book.Book.UserDefinedItem.LastDownloadedFormat is { IsDefault: false } format
-		? format.BitRate > 0 ? $"{format.CodecString} {format.BitRate:N0} kbps" : format.CodecString
+		? format.BitRate > 0 ? string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.DownloadsModels01N0Kbps, format.CodecString, format.BitRate) : format.CodecString
 		: null;
 	public string? SizeText => knownSizeBytes is long bytes ? DiskSpaceHelper.FormatBytes(bytes) : null;
 	public string Metadata => string.Join(" · ", new[] { MaskedAccount, Marketplace, QualityText, SizeText }
@@ -111,7 +111,7 @@ public sealed class DownloadBookItemViewModel : ReactiveObject, IDisposable
 	public string StatusAccessibleName => $"{Title}: {StatusText}";
 	public bool ShowProgress => QueueItem?.Status is ProcessBookStatus.Working;
 	public double Progress => QueueItem?.Progress ?? 0;
-	public string ProgressAccessibleName => $"{Title} progress {Progress:0} percent";
+	public string ProgressAccessibleName => string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.DownloadsModels0Progress10Percent, Title, Progress);
 
 	public bool CanRetry => QueueItem is { Status: ProcessBookStatus.Failed } item
 		&& item.LastPresentationStage switch
@@ -124,13 +124,13 @@ public sealed class DownloadBookItemViewModel : ReactiveObject, IDisposable
 	public bool CanStart => QueueItem?.Status is not (ProcessBookStatus.Queued or ProcessBookStatus.Working)
 		&& Book.NeedsBookDownload
 		&& Section is DownloadsSectionKind.DownloadPending or DownloadsSectionKind.Downloaded;
-	public string? PrimaryActionText => CanRetry ? "Retry" : CanStart
-		? Section == DownloadsSectionKind.Downloaded ? "Process" : "Download"
+	public string? PrimaryActionText => CanRetry ? global::LibationAvalonia.Properties.Resources.DownloadsModelsRetry : CanStart
+		? Section == DownloadsSectionKind.Downloaded ? global::LibationAvalonia.Properties.Resources.BookDetailsPaneProcess : global::LibationAvalonia.Properties.Resources.BookDetailsPaneDownload
 		: null;
 	public ICommand? PrimaryCommand => PrimaryActionText is null ? null : primaryCommand;
-	public string PrimaryAccessibleName => $"{PrimaryActionText ?? "Process"} {Title}";
+	public string PrimaryAccessibleName => $"{PrimaryActionText ?? (global::LibationAvalonia.Properties.Resources.BookDetailsPaneProcess)} {Title}";
 	public ICommand LocateCommand => locateCommand;
-	public string LocateAccessibleName => $"Locate an existing file for {Title}";
+	public string LocateAccessibleName => string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.DownloadsModelsLocateAnExistingFileFor0, Title);
 
 	internal void UpdateLibrary(LibraryBook replacement, LiberatedStatus status, long? sizeBytes)
 	{
@@ -204,13 +204,13 @@ public sealed class DownloadBookItemViewModel : ReactiveObject, IDisposable
 		if (QueueItem is { } item)
 		{
 			if (item.Status is ProcessBookStatus.Queued)
-				return "Queued";
+				return global::LibationAvalonia.Properties.Resources.DownloadsModelsQueued;
 			if (item.Status is ProcessBookStatus.Working)
 				return item.PresentationStage switch
 				{
-					ProcessBookPresentationStage.Downloading => "Downloading",
-					ProcessBookPresentationStage.Decrypting => "Decrypting",
-					ProcessBookPresentationStage.Converting => "Converting",
+					ProcessBookPresentationStage.Downloading => global::LibationAvalonia.Properties.Resources.DownloadsModelsDownloading,
+					ProcessBookPresentationStage.Decrypting => global::LibationAvalonia.Properties.Resources.DownloadsModelsDecrypting,
+					ProcessBookPresentationStage.Converting => global::LibationAvalonia.Properties.Resources.DownloadsModelsConverting,
 					_ => item.StatusText,
 				};
 			if (item.Status is ProcessBookStatus.Failed or ProcessBookStatus.Cancelled)
@@ -218,13 +218,13 @@ public sealed class DownloadBookItemViewModel : ReactiveObject, IDisposable
 		}
 
 		if (Book.AbsentFromLastScan)
-			return "Unavailable";
+			return global::LibationAvalonia.Properties.Resources.DownloadsModelsUnavailable;
 		return libraryStatus switch
 		{
-			LiberatedStatus.PartialDownload => "Audible file downloaded",
-			LiberatedStatus.Liberated => "Processed open copy",
-			LiberatedStatus.Error => "Needs attention",
-			_ => "Download pending",
+			LiberatedStatus.PartialDownload => global::LibationAvalonia.Properties.Resources.DownloadsModelsAudibleFileDownloaded,
+			LiberatedStatus.Liberated => global::LibationAvalonia.Properties.Resources.DownloadsModelsProcessedOpenCopy,
+			LiberatedStatus.Error => global::LibationAvalonia.Properties.Resources.DownloadsModelsNeedsAttention,
+			_ => global::LibationAvalonia.Properties.Resources.DownloadsModelsDownloadPending,
 		};
 	}
 

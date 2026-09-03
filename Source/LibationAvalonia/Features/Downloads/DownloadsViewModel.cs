@@ -56,36 +56,36 @@ public sealed class DownloadsViewModel : SecondaryDestinationViewModel, IRoutePr
 			section => DownloadsListRowViewModel.Section(SectionTitle(section)));
 		DownloadPendingCommand = CreateOwnerCommand(
 			commands.DownloadPendingBooksAsync,
-			"download and process pending audiobooks",
-			"Libation could not start the pending audiobook workflow. Review account access and the Books location, then try again.");
+			global::LibationAvalonia.Properties.Resources.DownloadsViewModelDownloadAndProcessPendingAudiobooks,
+			global::LibationAvalonia.Properties.Resources.DownloadsViewModelLibationCouldNotStartThePendingAudiobook);
 		DownloadPdfsCommand = CreateOwnerCommand(
 			commands.DownloadPendingPdfsAsync,
-			"download pending PDF supplements",
-			"Libation could not start pending PDF downloads. Review account access and try again.");
+			global::LibationAvalonia.Properties.Resources.DownloadsViewModelDownloadPendingPDFSupplements,
+			global::LibationAvalonia.Properties.Resources.DownloadsViewModelLibationCouldNotStartPendingPDFDownloads);
 		LocateFilesCommand = CreateOwnerCommand(
 			commands.LocateAudiobooksAsync,
-			"locate existing audiobook files",
-			"Libation could not open the audiobook locator. Check the configured Books location and try again.");
+			global::LibationAvalonia.Properties.Resources.DownloadsViewModelLocateExistingAudiobookFiles,
+			global::LibationAvalonia.Properties.Resources.DownloadsViewModelLibationCouldNotOpenTheAudiobookLocator);
 		ConvertAllToMp3Command = CreateOwnerCommand(
 			commands.ConvertLibraryToMp3Async,
-			"convert the library to MP3",
-			"Libation could not start the MP3 conversion workflow. Review Processing and the application log.");
+			global::LibationAvalonia.Properties.Resources.DownloadsViewModelConvertTheLibraryToMP3,
+			global::LibationAvalonia.Properties.Resources.DownloadsViewModelLibationCouldNotStartTheMP3Conversion);
 		RefreshCommand = CreateOwnerCommand(
 			async () =>
 			{
 				await main.SetBackupCountsAsync(null);
 				RequestLibraryProjection();
 			},
-			"refresh download state",
+			global::LibationAvalonia.Properties.Resources.DownloadsViewModelRefreshDownloadState,
 			Resources.DownloadsRefreshUnchangedError);
 		OpenAccountsCommand = CreateOwnerCommand(
 			commands.ShowAccountsAsync,
-			"open account management from Downloads",
-			"Libation could not open account management. No account data was changed.");
+			global::LibationAvalonia.Properties.Resources.DownloadsViewModelOpenAccountManagementFromDownloads,
+			global::LibationAvalonia.Properties.Resources.AccountsViewModelLibationCouldNotOpenAccountManagementNo);
 		ScanLibraryCommand = CreateOwnerCommand(
 			commands.ScanLibraryAsync,
-			"scan accounts from Downloads",
-			"Libation could not start the library scan. Review account access and try again.");
+			global::LibationAvalonia.Properties.Resources.DownloadsViewModelScanAccountsFromDownloads,
+			global::LibationAvalonia.Properties.Resources.DownloadsViewModelLibationCouldNotStartTheLibraryScan);
 
 		main.PropertyChanged += Main_PropertyChanged;
 		main.ProcessQueue.Queue.CollectionChanged += Queue_CollectionChanged;
@@ -101,9 +101,9 @@ public sealed class DownloadsViewModel : SecondaryDestinationViewModel, IRoutePr
 	public string EmptyLibraryExplanation => main.AnyAccounts
 		? main.ActivelyScanning
 			? Resources.DownloadsEmptyScanningExplanation
-			: "Scan the connected accounts to catalogue titles before starting a download workflow."
-		: "Add an Audible account, then scan it to catalogue titles before starting a download workflow.";
-	public string EmptyLibraryActionText => main.AnyAccounts && !main.ActivelyScanning ? "Scan accounts" : "Manage accounts";
+			: global::LibationAvalonia.Properties.Resources.DownloadsViewModelScanTheConnectedAccountsToCatalogueTitles
+		: global::LibationAvalonia.Properties.Resources.DownloadsViewModelAddAnAudibleAccountThenScanIt;
+	public string EmptyLibraryActionText => main.AnyAccounts && !main.ActivelyScanning ? global::LibationAvalonia.Properties.Resources.DownloadsViewModelScanAccounts : global::LibationAvalonia.Properties.Resources.OnboardingViewManageAccounts;
 	public ICommand EmptyLibraryCommand => main.AnyAccounts && !main.ActivelyScanning ? ScanLibraryCommand : OpenAccountsCommand;
 
 	public int PendingCount => books.Values.Count(book => book.Section == DownloadsSectionKind.DownloadPending);
@@ -111,7 +111,7 @@ public sealed class DownloadsViewModel : SecondaryDestinationViewModel, IRoutePr
 	public int DownloadedCount => books.Values.Count(book => book.Section == DownloadsSectionKind.Downloaded);
 	public int UnavailableCount => books.Values.Count(book => book.Section == DownloadsSectionKind.Unavailable);
 	public string ResultSummary
-		=> $"{PendingCount:N0} pending · {DownloadingCount:N0} downloading · {DownloadedCount:N0} downloaded · {UnavailableCount:N0} unavailable";
+		=> string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.DownloadsViewModel0N0Pending1N0Downloading2, PendingCount, DownloadingCount, DownloadedCount, UnavailableCount);
 
 	public ICommand DownloadPendingCommand { get; }
 	public ICommand DownloadPdfsCommand { get; }
@@ -120,16 +120,16 @@ public sealed class DownloadsViewModel : SecondaryDestinationViewModel, IRoutePr
 	public ICommand RefreshCommand { get; }
 	public ICommand OpenAccountsCommand { get; }
 	public ICommand ScanLibraryCommand { get; }
-	public string RouteEyebrow => "Acquisition";
-	public string RouteTitle => "Downloads";
-	public string RouteSubtitle => "See what is pending, downloading, downloaded, or unavailable.";
-	public RouteCommandPresentation RoutePrimaryCommand => new("Download pending titles", DownloadPendingCommand);
+	public string RouteEyebrow => global::LibationAvalonia.Properties.Resources.DownloadsViewModelAcquisition;
+	public string RouteTitle => global::LibationAvalonia.Properties.Resources.RouteDownloadsLabel;
+	public string RouteSubtitle => global::LibationAvalonia.Properties.Resources.DownloadsViewModelSeeWhatIsPendingDownloadingDownloadedOr;
+	public RouteCommandPresentation RoutePrimaryCommand => new(global::LibationAvalonia.Properties.Resources.CellarOverviewViewDownloadPendingTitles, DownloadPendingCommand);
 	public IReadOnlyList<RouteCommandPresentation> RouteSecondaryCommands =>
 	[
-		new("Download PDFs", DownloadPdfsCommand),
-		new("Locate files", LocateFilesCommand),
-		new("Convert to MP3", ConvertAllToMp3Command),
-		new("Refresh", RefreshCommand),
+		new(global::LibationAvalonia.Properties.Resources.DownloadsViewModelDownloadPDFs, DownloadPdfsCommand),
+		new(global::LibationAvalonia.Properties.Resources.DownloadsViewModelLocateFiles, LocateFilesCommand),
+		new(global::LibationAvalonia.Properties.Resources.DownloadsViewModelConvertToMP3, ConvertAllToMp3Command),
+		new(global::LibationAvalonia.Properties.Resources.DownloadsViewRefresh, RefreshCommand),
 	];
 	public RouteStatusPresentation RouteStatusBadge => new(ResultSummary,
 		UnavailableCount > 0 ? LibationStatusKind.NeedsAttention
@@ -140,20 +140,20 @@ public sealed class DownloadsViewModel : SecondaryDestinationViewModel, IRoutePr
 	internal Task QueueBookAsync(LibraryBook book)
 		=> RunOwnerActionAsync(
 			async () => await main.QueueBooksAsync([book], Configuration.Instance),
-			$"start the download workflow for {book.Book.AudibleProductId}",
-			"Libation could not start this title. Review its download state, account access, and Books location, then try again.");
+			string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.DownloadsViewModelStartTheDownloadWorkflowFor0, book.Book.AudibleProductId),
+			global::LibationAvalonia.Properties.Resources.DownloadsViewModelLibationCouldNotStartThisTitleReview);
 
 	internal Task RetryBookAsync(ProcessBookViewModel item)
 		=> RunOwnerActionAsync(
 			async () => await main.QueueBooksAsync([item.LibraryBook], item.Configuration),
-			$"retry the download workflow for {item.LibraryBook.Book.AudibleProductId}",
-			"Libation could not retry this title. Review its current queue state and account access, then try again.");
+			string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.DownloadsViewModelRetryTheDownloadWorkflowFor0, item.LibraryBook.Book.AudibleProductId),
+			global::LibationAvalonia.Properties.Resources.DownloadsViewModelLibationCouldNotRetryThisTitleReview);
 
 	internal Task LocateBookAsync(LibraryBook book)
 		=> RunOwnerActionAsync(
 			() => commands.LocateAudiobookAsync(book),
-			$"locate an existing file for {book.Book.AudibleProductId}",
-			"Libation could not open the file picker for this title. No library or file data was changed.");
+			string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.DownloadsViewModelLocateAnExistingFileFor0, book.Book.AudibleProductId),
+			global::LibationAvalonia.Properties.Resources.DownloadsViewModelLibationCouldNotOpenTheFilePicker);
 
 	private void Main_PropertyChanged(object? sender, PropertyChangedEventArgs e)
 	{
@@ -217,8 +217,8 @@ public sealed class DownloadsViewModel : SecondaryDestinationViewModel, IRoutePr
 				projectionRunning = false;
 				CurrentError = LibationAvalonia.DesignSystem.UserFacingErrorFactory.FromException(
 					ex,
-					"build the Downloads title list",
-					"Libation could not read the current per-title download state. Refresh the page after checking the Books location.");
+					global::LibationAvalonia.Properties.Resources.DownloadsViewModelBuildTheDownloadsTitleList,
+					global::LibationAvalonia.Properties.Resources.DownloadsViewModelLibationCouldNotReadTheCurrentPer);
 				RaiseState();
 			});
 		}
@@ -354,10 +354,10 @@ public sealed class DownloadsViewModel : SecondaryDestinationViewModel, IRoutePr
 
 	private static string SectionTitle(DownloadsSectionKind section) => section switch
 	{
-		DownloadsSectionKind.DownloadPending => "Download Pending",
-		DownloadsSectionKind.Downloading => "Downloading",
-		DownloadsSectionKind.Downloaded => "Downloaded",
-		_ => "Unavailable",
+		DownloadsSectionKind.DownloadPending => global::LibationAvalonia.Properties.Resources.CellarOverviewViewDownloadPending,
+		DownloadsSectionKind.Downloading => global::LibationAvalonia.Properties.Resources.DownloadsModelsDownloading,
+		DownloadsSectionKind.Downloaded => global::LibationAvalonia.Properties.Resources.DownloadsViewModelDownloaded,
+		_ => global::LibationAvalonia.Properties.Resources.DownloadsModelsUnavailable,
 	};
 
 	private void RaiseState()

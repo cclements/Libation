@@ -1,6 +1,7 @@
 <UserControl
 	xmlns="https://github.com/avaloniaui"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:properties="using:LibationAvalonia.Properties"
 	xmlns:trash="using:LibationAvalonia.Features.Trash"
 	xmlns:components="using:LibationAvalonia.DesignSystem.Components"
 	xmlns:designSystem="using:LibationAvalonia.DesignSystem"
@@ -12,7 +13,7 @@
 				<Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{DynamicResource Libation.Space.3}">
 					<CheckBox IsVisible="{Binding CanSelect}" IsChecked="{Binding IsSelected, Mode=TwoWay}"
 						VerticalAlignment="Center" AutomationProperties.Name="{Binding AccessibleName}"
-						AutomationProperties.HelpText="Selection changes only which existing Trash record Restore or Permanently delete will receive." />
+						AutomationProperties.HelpText="{x:Static properties:Resources.TrashViewSelectionChangesOnlyWhichExistingTrashRecord}" />
 					<StackPanel Grid.Column="1" Spacing="{DynamicResource Libation.Space.1}">
 						<TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextWrapping="Wrap"
 							Foreground="{DynamicResource Libation.Brush.TextPrimary}" />
@@ -31,38 +32,38 @@
 	<Grid Margin="{DynamicResource Libation.Thickness.4}" RowDefinitions="Auto,Auto,*,Auto"
 		RowSpacing="{DynamicResource Libation.Space.3}">
 		<components:AttentionBanner Grid.Row="0" IsVisible="{Binding HasError}" Severity="{x:Static components:ComponentSeverity.Danger}" FocusOnShow="True"
-			Title="Trash unavailable" Message="{Binding ErrorMessage}"
-			ActionText="Refresh" ActionCommand="{Binding RefreshCommand}"
-			SecondaryActionText="Copy technical details" SecondaryActionCommand="{Binding CopyTechnicalDetailsCommand}" />
+			Title="{x:Static properties:Resources.TrashViewTrashUnavailable}" Message="{Binding ErrorMessage}"
+			ActionText="{x:Static properties:Resources.DownloadsViewRefresh}" ActionCommand="{Binding RefreshCommand}"
+			SecondaryActionText="{x:Static properties:Resources.AccountsViewCopyTechnicalDetails}" SecondaryActionCommand="{Binding CopyTechnicalDetailsCommand}" />
 
 		<Border Grid.Row="1" Classes="card">
 			<Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource Libation.Space.3}">
 				<StackPanel Spacing="{DynamicResource Libation.Space.1}">
-					<TextBox Text="{Binding SearchText, Mode=TwoWay}" PlaceholderText="Search removed title, creator, series, or Audible ID"
-						AutomationProperties.Name="Search Trash" />
+					<TextBox Text="{Binding SearchText, Mode=TwoWay}" PlaceholderText="{x:Static properties:Resources.TrashViewSearchRemovedTitleCreatorSeriesOrAudible}"
+						AutomationProperties.Name="{x:Static properties:Resources.TrashViewSearchTrash}" />
 					<TextBlock Text="{Binding ResultSummary}" Foreground="{DynamicResource Libation.Brush.TextSecondary}"
 						AutomationProperties.LiveSetting="{x:Static designSystem:PlatformAutomationPolicy.Polite}" />
 				</StackPanel>
-				<Button Grid.Column="1" Classes="contemporary quiet" Content="Refresh" Command="{Binding RefreshCommand}"
-					AutomationProperties.Name="Refresh Trash" />
+				<Button Grid.Column="1" Classes="contemporary quiet" Content="{x:Static properties:Resources.DownloadsViewRefresh}" Command="{Binding RefreshCommand}"
+					AutomationProperties.Name="{x:Static properties:Resources.TrashViewRefreshTrash}" />
 			</Grid>
 		</Border>
 
 		<Grid Grid.Row="2">
 			<Border Classes="card" IsVisible="{Binding IsLoading}" VerticalAlignment="Top">
 				<StackPanel Spacing="{DynamicResource Libation.Space.2}">
-					<TextBlock Text="Loading Trash…" FontWeight="SemiBold" />
-					<ProgressBar IsIndeterminate="True" AutomationProperties.Name="Loading Trash" />
+					<TextBlock Text="{x:Static properties:Resources.TrashViewLoadingTrash}" FontWeight="SemiBold" />
+					<ProgressBar IsIndeterminate="True" AutomationProperties.Name="{x:Static properties:Resources.TrashViewLoadingTrash2}" />
 				</StackPanel>
 			</Border>
-			<components:EmptyState IsVisible="{Binding ShowEmpty}" VerticalAlignment="Top" Title="Trash is empty"
-				Explanation="Titles moved out of the Library appear here until they are restored or their Libation records are permanently deleted."
-				PrimaryActionText="Refresh Trash" PrimaryCommand="{Binding RefreshCommand}" />
-			<components:EmptyState IsVisible="{Binding ShowNoMatches}" VerticalAlignment="Top" Title="No removed titles match"
-				Explanation="Clear or change the current Trash search. No records were changed."
-				PrimaryActionText="Refresh Trash" PrimaryCommand="{Binding RefreshCommand}" />
+			<components:EmptyState IsVisible="{Binding ShowEmpty}" VerticalAlignment="Top" Title="{x:Static properties:Resources.TrashViewTrashIsEmpty}"
+				Explanation="{x:Static properties:Resources.TrashViewTitlesMovedOutOfTheLibraryAppear}"
+				PrimaryActionText="{x:Static properties:Resources.TrashViewRefreshTrash}" PrimaryCommand="{Binding RefreshCommand}" />
+			<components:EmptyState IsVisible="{Binding ShowNoMatches}" VerticalAlignment="Top" Title="{x:Static properties:Resources.TrashViewNoRemovedTitlesMatch}"
+				Explanation="{x:Static properties:Resources.TrashViewClearOrChangeTheCurrentTrashSearch}"
+				PrimaryActionText="{x:Static properties:Resources.TrashViewRefreshTrash}" PrimaryCommand="{Binding RefreshCommand}" />
 			<ListBox ItemsSource="{Binding VisibleItems}" ItemTemplate="{StaticResource TrashRow}"
-				IsVisible="{Binding HasVisibleItems}" AutomationProperties.Name="Removed library records"
+				IsVisible="{Binding HasVisibleItems}" AutomationProperties.Name="{x:Static properties:Resources.TrashViewRemovedLibraryRecords}"
 				BorderThickness="0">
 				<ListBox.Styles>
 					<Style Selector="ListBoxItem">
@@ -81,18 +82,18 @@
 				RowSpacing="{DynamicResource Libation.Space.1}">
 				<StackPanel Spacing="{DynamicResource Libation.Space.1}">
 					<TextBlock Text="{Binding SelectedCountText}" FontWeight="SemiBold" />
-					<TextBlock Text="Permanent deletion removes Libation records, not audiobook files. Titles can return after a later scan; every confirmation defaults to cancel."
+					<TextBlock Text="{x:Static properties:Resources.TrashViewPermanentDeletionRemovesLibationRecordsNotAudiobook}"
 						TextWrapping="Wrap" FontSize="{DynamicResource Libation.FontSize.Caption}"
 						Foreground="{DynamicResource Libation.Brush.Warning}" />
 					<TextBlock Text="{Binding LastActionText}" IsVisible="{Binding LastActionText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
 						TextWrapping="Wrap" Foreground="{DynamicResource Libation.Brush.TextSecondary}"
 						AutomationProperties.LiveSetting="{x:Static designSystem:PlatformAutomationPolicy.Polite}" />
 				</StackPanel>
-				<Button Grid.Column="1" Classes="contemporary" Content="Restore" Command="{Binding RestoreSelectedCommand}"
+				<Button Grid.Column="1" Classes="contemporary" Content="{x:Static properties:Resources.TrashViewRestore}" Command="{Binding RestoreSelectedCommand}"
 					IsEnabled="{Binding HasSelection}" AutomationProperties.Name="{Binding RestoreActionAccessibleName}" />
-				<Button Grid.Column="2" Classes="contemporary danger" Content="Permanently delete" Command="{Binding PermanentlyDeleteSelectedCommand}"
+				<Button Grid.Column="2" Classes="contemporary danger" Content="{x:Static properties:Resources.TrashViewPermanentlyDelete}" Command="{Binding PermanentlyDeleteSelectedCommand}"
 					IsEnabled="{Binding HasSelection}" AutomationProperties.Name="{Binding DeleteActionAccessibleName}"
-					AutomationProperties.HelpText="A confirmation defaults to cancel and explains that Libation records, not audiobook files, will be deleted." />
+					AutomationProperties.HelpText="{x:Static properties:Resources.TrashViewAConfirmationDefaultsToCancelAndExplains}" />
 			</Grid>
 		</Border>
 	</Grid>

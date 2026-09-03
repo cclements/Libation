@@ -181,7 +181,7 @@ public sealed class MainDashboardDataSource : IDashboardDataSource
 			FormatAddedDate(item.LibraryBook.DateAdded),
 			FormatDuration(item.DurationMinutes),
 			item.IsAvailable ? LibationStatusKind.DownloadPending : LibationStatusKind.Unavailable,
-			item.IsAvailable ? "Ready to process" : "Unavailable after the latest scan")
+			item.IsAvailable ? global::LibationAvalonia.Properties.Resources.MainDashboardDataSourceReadyToProcess : global::LibationAvalonia.Properties.Resources.LibraryModelsUnavailableAfterTheLatestScan)
 		{
 			ProcessingProgress = queue is null ? 0 : Math.Clamp(queue.Progress, 0, 100),
 			ShowProcessingProgress = queue?.Status == ProcessBookStatus.Working,
@@ -194,7 +194,7 @@ public sealed class MainDashboardDataSource : IDashboardDataSource
 			return string.Empty;
 		int hours = minutes / 60;
 		int remainingMinutes = minutes % 60;
-		return hours == 0 ? $"{remainingMinutes}m" : $"{hours}h {remainingMinutes}m";
+		return hours == 0 ? string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.MainDashboardDataSource0M, remainingMinutes) : string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.MainDashboardDataSource0H1M, hours, remainingMinutes);
 	}
 
 	private static string FormatAddedDate(DateTime added)
@@ -205,8 +205,8 @@ public sealed class MainDashboardDataSource : IDashboardDataSource
 		if (string.IsNullOrWhiteSpace(narrator))
 			return author;
 		if (string.IsNullOrWhiteSpace(author))
-			return $"Narrated by {narrator}";
-		return $"{author} · Narrated by {narrator}";
+			return string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.MainDashboardDataSourceNarratedBy0, narrator);
+		return string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.MainDashboardDataSource0NarratedBy1, author, narrator);
 	}
 
 	private void Main_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -403,7 +403,7 @@ public sealed class MainDashboardDataSource : IDashboardDataSource
 			var eventDate = metadata == BookMetadata.Completed
 				? book.Book.UserDefinedItem.LastDownloaded
 				: book.DateAdded;
-			string eventLabel = metadata == BookMetadata.Completed ? "Completed" : "Added";
+			string eventLabel = metadata == BookMetadata.Completed ? global::LibationAvalonia.Properties.Resources.CellarOverviewViewCompleted : global::LibationAvalonia.Properties.Resources.TastingRoomOverviewViewAdded;
 			string eventText = eventDate is null
 				? string.Empty
 				: $"{eventLabel} {eventDate.Value.ToString("d", CultureInfo.CurrentCulture)}";
@@ -419,7 +419,7 @@ public sealed class MainDashboardDataSource : IDashboardDataSource
 				FormatAddedDate(book.DateAdded),
 				metadataText,
 				metadata == BookMetadata.Completed ? LibationStatusKind.Completed : core.Status,
-				metadata == BookMetadata.Completed ? "Completed" : core.StatusText);
+				metadata == BookMetadata.Completed ? global::LibationAvalonia.Properties.Resources.CellarOverviewViewCompleted : core.StatusText);
 		}
 	}
 
@@ -446,11 +446,11 @@ public sealed class MainDashboardDataSource : IDashboardDataSource
 				};
 			string statusText = status switch
 			{
-				LibationStatusKind.Unavailable => "Unavailable after the latest scan",
-				LibationStatusKind.Completed => "Completed",
-				LibationStatusKind.Downloaded => "Downloaded; processing pending",
-				LibationStatusKind.Failed => "Needs attention",
-				_ => "Download pending",
+				LibationStatusKind.Unavailable => global::LibationAvalonia.Properties.Resources.LibraryModelsUnavailableAfterTheLatestScan,
+				LibationStatusKind.Completed => global::LibationAvalonia.Properties.Resources.CellarOverviewViewCompleted,
+				LibationStatusKind.Downloaded => global::LibationAvalonia.Properties.Resources.LibraryModelsDownloadedProcessingPending,
+				LibationStatusKind.Failed => global::LibationAvalonia.Properties.Resources.DownloadsModelsNeedsAttention,
+				_ => global::LibationAvalonia.Properties.Resources.DownloadsModelsDownloadPending,
 			};
 			string author = book.Book.AuthorNames;
 			string narrator = book.Book.NarratorNames;

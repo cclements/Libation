@@ -1,5 +1,6 @@
 <UserControl xmlns="https://github.com/avaloniaui"
 			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:properties="using:LibationAvalonia.Properties"
 			 xmlns:library="using:LibationAvalonia.Features.Library"
 			 x:Class="LibationAvalonia.Features.Library.LibraryGalleryView"
 			 x:DataType="library:LibraryViewModel">
@@ -9,7 +10,7 @@
 			 BorderThickness="0"
 			 Focusable="False"
 			 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-			 AutomationProperties.Name="Library Gallery">
+			 AutomationProperties.Name="{x:Static properties:Resources.LibraryGalleryViewLibraryGallery}">
 		<ListBox.ItemsPanel>
 			<ItemsPanelTemplate>
 				<VirtualizingStackPanel />

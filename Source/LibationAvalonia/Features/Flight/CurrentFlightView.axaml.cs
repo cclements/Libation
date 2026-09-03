@@ -5,7 +5,7 @@ namespace LibationAvalonia.Features.Flight;
 
 public partial class CurrentFlightView : UserControl
 {
-	private static readonly DataFormat<string> FlightItemFormat = DataFormat.CreateStringApplicationFormat("libation.current-flight-item");
+	private static readonly DataFormat<string> FlightItemFormat = DataFormat.CreateStringApplicationFormat(global::LibationAvalonia.Properties.Resources.CurrentFlightViewaxamlLibationCurrentFlightItem);
 
 	public CurrentFlightView() => InitializeComponent();
 

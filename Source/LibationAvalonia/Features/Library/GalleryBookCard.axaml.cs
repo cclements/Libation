@@ -133,7 +133,7 @@ public partial class GalleryBookCard : UserControl
 		}
 		catch (Exception ex)
 		{
-			Serilog.Log.Logger.Warning(ex, "Unable to load a Gallery cover for {ProductId}.", item.ProductId);
+			Serilog.Log.Logger.Warning(ex, global::LibationAvalonia.Properties.Resources.GalleryBookCardaxamlUnableToLoadAGalleryCoverFor, item.ProductId);
 		}
 	}
 

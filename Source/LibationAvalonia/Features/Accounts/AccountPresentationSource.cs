@@ -17,9 +17,9 @@ namespace LibationAvalonia.Features.Accounts;
 /// </summary>
 public sealed class AccountPresentationSource : IAccountPresentationSource
 {
-	public const string RemovalConsequenceText =
-		"Removing this account deletes its saved sign-in and marketplace settings from Libation. "
-		+ "Existing Library records and local audiobook files are not deleted.";
+	public static readonly string RemovalConsequenceText =
+		global::LibationAvalonia.Properties.Resources.AccountPresentationSourceRemovingThisAccountDeletesItsSavedSign
+		+ global::LibationAvalonia.Properties.Resources.AccountPresentationSourceExistingLibraryRecordsAndLocalAudiobookFiles;
 
 	private readonly ILibationCommandAdapter commands;
 	private readonly MainVM main;
@@ -41,7 +41,7 @@ public sealed class AccountPresentationSource : IAccountPresentationSource
 
 	public event EventHandler? Changed;
 	public bool IsScanning => main.ActivelyScanning;
-	public string ScanStateText => IsScanning ? main.ScanningText : "No account scan is running.";
+	public string ScanStateText => IsScanning ? main.ScanningText : global::LibationAvalonia.Properties.Resources.AccountPresentationSourceNoAccountScanIsRunning;
 
 	public IReadOnlyList<AccountPresentationSnapshot> GetAccounts()
 	{
@@ -139,7 +139,7 @@ public sealed class AccountPresentationSource : IAccountPresentationSource
 			if (locators.TryGetValue(account.PresentationId, out var locator))
 				return locator;
 		}
-		throw new InvalidOperationException("That account card is no longer current. Refresh Accounts and try again.");
+		throw new InvalidOperationException(global::LibationAvalonia.Properties.Resources.AccountPresentationSourceThatAccountCardIsNoLongerCurrent);
 	}
 
 	private static string AccountKey(Account account)

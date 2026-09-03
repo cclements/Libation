@@ -49,9 +49,9 @@ public sealed class AccountPresentationSnapshot
 	public bool ActionsAvailable { get; }
 	public string AuthorizationText => AuthorizationState switch
 	{
-		AccountAuthorizationState.StoredAuthorizationReady => "Stored authorization is ready",
-		AccountAuthorizationState.StoredSessionNeedsRenewal => "Stored session needs renewal",
-		_ => "Sign-in required",
+		AccountAuthorizationState.StoredAuthorizationReady => global::LibationAvalonia.Properties.Resources.IAccountPresentationSourceStoredAuthorizationIsReady,
+		AccountAuthorizationState.StoredSessionNeedsRenewal => global::LibationAvalonia.Properties.Resources.IAccountPresentationSourceStoredSessionNeedsRenewal,
+		_ => global::LibationAvalonia.Properties.Resources.IAccountPresentationSourceSignInRequired,
 	};
 	public LibationStatusKind AuthorizationStatus => AuthorizationState switch
 	{

@@ -32,7 +32,7 @@ public sealed class TrashItemViewModel : ViewModelBase
 		ArgumentNullException.ThrowIfNull(libraryBook);
 		var nextKey = TrashItemKey.From(libraryBook);
 		if (LibraryBook is not null && nextKey != Key)
-			throw new InvalidOperationException("A Trash row's stable identity cannot change during refresh.");
+			throw new InvalidOperationException(global::LibationAvalonia.Properties.Resources.TrashModelsATrashRowSStableIdentityCannot);
 
 		LibraryBook = libraryBook;
 		Key = nextKey;
@@ -42,24 +42,24 @@ public sealed class TrashItemViewModel : ViewModelBase
 		string authors = string.Join(", ", libraryBook.Book.Authors.Select(author => author.Name).Where(name => !string.IsNullOrWhiteSpace(name)));
 		string kind = libraryBook.Book.ContentType switch
 		{
-			ContentType.Parent => "Podcast series context",
-			ContentType.Episode => "Podcast episode",
-			_ => "Audiobook",
+			ContentType.Parent => global::LibationAvalonia.Properties.Resources.TrashModelsPodcastSeriesContext,
+			ContentType.Episode => global::LibationAvalonia.Properties.Resources.TrashModelsPodcastEpisode,
+			_ => global::LibationAvalonia.Properties.Resources.TrashModelsAudiobook,
 		};
 		string added = libraryBook.DateAdded == default
-			? "Added date unavailable"
-			: $"Added {libraryBook.DateAdded.ToString("d", CultureInfo.CurrentCulture)}";
+			? global::LibationAvalonia.Properties.Resources.TrashModelsAddedDateUnavailable
+			: string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.TrashModelsAdded0, libraryBook.DateAdded.ToString("d", CultureInfo.CurrentCulture));
 		Detail = IsContextOnly
-			? "Series context for removed episodes — this row is never selected for an action."
+			? global::LibationAvalonia.Properties.Resources.TrashModelsSeriesContextForRemovedEpisodesThisRow
 			: string.IsNullOrWhiteSpace(parentTitle)
 				? $"{kind} · {added}"
-				: $"{kind} in {parentTitle} · {added}";
+				: string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.TrashModels0In12, kind, parentTitle, added);
 		CreatorText = string.IsNullOrWhiteSpace(authors) ? null : authors;
-		StatusText = IsContextOnly ? "Series context" : libraryBook.IsAudiblePlus ? "Removed · Audible Plus" : "Removed";
+		StatusText = IsContextOnly ? global::LibationAvalonia.Properties.Resources.TrashModelsSeriesContext : libraryBook.IsAudiblePlus ? global::LibationAvalonia.Properties.Resources.TrashModelsRemovedAudiblePlus : global::LibationAvalonia.Properties.Resources.TrashModelsRemoved;
 		Status = IsContextOnly ? LibationStatusKind.Unavailable : LibationStatusKind.NeedsAttention;
 		AccessibleName = IsContextOnly
 			? $"{Title}. {Detail}"
-			: $"Select {Title} for restore or permanent deletion. {Detail}";
+			: string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.TrashModelsSelect0ForRestoreOrPermanentDeletion, Title, Detail);
 		searchText = string.Join(" ", new[]
 		{
 			Title,

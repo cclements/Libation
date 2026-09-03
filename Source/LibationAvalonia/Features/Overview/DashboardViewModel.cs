@@ -28,8 +28,8 @@ namespace LibationAvalonia.Features.Overview;
 public sealed class DashboardViewModel : ViewModelBase, IDisposable, IRoutePresentation
 {
 	private static readonly TimeSpan RefreshDebounce = TimeSpan.FromMilliseconds(300);
-	private const string RecentAdditionsScope = "Recent additions";
-	private const string RecentCompletionsScope = "Recently completed";
+	private static readonly string RecentAdditionsScope = global::LibationAvalonia.Properties.Resources.DashboardViewModelRecentAdditions;
+	private static readonly string RecentCompletionsScope = global::LibationAvalonia.Properties.Resources.DashboardViewModelRecentlyCompleted;
 
 	private static readonly string[] SnapshotPropertyNames =
 	[
@@ -86,49 +86,49 @@ public sealed class DashboardViewModel : ViewModelBase, IDisposable, IRoutePrese
 		RefreshCommand = Track(ReactiveCommand.CreateFromTask(RefreshAsync));
 		CopyTechnicalDetailsCommand = Track(ReactiveCommand.CreateFromTask(CopyTechnicalDetailsAsync));
 		AddAccountCommand = Track(ReactiveCommand.CreateFromTask(() => RunActionAsync(
-			"add an account",
+			global::LibationAvalonia.Properties.Resources.DashboardViewModelAddAnAccount,
 			commands.AddAccountAsync,
-			"Libation could not open account setup. Try Accounts from the navigation.")));
+			global::LibationAvalonia.Properties.Resources.DashboardViewModelLibationCouldNotOpenAccountSetupTry)));
 		ManageAccountsCommand = Track(ReactiveCommand.CreateFromTask(() => RunActionAsync(
-			"manage accounts",
+			global::LibationAvalonia.Properties.Resources.DashboardViewModelManageAccounts,
 			commands.ShowAccountsAsync,
-			"Libation could not open account management. Try Accounts from the navigation.")));
+			global::LibationAvalonia.Properties.Resources.DashboardViewModelLibationCouldNotOpenAccountManagementTry)));
 		ScanLibraryCommand = Track(ReactiveCommand.CreateFromTask(() => RunActionAsync(
-			"scan the library",
+			global::LibationAvalonia.Properties.Resources.DashboardViewModelScanTheLibrary,
 			commands.ScanLibraryAsync,
-			"Libation could not start the library scan. Check the account connection and try again.")));
+			global::LibationAvalonia.Properties.Resources.DashboardViewModelLibationCouldNotStartTheLibraryScan)));
 		LocateAudiobooksCommand = Track(ReactiveCommand.CreateFromTask(() => RunActionAsync(
-			"locate audiobooks",
+			global::LibationAvalonia.Properties.Resources.DashboardViewModelLocateAudiobooks,
 			commands.LocateAudiobooksAsync,
-			"Libation could not open the audiobook locator. Check the configured Books location and try again.")));
+			global::LibationAvalonia.Properties.Resources.DownloadsViewModelLibationCouldNotOpenTheAudiobookLocator)));
 		DownloadPendingCommand = Track(ReactiveCommand.CreateFromTask(() => RunActionAsync(
-			"download pending titles",
+			global::LibationAvalonia.Properties.Resources.DashboardViewModelDownloadPendingTitles,
 			commands.DownloadPendingBooksAsync,
-			"Libation could not queue the pending titles. Open Downloads or Processing for title-level details.")));
+			global::LibationAvalonia.Properties.Resources.DashboardViewModelLibationCouldNotQueueThePendingTitles)));
 		DropAudiobooksCommand = Track(ReactiveCommand.CreateFromTask<IReadOnlyList<string>>(paths => RunActionAsync(
-			"locate dropped audiobooks",
+			global::LibationAvalonia.Properties.Resources.DashboardViewModelLocateDroppedAudiobooks,
 			() => commands.LocateAudiobooksFromDropAsync(paths),
-			"Libation could not inspect the dropped location. Use Browse and choose a local folder instead.")));
+			global::LibationAvalonia.Properties.Resources.DashboardViewModelLibationCouldNotInspectTheDroppedLocation)));
 		ApplySearchCommand = Track(ReactiveCommand.CreateFromTask(() => RunActionAsync(
-			"search the library",
+			global::LibationAvalonia.Properties.Resources.DashboardViewModelSearchTheLibrary,
 			() => commands.ApplyFilterAsync(SearchText),
-			"Libation could not apply that library search. Clear the search and try again.")));
+			global::LibationAvalonia.Properties.Resources.DashboardViewModelLibationCouldNotApplyThatLibrarySearch)));
 		OpenFilteredLibraryCommand = Track(ReactiveCommand.CreateFromTask(() => RunActionAsync(
-			"search the library",
+			global::LibationAvalonia.Properties.Resources.DashboardViewModelSearchTheLibrary,
 			async () =>
 			{
 				await commands.ApplyFilterAsync(SearchText);
 				await navigation.OpenLibraryAsync();
 			},
-			"Libation could not open the filtered Library. Clear the search and try again.")));
+			global::LibationAvalonia.Properties.Resources.DashboardViewModelLibationCouldNotOpenTheFilteredLibrary)));
 		OpenLibraryCommand = Track(ReactiveCommand.CreateFromTask(() => RunActionAsync(
-			"open the library",
+			global::LibationAvalonia.Properties.Resources.DashboardViewModelOpenTheLibrary,
 			navigation.OpenLibraryAsync,
-			"Libation could not open the Library view. Try Library from the navigation.")));
+			global::LibationAvalonia.Properties.Resources.DashboardViewModelLibationCouldNotOpenTheLibraryView)));
 		OpenProcessingCommand = Track(ReactiveCommand.CreateFromTask(() => RunActionAsync(
-			"open processing",
+			global::LibationAvalonia.Properties.Resources.DashboardViewModelOpenProcessing,
 			navigation.OpenProcessingAsync,
-			"Libation could not open Processing. Try Processing from the navigation.")));
+			global::LibationAvalonia.Properties.Resources.DashboardViewModelLibationCouldNotOpenProcessingTryProcessing)));
 		OpenBookCommand = Track(ReactiveCommand.CreateFromTask<DashboardBookItem>(OpenBookAsync));
 		library.PropertyChanged += Library_PropertyChanged;
 		processing.PropertyChanged += Processing_PropertyChanged;
@@ -213,35 +213,35 @@ public sealed class DashboardViewModel : ViewModelBase, IDisposable, IRoutePrese
 	public string ProcessingText => FormatCount(processing.Active.Count + processing.Waiting.Count);
 	public bool HasLocalStorage => Snapshot.Supplement.TotalLocalStorageBytes.HasValue;
 	public string LocalStorageText => Snapshot.Supplement.TotalLocalStorageBytes is long bytes ? DiskSpaceHelper.FormatBytes(bytes) : string.Empty;
-	public string TotalSizeText => HasLocalStorage ? LocalStorageText : "Not measured";
+	public string TotalSizeText => HasLocalStorage ? LocalStorageText : global::LibationAvalonia.Properties.Resources.DashboardViewModelNotMeasured;
 	public string AddedThisWeekDeltaText => Snapshot.AddedThisWeekCount == 0
-		? "No additions this week"
+		? global::LibationAvalonia.Properties.Resources.DashboardViewModelNoAdditionsThisWeek
 		: Snapshot.AddedThisWeekCount == 1
-			? "+1 this week"
-			: $"+{FormatCount(Snapshot.AddedThisWeekCount)} this week";
+			? global::LibationAvalonia.Properties.Resources.DashboardViewModel1ThisWeek
+			: string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.DashboardViewModel0ThisWeek, FormatCount(Snapshot.AddedThisWeekCount));
 	public string DownloadsDeltaText => Snapshot.ActiveDownloadCount == 0
-		? "None running"
-		: Snapshot.ActiveDownloadCount == 1 ? "1 running" : $"{FormatCount(Snapshot.ActiveDownloadCount)} running";
-	public string ProcessingDeltaText => $"{FormatCount(processing.Active.Count)} running · {FormatCount(processing.Waiting.Count)} queued";
+		? global::LibationAvalonia.Properties.Resources.DashboardViewModelNoneRunning
+		: Snapshot.ActiveDownloadCount == 1 ? global::LibationAvalonia.Properties.Resources.DashboardViewModel1Running : string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.DashboardViewModel0Running, FormatCount(Snapshot.ActiveDownloadCount));
+	public string ProcessingDeltaText => string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.DashboardViewModel0Running1Queued, FormatCount(processing.Active.Count), FormatCount(processing.Waiting.Count));
 	public string CompletedDeltaText => Snapshot.FailedJobCount == 0
-		? "All looks good"
-		: Snapshot.FailedJobCount == 1 ? "1 failed" : $"{FormatCount(Snapshot.FailedJobCount)} failed";
-	public string StorageStatusText => Snapshot.Supplement.TotalLocalStorageBytes.HasValue ? "Local audiobook storage" : "Storage has not been measured";
+		? global::LibationAvalonia.Properties.Resources.DashboardViewModelAllLooksGood
+		: Snapshot.FailedJobCount == 1 ? global::LibationAvalonia.Properties.Resources.DashboardViewModel1Failed : string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.DashboardViewModel0Failed, FormatCount(Snapshot.FailedJobCount));
+	public string StorageStatusText => Snapshot.Supplement.TotalLocalStorageBytes.HasValue ? global::LibationAvalonia.Properties.Resources.DashboardViewModelLocalAudiobookStorage : global::LibationAvalonia.Properties.Resources.DashboardViewModelStorageHasNotBeenMeasured;
 	public string AccountHealthText => Snapshot.AccountCount switch
 	{
-		0 => "No Audible account connected",
-		1 => "1 Audible account connected",
-		_ => $"{Snapshot.AccountCount.ToString("N0", CultureInfo.CurrentCulture)} Audible accounts connected",
+		0 => global::LibationAvalonia.Properties.Resources.OnboardingViewModelNoAudibleAccountConnected,
+		1 => global::LibationAvalonia.Properties.Resources.DashboardViewModel1AudibleAccountConnected,
+		_ => string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.DashboardViewModel0AudibleAccountsConnected, Snapshot.AccountCount.ToString("N0", CultureInfo.CurrentCulture)),
 	};
 	public LibationStatusKind AccountStatus => Snapshot.AccountCount > 0 ? LibationStatusKind.Connected : LibationStatusKind.NeedsAttention;
 	public string ScanStateText => Snapshot.IsScanning
 		? Snapshot.ScanProgressText
 		: Snapshot.Supplement.ScanFreshness == DashboardScanFreshness.Stale
-			? "The last successful scan is stale"
+			? global::LibationAvalonia.Properties.Resources.DashboardViewModelTheLastSuccessfulScanIsStale
 			: Snapshot.Supplement.LastSuccessfulScan is DateTimeOffset scanned
-				? $"Last successful scan: {scanned.ToLocalTime():g}"
+				? string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.DashboardViewModelLastSuccessfulScan0G, scanned.ToLocalTime())
 				: Snapshot.AccountCount > 0 && Snapshot.TotalTitles == 0
-					? "Ready to scan"
+					? global::LibationAvalonia.Properties.Resources.DashboardViewModelReadyToScan
 					: string.Empty;
 	public LibationStatusKind ScanStatus => Snapshot.IsScanning
 		? LibationStatusKind.Processing
@@ -249,8 +249,8 @@ public sealed class DashboardViewModel : ViewModelBase, IDisposable, IRoutePrese
 			? LibationStatusKind.NeedsAttention
 			: LibationStatusKind.Completed;
 	public string FailedJobsText => Snapshot.FailedJobCount == 1
-		? "1 processing job failed. Open Processing for details."
-		: $"{Snapshot.FailedJobCount.ToString("N0", CultureInfo.CurrentCulture)} processing jobs failed. Open Processing for details.";
+		? global::LibationAvalonia.Properties.Resources.DashboardViewModel1ProcessingJobFailedOpenProcessingFor
+		: string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.DashboardViewModel0ProcessingJobsFailedOpenProcessingFor, Snapshot.FailedJobCount.ToString("N0", CultureInfo.CurrentCulture));
 	public IReadOnlyList<DashboardBookItem> CurrentFlightItems => Snapshot.CurrentFlight;
 	public IReadOnlyList<DashboardBookItem> RecentAdditions => Snapshot.RecentAdditions;
 	public IReadOnlyList<DashboardBookItem> RecentCompletions => Snapshot.RecentCompletions;
@@ -258,11 +258,11 @@ public sealed class DashboardViewModel : ViewModelBase, IDisposable, IRoutePrese
 		? RecentCompletions
 		: RecentAdditions;
 	public string FlightCountText => Snapshot.CurrentFlight.Count == 1
-		? "1 title"
-		: $"{Snapshot.CurrentFlight.Count.ToString("N0", CultureInfo.CurrentCulture)} titles";
+		? global::LibationAvalonia.Properties.Resources.CurrentFlightViewModel1Title
+		: string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.CurrentFlightViewModel0Titles, Snapshot.CurrentFlight.Count.ToString("N0", CultureInfo.CurrentCulture));
 	public string VisibleLibrarySummary => string.IsNullOrWhiteSpace(Snapshot.SearchText)
-		? $"{VisibleTitlesText} titles visible"
-		: $"{VisibleTitlesText} titles match the current library search";
+		? string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.DashboardViewModel0TitlesVisible, VisibleTitlesText)
+		: string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.DashboardViewModel0TitlesMatchTheCurrentLibrarySearch, VisibleTitlesText);
 	public UserFacingError? CurrentError => actionError ?? refreshError;
 	public string? ErrorMessage => CurrentError?.PrimaryMessage ?? Snapshot.Supplement.ErrorMessage;
 	public bool CanCopyTechnicalDetails => CurrentError is not null && App.MainWindow?.Clipboard is not null;
@@ -281,12 +281,12 @@ public sealed class DashboardViewModel : ViewModelBase, IDisposable, IRoutePrese
 	public ICommand OpenProcessingCommand { get; }
 	public ICommand OpenBookCommand { get; }
 	public string RouteEyebrow => dashboardLayout == DashboardLayoutKind.TastingRoom
-		? "Editorial library workspace"
-		: "Library workspace";
-	public string RouteTitle => dashboardLayout == DashboardLayoutKind.TastingRoom ? "Today’s Selection" : "The Cellar";
+		? global::LibationAvalonia.Properties.Resources.DashboardViewModelEditorialLibraryWorkspace
+		: global::LibationAvalonia.Properties.Resources.LibraryViewModelLibraryWorkspace;
+	public string RouteTitle => dashboardLayout == DashboardLayoutKind.TastingRoom ? global::LibationAvalonia.Properties.Resources.DashboardViewModelTodaySSelection : global::LibationAvalonia.Properties.Resources.DashboardViewModelTheCellar;
 	public string RouteSubtitle => dashboardLayout == DashboardLayoutKind.TastingRoom
-		? "Welcome back. Here’s what’s happening in your cellar."
-		: "Your curated collection of stories, neatly aged and ready to enjoy.";
+		? global::LibationAvalonia.Properties.Resources.DashboardViewModelWelcomeBackHereSWhatSHappening
+		: global::LibationAvalonia.Properties.Resources.DashboardViewModelYourCuratedCollectionOfStoriesNeatlyAged;
 	public RouteCommandPresentation? RoutePrimaryCommand => null;
 	public IReadOnlyList<RouteCommandPresentation> RouteSecondaryCommands => [];
 	public RouteStatusPresentation RouteStatusBadge => new(AccountHealthText, AccountStatus);
@@ -340,11 +340,11 @@ public sealed class DashboardViewModel : ViewModelBase, IDisposable, IRoutePrese
 				{
 					refreshError = UserFacingErrorFactory.FromException(
 						ex,
-						"refresh the contemporary overview",
-						"Libation could not refresh the overview. Your library data was not changed.");
+						global::LibationAvalonia.Properties.Resources.DashboardViewModelRefreshTheContemporaryOverview,
+						global::LibationAvalonia.Properties.Resources.DashboardViewModelLibationCouldNotRefreshTheOverviewYour);
 					Serilog.Log.Logger.Error(
 						ex,
-						"Failed to refresh the contemporary overview. Correlation ID: {CorrelationId}. Category: {ErrorCategory}",
+						global::LibationAvalonia.Properties.Resources.DashboardViewModelFailedToRefreshTheContemporaryOverviewCorrelation,
 						refreshError.CorrelationId,
 						refreshError.Category.ToDisplayName());
 					RaiseErrorProperties();
@@ -367,9 +367,9 @@ public sealed class DashboardViewModel : ViewModelBase, IDisposable, IRoutePrese
 		if (item is null)
 			return;
 		await RunActionAsync(
-			"open a book",
+			global::LibationAvalonia.Properties.Resources.DashboardViewModelOpenABook,
 			() => navigation.OpenBookAsync(item.LibraryBook),
-			"Libation could not open that book. Open it from the Library instead.");
+			global::LibationAvalonia.Properties.Resources.DashboardViewModelLibationCouldNotOpenThatBookOpen);
 	}
 
 	private DashboardSnapshot AttachPresentationCommands(DashboardSnapshot next)
@@ -409,7 +409,7 @@ public sealed class DashboardViewModel : ViewModelBase, IDisposable, IRoutePrese
 			actionError = UserFacingErrorFactory.FromException(ex, actionName, userError);
 			Serilog.Log.Logger.Error(
 				ex,
-				"Dashboard action failed: {DashboardAction}. Correlation ID: {CorrelationId}. Category: {ErrorCategory}",
+				global::LibationAvalonia.Properties.Resources.DashboardViewModelDashboardActionFailedDashboardActionCorrelationIDCorrelationId,
 				actionName,
 				actionError.CorrelationId,
 				actionError.Category.ToDisplayName());
@@ -492,7 +492,7 @@ public sealed class DashboardViewModel : ViewModelBase, IDisposable, IRoutePrese
 		catch (Exception ex)
 		{
 			Serilog.Log.Logger.Warning(
-				"Unable to copy overview diagnostics. Correlation ID: {CorrelationId}. {TechnicalDetails}",
+				global::LibationAvalonia.Properties.Resources.DashboardViewModelUnableToCopyOverviewDiagnosticsCorrelationID,
 				error.CorrelationId,
 				UserFacingErrorFactory.Scrub(ex.ToString()));
 		}

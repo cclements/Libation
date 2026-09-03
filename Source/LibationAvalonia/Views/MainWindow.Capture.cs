@@ -73,7 +73,7 @@ public partial class MainWindow
 			if (osHandshake is not null)
 				Directory.CreateDirectory(osHandshake);
 			await WaitForLibraryReadyAsync();
-			var routeContent = Content as Control
+			var routeContent = Content as AppShellView
 				?? throw new InvalidOperationException("The contemporary shell was not available for capture.");
 			var main = ViewModel
 				?? throw new InvalidOperationException("The main view model was not available for capture.");
@@ -101,7 +101,7 @@ public partial class MainWindow
 				try
 				{
 					var entry = plan.Entries[index];
-					SizeCaptureSurface(captureHost, entry);
+					SizeCaptureHost(captureHost, entry);
 					SizeCaptureSurface(routeContent, entry);
 					SizeCaptureSurface(galleryContent, entry);
 					SizeCaptureSurface(onboardingContent, entry);
@@ -111,9 +111,11 @@ public partial class MainWindow
 						ExperienceStyle = entry.Profile,
 						DensityMode = entry.Density,
 						DecorationLevel = entry.Decoration,
+						ReducedMotionPreference = entry.Motion,
 						LibraryViewMode = entry.LibraryView ?? baseline.LibraryViewMode,
 						UseContemporaryShell = true,
 					});
+					await WaitForCaptureExperienceAsync(entry);
 					await SettleAsync(plan.SettleMs / 2);
 
 					if (entry.Surface == CaptureSurface.ComponentGallery)
@@ -123,7 +125,7 @@ public partial class MainWindow
 						galleryContent.PreviewStyle = entry.Profile;
 						galleryContent.PreviewDensity = entry.Density;
 						galleryContent.PreviewDecoration = entry.Decoration;
-						galleryContent.PreviewMotion = ReducedMotionPreference.Full;
+						galleryContent.PreviewMotion = entry.Motion;
 						galleryContent.UseSystemTypography = false;
 						galleryContent.IsVisible = true;
 						ResizeForCapture(entry);
@@ -146,6 +148,7 @@ public partial class MainWindow
 						ResizeForCapture(entry);
 						NavigateContemporary(entry.Route);
 						await WaitForRouteReadyAsync(entry.Route);
+						await WaitForRenderedRouteAsync(routeContent, entry.Route);
 						PrepareFlightForCapture(entry);
 						await PrepareProcessingForCaptureAsync(entry);
 						PrepareDecanterForCapture(entry);
@@ -153,6 +156,8 @@ public partial class MainWindow
 					}
 					await WaitForVisibleCoverLoadsAsync();
 					await SettleAsync(plan.SettleMs);
+					VerifyCaptureState(entry);
+					await PresentCaptureFrameAsync(captureHost, plan.SettleMs);
 
 					if (osHandshake is null)
 					{
@@ -422,6 +427,16 @@ public partial class MainWindow
 		// capture.  An inactive surface can otherwise contribute an oversized desired
 		// size when the shell is re-parented, causing the active surface to be centered
 		// and clipped instead of occupying the requested client area.
+		surface.Width = entry.Width / entry.LogicalScale;
+		surface.Height = entry.Height / entry.LogicalScale;
+		surface.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left;
+		surface.VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top;
+		surface.RenderTransformOrigin = new RelativePoint(0, 0, RelativeUnit.Relative);
+		surface.RenderTransform = Avalonia.Media.Transformation.TransformOperations.Parse($"scale({entry.LogicalScale})");
+	}
+
+	private static void SizeCaptureHost(Control surface, CaptureEntry entry)
+	{
 		surface.Width = entry.Width;
 		surface.Height = entry.Height;
 		surface.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left;
@@ -472,6 +487,7 @@ public partial class MainWindow
 		if (contemporaryShellViewModel is not { } shell)
 			throw new InvalidOperationException("The contemporary shell was not available for capture.");
 
+		await WaitForPropertyAsync(shell, () => shell.CurrentRoute.Id == route);
 		await WaitForPropertyAsync(shell.Library, () => !shell.Library.IsLoading);
 		if (route == Shell.AppRouteId.Overview)
 			await WaitForPropertyAsync(shell.Dashboard, () => shell.Dashboard.HasDashboardData || shell.Dashboard.HasError);
@@ -483,6 +499,58 @@ public partial class MainWindow
 			await WaitForPropertyAsync(shell.Trash, () => !shell.Trash.IsLoading);
 
 		await Dispatcher.UIThread.InvokeAsync(() => { }, DispatcherPriority.Background);
+	}
+
+	private static async Task WaitForRenderedRouteAsync(AppShellView shellView, Shell.AppRouteId route)
+	{
+		while (!shellView.IsRoutePresented(route))
+		{
+			await Dispatcher.UIThread.InvokeAsync(() => { }, DispatcherPriority.Render);
+			await Task.Delay(50);
+		}
+		await Dispatcher.UIThread.InvokeAsync(() => { }, DispatcherPriority.Background);
+	}
+
+	private async Task WaitForCaptureExperienceAsync(CaptureEntry entry)
+	{
+		if (contemporaryShellViewModel is not { } shell)
+			throw new InvalidOperationException("The contemporary shell was not available for capture.");
+
+		await WaitForPropertyAsync(shell, () => shell.Profile.Style == entry.Profile);
+		await Dispatcher.UIThread.InvokeAsync(() => { }, DispatcherPriority.Background);
+	}
+
+	private void VerifyCaptureState(CaptureEntry entry)
+	{
+		if (entry.Surface != CaptureSurface.Route)
+			return;
+		if (contemporaryShellViewModel is not { } shell)
+			throw new InvalidOperationException("The contemporary shell was not available for capture.");
+		if (shell.Profile.Style != entry.Profile)
+			throw new CapturePlanException($"Capture profile drifted from {entry.Profile} to {shell.Profile.Style} before presentation.");
+		if (shell.CurrentRoute.Id != entry.Route)
+			throw new CapturePlanException($"Capture route drifted from {entry.Route} to {shell.CurrentRoute.Id} before presentation.");
+		if (entry.ProcessingScenario == ProcessingCaptureScenario.Mixed
+			&& (shell.Processing.ActiveCount != 1
+				|| shell.Processing.WaitingCount != 1
+				|| shell.Processing.CompletedCount != 1
+				|| shell.Processing.FailedCount != 1))
+		{
+			throw new CapturePlanException("The mixed Processing capture lost its deterministic 1/1/1/1 queue state before presentation.");
+		}
+	}
+
+	private static async Task PresentCaptureFrameAsync(Control captureHost, int settleMs)
+	{
+		await Dispatcher.UIThread.InvokeAsync(() =>
+		{
+			captureHost.InvalidateMeasure();
+			captureHost.InvalidateArrange();
+			captureHost.InvalidateVisual();
+		}, DispatcherPriority.Render);
+		// Dispatcher completion only proves that Avalonia scheduled the frame. The
+		// native-window capture must also wait for the compositor to present it.
+		await SettleAsync(settleMs);
 	}
 
 	private async Task WaitForVisibleCoverLoadsAsync()

@@ -1,5 +1,6 @@
 <UserControl xmlns="https://github.com/avaloniaui"
 			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:properties="using:LibationAvalonia.Properties"
 			 xmlns:components="using:LibationAvalonia.DesignSystem.Components"
 			 xmlns:designSystem="using:LibationAvalonia.DesignSystem"
 			 xmlns:flight="using:LibationAvalonia.Features.Flight"
@@ -26,8 +27,8 @@
 					<Grid ColumnDefinitions="Auto,Auto,*,Auto" ColumnSpacing="8" Margin="2,4">
 						<Border Width="20" Height="40" Cursor="SizeNorthSouth" PointerPressed="DragHandle_PointerPressed"
 								Focusable="True" KeyDown="DragHandle_KeyDown"
-								ToolTip.Tip="Drag to reorder Current Flight"
-								AutomationProperties.Name="Drag handle for Current Flight title">
+								ToolTip.Tip="{x:Static properties:Resources.CurrentFlightViewDragToReorderCurrentFlight}"
+								AutomationProperties.Name="{x:Static properties:Resources.CurrentFlightViewDragHandleForCurrentFlightTitle}">
 							<Path Data="M 3,13 L 17,13 M 3,20 L 17,20 M 3,27 L 17,27"
 								  Stroke="{DynamicResource Libation.Brush.TextTertiary}" StrokeThickness="1.5" />
 						</Border>
@@ -42,7 +43,7 @@
 							<TextBlock Text="{Binding Author}" Foreground="{DynamicResource Libation.Brush.TextSecondary}" TextTrimming="CharacterEllipsis" />
 							<TextBlock Text="{Binding DurationText}" FontSize="{DynamicResource Libation.FontSize.Caption}" Foreground="{DynamicResource Libation.Brush.TextTertiary}" />
 						</StackPanel>
-						<Button Grid.Column="3" Classes="contemporary quiet compact" Content="Remove" Command="{Binding RemoveCommand}" AutomationProperties.Name="Remove title from Current Flight" />
+						<Button Grid.Column="3" Classes="contemporary quiet compact" Content="{x:Static properties:Resources.AccountsViewRemove}" Command="{Binding RemoveCommand}" AutomationProperties.Name="{x:Static properties:Resources.CurrentFlightViewRemoveTitleFromCurrentFlight}" />
 					</Grid>
 					</Border>
 				</DataTemplate>
@@ -61,18 +62,18 @@
 		</StackPanel>
 
 		<Grid Grid.Row="1" ColumnDefinitions="Auto,*" ColumnSpacing="8">
-			<TextBlock VerticalAlignment="Center" Text="Output profile" />
+			<TextBlock VerticalAlignment="Center" Text="{x:Static properties:Resources.CurrentFlightViewOutputProfile}" />
 			<ComboBox Grid.Column="1" ItemsSource="{Binding OutputProfiles}" SelectedItem="{Binding SelectedOutputProfile, Mode=TwoWay}"
-				AutomationProperties.Name="Output profile">
+				AutomationProperties.Name="{x:Static properties:Resources.CurrentFlightViewOutputProfile}">
 				<ComboBox.ItemTemplate><DataTemplate x:DataType="flight:FlightOutputProfileOption"><StackPanel><TextBlock Text="{Binding Label}" /><TextBlock Text="{Binding Description}" FontSize="{DynamicResource Libation.FontSize.Caption}" Foreground="{DynamicResource Libation.Brush.TextSecondary}" /></StackPanel></DataTemplate></ComboBox.ItemTemplate>
 			</ComboBox>
 		</Grid>
 		<WrapPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Left">
-			<Button Classes="contemporary quiet compact" Margin="0,0,8,8" Content="Inspect preflight" Command="{Binding InspectPreflightCommand}" />
-			<Button Classes="contemporary quiet compact" Margin="0,0,8,8" Content="Export metadata" Command="{Binding ExportMetadataCommand}" />
-			<Button Classes="contemporary quiet compact" Margin="0,0,8,8" Content="Add tags" Command="{Binding AddTagsCommand}" />
-			<Button Classes="contemporary quiet compact" Margin="0,0,8,8" Content="Replace tags" Command="{Binding ReplaceTagsCommand}" />
-			<Button Classes="contemporary quiet compact" Margin="0,0,8,8" Content="Copy technical details"
+			<Button Classes="contemporary quiet compact" Margin="0,0,8,8" Content="{x:Static properties:Resources.CurrentFlightViewInspectPreflight}" Command="{Binding InspectPreflightCommand}" />
+			<Button Classes="contemporary quiet compact" Margin="0,0,8,8" Content="{x:Static properties:Resources.CurrentFlightViewExportMetadata}" Command="{Binding ExportMetadataCommand}" />
+			<Button Classes="contemporary quiet compact" Margin="0,0,8,8" Content="{x:Static properties:Resources.CurrentFlightViewAddTags}" Command="{Binding AddTagsCommand}" />
+			<Button Classes="contemporary quiet compact" Margin="0,0,8,8" Content="{x:Static properties:Resources.CurrentFlightViewReplaceTags}" Command="{Binding ReplaceTagsCommand}" />
+			<Button Classes="contemporary quiet compact" Margin="0,0,8,8" Content="{x:Static properties:Resources.AccountsViewCopyTechnicalDetails}"
 				Command="{Binding CopyTechnicalDetailsCommand}" IsVisible="{Binding HasError}" />
 		</WrapPanel>
 		<TextBlock Grid.Row="3" Text="{Binding Announcement}"

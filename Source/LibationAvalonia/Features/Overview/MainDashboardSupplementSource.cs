@@ -88,7 +88,7 @@ public sealed class MainDashboardSupplementSource : IDashboardSupplementSource, 
 			}
 			catch (Exception ex)
 			{
-				Serilog.Log.Logger.Warning(ex, "Unable to measure local audiobook storage for the dashboard");
+				Serilog.Log.Logger.Warning(ex, global::LibationAvalonia.Properties.Resources.MainDashboardSupplementSourceUnableToMeasureLocalAudiobookStorageFor);
 				return null;
 			}
 

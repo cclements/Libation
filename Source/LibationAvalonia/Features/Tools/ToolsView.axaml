@@ -55,16 +55,16 @@
 	<ScrollViewer HorizontalScrollBarVisibility="Disabled">
 		<StackPanel Margin="{DynamicResource Libation.Thickness.5}" Spacing="{DynamicResource Libation.Space.4}">
 			<components:AttentionBanner IsVisible="{Binding HasError}" Severity="{x:Static components:ComponentSeverity.Danger}" FocusOnShow="True"
-				Title="Tool action unavailable" Message="{Binding ErrorMessage}"
-				ActionText="Copy technical details" ActionCommand="{Binding CopyTechnicalDetailsCommand}" />
-			<components:AttentionBanner Severity="{x:Static components:ComponentSeverity.Warning}" Title="The current Library filter defines visible-title scope"
-				Message="Commands that say visible titles operate on the shared Library filter, including titles outside the current viewport. Review that filter before running a scoped or destructive action." />
+				Title="{x:Static properties:Resources.ToolsViewToolActionUnavailable}" Message="{Binding ErrorMessage}"
+				ActionText="{x:Static properties:Resources.AccountsViewCopyTechnicalDetails}" ActionCommand="{Binding CopyTechnicalDetailsCommand}" />
+			<components:AttentionBanner Severity="{x:Static components:ComponentSeverity.Warning}" Title="{x:Static properties:Resources.ToolsViewTheCurrentLibraryFilterDefinesVisibleTitle}"
+				Message="{x:Static properties:Resources.ToolsViewCommandsThatSayVisibleTitlesOperateOn}" />
 			<Border Classes="card raised">
 				<Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource Libation.Space.4}">
 					<StackPanel Spacing="{DynamicResource Libation.Space.1}">
-						<TextBlock Text="Apply the first saved quick filter at startup" FontWeight="SemiBold"
+						<TextBlock Text="{x:Static properties:Resources.ToolsViewApplyTheFirstSavedQuickFilterAt}" FontWeight="SemiBold"
 							Foreground="{DynamicResource Libation.Brush.TextPrimary}" />
-						<TextBlock Text="Controls only the filter Libation applies when it opens; it does not change or delete any saved filter."
+						<TextBlock Text="{x:Static properties:Resources.ToolsViewControlsOnlyTheFilterLibationAppliesWhen}"
 							TextWrapping="Wrap" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
 						<TextBlock Text="{Binding StartupFilterStateText}" TextWrapping="Wrap"
 							Foreground="{DynamicResource Libation.Brush.TextTertiary}" />
@@ -73,8 +73,8 @@
 						<components:StatusBadge Status="{Binding StartupFilterStatus}" TextOverride="{Binding StartupFilterBadgeText}"
 							AccessibleName="{Binding StartupFilterStateText}" />
 						<ToggleSwitch IsChecked="{Binding FirstFilterIsDefault, Mode=TwoWay}" HorizontalAlignment="Right"
-							AutomationProperties.Name="Apply the first saved quick filter at startup"
-							AutomationProperties.HelpText="Changes only the startup quick-filter preference." />
+							AutomationProperties.Name="{x:Static properties:Resources.ToolsViewApplyTheFirstSavedQuickFilterAt}"
+							AutomationProperties.HelpText="{x:Static properties:Resources.ToolsViewChangesOnlyTheStartupQuickFilterPreference}" />
 					</StackPanel>
 				</Grid>
 			</Border>

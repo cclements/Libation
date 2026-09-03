@@ -46,15 +46,15 @@ public sealed class ProcessingQueueItemViewModel : ReactiveObject, IDisposable
 	}
 
 	public ProcessBookViewModel Source { get; }
-	public string Title => string.IsNullOrWhiteSpace(Source.Title) ? "Untitled audiobook" : Source.Title;
-	public string Author => string.IsNullOrWhiteSpace(Source.Author) ? "Unknown author" : Source.Author;
+	public string Title => string.IsNullOrWhiteSpace(Source.Title) ? global::LibationAvalonia.Properties.Resources.DownloadsModelsUntitledAudiobook : Source.Title;
+	public string Author => string.IsNullOrWhiteSpace(Source.Author) ? global::LibationAvalonia.Properties.Resources.DownloadsModelsUnknownAuthor : Source.Author;
 	public string? Narrator => Source.Narrator;
 	public string Stage => Source.PresentationStage switch
 	{
-		ProcessBookPresentationStage.Downloading => "Downloading",
-		ProcessBookPresentationStage.Decrypting => "Decrypting",
-		ProcessBookPresentationStage.Converting => "Converting",
-		ProcessBookPresentationStage.Completed => "Completed",
+		ProcessBookPresentationStage.Downloading => global::LibationAvalonia.Properties.Resources.DownloadsModelsDownloading,
+		ProcessBookPresentationStage.Decrypting => global::LibationAvalonia.Properties.Resources.DownloadsModelsDecrypting,
+		ProcessBookPresentationStage.Converting => global::LibationAvalonia.Properties.Resources.DownloadsModelsConverting,
+		ProcessBookPresentationStage.Completed => global::LibationAvalonia.Properties.Resources.CellarOverviewViewCompleted,
 		_ => Source.StatusText,
 	};
 	public string StageAnnouncement => $"{Title}: {Stage}";
@@ -62,17 +62,17 @@ public sealed class ProcessingQueueItemViewModel : ReactiveObject, IDisposable
 	public string Message => string.Join(" · ", new[] { Author, Narrator, OutputProfileText }
 		.Where(value => !string.IsNullOrWhiteSpace(value)));
 	public string? OutputProfileText => Source.IncludesMp3Conversion
-		? "MP3 output"
+		? global::LibationAvalonia.Properties.Resources.ProcessingQueueItemViewModelMP3Output
 		: Source.IncludesBookDownload
 			? Source.Configuration.SplitFilesByChapter
-				? Source.Configuration.DecryptToLossy ? "MP3 split by chapter" : "M4B split by chapter"
-				: Source.Configuration.DecryptToLossy ? "MP3 output" : "M4B output"
-			: Source.IncludesPdfDownload ? "PDF supplement" : null;
+				? Source.Configuration.DecryptToLossy ? global::LibationAvalonia.Properties.Resources.ProcessingQueueItemViewModelMP3SplitByChapter : global::LibationAvalonia.Properties.Resources.ProcessingQueueItemViewModelM4BSplitByChapter
+				: Source.Configuration.DecryptToLossy ? global::LibationAvalonia.Properties.Resources.ProcessingQueueItemViewModelMP3Output : global::LibationAvalonia.Properties.Resources.ProcessingQueueItemViewModelM4BOutput
+			: Source.IncludesPdfDownload ? global::LibationAvalonia.Properties.Resources.ProcessingQueueItemViewModelPDFSupplement : null;
 	public string? OutputPath => AudibleFileStorage.Audio.GetPath(Source.LibraryBook.Book.AudibleProductId)?.ShortPathName;
 	public IImage? Cover => Source.Cover as IImage;
 	public double Progress => Source.Progress;
 	public string? ProgressText => ShowProgress ? $"{Progress:0}%" : null;
-	public string ProgressAccessibleName => $"{Title} progress {Progress:0} percent";
+	public string ProgressAccessibleName => string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.DownloadsModels0Progress10Percent, Title, Progress);
 	public bool ShowProgress => Source.Status is ProcessBookStatus.Working;
 	public string? EtaText => ShowProgress && Source.TimeRemaining > TimeSpan.Zero ? Source.ETA : null;
 	public LibationStatusKind Status => Source.Status switch
@@ -91,11 +91,11 @@ public sealed class ProcessingQueueItemViewModel : ReactiveObject, IDisposable
 	public string? RecommendedAction => Source.Status switch
 	{
 		ProcessBookStatus.Failed => BuildRecommendedAction(),
-		ProcessBookStatus.Cancelled => "Inspect the output folder before starting this title again; partial output may remain.",
+		ProcessBookStatus.Cancelled => global::LibationAvalonia.Properties.Resources.ProcessingQueueItemViewModelInspectTheOutputFolderBeforeStartingThis,
 		_ => null,
 	};
 	public string? ReferenceText => Source.Status is ProcessBookStatus.Failed or ProcessBookStatus.Cancelled
-		? $"Reference: {CorrelationId}"
+		? string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.ProcessingQueueItemViewModelReference0, CorrelationId)
 		: null;
 	public string? ErrorDetails => FailureSummary;
 	public bool IsExpanded { get => field; set => this.RaiseAndSetIfChanged(ref field, value); }
@@ -114,22 +114,22 @@ public sealed class ProcessingQueueItemViewModel : ReactiveObject, IDisposable
 		&& Source.LibraryBook.Book.AudioExists
 		&& !string.IsNullOrWhiteSpace(OutputPath);
 
-	public string CancelAccessibleName => $"Cancel {Title}";
-	public string RetryAccessibleName => $"Retry {Title}";
-	public string MoveUpAccessibleName => $"Move {Title} up one position";
-	public string MoveDownAccessibleName => $"Move {Title} down one position";
-	public string OpenLogAccessibleName => $"Open the queue log for {Title}";
-	public string CopyDetailsAccessibleName => $"Copy technical details for {Title}";
-	public string RevealAccessibleName => $"Reveal the output for {Title}";
+	public string CancelAccessibleName => string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.ProcessingQueueItemViewModelCancel0, Title);
+	public string RetryAccessibleName => string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.ProcessingQueueItemViewModelRetry0, Title);
+	public string MoveUpAccessibleName => string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.ProcessingQueueItemViewModelMove0UpOnePosition, Title);
+	public string MoveDownAccessibleName => string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.ProcessingQueueItemViewModelMove0DownOnePosition, Title);
+	public string OpenLogAccessibleName => string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.ProcessingQueueItemViewModelOpenTheQueueLogFor0, Title);
+	public string CopyDetailsAccessibleName => string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.ProcessingQueueItemViewModelCopyTechnicalDetailsFor0, Title);
+	public string RevealAccessibleName => string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.ProcessingQueueItemViewModelRevealTheOutputFor0, Title);
 
 	private string BuildRecommendedAction() => Source.Result switch
 	{
-		ProcessBookResult.DiskFull => "Free space or change Books / In progress in Settings before trying again.",
-		ProcessBookResult.LicenseDenied or ProcessBookResult.LicenseDeniedPossibleOutage => "Confirm the title is available to the connected Audible account, then try again.",
-		ProcessBookResult.WidevineRecommended => "Open the queue log and follow its Widevine guidance before trying again.",
-		ProcessBookResult.ValidationFail => "Review the source title and output settings before trying again.",
-		_ when owner.CanRetry(Source) => "Retry this title, or open the queue log for the matching reference.",
-		_ => "Open the queue log for the matching reference, then requeue the title from the Library if appropriate.",
+		ProcessBookResult.DiskFull => global::LibationAvalonia.Properties.Resources.ProcessingQueueItemViewModelFreeSpaceOrChangeBooksInProgress,
+		ProcessBookResult.LicenseDenied or ProcessBookResult.LicenseDeniedPossibleOutage => global::LibationAvalonia.Properties.Resources.ProcessingQueueItemViewModelConfirmTheTitleIsAvailableToThe,
+		ProcessBookResult.WidevineRecommended => global::LibationAvalonia.Properties.Resources.ProcessingQueueItemViewModelOpenTheQueueLogAndFollowIts,
+		ProcessBookResult.ValidationFail => global::LibationAvalonia.Properties.Resources.ProcessingQueueItemViewModelReviewTheSourceTitleAndOutputSettings,
+		_ when owner.CanRetry(Source) => global::LibationAvalonia.Properties.Resources.ProcessingQueueItemViewModelRetryThisTitleOrOpenTheQueue,
+		_ => global::LibationAvalonia.Properties.Resources.ProcessingQueueItemViewModelOpenTheQueueLogForTheMatching,
 	};
 
 	private async Task CancelAsync()
@@ -142,14 +142,14 @@ public sealed class ProcessingQueueItemViewModel : ReactiveObject, IDisposable
 	private async Task CopyTechnicalDetailsAsync()
 	{
 		var details = DiagnosticTextScrubber.Scrub(string.Join(Environment.NewLine,
-			$"Title: {Title}",
-			$"Status: {StatusText}",
-			$"Stage: {Stage}",
-			$"Result: {Source.Result}",
-			$"Output: {OutputProfileText}",
-			$"Correlation ID: {CorrelationId}",
-			$"Summary: {FailureSummary}",
-			$"Recommended action: {RecommendedAction}"));
+			string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.ProcessingQueueItemViewModelTitle0, Title),
+			string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.ProcessingQueueItemViewModelStatus0, StatusText),
+			string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.ProcessingQueueItemViewModelStage0, Stage),
+			string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.ProcessingQueueItemViewModelResult0, Source.Result),
+			string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.CurrentFlightViewModelOutput0, OutputProfileText),
+			string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.ProcessingQueueItemViewModelCorrelationID0, CorrelationId),
+			string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.ProcessingQueueItemViewModelSummary0, FailureSummary),
+			string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.ProcessingQueueItemViewModelRecommendedAction0, RecommendedAction)));
 		if (App.MainWindow?.Clipboard is not { } clipboard || details is null)
 			return;
 
@@ -160,7 +160,7 @@ public sealed class ProcessingQueueItemViewModel : ReactiveObject, IDisposable
 		catch (Exception ex)
 		{
 			Serilog.Log.Logger.Warning(
-				"Unable to copy queue-item diagnostics. Correlation ID: {CorrelationId}. {TechnicalDetails}",
+				global::LibationAvalonia.Properties.Resources.ProcessingQueueItemViewModelUnableToCopyQueueItemDiagnosticsCorrelation,
 				CorrelationId,
 				DiagnosticTextScrubber.Scrub(ex.ToString()));
 		}
@@ -172,7 +172,7 @@ public sealed class ProcessingQueueItemViewModel : ReactiveObject, IDisposable
 			return;
 
 		Serilog.Log.Logger.Warning(
-			"Unable to reveal completed queue output. Correlation ID: {CorrelationId}",
+			global::LibationAvalonia.Properties.Resources.ProcessingQueueItemViewModelUnableToRevealCompletedQueueOutputCorrelation,
 			CorrelationId);
 	}
 

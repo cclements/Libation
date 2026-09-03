@@ -73,70 +73,70 @@ public sealed class ToolsViewModel : SecondaryDestinationViewModel, IRoutePresen
 		ArgumentNullException.ThrowIfNull(commands);
 		main = commands.Main;
 
-		var processVisible = CreateOwnerCommand(commands.ProcessVisibleConfirmedAsync, "process visible titles", "Libation could not queue the visible titles. Review the current Library filter and try again.");
-		var replaceTags = CreateOwnerCommand(commands.ReplaceVisibleTagsAsync, "replace visible-title tags", "Libation could not open the tag replacement workflow. No metadata was changed.");
-		var setBookStatus = CreateOwnerCommand(commands.SetVisibleBookStatusAsync, "set visible audiobook status", "Libation could not open the audiobook-status workflow. No status was changed.");
-		var setPdfStatus = CreateOwnerCommand(commands.SetVisiblePdfStatusAsync, "set visible PDF status", "Libation could not open the PDF-status workflow. No status was changed.");
-		var detectStatus = CreateOwnerCommand(commands.DetectVisibleStatusAsync, "detect visible download status", "Libation could not inspect visible-title files. No status was changed.");
-		var removeVisible = CreateOwnerCommand(commands.RemoveVisibleAsync, "remove visible titles", "Libation could not open the remove-visible workflow. No titles were removed.");
-		var locate = CreateOwnerCommand(commands.LocateAudiobooksAsync, "locate audiobook files", "Libation could not open the audiobook locator. No files were changed.");
-		var quality = CreateOwnerCommand(commands.ShowQualityScanAsync, "scan for better-quality audiobooks", "Libation could not open the quality scan. No library data was changed.");
-		var export = CreateOwnerCommand(commands.ExportLibraryAsync, "export the library", "Libation could not open the library export workflow. No export was written.");
-		var editFilters = CreateOwnerCommand(commands.EditQuickFiltersAsync, "edit quick filters", "Libation could not open the quick-filter editor. No filters were changed.");
-		var addFilter = CreateOwnerCommand(commands.AddCurrentFilter, "save the current filter", "Libation could not save the current filter.");
-		var filterHelp = CreateOwnerCommand(commands.OpenFilterHelp, "open filter syntax help", "Libation could not open filter syntax help.");
-		var about = CreateOwnerCommand(main.ShowAboutAsync, "open About and update status", "Libation could not open About. Try the native application menu instead.");
+		var processVisible = CreateOwnerCommand(commands.ProcessVisibleConfirmedAsync, global::LibationAvalonia.Properties.Resources.ToolsViewModelProcessVisibleTitles, global::LibationAvalonia.Properties.Resources.ToolsViewModelLibationCouldNotQueueTheVisibleTitles);
+		var replaceTags = CreateOwnerCommand(commands.ReplaceVisibleTagsAsync, global::LibationAvalonia.Properties.Resources.ToolsViewModelReplaceVisibleTitleTags, global::LibationAvalonia.Properties.Resources.ToolsViewModelLibationCouldNotOpenTheTagReplacement);
+		var setBookStatus = CreateOwnerCommand(commands.SetVisibleBookStatusAsync, global::LibationAvalonia.Properties.Resources.ToolsViewModelSetVisibleAudiobookStatus, global::LibationAvalonia.Properties.Resources.ToolsViewModelLibationCouldNotOpenTheAudiobookStatus);
+		var setPdfStatus = CreateOwnerCommand(commands.SetVisiblePdfStatusAsync, global::LibationAvalonia.Properties.Resources.ToolsViewModelSetVisiblePDFStatus, global::LibationAvalonia.Properties.Resources.ToolsViewModelLibationCouldNotOpenThePDFStatus);
+		var detectStatus = CreateOwnerCommand(commands.DetectVisibleStatusAsync, global::LibationAvalonia.Properties.Resources.ToolsViewModelDetectVisibleDownloadStatus, global::LibationAvalonia.Properties.Resources.ToolsViewModelLibationCouldNotInspectVisibleTitleFiles);
+		var removeVisible = CreateOwnerCommand(commands.RemoveVisibleAsync, global::LibationAvalonia.Properties.Resources.ToolsViewModelRemoveVisibleTitles, global::LibationAvalonia.Properties.Resources.ToolsViewModelLibationCouldNotOpenTheRemoveVisible);
+		var locate = CreateOwnerCommand(commands.LocateAudiobooksAsync, global::LibationAvalonia.Properties.Resources.ToolsViewModelLocateAudiobookFiles, global::LibationAvalonia.Properties.Resources.ToolsViewModelLibationCouldNotOpenTheAudiobookLocator);
+		var quality = CreateOwnerCommand(commands.ShowQualityScanAsync, global::LibationAvalonia.Properties.Resources.ToolsViewModelScanForBetterQualityAudiobooks, global::LibationAvalonia.Properties.Resources.ToolsViewModelLibationCouldNotOpenTheQualityScan);
+		var export = CreateOwnerCommand(commands.ExportLibraryAsync, global::LibationAvalonia.Properties.Resources.ToolsViewModelExportTheLibrary, global::LibationAvalonia.Properties.Resources.ToolsViewModelLibationCouldNotOpenTheLibraryExport);
+		var editFilters = CreateOwnerCommand(commands.EditQuickFiltersAsync, global::LibationAvalonia.Properties.Resources.ToolsViewModelEditQuickFilters, global::LibationAvalonia.Properties.Resources.ToolsViewModelLibationCouldNotOpenTheQuickFilter);
+		var addFilter = CreateOwnerCommand(commands.AddCurrentFilter, global::LibationAvalonia.Properties.Resources.ToolsViewModelSaveTheCurrentFilter, global::LibationAvalonia.Properties.Resources.ToolsViewModelLibationCouldNotSaveTheCurrentFilter);
+		var filterHelp = CreateOwnerCommand(commands.OpenFilterHelp, global::LibationAvalonia.Properties.Resources.ToolsViewModelOpenFilterSyntaxHelp, global::LibationAvalonia.Properties.Resources.ToolsViewModelLibationCouldNotOpenFilterSyntaxHelp);
+		var about = CreateOwnerCommand(main.ShowAboutAsync, global::LibationAvalonia.Properties.Resources.SettingsViewModelOpenAboutAndUpdateStatus, global::LibationAvalonia.Properties.Resources.SettingsViewModelLibationCouldNotOpenAboutTryThe);
 
 		var processVisibleItem = new ToolActionItem(
-			"Process visible titles",
-			"Reviews the current filtered scope, then queues every visible title still awaiting an open local copy only after you confirm.",
-			"Confirmation required",
+			global::LibationAvalonia.Properties.Resources.ToolsViewModelProcessVisibleTitles2,
+			global::LibationAvalonia.Properties.Resources.ToolsViewModelReviewsTheCurrentFilteredScopeThenQueues,
+			global::LibationAvalonia.Properties.Resources.ToolsViewModelConfirmationRequired,
 			ToolRiskKind.NeedsReview,
-			"Review and process",
+			global::LibationAvalonia.Properties.Resources.ToolsViewModelReviewAndProcess,
 			processVisible,
-			"The confirmation counts the exact eligible scope, including titles that need only a PDF.");
+			global::LibationAvalonia.Properties.Resources.ToolsViewModelTheConfirmationCountsTheExactEligibleScope);
 		aboutItem = new(
-			"About, version, and updates",
+			global::LibationAvalonia.Properties.Resources.ToolsViewModelAboutVersionAndUpdates,
 			Resources.ToolsAboutDescription,
-			"Network only on request",
+			global::LibationAvalonia.Properties.Resources.ToolsViewModelNetworkOnlyOnRequest,
 			ToolRiskKind.External,
-			"Open About",
+			global::LibationAvalonia.Properties.Resources.ShellOpenAboutCommandLabel,
 			about,
 			main.ApplicationUpdateState);
 
 		Groups =
 		[
-			new("Library maintenance", "Operate on the titles currently visible in the shared Library filter.",
+			new(global::LibationAvalonia.Properties.Resources.ToolsViewModelLibraryMaintenance, global::LibationAvalonia.Properties.Resources.ToolsViewModelOperateOnTheTitlesCurrentlyVisibleIn,
 			[
 				processVisibleItem,
-				new("Detect downloaded status", "Inspects files for visible titles, previews proposed status changes, and asks before applying them.", "Changes status after review", ToolRiskKind.NeedsReview, "Review detected status", detectStatus),
-				new("Set audiobook status manually", Resources.ToolsManualBookStatusDescription, "Changes status after confirmation", ToolRiskKind.NeedsReview, "Set audiobook status", setBookStatus),
-				new("Set PDF status manually", Resources.ToolsManualPdfStatusDescription, "Changes status after confirmation", ToolRiskKind.NeedsReview, "Set PDF status", setPdfStatus),
-				new("Move visible titles to Trash", Resources.ToolsTrashDescription, "Moves records after confirmation", ToolRiskKind.Destructive, "Review and move", removeVisible),
+				new(global::LibationAvalonia.Properties.Resources.ToolsViewModelDetectDownloadedStatus, global::LibationAvalonia.Properties.Resources.ToolsViewModelInspectsFilesForVisibleTitlesPreviewsProposed, global::LibationAvalonia.Properties.Resources.ToolsViewModelChangesStatusAfterReview, ToolRiskKind.NeedsReview, global::LibationAvalonia.Properties.Resources.ToolsViewModelReviewDetectedStatus, detectStatus),
+				new(global::LibationAvalonia.Properties.Resources.ToolsViewModelSetAudiobookStatusManually, Resources.ToolsManualBookStatusDescription, global::LibationAvalonia.Properties.Resources.ToolsViewModelChangesStatusAfterConfirmation, ToolRiskKind.NeedsReview, global::LibationAvalonia.Properties.Resources.ToolsViewModelSetAudiobookStatus, setBookStatus),
+				new(global::LibationAvalonia.Properties.Resources.ToolsViewModelSetPDFStatusManually, Resources.ToolsManualPdfStatusDescription, global::LibationAvalonia.Properties.Resources.ToolsViewModelChangesStatusAfterConfirmation, ToolRiskKind.NeedsReview, global::LibationAvalonia.Properties.Resources.ToolsViewModelSetPDFStatus, setPdfStatus),
+				new(global::LibationAvalonia.Properties.Resources.ToolsViewModelMoveVisibleTitlesToTrash, Resources.ToolsTrashDescription, global::LibationAvalonia.Properties.Resources.ToolsViewModelMovesRecordsAfterConfirmation, ToolRiskKind.Destructive, global::LibationAvalonia.Properties.Resources.ToolsViewModelReviewAndMove, removeVisible),
 			]),
-			new("File discovery", Resources.ToolsFileDiscoveryDescription,
+			new(global::LibationAvalonia.Properties.Resources.ToolsViewModelFileDiscovery, Resources.ToolsFileDiscoveryDescription,
 			[
-				new("Locate previously processed audiobooks", Resources.ToolsLocateDescription, "Records matches and updates title status", ToolRiskKind.ChangesData, "Choose folders", locate),
+				new(global::LibationAvalonia.Properties.Resources.ToolsViewModelLocatePreviouslyProcessedAudiobooks, Resources.ToolsLocateDescription, global::LibationAvalonia.Properties.Resources.ToolsViewModelRecordsMatchesAndUpdatesTitleStatus, ToolRiskKind.ChangesData, global::LibationAvalonia.Properties.Resources.ToolsViewModelChooseFolders, locate),
 			]),
-			new("Metadata", "Change metadata for the current visible-title scope.",
+			new(global::LibationAvalonia.Properties.Resources.BookDetailsPaneMetadata, global::LibationAvalonia.Properties.Resources.ToolsViewModelChangeMetadataForTheCurrentVisibleTitle,
 			[
-				new("Replace tags for visible titles", "Opens tag input, shows the affected visible-title scope, and asks before replacing tags.", "Replaces metadata after confirmation", ToolRiskKind.Destructive, "Review and replace", replaceTags),
+				new(global::LibationAvalonia.Properties.Resources.ToolsViewModelReplaceTagsForVisibleTitles, global::LibationAvalonia.Properties.Resources.ToolsViewModelOpensTagInputShowsTheAffectedVisible, global::LibationAvalonia.Properties.Resources.ToolsViewModelReplacesMetadataAfterConfirmation, ToolRiskKind.Destructive, global::LibationAvalonia.Properties.Resources.ToolsViewModelReviewAndReplace, replaceTags),
 			]),
-			new("Quality", "Inspect the library for source-quality improvements without changing files immediately.",
+			new(global::LibationAvalonia.Properties.Resources.ToolsViewModelQuality, global::LibationAvalonia.Properties.Resources.ToolsViewModelInspectTheLibraryForSourceQualityImprovements,
 			[
-				new("Scan for better-quality audiobooks", Resources.ToolsQualityDescription, "Read-only scan", ToolRiskKind.ReadOnly, "Start quality scan", quality),
+				new(global::LibationAvalonia.Properties.Resources.ToolsViewModelScanForBetterQualityAudiobooks2, Resources.ToolsQualityDescription, global::LibationAvalonia.Properties.Resources.ToolsViewModelReadOnlyScan, ToolRiskKind.ReadOnly, global::LibationAvalonia.Properties.Resources.ToolsViewModelStartQualityScan, quality),
 			]),
-			new("Import, export, and filters", Resources.ToolsImportExportDescription,
+			new(global::LibationAvalonia.Properties.Resources.ToolsViewModelImportExportAndFilters, Resources.ToolsImportExportDescription,
 			[
-				new("Export library", "Writes the current library catalogue to a user-selected XLSX, CSV, or JSON file.", "Writes selected file", ToolRiskKind.ChangesData, "Choose export", export),
-				new("Edit quick filters", Resources.ToolsEditFiltersDescription, "Changes saved filters", ToolRiskKind.ChangesData, "Edit filters", editFilters),
-				new("Save current filter", Resources.ToolsSaveFilterDescription, "Changes saved filters", ToolRiskKind.ChangesData, "Save filter", addFilter),
-				new("Open filter syntax help", Resources.ToolsFilterHelpDescription, "No data change", ToolRiskKind.ReadOnly, "Open help", filterHelp),
+				new(global::LibationAvalonia.Properties.Resources.ToolsViewModelExportLibrary, global::LibationAvalonia.Properties.Resources.ToolsViewModelWritesTheCurrentLibraryCatalogueToA, global::LibationAvalonia.Properties.Resources.ToolsViewModelWritesSelectedFile, ToolRiskKind.ChangesData, global::LibationAvalonia.Properties.Resources.ToolsViewModelChooseExport, export),
+				new(global::LibationAvalonia.Properties.Resources.ToolsViewModelEditQuickFilters2, Resources.ToolsEditFiltersDescription, global::LibationAvalonia.Properties.Resources.ToolsViewModelChangesSavedFilters, ToolRiskKind.ChangesData, global::LibationAvalonia.Properties.Resources.ToolsViewModelEditFilters, editFilters),
+				new(global::LibationAvalonia.Properties.Resources.ToolsViewModelSaveCurrentFilter, Resources.ToolsSaveFilterDescription, global::LibationAvalonia.Properties.Resources.ToolsViewModelChangesSavedFilters, ToolRiskKind.ChangesData, global::LibationAvalonia.Properties.Resources.ToolsViewModelSaveFilter, addFilter),
+				new(global::LibationAvalonia.Properties.Resources.ToolsViewModelOpenFilterSyntaxHelp2, Resources.ToolsFilterHelpDescription, global::LibationAvalonia.Properties.Resources.ToolsViewModelNoDataChange, ToolRiskKind.ReadOnly, global::LibationAvalonia.Properties.Resources.ToolsViewModelOpenHelp, filterHelp),
 			]),
-			new("Diagnostics and legacy utilities", Resources.ToolsDiagnosticsDescription,
+			new(global::LibationAvalonia.Properties.Resources.ToolsViewModelDiagnosticsAndLegacyUtilities, Resources.ToolsDiagnosticsDescription,
 			[
 				aboutItem,
-				new("Launch Hangover", Resources.ToolsHangoverDescription, "Opens external application", ToolRiskKind.External, "Launch Hangover", main.LaunchHangover),
+				new(global::LibationAvalonia.Properties.Resources.ToolsViewModelLaunchHangover, Resources.ToolsHangoverDescription, global::LibationAvalonia.Properties.Resources.ToolsViewModelOpensExternalApplication, ToolRiskKind.External, global::LibationAvalonia.Properties.Resources.ToolsViewModelLaunchHangover, main.LaunchHangover),
 			]),
 		];
 
@@ -160,25 +160,25 @@ public sealed class ToolsViewModel : SecondaryDestinationViewModel, IRoutePresen
 			{
 				CurrentError = LibationAvalonia.DesignSystem.UserFacingErrorFactory.FromException(
 					ex,
-					"change the startup quick-filter preference",
-					"Libation could not change the startup quick-filter preference. Your previous setting remains in effect.");
+					global::LibationAvalonia.Properties.Resources.ToolsViewModelChangeTheStartupQuickFilterPreference,
+					global::LibationAvalonia.Properties.Resources.ToolsViewModelLibationCouldNotChangeTheStartupQuick);
 				Serilog.Log.Logger.Error(
 					ex,
-					"Unable to change startup quick-filter preference. Correlation ID: {CorrelationId}.",
+					global::LibationAvalonia.Properties.Resources.ToolsViewModelUnableToChangeStartupQuickFilterPreference,
 					CurrentError.CorrelationId);
 			}
 			RaiseStartupFilterState();
 		}
 	}
 	public string StartupFilterStateText => FirstFilterIsDefault
-		? "On — the first saved quick filter is applied when Libation starts."
-		: "Off — Libation starts without automatically applying the first saved quick filter.";
+		? global::LibationAvalonia.Properties.Resources.ToolsViewModelOnTheFirstSavedQuickFilterIs
+		: global::LibationAvalonia.Properties.Resources.ToolsViewModelOffLibationStartsWithoutAutomaticallyApplyingThe;
 	public LibationStatusKind StartupFilterStatus => FirstFilterIsDefault
 		? LibationStatusKind.Connected
 		: LibationStatusKind.Completed;
-	public string StartupFilterBadgeText => FirstFilterIsDefault ? "On" : "Off";
-	public string RouteEyebrow => "Advanced operations";
-	public string RouteTitle => "Tools";
+	public string StartupFilterBadgeText => FirstFilterIsDefault ? global::LibationAvalonia.Properties.Resources.ToolsViewModelOn : global::LibationAvalonia.Properties.Resources.ToolsViewModelOff;
+	public string RouteEyebrow => global::LibationAvalonia.Properties.Resources.ToolsViewModelAdvancedOperations;
+	public string RouteTitle => global::LibationAvalonia.Properties.Resources.RouteToolsLabel;
 	public string RouteSubtitle => Resources.ToolsSupportingText;
 	public RouteCommandPresentation? RoutePrimaryCommand => null;
 	public IReadOnlyList<RouteCommandPresentation> RouteSecondaryCommands => [];

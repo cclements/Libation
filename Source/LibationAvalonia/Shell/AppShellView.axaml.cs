@@ -315,21 +315,68 @@ public partial class AppShellView : UserControl
 
 	private void PlayRouteEntrance()
 	{
-		ContentRegion.Opacity = 0;
-		ContentRegion.RenderTransform = TransformOperations.Parse("translateY(10px)");
-		Dispatcher.UIThread.Post(() =>
+		ContentRegion.Opacity = 1;
+		if (ViewModel?.IsReducedMotionEnabled == true)
 		{
-			ContentRegion.Opacity = 1;
-			ContentRegion.RenderTransform = TransformOperations.Parse("translateY(0px)");
-		}, DispatcherPriority.Render);
+			SetWithoutTransitions(
+				ContentRegion,
+				() => ContentRegion.RenderTransform = TransformOperations.Parse("translateY(0px)"));
+			return;
+		}
+
+		SetWithoutTransitions(
+			ContentRegion,
+			() => ContentRegion.RenderTransform = TransformOperations.Parse("translateY(10px)"));
+		Dispatcher.UIThread.Post(() =>
+			ContentRegion.RenderTransform = TransformOperations.Parse("translateY(0px)"),
+			DispatcherPriority.Render);
 	}
 
-	private static void PlaySurfaceEntrance(Control surface, string initialTransform)
+	internal bool IsRoutePresented(AppRouteId route)
+		=> route switch
+		{
+			AppRouteId.Overview => OverviewHost.IsEffectivelyVisible && OverviewHost.Content is not null,
+			AppRouteId.Library => LibraryRouteHost.IsEffectivelyVisible,
+			AppRouteId.Downloads => DownloadsRouteHost.IsEffectivelyVisible,
+			AppRouteId.Processing => ProcessingRouteHost.IsEffectivelyVisible,
+			AppRouteId.History => HistoryRouteHost.IsEffectivelyVisible,
+			AppRouteId.Accounts => AccountsRouteHost.IsEffectivelyVisible,
+			AppRouteId.Settings => SettingsRouteHost.IsEffectivelyVisible,
+			AppRouteId.Tools => ToolsRouteHost.IsEffectivelyVisible,
+			AppRouteId.Trash => TrashRouteHost.IsEffectivelyVisible,
+			_ => false,
+		};
+
+	private void PlaySurfaceEntrance(Control surface, string initialTransform)
 	{
-		surface.RenderTransform = TransformOperations.Parse(initialTransform);
+		if (ViewModel?.IsReducedMotionEnabled == true)
+		{
+			SetWithoutTransitions(
+				surface,
+				() => surface.RenderTransform = TransformOperations.Parse("translateX(0px)"));
+			return;
+		}
+
+		SetWithoutTransitions(
+			surface,
+			() => surface.RenderTransform = TransformOperations.Parse(initialTransform));
 		Dispatcher.UIThread.Post(
 			() => surface.RenderTransform = TransformOperations.Parse("translateX(0px)"),
 			DispatcherPriority.Render);
+	}
+
+	private static void SetWithoutTransitions(Control control, Action update)
+	{
+		var transitions = control.Transitions;
+		control.Transitions = null;
+		try
+		{
+			update();
+		}
+		finally
+		{
+			control.Transitions = transitions;
+		}
 	}
 
 	private void EnterTransientSurface(Control surface, ref Control? returnFocus)

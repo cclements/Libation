@@ -131,7 +131,7 @@ public partial class CachedCover : UserControl
 		}
 		catch (Exception ex)
 		{
-			Serilog.Log.Logger.Warning(ex, "Unable to load the cached cover for {ProductId}.", book.Book.AudibleProductId);
+			Serilog.Log.Logger.Warning(ex, global::LibationAvalonia.Properties.Resources.CachedCoveraxamlUnableToLoadTheCachedCoverFor, book.Book.AudibleProductId);
 		}
 	}
 

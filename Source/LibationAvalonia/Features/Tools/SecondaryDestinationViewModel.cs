@@ -80,12 +80,12 @@ public abstract class SecondaryDestinationViewModel : ViewModelBase, IDisposable
 		if (!await actionGate.WaitAsync(0))
 		{
 			var busyError = UserFacingErrorFactory.FromException(
-				new InvalidOperationException("The destination action gate is already held."),
+				new InvalidOperationException(global::LibationAvalonia.Properties.Resources.SecondaryDestinationViewModelTheDestinationActionGateIsAlreadyHeld),
 				operation,
-				"Another action on this page is still running. Wait for it to finish, then try again.");
+				global::LibationAvalonia.Properties.Resources.SecondaryDestinationViewModelAnotherActionOnThisPageIsStill);
 			CurrentError = busyError;
 			Serilog.Log.Logger.Warning(
-				"Contemporary destination action was already running: {SecondaryOperation}. Correlation ID: {CorrelationId}. Category: {ErrorCategory}",
+				global::LibationAvalonia.Properties.Resources.SecondaryDestinationViewModelContemporaryDestinationActionWasAlreadyRunningSecondaryOperation,
 				operation,
 				busyError.CorrelationId,
 				busyError.Category.ToDisplayName());
@@ -103,7 +103,7 @@ public abstract class SecondaryDestinationViewModel : ViewModelBase, IDisposable
 			CurrentError = error;
 			Serilog.Log.Logger.Error(
 				ex,
-				"Contemporary destination action failed: {SecondaryOperation}. Correlation ID: {CorrelationId}. Category: {ErrorCategory}",
+				global::LibationAvalonia.Properties.Resources.SecondaryDestinationViewModelContemporaryDestinationActionFailedSecondaryOperationCorrelationID,
 				operation,
 				error.CorrelationId,
 				error.Category.ToDisplayName());
@@ -129,7 +129,7 @@ public abstract class SecondaryDestinationViewModel : ViewModelBase, IDisposable
 		catch (Exception ex)
 		{
 			Serilog.Log.Logger.Warning(
-				"Unable to copy contemporary error diagnostics. Correlation ID: {CorrelationId}. Exception: {ExceptionType}. {TechnicalDetails}",
+				global::LibationAvalonia.Properties.Resources.SecondaryDestinationViewModelUnableToCopyContemporaryErrorDiagnosticsCorrelation,
 				error.CorrelationId,
 				ex.GetType().FullName,
 				UserFacingErrorFactory.Scrub(ex.ToString()));

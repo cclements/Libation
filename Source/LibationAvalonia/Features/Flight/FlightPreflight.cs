@@ -103,15 +103,15 @@ public static class FlightPreflight
 		var selectedBooks = selection.Select(item => item.LibraryBook).ToArray();
 		var issues = new List<FlightPreflightIssue>();
 		if (selectedBooks.Length == 0)
-			issues.Add(new(FlightPreflightSeverity.Blocking, "Select at least one title before processing."));
+			issues.Add(new(FlightPreflightSeverity.Blocking, global::LibationAvalonia.Properties.Resources.FlightPreflightSelectAtLeastOneTitleBeforeProcessing));
 		if (!Enum.IsDefined(outputProfile))
-			issues.Add(new(FlightPreflightSeverity.Blocking, "The selected output profile is not supported. Choose a listed output profile before processing."));
+			issues.Add(new(FlightPreflightSeverity.Blocking, global::LibationAvalonia.Properties.Resources.FlightPreflightTheSelectedOutputProfileIsNotSupported));
 		if (configuration.Books is null || string.IsNullOrWhiteSpace(configuration.Books.PathWithoutPrefix))
-			issues.Add(new(FlightPreflightSeverity.Blocking, "Choose a valid Books location in Settings before processing."));
+			issues.Add(new(FlightPreflightSeverity.Blocking, global::LibationAvalonia.Properties.Resources.FlightPreflightChooseAValidBooksLocationInSettings));
 
 		int unavailable = selectedBooks.Count(book => book.AbsentFromLastScan);
 		if (unavailable > 0)
-			issues.Add(new(FlightPreflightSeverity.Blocking, $"{unavailable} selected title(s) are unavailable in the latest account scan. Remove them or scan the account again."));
+			issues.Add(new(FlightPreflightSeverity.Blocking, string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.FlightPreflight0SelectedTitleSAreUnavailableIn, unavailable)));
 
 		AddAuthorizationIssues(selectedBooks, issues);
 
@@ -122,12 +122,12 @@ public static class FlightPreflight
 			.ToHashSet(StringComparer.Ordinal);
 		int alreadyActive = selectedBooks.Count(book => queuedIds.Contains(book.Book.AudibleProductId));
 		if (alreadyActive > 0)
-			issues.Add(new(FlightPreflightSeverity.Warning, $"{alreadyActive} selected title(s) already have active processing work and will be skipped."));
+			issues.Add(new(FlightPreflightSeverity.Warning, string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.FlightPreflight0SelectedTitleSAlreadyHaveActive, alreadyActive)));
 		var books = selectedBooks
 			.Where(book => !queuedIds.Contains(book.Book.AudibleProductId))
 			.ToArray();
 		if (selectedBooks.Length > 0 && books.Length == 0 && alreadyActive == selectedBooks.Length)
-			issues.Add(new(FlightPreflightSeverity.Blocking, "All selected titles already have active processing work."));
+			issues.Add(new(FlightPreflightSeverity.Blocking, global::LibationAvalonia.Properties.Resources.FlightPreflightAllSelectedTitlesAlreadyHaveActiveProcessing));
 
 		int alreadyComplete = books.Count(book => book.Book.AudioExists);
 		if (alreadyComplete > 0)
@@ -153,14 +153,14 @@ public static class FlightPreflight
 			if (unauthorized > 0)
 				issues.Add(new(
 					FlightPreflightSeverity.Warning,
-					$"{unauthorized} selected title(s) do not currently have valid stored account authorization. Open Accounts and sign in again if Processing cannot refresh authorization."));
+					string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.FlightPreflight0SelectedTitleSDoNotCurrently, unauthorized)));
 		}
 		catch (Exception ex)
 		{
-			Serilog.Log.Logger.Warning(ex, "Unable to inspect Current Flight account authorization");
+			Serilog.Log.Logger.Warning(ex, global::LibationAvalonia.Properties.Resources.FlightPreflightUnableToInspectCurrentFlightAccountAuthorization);
 			issues.Add(new(
 				FlightPreflightSeverity.Warning,
-				"Libation could not inspect stored account authorization. Processing may ask you to sign in."));
+				global::LibationAvalonia.Properties.Resources.FlightPreflightLibationCouldNotInspectStoredAccountAuthorization));
 		}
 	}
 
@@ -181,7 +181,7 @@ public static class FlightPreflight
 		{
 			issues.Add(new(
 				FlightPreflightSeverity.Blocking,
-				$"A configured Books or In progress drive is critically low on free space. Current Flight estimates about {estimate} for {bookCount} title(s); free space or change the locations in Settings."));
+				string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.FlightPreflightAConfiguredBooksOrInProgressDrive, estimate, bookCount)));
 		}
 		else
 		{

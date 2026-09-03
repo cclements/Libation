@@ -21,6 +21,10 @@
 		<Setter Property="Foreground" Value="{DynamicResource Libation.Brush.TextPrimary}" />
 		<Setter Property="BorderBrush" Value="{DynamicResource Libation.Brush.BorderStrong}" />
 	</Style>
+	<Style Selector="ComboBox.contemporary:focus-within">
+		<Setter Property="BorderBrush" Value="{DynamicResource Libation.Brush.Focus}" />
+		<Setter Property="BorderThickness" Value="2" />
+	</Style>
 	<Style Selector="CheckBox.contemporary:focus-visible">
 		<Setter Property="Foreground" Value="{DynamicResource Libation.Brush.Focus}" />
 	</Style>

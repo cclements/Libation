@@ -70,6 +70,8 @@ public sealed record CaptureEntry(
 	/// <see cref="ProcessingSeedCount"/> behavior.
 	/// </summary>
 	public ProcessingCaptureScenario ProcessingScenario { get; init; } = ProcessingCaptureScenario.Default;
+	public ReducedMotionPreference Motion { get; init; } = ReducedMotionPreference.Full;
+	public double LogicalScale { get; init; } = 1d;
 	public bool OpenDecanter { get; init; }
 	public bool FocusFailedProcessingItem { get; init; }
 	public int OnboardingStep { get; init; } = 1;
@@ -150,6 +152,12 @@ public sealed record CapturePlan(int SettleMs, IReadOnlyList<CaptureEntry> Entri
 			var processingScenario = entry.ProcessingScenario is null ? ProcessingCaptureScenario.Default
 				: TryParseDefined(entry.ProcessingScenario, out ProcessingCaptureScenario parsedProcessingScenario) ? parsedProcessingScenario
 				: throw new CapturePlanException($"Unknown processing scenario '{entry.ProcessingScenario}'.");
+			var motion = entry.Motion is null ? ReducedMotionPreference.Full
+				: TryParseDefined(entry.Motion, out ReducedMotionPreference parsedMotion) ? parsedMotion
+				: throw new CapturePlanException($"Unknown motion preference '{entry.Motion}'.");
+			var logicalScale = entry.LogicalScale ?? 1d;
+			if (!double.IsFinite(logicalScale) || logicalScale <= 0)
+				throw new CapturePlanException($"Entry {profile}/{surface} has invalid logical scale {logicalScale}.");
 
 			entries.Add(new CaptureEntry(
 				profile,
@@ -167,6 +175,8 @@ public sealed record CapturePlan(int SettleMs, IReadOnlyList<CaptureEntry> Entri
 				entry.File)
 			{
 				ProcessingScenario = processingScenario,
+				Motion = motion,
+				LogicalScale = logicalScale,
 				OpenDecanter = entry.OpenDecanter,
 				FocusFailedProcessingItem = entry.FocusFailedProcessingItem,
 				OnboardingStep = entry.OnboardingStep,
@@ -200,6 +210,8 @@ public sealed record CapturePlan(int SettleMs, IReadOnlyList<CaptureEntry> Entri
 		[JsonPropertyName("flightSelectionCount")] public int FlightSelectionCount { get; set; }
 		[JsonPropertyName("processingSeedCount")] public int ProcessingSeedCount { get; set; }
 		[JsonPropertyName("processingScenario")] public string? ProcessingScenario { get; set; }
+		[JsonPropertyName("motion")] public string? Motion { get; set; }
+		[JsonPropertyName("logicalScale")] public double? LogicalScale { get; set; }
 		[JsonPropertyName("openFlight")] public bool OpenFlight { get; set; }
 		[JsonPropertyName("openDetails")] public bool OpenDetails { get; set; }
 		[JsonPropertyName("openDecanter")] public bool OpenDecanter { get; set; }

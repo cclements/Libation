@@ -28,8 +28,8 @@ namespace LibationAvalonia.Features.History;
 /// </summary>
 public sealed class HistoryViewModel : SecondaryDestinationViewModel, IRoutePresentation
 {
-	public const string AllActions = "All actions";
-	public const string AllResults = "All results";
+	public static readonly string AllActions = global::LibationAvalonia.Properties.Resources.HistoryViewModelAllActions;
+	public static readonly string AllResults = global::LibationAvalonia.Properties.Resources.HistoryViewModelAllResults;
 
 	private readonly MainVM main;
 	private readonly CancellationTokenSource lifetime = new();
@@ -132,16 +132,16 @@ public sealed class HistoryViewModel : SecondaryDestinationViewModel, IRoutePres
 	public bool HasActiveFilters => FromDate is not null || ToDate is not null
 		|| SelectedAction != AllActions || SelectedResult != AllResults || !string.IsNullOrWhiteSpace(SearchText);
 	public string ResultSummary => HasActiveFilters
-		? $"{VisibleItems.Count.ToString("N0", CultureInfo.CurrentCulture)} outcomes match the current filters"
-		: $"{VisibleItems.Count.ToString("N0", CultureInfo.CurrentCulture)} available timestamped outcomes";
+		? string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.HistoryViewModel0OutcomesMatchTheCurrentFilters, VisibleItems.Count.ToString("N0", CultureInfo.CurrentCulture))
+		: string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.HistoryViewModel0AvailableTimestampedOutcomes, VisibleItems.Count.ToString("N0", CultureInfo.CurrentCulture));
 	public string? LoadError => CurrentError?.PrimaryMessage;
 	public bool HasLoadError => CurrentError is not null;
 	public ICommand RefreshCommand { get; }
 	public ICommand ClearFiltersCommand { get; }
 	public string RouteEyebrow => LibationAvalonia.Properties.Resources.HistoryEyebrow;
-	public string RouteTitle => "History";
+	public string RouteTitle => global::LibationAvalonia.Properties.Resources.RouteHistoryLabel;
 	public string RouteSubtitle => LibationAvalonia.Properties.Resources.HistorySupportingText;
-	public RouteCommandPresentation RoutePrimaryCommand => new("Refresh", RefreshCommand);
+	public RouteCommandPresentation RoutePrimaryCommand => new(global::LibationAvalonia.Properties.Resources.DownloadsViewRefresh, RefreshCommand);
 	public IReadOnlyList<RouteCommandPresentation> RouteSecondaryCommands => [];
 	public RouteStatusPresentation RouteStatusBadge => new(ResultSummary,
 		HasLoadError ? LibationStatusKind.NeedsAttention : LibationStatusKind.Completed);
@@ -195,11 +195,11 @@ public sealed class HistoryViewModel : SecondaryDestinationViewModel, IRoutePres
 				{
 					CurrentError = UserFacingErrorFactory.FromException(
 						ex,
-						"refresh the available History projection",
-						"Libation could not refresh the available history timestamps. No library or queue data was changed.");
+						global::LibationAvalonia.Properties.Resources.HistoryViewModelRefreshTheAvailableHistoryProjection,
+						global::LibationAvalonia.Properties.Resources.HistoryViewModelLibationCouldNotRefreshTheAvailableHistory);
 					Serilog.Log.Logger.Error(
 						ex,
-						"Failed to build the available History projection. Correlation ID: {CorrelationId}. Category: {ErrorCategory}",
+						global::LibationAvalonia.Properties.Resources.HistoryViewModelFailedToBuildTheAvailableHistoryProjection,
 						CurrentError.CorrelationId,
 						CurrentError.Category.ToDisplayName());
 					RaiseLoadErrorState();
@@ -228,15 +228,15 @@ public sealed class HistoryViewModel : SecondaryDestinationViewModel, IRoutePres
 		{
 			cancellationToken.ThrowIfCancellationRequested();
 			if (book.DateAdded != default)
-				items.Add(ToItem(book.DateAdded, null, "Catalogued", book.Title, "Added to Libation’s library.", "Recorded", LibationStatusKind.Completed));
+				items.Add(ToItem(book.DateAdded, null, global::LibationAvalonia.Properties.Resources.HistoryViewModelCatalogued, book.Title, global::LibationAvalonia.Properties.Resources.HistoryViewModelAddedToLibationSLibrary, global::LibationAvalonia.Properties.Resources.HistoryViewModelRecorded, LibationStatusKind.Completed));
 			if (book.LastDownloaded is DateTime downloaded)
-				items.Add(ToItem(downloaded, null, "Downloaded", book.Title, "Last completed download timestamp recorded for this title.", "Completed", LibationStatusKind.Completed));
+				items.Add(ToItem(downloaded, null, global::LibationAvalonia.Properties.Resources.DownloadsViewModelDownloaded, book.Title, global::LibationAvalonia.Properties.Resources.HistoryViewModelLastCompletedDownloadTimestampRecordedForThis, global::LibationAvalonia.Properties.Resources.CellarOverviewViewCompleted, LibationStatusKind.Completed));
 		}
 		foreach (var log in logs)
 		{
 			cancellationToken.ThrowIfCancellationRequested();
 			var (correlationId, detail) = ExtractCorrelation(log.Message);
-			items.Add(ToItem(log.Timestamp, correlationId, "Processing session", "Queue activity", detail, "Recorded", LibationStatusKind.Processing));
+			items.Add(ToItem(log.Timestamp, correlationId, global::LibationAvalonia.Properties.Resources.HistoryViewModelProcessingSession, global::LibationAvalonia.Properties.Resources.HistoryViewModelQueueActivity, detail, global::LibationAvalonia.Properties.Resources.HistoryViewModelRecorded, LibationStatusKind.Processing));
 		}
 		return items.OrderByDescending(item => item.Timestamp).ToArray();
 	}

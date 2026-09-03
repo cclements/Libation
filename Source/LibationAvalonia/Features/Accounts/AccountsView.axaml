@@ -1,6 +1,7 @@
 <UserControl
 	xmlns="https://github.com/avaloniaui"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:properties="using:LibationAvalonia.Properties"
 	xmlns:accounts="using:LibationAvalonia.Features.Accounts"
 	xmlns:components="using:LibationAvalonia.DesignSystem.Components"
 	x:Class="LibationAvalonia.Features.Accounts.AccountsView"
@@ -20,27 +21,27 @@
 					</Grid>
 					<Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="{DynamicResource Libation.Space.3}"
 						RowSpacing="{DynamicResource Libation.Space.2}">
-						<TextBlock Text="Marketplaces" FontWeight="SemiBold" />
+						<TextBlock Text="{x:Static properties:Resources.AccountsViewMarketplaces}" FontWeight="SemiBold" />
 						<TextBlock Grid.Column="1" Text="{Binding MarketplacesText}" TextWrapping="Wrap"
 							Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
-						<TextBlock Grid.Row="1" Text="Titles" FontWeight="SemiBold" />
+						<TextBlock Grid.Row="1" Text="{x:Static properties:Resources.AccountsViewTitles}" FontWeight="SemiBold" />
 						<TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding TitleCountText}"
 							Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
-						<TextBlock Grid.Row="2" Text="Scanning" FontWeight="SemiBold" />
+						<TextBlock Grid.Row="2" Text="{x:Static properties:Resources.AccountsViewScanning}" FontWeight="SemiBold" />
 						<TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding ScanInclusionText}"
 							Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
 					</Grid>
 					<WrapPanel Orientation="Horizontal">
-						<Button Classes="contemporary primary" Margin="0,0,8,8" Content="Scan now"
+						<Button Classes="contemporary primary" Margin="0,0,8,8" Content="{x:Static properties:Resources.AccountsViewScanNow}"
 							Command="{Binding ScanNowCommand}" CommandParameter="{Binding}" IsEnabled="{Binding CanScanNow}"
 							AutomationProperties.Name="{Binding ScanAccessibleName}" />
-						<Button Classes="contemporary" Margin="0,0,8,8" Content="Edit marketplaces"
+						<Button Classes="contemporary" Margin="0,0,8,8" Content="{x:Static properties:Resources.AccountsViewEditMarketplaces}"
 							Command="{Binding EditMarketplacesCommand}" CommandParameter="{Binding}" IsEnabled="{Binding CanManage}"
 							AutomationProperties.Name="{Binding EditMarketplacesAccessibleName}" />
-						<Button Classes="contemporary" Margin="0,0,8,8" Content="Reauthenticate"
+						<Button Classes="contemporary" Margin="0,0,8,8" Content="{x:Static properties:Resources.AccountsViewReauthenticate}"
 							Command="{Binding ReauthenticateCommand}" CommandParameter="{Binding}" IsEnabled="{Binding CanManage}"
 							AutomationProperties.Name="{Binding ReauthenticateAccessibleName}" />
-						<Button Classes="contemporary" Margin="0,0,8,8" Content="Remove"
+						<Button Classes="contemporary" Margin="0,0,8,8" Content="{x:Static properties:Resources.AccountsViewRemove}"
 							Command="{Binding RemoveCommand}" CommandParameter="{Binding}" IsEnabled="{Binding CanManage}"
 							AutomationProperties.Name="{Binding RemoveAccessibleName}" />
 					</WrapPanel>
@@ -53,11 +54,11 @@
 	<ScrollViewer HorizontalScrollBarVisibility="Disabled">
 		<StackPanel Margin="{DynamicResource Libation.Thickness.5}" Spacing="{DynamicResource Libation.Space.4}">
 			<components:AttentionBanner IsVisible="{Binding HasError}" Severity="{x:Static components:ComponentSeverity.Danger}" FocusOnShow="True"
-				Title="Accounts unavailable" Message="{Binding ErrorMessage}"
-				ActionText="Copy technical details" ActionCommand="{Binding CopyTechnicalDetailsCommand}" />
+				Title="{x:Static properties:Resources.AccountsViewAccountsUnavailable}" Message="{Binding ErrorMessage}"
+				ActionText="{x:Static properties:Resources.AccountsViewCopyTechnicalDetails}" ActionCommand="{Binding CopyTechnicalDetailsCommand}" />
 			<Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource Libation.Space.3}">
 				<StackPanel Spacing="{DynamicResource Libation.Space.1}">
-					<TextBlock Text="Configured accounts" FontFamily="{DynamicResource Libation.Font.Display}"
+					<TextBlock Text="{x:Static properties:Resources.AccountsViewConfiguredAccounts}" FontFamily="{DynamicResource Libation.Font.Display}"
 						FontSize="{DynamicResource Libation.FontSize.Section}" />
 					<TextBlock Text="{Binding ScanStateText}" Foreground="{DynamicResource Libation.Brush.TextSecondary}" TextWrapping="Wrap" />
 				</StackPanel>
@@ -65,7 +66,7 @@
 					TextOverride="{Binding AccountCountText}" AccessibleName="{Binding AccountCountText}" />
 			</Grid>
 			<components:EmptyState IsVisible="{Binding !HasAccounts}" Title="{Binding EmptyStateTitle}"
-				Explanation="{Binding EmptyStateExplanation}" PrimaryActionText="Add account"
+				Explanation="{Binding EmptyStateExplanation}" PrimaryActionText="{x:Static properties:Resources.AccountsViewAddAccount}"
 				PrimaryCommand="{Binding AddAccountCommand}" />
 			<ItemsControl ItemsSource="{Binding Accounts}" ItemTemplate="{StaticResource AccountCard}" />
 		</StackPanel>

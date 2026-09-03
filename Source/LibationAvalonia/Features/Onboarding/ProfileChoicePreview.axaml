@@ -1,6 +1,7 @@
 <UserControl
 	xmlns="https://github.com/avaloniaui"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:properties="using:LibationAvalonia.Properties"
 	xmlns:onboarding="using:LibationAvalonia.Features.Onboarding"
 	xmlns:components="using:LibationAvalonia.DesignSystem.Components"
 	x:Class="LibationAvalonia.Features.Onboarding.ProfileChoicePreview"
@@ -13,8 +14,8 @@
 			ActionCommand="{Binding SelectCommand, ElementName=Root}"
 			BadgeStatus="{Binding SelectionStatus, ElementName=Root}"
 			BadgeText="{Binding SelectionText, ElementName=Root}"
-			SelectedRowTitle="Library row preview"
-			SelectedRowMetadata="Semantic type, spacing, status, and progress"
+			SelectedRowTitle="{x:Static properties:Resources.ProfileChoicePreviewLibraryRowPreview}"
+			SelectedRowMetadata="{x:Static properties:Resources.ProfileChoicePreviewSemanticTypeSpacingStatusAndProgress}"
 			Progress="58" />
 	</ThemeVariantScope>
 </UserControl>

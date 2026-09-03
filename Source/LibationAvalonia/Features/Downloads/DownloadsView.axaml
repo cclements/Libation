@@ -1,6 +1,7 @@
 <UserControl
 	xmlns="https://github.com/avaloniaui"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:properties="using:LibationAvalonia.Properties"
 	xmlns:downloads="using:LibationAvalonia.Features.Downloads"
 	xmlns:components="using:LibationAvalonia.DesignSystem.Components"
 	x:Class="LibationAvalonia.Features.Downloads.DownloadsView"
@@ -21,7 +22,7 @@
 					ProgressAccessibleName="{Binding Book.ProgressAccessibleName}"
 					Command="{Binding Book.PrimaryCommand}" CommandText="{Binding Book.PrimaryActionText}"
 					CommandAccessibleName="{Binding Book.PrimaryAccessibleName}"
-					ContextCommand="{Binding Book.LocateCommand}" ContextCommandText="Locate"
+					ContextCommand="{Binding Book.LocateCommand}" ContextCommandText="{x:Static properties:Resources.DownloadsViewLocate}"
 					ContextCommandAccessibleName="{Binding Book.LocateAccessibleName}" />
 			</Grid>
 		</DataTemplate>
@@ -29,21 +30,21 @@
 	<Grid Margin="{DynamicResource Libation.Thickness.5}" RowDefinitions="Auto,*"
 		RowSpacing="{DynamicResource Libation.Space.3}">
 		<components:AttentionBanner Grid.Row="0" IsVisible="{Binding HasError}"
-			Severity="{x:Static components:ComponentSeverity.Danger}" FocusOnShow="True" Title="Download action unavailable"
-			Message="{Binding ErrorMessage}" ActionText="Copy technical details" ActionCommand="{Binding CopyTechnicalDetailsCommand}" />
+			Severity="{x:Static components:ComponentSeverity.Danger}" FocusOnShow="True" Title="{x:Static properties:Resources.DownloadsViewDownloadActionUnavailable}"
+			Message="{Binding ErrorMessage}" ActionText="{x:Static properties:Resources.AccountsViewCopyTechnicalDetails}" ActionCommand="{Binding CopyTechnicalDetailsCommand}" />
 		<Grid Grid.Row="1">
 			<Border Classes="card" IsVisible="{Binding IsLoading}" VerticalAlignment="Top">
 				<StackPanel Spacing="{DynamicResource Libation.Space.2}">
-					<TextBlock Text="Loading per-title download state…" FontWeight="SemiBold" />
-					<ProgressBar IsIndeterminate="True" AutomationProperties.Name="Loading per-title download state" />
+					<TextBlock Text="{x:Static properties:Resources.DownloadsViewLoadingPerTitleDownloadState}" FontWeight="SemiBold" />
+					<ProgressBar IsIndeterminate="True" AutomationProperties.Name="{x:Static properties:Resources.DownloadsViewLoadingPerTitleDownloadState2}" />
 				</StackPanel>
 			</Border>
-			<components:EmptyState IsVisible="{Binding ShowEmptyLibrary}" VerticalAlignment="Top" Title="No catalogued titles yet"
+			<components:EmptyState IsVisible="{Binding ShowEmptyLibrary}" VerticalAlignment="Top" Title="{x:Static properties:Resources.DownloadsViewNoCataloguedTitlesYet}"
 				Explanation="{Binding EmptyLibraryExplanation}" PrimaryActionText="{Binding EmptyLibraryActionText}"
-				PrimaryCommand="{Binding EmptyLibraryCommand}" SecondaryActionText="Refresh"
+				PrimaryCommand="{Binding EmptyLibraryCommand}" SecondaryActionText="{x:Static properties:Resources.DownloadsViewRefresh}"
 				SecondaryCommand="{Binding RefreshCommand}" />
 			<ListBox ItemsSource="{Binding Rows}" ItemTemplate="{StaticResource DownloadsRow}"
-				IsVisible="{Binding HasLibraryTitles}" AutomationProperties.Name="Downloads grouped by title"
+				IsVisible="{Binding HasLibraryTitles}" AutomationProperties.Name="{x:Static properties:Resources.DownloadsViewDownloadsGroupedByTitle}"
 				BorderThickness="0">
 				<ListBox.Styles>
 					<Style Selector="ListBoxItem">

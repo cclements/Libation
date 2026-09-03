@@ -39,31 +39,31 @@ public sealed class AccountCardViewModel : ViewModelBase
 	public string DisplayName => snapshot.DisplayName;
 	public string MarketplacesText => snapshot.Marketplaces.Count switch
 	{
-		0 => "Marketplace unavailable",
+		0 => global::LibationAvalonia.Properties.Resources.AccountsViewModelMarketplaceUnavailable,
 		1 => snapshot.Marketplaces[0],
 		_ => string.Join(", ", snapshot.Marketplaces),
 	};
 	public string MarketplaceSummary => snapshot.Marketplaces.Count == 1
-		? "1 marketplace"
-		: $"{snapshot.Marketplaces.Count.ToString("N0", CultureInfo.CurrentCulture)} marketplaces";
+		? global::LibationAvalonia.Properties.Resources.AccountsViewModel1Marketplace
+		: string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.AccountsViewModel0Marketplaces, snapshot.Marketplaces.Count.ToString("N0", CultureInfo.CurrentCulture));
 	public string TitleCountText => snapshot.TitleCount switch
 	{
-		null => "Title count is loading",
-		1 => "1 catalogued title",
-		int count => $"{count.ToString("N0", CultureInfo.CurrentCulture)} catalogued titles",
+		null => global::LibationAvalonia.Properties.Resources.AccountsViewModelTitleCountIsLoading,
+		1 => global::LibationAvalonia.Properties.Resources.AccountsViewModel1CataloguedTitle,
+		int count => string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.AccountsViewModel0CataloguedTitles, count.ToString("N0", CultureInfo.CurrentCulture)),
 	};
 	public string AuthorizationText => snapshot.AuthorizationText;
 	public LibationStatusKind AuthorizationStatus => snapshot.AuthorizationStatus;
 	public string AuthorizationAccessibleName => $"{DisplayName}: {AuthorizationText}";
 	public string ScanInclusionText => snapshot.IncludedInLibraryScans
-		? "Included in automatic scans"
-		: "Excluded from automatic scans";
+		? global::LibationAvalonia.Properties.Resources.AccountsViewModelIncludedInAutomaticScans
+		: global::LibationAvalonia.Properties.Resources.AccountsViewModelExcludedFromAutomaticScans;
 	public bool CanScanNow { get; private set; }
 	public bool CanManage => snapshot.ActionsAvailable;
-	public string ScanAccessibleName => $"Scan {DisplayName} now";
-	public string EditMarketplacesAccessibleName => $"Edit marketplaces for {DisplayName}";
-	public string ReauthenticateAccessibleName => $"Reauthenticate {DisplayName}";
-	public string RemoveAccessibleName => $"Remove {DisplayName} from Libation";
+	public string ScanAccessibleName => string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.AccountsViewModelScan0Now, DisplayName);
+	public string EditMarketplacesAccessibleName => string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.AccountsViewModelEditMarketplacesFor0, DisplayName);
+	public string ReauthenticateAccessibleName => string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.AccountsViewModelReauthenticate0, DisplayName);
+	public string RemoveAccessibleName => string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.AccountsViewModelRemove0FromLibation, DisplayName);
 	public string RemovalConsequenceText => AccountPresentationSource.RemovalConsequenceText;
 	public ICommand ScanNowCommand { get; }
 	public ICommand EditMarketplacesCommand { get; }
@@ -74,7 +74,7 @@ public sealed class AccountCardViewModel : ViewModelBase
 	{
 		ArgumentNullException.ThrowIfNull(replacement);
 		if (snapshot.PresentationId != replacement.PresentationId)
-			throw new InvalidOperationException("An account card's stable presentation identity cannot change during refresh.");
+			throw new InvalidOperationException(global::LibationAvalonia.Properties.Resources.AccountsViewModelAnAccountCardSStablePresentationIdentity);
 		snapshot = replacement;
 		CanScanNow = snapshot.ActionsAvailable && !isScanning;
 		foreach (var property in new[]
@@ -106,32 +106,32 @@ public sealed class AccountsViewModel : SecondaryDestinationViewModel, IRoutePre
 		this.source = source;
 		AddAccountCommand = CreateOwnerCommand(
 			source.AddAccountAsync,
-			"add an Audible account",
-			"Libation could not open account setup. No account data was changed.");
+			global::LibationAvalonia.Properties.Resources.AccountsViewModelAddAnAudibleAccount,
+			global::LibationAvalonia.Properties.Resources.AccountsViewModelLibationCouldNotOpenAccountSetupNo);
 		ManageAccountsCommand = CreateOwnerCommand(
 			source.ManageAccountsAsync,
-			"open account management",
-			"Libation could not open account management. No account data was changed.");
+			global::LibationAvalonia.Properties.Resources.AccountsViewModelOpenAccountManagement,
+			global::LibationAvalonia.Properties.Resources.AccountsViewModelLibationCouldNotOpenAccountManagementNo);
 		ScanAccountCommand = Track(ReactiveCommand.CreateFromTask<AccountCardViewModel>(card => RunAccountActionAsync(
 			card,
 			source.ScanNowAsync,
-			"scan an account",
-			"Libation could not scan that account. Review its stored authorization and try again.")));
+			global::LibationAvalonia.Properties.Resources.AccountsViewModelScanAnAccount,
+			global::LibationAvalonia.Properties.Resources.AccountsViewModelLibationCouldNotScanThatAccountReview)));
 		EditMarketplacesCommand = Track(ReactiveCommand.CreateFromTask<AccountCardViewModel>(card => RunAccountActionAsync(
 			card,
 			source.EditMarketplacesAsync,
-			"edit account marketplaces",
-			"Libation could not open marketplace settings. No account data was changed.")));
+			global::LibationAvalonia.Properties.Resources.AccountsViewModelEditAccountMarketplaces,
+			global::LibationAvalonia.Properties.Resources.AccountsViewModelLibationCouldNotOpenMarketplaceSettingsNo)));
 		ReauthenticateCommand = Track(ReactiveCommand.CreateFromTask<AccountCardViewModel>(card => RunAccountActionAsync(
 			card,
 			source.ReauthenticateAsync,
-			"reauthenticate an account",
-			"Libation could not reauthenticate that account. Its existing stored authorization was not removed.")));
+			global::LibationAvalonia.Properties.Resources.AccountsViewModelReauthenticateAnAccount,
+			global::LibationAvalonia.Properties.Resources.AccountsViewModelLibationCouldNotReauthenticateThatAccountIts)));
 		RemoveAccountCommand = Track(ReactiveCommand.CreateFromTask<AccountCardViewModel>(card => RunAccountActionAsync(
 			card,
 			source.RemoveAsync,
-			"remove an account",
-			"Libation could not remove that account. Its settings and Library records were left unchanged.")));
+			global::LibationAvalonia.Properties.Resources.AccountsViewModelRemoveAnAccount,
+			global::LibationAvalonia.Properties.Resources.AccountsViewModelLibationCouldNotRemoveThatAccountIts)));
 		source.Changed += Source_Changed;
 		RefreshAccounts();
 	}
@@ -141,8 +141,8 @@ public sealed class AccountsViewModel : SecondaryDestinationViewModel, IRoutePre
 	public bool IsScanning => source.IsScanning;
 	public string ScanStateText => source.ScanStateText;
 	public string AccountCountText => Accounts.Count == 1
-		? "1 configured account"
-		: $"{Accounts.Count.ToString("N0", CultureInfo.CurrentCulture)} configured accounts";
+		? global::LibationAvalonia.Properties.Resources.AccountsViewModel1ConfiguredAccount
+		: string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.AccountsViewModel0ConfiguredAccounts, Accounts.Count.ToString("N0", CultureInfo.CurrentCulture));
 	public LibationStatusKind AccountStatus => !HasAccounts
 		? LibationStatusKind.NeedsAttention
 		: Accounts.Any(account => account.AuthorizationStatus == LibationStatusKind.NeedsAttention)
@@ -150,10 +150,10 @@ public sealed class AccountsViewModel : SecondaryDestinationViewModel, IRoutePre
 			: Accounts.Any(account => account.AuthorizationStatus == LibationStatusKind.DownloadPending)
 				? LibationStatusKind.DownloadPending
 				: LibationStatusKind.Connected;
-	public string EmptyStateTitle => HasError ? "Accounts unavailable" : "No Audible accounts configured";
+	public string EmptyStateTitle => HasError ? global::LibationAvalonia.Properties.Resources.AccountsViewAccountsUnavailable : global::LibationAvalonia.Properties.Resources.AccountsViewModelNoAudibleAccountsConfigured;
 	public string EmptyStateExplanation => HasError
-		? "Libation could not safely read the account list. Use the preserved account manager to review the problem."
-		: "Add an Audible account to scan its marketplaces and catalogue titles.";
+		? global::LibationAvalonia.Properties.Resources.AccountsViewModelLibationCouldNotSafelyReadTheAccount
+		: global::LibationAvalonia.Properties.Resources.AccountsViewModelAddAnAudibleAccountToScanIts;
 
 	public ICommand AddAccountCommand { get; }
 	public ICommand ManageAccountsCommand { get; }
@@ -161,13 +161,13 @@ public sealed class AccountsViewModel : SecondaryDestinationViewModel, IRoutePre
 	public ICommand EditMarketplacesCommand { get; }
 	public ICommand ReauthenticateCommand { get; }
 	public ICommand RemoveAccountCommand { get; }
-	public string RouteEyebrow => "Audible access";
-	public string RouteTitle => "Accounts";
-	public string RouteSubtitle => "Review each account's local authorization, marketplaces, titles, and scan participation.";
-	public RouteCommandPresentation RoutePrimaryCommand => new("Add account", AddAccountCommand);
+	public string RouteEyebrow => global::LibationAvalonia.Properties.Resources.AccountsViewModelAudibleAccess;
+	public string RouteTitle => global::LibationAvalonia.Properties.Resources.RouteAccountsLabel;
+	public string RouteSubtitle => global::LibationAvalonia.Properties.Resources.AccountsViewModelReviewEachAccountSLocalAuthorizationMarketplaces;
+	public RouteCommandPresentation RoutePrimaryCommand => new(global::LibationAvalonia.Properties.Resources.AccountsViewAddAccount, AddAccountCommand);
 	public IReadOnlyList<RouteCommandPresentation> RouteSecondaryCommands =>
 	[
-		new("Manage accounts", ManageAccountsCommand),
+		new(global::LibationAvalonia.Properties.Resources.OnboardingViewManageAccounts, ManageAccountsCommand),
 	];
 	public RouteStatusPresentation RouteStatusBadge => new(AccountCountText, AccountStatus);
 
@@ -230,10 +230,10 @@ public sealed class AccountsViewModel : SecondaryDestinationViewModel, IRoutePre
 			accountsById.Clear();
 			CurrentError = UserFacingErrorFactory.FromException(
 				ex,
-				"read account presentation",
-				"Libation could not safely read the account list. Open Manage Accounts and try again.");
+				global::LibationAvalonia.Properties.Resources.AccountsViewModelReadAccountPresentation,
+				global::LibationAvalonia.Properties.Resources.AccountsViewModelLibationCouldNotSafelyReadTheAccount2);
 			Serilog.Log.Logger.Error(
-				"The contemporary Accounts destination could not load its privacy-safe account projection. Correlation ID: {CorrelationId}. {TechnicalDetails}",
+				global::LibationAvalonia.Properties.Resources.AccountsViewModelTheContemporaryAccountsDestinationCouldNotLoad,
 				CurrentError.CorrelationId,
 				UserFacingErrorFactory.Scrub(ex.ToString()));
 		}

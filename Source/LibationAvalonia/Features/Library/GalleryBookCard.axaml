@@ -1,5 +1,6 @@
 <UserControl xmlns="https://github.com/avaloniaui"
 			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:properties="using:LibationAvalonia.Properties"
 			 xmlns:components="using:LibationAvalonia.DesignSystem.Components"
 			 xmlns:library="using:LibationAvalonia.Features.Library"
 			 x:Class="LibationAvalonia.Features.Library.GalleryBookCard"
@@ -7,7 +8,7 @@
 			 x:Name="Root"
 			 Focusable="True"
 			 AutomationProperties.Name="{Binding AccessibleName}"
-			 AutomationProperties.HelpText="Use arrow keys to move, Space to select, Enter to open details, and Shift+F10 for book actions.">
+			 AutomationProperties.HelpText="{x:Static properties:Resources.GalleryBookCardUseArrowKeysToMoveSpaceTo}">
 	<Grid RowDefinitions="*,Auto">
 		<components:BookCard
 			Cover="{Binding Cover, ElementName=Root}"
@@ -27,8 +28,8 @@
 				  Margin="8"
 				  IsChecked="{Binding IsSelected, Mode=OneWay}"
 				  Click="FlightCheckBox_Click"
-				  AutomationProperties.Name="Add or remove title from Current Flight"
-				  AutomationProperties.HelpText="This checkbox changes only this title and preserves the rest of Current Flight." />
+				  AutomationProperties.Name="{x:Static properties:Resources.GalleryBookCardAddOrRemoveTitleFromCurrentFlight}"
+				  AutomationProperties.HelpText="{x:Static properties:Resources.GalleryBookCardThisCheckboxChangesOnlyThisTitleAnd}" />
 		<TextBlock Grid.Row="1"
 				   Text="{Binding SelectionText}"
 				   FontWeight="SemiBold"

@@ -1,0 +1,227 @@
+{
+  "settleMs": 900,
+  "entries": [
+    {
+      "profile": "Cellar",
+      "route": "Overview",
+      "width": 1456,
+      "height": 1060,
+      "file": "compact-cellar-overview.png",
+      "density": "Compact"
+    },
+    {
+      "profile": "Cellar",
+      "route": "Library",
+      "width": 1456,
+      "height": 1060,
+      "file": "compact-cellar-library.png",
+      "density": "Compact"
+    },
+    {
+      "profile": "Cellar",
+      "route": "Processing",
+      "width": 1456,
+      "height": 1060,
+      "file": "compact-cellar-processing.png",
+      "density": "Compact",
+      "processingScenario": "Mixed"
+    },
+    {
+      "profile": "TastingRoom",
+      "route": "Overview",
+      "width": 1456,
+      "height": 1060,
+      "file": "compact-tastingroom-overview.png",
+      "density": "Compact"
+    },
+    {
+      "profile": "TastingRoom",
+      "route": "Library",
+      "width": 1456,
+      "height": 1060,
+      "file": "compact-tastingroom-library.png",
+      "density": "Compact"
+    },
+    {
+      "profile": "TastingRoom",
+      "route": "Processing",
+      "width": 1456,
+      "height": 1060,
+      "file": "compact-tastingroom-processing.png",
+      "density": "Compact",
+      "processingScenario": "Mixed"
+    },
+    {
+      "profile": "Cellar",
+      "route": "Overview",
+      "width": 1456,
+      "height": 1060,
+      "file": "decoration-off-cellar-overview.png",
+      "decoration": "Off"
+    },
+    {
+      "profile": "Cellar",
+      "route": "Library",
+      "width": 1456,
+      "height": 1060,
+      "file": "decoration-off-cellar-library.png",
+      "decoration": "Off"
+    },
+    {
+      "profile": "Cellar",
+      "route": "Processing",
+      "width": 1456,
+      "height": 1060,
+      "file": "decoration-off-cellar-processing.png",
+      "decoration": "Off",
+      "processingScenario": "Mixed"
+    },
+    {
+      "profile": "TastingRoom",
+      "route": "Overview",
+      "width": 1456,
+      "height": 1060,
+      "file": "decoration-off-tastingroom-overview.png",
+      "decoration": "Off"
+    },
+    {
+      "profile": "TastingRoom",
+      "route": "Library",
+      "width": 1456,
+      "height": 1060,
+      "file": "decoration-off-tastingroom-library.png",
+      "decoration": "Off"
+    },
+    {
+      "profile": "TastingRoom",
+      "route": "Processing",
+      "width": 1456,
+      "height": 1060,
+      "file": "decoration-off-tastingroom-processing.png",
+      "decoration": "Off",
+      "processingScenario": "Mixed"
+    },
+    {
+      "profile": "Cellar",
+      "route": "Overview",
+      "width": 1456,
+      "height": 1060,
+      "file": "reduced-motion-cellar-overview.png",
+      "motion": "Reduce"
+    },
+    {
+      "profile": "Cellar",
+      "route": "Library",
+      "width": 1456,
+      "height": 1060,
+      "file": "reduced-motion-cellar-library.png",
+      "motion": "Reduce"
+    },
+    {
+      "profile": "Cellar",
+      "route": "Processing",
+      "width": 1456,
+      "height": 1060,
+      "file": "reduced-motion-cellar-processing.png",
+      "motion": "Reduce",
+      "processingScenario": "Mixed"
+    },
+    {
+      "profile": "TastingRoom",
+      "route": "Overview",
+      "width": 1456,
+      "height": 1060,
+      "file": "reduced-motion-tastingroom-overview.png",
+      "motion": "Reduce"
+    },
+    {
+      "profile": "TastingRoom",
+      "route": "Library",
+      "width": 1456,
+      "height": 1060,
+      "file": "reduced-motion-tastingroom-library.png",
+      "motion": "Reduce"
+    },
+    {
+      "profile": "TastingRoom",
+      "route": "Processing",
+      "width": 1456,
+      "height": 1060,
+      "file": "reduced-motion-tastingroom-processing.png",
+      "motion": "Reduce",
+      "processingScenario": "Mixed"
+    },
+    {
+      "profile": "Cellar",
+      "route": "Overview",
+      "width": 1456,
+      "height": 1060,
+      "file": "scale-200-cellar-overview.png",
+      "logicalScale": 2
+    },
+    {
+      "profile": "Cellar",
+      "route": "Library",
+      "width": 1456,
+      "height": 1060,
+      "file": "scale-200-cellar-library.png",
+      "logicalScale": 2
+    },
+    {
+      "profile": "Cellar",
+      "route": "Processing",
+      "width": 1456,
+      "height": 1060,
+      "file": "scale-200-cellar-processing.png",
+      "logicalScale": 2,
+      "processingScenario": "Mixed"
+    },
+    {
+      "profile": "TastingRoom",
+      "route": "Overview",
+      "width": 1456,
+      "height": 1060,
+      "file": "scale-200-tastingroom-overview.png",
+      "logicalScale": 2
+    },
+    {
+      "profile": "TastingRoom",
+      "route": "Library",
+      "width": 1456,
+      "height": 1060,
+      "file": "scale-200-tastingroom-library.png",
+      "logicalScale": 2
+    },
+    {
+      "profile": "TastingRoom",
+      "route": "Processing",
+      "width": 1456,
+      "height": 1060,
+      "file": "scale-200-tastingroom-processing.png",
+      "logicalScale": 2,
+      "processingScenario": "Mixed"
+    },
+    {
+      "profile": "HighContrast",
+      "route": "Overview",
+      "width": 1456,
+      "height": 1060,
+      "file": "high-contrast-overview.png"
+    },
+    {
+      "profile": "HighContrast",
+      "route": "Library",
+      "width": 1456,
+      "height": 1060,
+      "file": "high-contrast-library.png"
+    },
+    {
+      "profile": "HighContrast",
+      "route": "Processing",
+      "width": 1456,
+      "height": 1060,
+      "file": "high-contrast-processing.png",
+      "processingScenario": "Mixed"
+    }
+  ]
+}

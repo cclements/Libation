@@ -1,5 +1,6 @@
 <UserControl xmlns="https://github.com/avaloniaui"
 			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:properties="using:LibationAvalonia.Properties"
 			 xmlns:components="using:LibationAvalonia.DesignSystem.Components"
 			 xmlns:designSystem="using:LibationAvalonia.DesignSystem"
 			 xmlns:library="using:LibationAvalonia.Features.Library"
@@ -30,38 +31,38 @@
 				<Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="{DynamicResource Libation.Space.2}">
 					<TextBox x:Name="SearchBox"
 							 Classes="contemporary search"
-							 PlaceholderText="Search titles, authors, narrators, series, tags, or use a filter expression"
+							 PlaceholderText="{x:Static properties:Resources.LibraryViewSearchTitlesAuthorsNarratorsSeriesTagsOr}"
 							 Text="{Binding SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-							 AutomationProperties.Name="Search and filter the Library" />
-					<Button Grid.Column="1" Classes="contemporary quiet compact" Content="Clear" Command="{Binding ClearSearchCommand}"
-							AutomationProperties.Name="Clear Library search" />
+							 AutomationProperties.Name="{x:Static properties:Resources.LibraryViewSearchAndFilterTheLibrary}" />
+					<Button Grid.Column="1" Classes="contemporary quiet compact" Content="{x:Static properties:Resources.LibraryViewClear}" Command="{Binding ClearSearchCommand}"
+							AutomationProperties.Name="{x:Static properties:Resources.LibraryViewClearLibrarySearch}" />
 					<Menu Grid.Column="2" Background="Transparent">
-						<MenuItem Header="Quick filters" ItemsSource="{Binding QuickFilterMenuItems}" />
+						<MenuItem Header="{x:Static properties:Resources.LibraryViewQuickFilters}" ItemsSource="{Binding QuickFilterMenuItems}" />
 					</Menu>
 				</Grid>
 				<WrapPanel Grid.Row="1" Orientation="Horizontal" VerticalAlignment="Center">
-					<Button x:Name="FilterHelpButton" Classes="contemporary quiet compact" Content="Filter help" Command="{Binding OpenFilterHelpCommand}" Margin="0,0,8,8" />
+					<Button x:Name="FilterHelpButton" Classes="contemporary quiet compact" Content="{x:Static properties:Resources.LibraryViewFilterHelp}" Command="{Binding OpenFilterHelpCommand}" Margin="0,0,8,8" />
 					<ComboBox Width="190"
 							  Margin="0,0,8,8"
 							  ItemsSource="{Binding SortOptions}"
 							  SelectedItem="{Binding SelectedSort, Mode=TwoWay}"
-							  AutomationProperties.Name="Sort Library">
+							  AutomationProperties.Name="{x:Static properties:Resources.LibraryViewSortLibrary}">
 						<ComboBox.ItemTemplate>
 							<DataTemplate x:DataType="library:LibrarySortOption">
 								<TextBlock Text="{Binding Label}" />
 							</DataTemplate>
 						</ComboBox.ItemTemplate>
 					</ComboBox>
-					<Button Classes="contemporary compact" Content="Details" Command="{Binding ShowDetailsCommand}" Margin="0,0,4,8" />
-					<Button Classes="contemporary compact" Content="Gallery" Command="{Binding ShowGalleryCommand}" Margin="0,0,8,8" />
-					<Button Classes="contemporary quiet compact" Content="Columns" Click="ColumnChooser_Click" Margin="0,0,8,8"
+					<Button Classes="contemporary compact" Content="{x:Static properties:Resources.LibraryViewDetails}" Command="{Binding ShowDetailsCommand}" Margin="0,0,4,8" />
+					<Button Classes="contemporary compact" Content="{x:Static properties:Resources.LibraryViewGallery}" Command="{Binding ShowGalleryCommand}" Margin="0,0,8,8" />
+					<Button Classes="contemporary quiet compact" Content="{x:Static properties:Resources.LibraryViewColumns}" Click="ColumnChooser_Click" Margin="0,0,8,8"
 							IsVisible="{Binding IsDetailsMode}" />
 					<Button Classes="contemporary quiet compact" Content="{Binding DetailsPaneToggleText}" Command="{Binding ToggleDetailsPaneCommand}"
 							IsEnabled="{Binding HasFocusedItem}" Margin="0,0,8,8" />
 					<Button Classes="contemporary quiet compact" Content="{Binding FlightToggleText}" Command="{Binding ToggleFlightCommand}" Margin="0,0,8,8" />
-					<Button Classes="contemporary quiet compact" Content="Scan" Command="{Binding ScanLibraryCommand}" Margin="0,0,8,8" />
-					<Button Classes="contemporary quiet compact" Content="Add books" Command="{Binding AddBooksCommand}" Margin="0,0,8,8" />
-					<Button Classes="contemporary primary compact" Content="Process selected" Command="{Binding ProcessSelectionCommand}"
+					<Button Classes="contemporary quiet compact" Content="{x:Static properties:Resources.LibraryViewScan}" Command="{Binding ScanLibraryCommand}" Margin="0,0,8,8" />
+					<Button Classes="contemporary quiet compact" Content="{x:Static properties:Resources.LibraryViewAddBooks}" Command="{Binding AddBooksCommand}" Margin="0,0,8,8" />
+					<Button Classes="contemporary primary compact" Content="{x:Static properties:Resources.LibraryViewProcessSelected}" Command="{Binding ProcessSelectionCommand}"
 							IsEnabled="{Binding HasSelection}" Margin="0,0,0,8" />
 				</WrapPanel>
 				</Grid>
@@ -93,8 +94,8 @@
 
 				<Border IsVisible="{Binding IsLoading}" Classes="card" Padding="32">
 					<StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
-						<ProgressBar IsIndeterminate="True" Width="240" AutomationProperties.Name="Loading Library" />
-						<TextBlock Text="Loading your Library…" />
+						<ProgressBar IsIndeterminate="True" Width="240" AutomationProperties.Name="{x:Static properties:Resources.LibraryViewLoadingLibrary}" />
+						<TextBlock Text="{x:Static properties:Resources.LibraryViewLoadingYourLibrary}" />
 					</StackPanel>
 				</Border>
 
@@ -110,11 +111,11 @@
 
 				<StackPanel IsVisible="{Binding ShowNoResults}" VerticalAlignment="Center" Spacing="12">
 					<components:EmptyState
-						Title="No Library results"
+						Title="{x:Static properties:Resources.LibraryViewNoLibraryResults}"
 						Explanation="{Binding NoResultsText}"
-						PrimaryActionText="Clear search"
+						PrimaryActionText="{x:Static properties:Resources.LibraryViewClearSearch}"
 						PrimaryCommand="{Binding ClearSearchCommand}"
-						SecondaryActionText="Filter help"
+						SecondaryActionText="{x:Static properties:Resources.LibraryViewFilterHelp}"
 						SecondaryCommand="{Binding OpenFilterHelpCommand}"
 					IllustrationTemplate="{StaticResource illustration.shared.no-search-results}" />
 					<TextBlock IsVisible="{Binding ShowNoResultsTrashHint}"

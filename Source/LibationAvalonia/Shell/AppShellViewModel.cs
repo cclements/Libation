@@ -166,6 +166,7 @@ public sealed class AppShellViewModel : ViewModelBase, IDisposable
 	public bool IsCellarComposition => Profile.DashboardLayout == DashboardLayoutKind.Cellar;
 	public bool IsTastingRoomComposition => Profile.DashboardLayout == DashboardLayoutKind.TastingRoom;
 	public bool IsAccessibleComposition => Profile.DashboardLayout == DashboardLayoutKind.Accessible;
+	public bool IsReducedMotionEnabled => experienceManager.IsReducedMotionEnabled;
 	public bool IsOverviewRoute => CurrentRoute.Id == AppRouteId.Overview;
 	public bool IsLibraryRoute => CurrentRoute.Id == AppRouteId.Library;
 	public bool IsDownloadsRoute => CurrentRoute.Id == AppRouteId.Downloads;

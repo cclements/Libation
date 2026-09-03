@@ -13,11 +13,11 @@ public partial class ProfileChoicePreview : UserControl
 	public static readonly StyledProperty<ExperienceStyle> ProfileStyleProperty =
 		AvaloniaProperty.Register<ProfileChoicePreview, ExperienceStyle>(nameof(ProfileStyle), ExperienceStyle.Cellar);
 	public static readonly StyledProperty<string> ProfileNameProperty =
-		AvaloniaProperty.Register<ProfileChoicePreview, string>(nameof(ProfileName), "Profile");
+		AvaloniaProperty.Register<ProfileChoicePreview, string>(nameof(ProfileName), global::LibationAvalonia.Properties.Resources.ProfileChoicePreviewaxamlProfile);
 	public static readonly StyledProperty<string?> DescriptionProperty =
 		AvaloniaProperty.Register<ProfileChoicePreview, string?>(nameof(Description));
 	public static readonly StyledProperty<string> ActionTextProperty =
-		AvaloniaProperty.Register<ProfileChoicePreview, string>(nameof(ActionText), "Choose profile");
+		AvaloniaProperty.Register<ProfileChoicePreview, string>(nameof(ActionText), global::LibationAvalonia.Properties.Resources.ProfileChoicePreviewaxamlChooseProfile);
 	public static readonly StyledProperty<ICommand?> SelectCommandProperty =
 		AvaloniaProperty.Register<ProfileChoicePreview, ICommand?>(nameof(SelectCommand));
 	public static readonly StyledProperty<bool> IsSelectedProperty =
@@ -25,7 +25,7 @@ public partial class ProfileChoicePreview : UserControl
 	public static readonly StyledProperty<LibationStatusKind> SelectionStatusProperty =
 		AvaloniaProperty.Register<ProfileChoicePreview, LibationStatusKind>(nameof(SelectionStatus), LibationStatusKind.DownloadPending);
 	public static readonly StyledProperty<string> SelectionTextProperty =
-		AvaloniaProperty.Register<ProfileChoicePreview, string>(nameof(SelectionText), "Preview");
+		AvaloniaProperty.Register<ProfileChoicePreview, string>(nameof(SelectionText), global::LibationAvalonia.Properties.Resources.ProfileChoicePreviewaxamlPreview);
 
 	public ProfileChoicePreview()
 	{
@@ -50,7 +50,7 @@ public partial class ProfileChoicePreview : UserControl
 		if (change.Property == IsSelectedProperty)
 		{
 			SelectionStatus = IsSelected ? LibationStatusKind.Completed : LibationStatusKind.DownloadPending;
-			SelectionText = IsSelected ? "Selected" : "Preview";
+			SelectionText = IsSelected ? global::LibationAvalonia.Properties.Resources.LibraryModelsSelected : global::LibationAvalonia.Properties.Resources.ProfileChoicePreviewaxamlPreview;
 		}
 	}
 

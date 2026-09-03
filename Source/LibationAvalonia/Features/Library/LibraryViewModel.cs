@@ -77,10 +77,10 @@ public sealed class LibraryViewModel : ViewModelBase, IDisposable, IRoutePresent
 		CoverCache = new CoverImageCache();
 		SortOptions =
 		[
-			new("Current Details order", null, ListSortDirection.Ascending),
-			new("Recently added", nameof(GridEntry.DateAdded), ListSortDirection.Descending),
-			new("Title A–Z", nameof(GridEntry.Title), ListSortDirection.Ascending),
-			new("Author A–Z", nameof(GridEntry.Authors), ListSortDirection.Ascending),
+			new(global::LibationAvalonia.Properties.Resources.LibraryViewModelCurrentDetailsOrder, null, ListSortDirection.Ascending),
+			new(global::LibationAvalonia.Properties.Resources.LibraryViewModelRecentlyAdded, nameof(GridEntry.DateAdded), ListSortDirection.Descending),
+			new(global::LibationAvalonia.Properties.Resources.LibraryViewModelTitleAZ, nameof(GridEntry.Title), ListSortDirection.Ascending),
+			new(global::LibationAvalonia.Properties.Resources.LibraryViewModelAuthorAZ, nameof(GridEntry.Authors), ListSortDirection.Ascending),
 		];
 		selectedSort = SortOptions[0];
 		viewMode = configuration.LibraryViewMode;
@@ -132,16 +132,16 @@ public sealed class LibraryViewModel : ViewModelBase, IDisposable, IRoutePresent
 	public ReactiveCommand<Unit, Unit> ToggleDetailsPaneCommand { get; }
 	public ReactiveCommand<Unit, Unit> SelectAllVisibleCommand { get; }
 	public IEnumerable<Control> QuickFilterMenuItems => commands.Main.ContemporaryQuickFilterMenuItems;
-	public string RouteEyebrow => "Library workspace";
-	public string RouteTitle => VisibleCount == 1 ? "Library — 1 title" : $"Library — {VisibleCount} titles";
+	public string RouteEyebrow => global::LibationAvalonia.Properties.Resources.LibraryViewModelLibraryWorkspace;
+	public string RouteTitle => VisibleCount == 1 ? global::LibationAvalonia.Properties.Resources.LibraryViewModelLibrary1Title : string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.LibraryViewModelLibrary0Titles, VisibleCount);
 	public string RouteSubtitle => SelectionStateText;
 	public RouteCommandPresentation? RoutePrimaryCommand => ProcessSelectionCommand is null
 		? null
-		: new("Process selected", ProcessSelectionCommand);
+		: new(global::LibationAvalonia.Properties.Resources.LibraryViewProcessSelected, ProcessSelectionCommand);
 	public IReadOnlyList<RouteCommandPresentation> RouteSecondaryCommands =>
 	[
-		new("Scan library", ScanLibraryCommand),
-		new("Add books", AddBooksCommand),
+		new(global::LibationAvalonia.Properties.Resources.LibraryViewModelScanLibrary, ScanLibraryCommand),
+		new(global::LibationAvalonia.Properties.Resources.LibraryViewAddBooks, AddBooksCommand),
 		.. (ToggleFlightCommand is null ? [] : new[] { new RouteCommandPresentation(FlightToggleText, ToggleFlightCommand) }),
 	];
 	public RouteStatusPresentation RouteStatusBadge => new(SelectionStateText, SelectedCount > 0
@@ -228,8 +228,8 @@ public sealed class LibraryViewModel : ViewModelBase, IDisposable, IRoutePresent
 		}
 	}
 	public bool ShowDetailsPane => IsDetailsPaneOpen && HasFocusedItem;
-	public string DetailsPaneToggleText => ShowDetailsPane ? "Hide details" : "Show details";
-	public string FlightToggleText => SelectedCount == 1 ? "Current Flight (1)" : $"Current Flight ({SelectedCount})";
+	public string DetailsPaneToggleText => ShowDetailsPane ? global::LibationAvalonia.Properties.Resources.LibraryViewModelHideDetails : global::LibationAvalonia.Properties.Resources.LibraryViewModelShowDetails;
+	public string FlightToggleText => SelectedCount == 1 ? global::LibationAvalonia.Properties.Resources.LibraryViewModelCurrentFlight1 : string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.LibraryViewModelCurrentFlight0, SelectedCount);
 	public SplitViewDisplayMode DetailsPaneDisplayMode { get; private set; } = SplitViewDisplayMode.Overlay;
 	public bool IsDetailsPanePersistent => DetailsPaneDisplayMode == SplitViewDisplayMode.Inline;
 
@@ -239,9 +239,9 @@ public sealed class LibraryViewModel : ViewModelBase, IDisposable, IRoutePresent
 	public bool ShowNoResults => commands.Main.NoMatchesVisible;
 	public string EmptyTitle => commands.Main.GettingStartedHeadline;
 	public string EmptyExplanation => commands.Main.GettingStartedDetail;
-	public string EmptyPrimaryText => commands.Main.GettingStartedAddAccountVisible ? "Add Audible account" : "Scan library";
+	public string EmptyPrimaryText => commands.Main.GettingStartedAddAccountVisible ? global::LibationAvalonia.Properties.Resources.LibraryViewModelAddAudibleAccount : global::LibationAvalonia.Properties.Resources.LibraryViewModelScanLibrary;
 	public bool ShowEmptyTrashAction => commands.Main.GettingStartedTrashVisible;
-	public string? EmptySecondaryText => ShowEmptyTrashAction ? "Open Trash" : null;
+	public string? EmptySecondaryText => ShowEmptyTrashAction ? global::LibationAvalonia.Properties.Resources.LibraryViewModelOpenTrash : null;
 	public string NoResultsText => commands.Main.NoMatchesText;
 	public bool ShowNoResultsTrashHint => commands.Main.NoMatchesTrashHintVisible;
 	public string NoResultsTrashHint => commands.Main.NoMatchesTrashHintText;
@@ -249,13 +249,13 @@ public sealed class LibraryViewModel : ViewModelBase, IDisposable, IRoutePresent
 	public int SelectedCount => flight.Count;
 	public bool HasSelection => SelectedCount > 0;
 	public int HiddenSelectedCount => flight.HiddenCount;
-	public string ResultStateText => VisibleCount == 1 ? "1 title shown" : $"{VisibleCount} titles shown";
+	public string ResultStateText => VisibleCount == 1 ? global::LibationAvalonia.Properties.Resources.LibraryViewModel1TitleShown : string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.LibraryViewModel0TitlesShown, VisibleCount);
 	public string SelectionStateText => flight.Count switch
 	{
-		0 => "No titles selected",
-		1 when flight.HiddenCount == 0 => "1 title selected",
-		_ when flight.HiddenCount == 0 => $"{flight.Count} titles selected",
-		_ => $"{flight.Count} titles selected, {flight.HiddenCount} hidden by filter",
+		0 => global::LibationAvalonia.Properties.Resources.LibraryViewModelNoTitlesSelected,
+		1 when flight.HiddenCount == 0 => global::LibationAvalonia.Properties.Resources.LibraryViewModel1TitleSelected,
+		_ when flight.HiddenCount == 0 => string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.LibraryViewModel0TitlesSelected, flight.Count),
+		_ => string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.LibraryViewModel0TitlesSelected1HiddenByFilter, flight.Count, flight.HiddenCount),
 	};
 	public bool CanAddVisibleToFlight => HasResults && VisibleItems.Any(item => !item.IsSelected);
 	public int GalleryColumnCount => galleryColumnCount;
@@ -434,11 +434,11 @@ public sealed class LibraryViewModel : ViewModelBase, IDisposable, IRoutePresent
 		if (candidates.Length == 0)
 			return;
 
-		string countText = candidates.Length == 1 ? "1 shown title" : $"{candidates.Length} shown titles";
+		string countText = candidates.Length == 1 ? global::LibationAvalonia.Properties.Resources.LibraryViewModel1ShownTitle : string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.LibraryViewModel0ShownTitles, candidates.Length);
 		var result = await global::LibationAvalonia.MessageBox.Show(
 			global::LibationAvalonia.App.MainWindow,
-			$"Add {countText} to Current Flight?\n\nThis changes the explicit Flight selection only. It does not download, process, or remove any title.",
-			"Add shown titles to Current Flight",
+			string.Format(global::System.Globalization.CultureInfo.CurrentCulture, global::LibationAvalonia.Properties.Resources.LibraryViewModelAdd0ToCurrentFlightThisChanges, countText),
+			global::LibationAvalonia.Properties.Resources.LibraryViewModelAddShownTitlesToCurrentFlight,
 			MessageBoxButtons.OKCancel,
 			MessageBoxIcon.Question,
 			MessageBoxDefaultButton.Button1);
@@ -475,7 +475,7 @@ public sealed class LibraryViewModel : ViewModelBase, IDisposable, IRoutePresent
 		}
 		catch (Exception ex)
 		{
-			Serilog.Log.Logger.Error(ex, "Unable to apply the Library filter.");
+			Serilog.Log.Logger.Error(ex, global::LibationAvalonia.Properties.Resources.LibraryViewModelUnableToApplyTheLibraryFilter);
 		}
 		finally
 		{

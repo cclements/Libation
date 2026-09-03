@@ -29,8 +29,8 @@
 		RowSpacing="{DynamicResource Libation.Space.3}">
 		<components:AttentionBanner Grid.Row="0" IsVisible="{Binding HasLoadError}"
 			Severity="{x:Static components:ComponentSeverity.Danger}" FocusOnShow="True"
-			Title="History unavailable" Message="{Binding LoadError}" ActionText="Refresh" ActionCommand="{Binding RefreshCommand}"
-			SecondaryActionText="Copy technical details" SecondaryActionCommand="{Binding CopyTechnicalDetailsCommand}" />
+			Title="{x:Static properties:Resources.HistoryViewHistoryUnavailable}" Message="{Binding LoadError}" ActionText="{x:Static properties:Resources.DownloadsViewRefresh}" ActionCommand="{Binding RefreshCommand}"
+			SecondaryActionText="{x:Static properties:Resources.AccountsViewCopyTechnicalDetails}" SecondaryActionCommand="{Binding CopyTechnicalDetailsCommand}" />
 		<Border Grid.Row="1" Classes="card">
 			<StackPanel Spacing="{DynamicResource Libation.Space.2}">
 				<TextBlock Text="{x:Static properties:Resources.HistoryScopeMessage}"
@@ -38,31 +38,31 @@
 					AutomationProperties.Name="{x:Static properties:Resources.HistoryScopeTitle}" />
 				<WrapPanel Orientation="Horizontal">
 					<StackPanel Width="168" Margin="0,0,12,8" Spacing="{DynamicResource Libation.Space.1}">
-						<TextBlock Text="From date" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
-						<CalendarDatePicker SelectedDate="{Binding FromDate, Mode=TwoWay}" AutomationProperties.Name="History from date" />
+						<TextBlock Text="{x:Static properties:Resources.HistoryViewFromDate}" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+						<CalendarDatePicker SelectedDate="{Binding FromDate, Mode=TwoWay}" AutomationProperties.Name="{x:Static properties:Resources.HistoryViewHistoryFromDate}" />
 					</StackPanel>
 					<StackPanel Width="168" Margin="0,0,12,8" Spacing="{DynamicResource Libation.Space.1}">
-						<TextBlock Text="To date" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
-						<CalendarDatePicker SelectedDate="{Binding ToDate, Mode=TwoWay}" AutomationProperties.Name="History to date" />
+						<TextBlock Text="{x:Static properties:Resources.HistoryViewToDate}" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+						<CalendarDatePicker SelectedDate="{Binding ToDate, Mode=TwoWay}" AutomationProperties.Name="{x:Static properties:Resources.HistoryViewHistoryToDate}" />
 					</StackPanel>
 					<StackPanel Width="180" Margin="0,0,12,8" Spacing="{DynamicResource Libation.Space.1}">
-						<TextBlock Text="Action" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+						<TextBlock Text="{x:Static properties:Resources.HistoryViewAction}" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
 						<ComboBox ItemsSource="{Binding ActionOptions}" SelectedItem="{Binding SelectedAction, Mode=TwoWay}"
-							AutomationProperties.Name="Filter History by action" />
+							AutomationProperties.Name="{x:Static properties:Resources.HistoryViewFilterHistoryByAction}" />
 					</StackPanel>
 					<StackPanel Width="180" Margin="0,0,0,8" Spacing="{DynamicResource Libation.Space.1}">
-						<TextBlock Text="Result" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
+						<TextBlock Text="{x:Static properties:Resources.HistoryViewResult}" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
 						<ComboBox ItemsSource="{Binding ResultOptions}" SelectedItem="{Binding SelectedResult, Mode=TwoWay}"
-							AutomationProperties.Name="Filter History by result" />
+							AutomationProperties.Name="{x:Static properties:Resources.HistoryViewFilterHistoryByResult}" />
 					</StackPanel>
 				</WrapPanel>
 				<Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="{DynamicResource Libation.Space.2}">
 					<TextBox Text="{Binding SearchText, Mode=TwoWay}"
-						PlaceholderText="Search date, title, action, result, or recorded detail"
-						AutomationProperties.Name="Search available history" />
-					<Button Grid.Column="1" Classes="contemporary quiet" Content="Clear filters"
+						PlaceholderText="{x:Static properties:Resources.HistoryViewSearchDateTitleActionResultOrRecorded}"
+						AutomationProperties.Name="{x:Static properties:Resources.HistoryViewSearchAvailableHistory}" />
+					<Button Grid.Column="1" Classes="contemporary quiet" Content="{x:Static properties:Resources.HistoryViewClearFilters}"
 						Command="{Binding ClearFiltersCommand}" />
-					<Button Grid.Column="2" Classes="contemporary quiet" Content="Refresh"
+					<Button Grid.Column="2" Classes="contemporary quiet" Content="{x:Static properties:Resources.DownloadsViewRefresh}"
 						Command="{Binding RefreshCommand}" />
 				</Grid>
 				<TextBlock Text="{Binding ResultSummary}" Foreground="{DynamicResource Libation.Brush.TextSecondary}" />
@@ -71,16 +71,16 @@
 		<Grid Grid.Row="2">
 			<Border Classes="card" IsVisible="{Binding IsLoading}" VerticalAlignment="Top">
 				<StackPanel Spacing="{DynamicResource Libation.Space.2}">
-					<TextBlock Text="Loading available history…" FontWeight="SemiBold" />
-					<ProgressBar IsIndeterminate="True" AutomationProperties.Name="Loading available history" />
+					<TextBlock Text="{x:Static properties:Resources.HistoryViewLoadingAvailableHistory}" FontWeight="SemiBold" />
+					<ProgressBar IsIndeterminate="True" AutomationProperties.Name="{x:Static properties:Resources.HistoryViewLoadingAvailableHistory2}" />
 				</StackPanel>
 			</Border>
-			<components:EmptyState IsVisible="{Binding ShowEmpty}" VerticalAlignment="Top" Title="No recorded outcomes match"
-				Explanation="Adjust or clear the filters, or return after Libation records another available outcome."
-				PrimaryActionText="Clear filters" PrimaryCommand="{Binding ClearFiltersCommand}"
-				SecondaryActionText="Refresh" SecondaryCommand="{Binding RefreshCommand}" />
+			<components:EmptyState IsVisible="{Binding ShowEmpty}" VerticalAlignment="Top" Title="{x:Static properties:Resources.HistoryViewNoRecordedOutcomesMatch}"
+				Explanation="{x:Static properties:Resources.HistoryViewAdjustOrClearTheFiltersOrReturn}"
+				PrimaryActionText="{x:Static properties:Resources.HistoryViewClearFilters}" PrimaryCommand="{Binding ClearFiltersCommand}"
+				SecondaryActionText="{x:Static properties:Resources.DownloadsViewRefresh}" SecondaryCommand="{Binding RefreshCommand}" />
 			<ListBox ItemsSource="{Binding VisibleItems}" ItemTemplate="{StaticResource HistoryRow}"
-				IsVisible="{Binding HasItems}" AutomationProperties.Name="Available history outcomes"
+				IsVisible="{Binding HasItems}" AutomationProperties.Name="{x:Static properties:Resources.HistoryViewAvailableHistoryOutcomes}"
 				BorderThickness="0">
 				<ListBox.Styles>
 					<Style Selector="ListBoxItem">
