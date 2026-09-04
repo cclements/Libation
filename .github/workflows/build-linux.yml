@@ -47,6 +47,8 @@ jobs:
       - name: Unit test
         if: ${{ inputs.run-unit-tests }}
         working-directory: ./Source
+        env:
+          LIBATION_HEADLESS_CAPTURE_OUTPUT: ${{ inputs.OS == 'Debian' && inputs.architecture == 'x64' && format('{0}/cross-platform-captures/linux-x64', github.workspace) || '' }}
         run: |
           shopt -s nullglob
           TEST_PROJECTS=(_Tests/*.Tests/*.csproj)
@@ -57,6 +59,15 @@ jobs:
           for TEST_PROJECT in "${TEST_PROJECTS[@]}"; do
             dotnet run --project "${TEST_PROJECT}" --configuration Release -- --minimum-expected-tests 1
           done
+
+      - name: Upload Linux contemporary captures
+        if: ${{ always() && inputs.run-unit-tests && inputs.OS == 'Debian' && inputs.architecture == 'x64' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: contemporary-captures-linux-x64
+          path: ./cross-platform-captures/linux-x64/*.png
+          if-no-files-found: error
+          retention-days: ${{ inputs.retention-days }}
 
       - name: Publish
         id: publish

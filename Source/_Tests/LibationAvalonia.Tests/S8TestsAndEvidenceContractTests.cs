@@ -100,6 +100,7 @@ public class S8TestsAndEvidenceContractTests
 					frame.Save(actualPath);
 					var actual = File.ReadAllBytes(actualPath);
 					Assert.IsGreaterThan(0, actual.Length, $"The {style} headless capture was empty.");
+					ExportCaptureIfRequested(actualPath, fileName);
 					var baselinePath = Path.Combine(baselineDirectory, fileName);
 
 					if (updateBaselines)
@@ -124,6 +125,16 @@ public class S8TestsAndEvidenceContractTests
 				}
 			}
 		});
+	}
+
+	private static void ExportCaptureIfRequested(string actualPath, string fileName)
+	{
+		var outputDirectory = Environment.GetEnvironmentVariable("LIBATION_HEADLESS_CAPTURE_OUTPUT");
+		if (string.IsNullOrWhiteSpace(outputDirectory))
+			return;
+
+		Directory.CreateDirectory(outputDirectory);
+		File.Copy(actualPath, Path.Combine(outputDirectory, fileName), overwrite: true);
 	}
 
 	[TestMethod]

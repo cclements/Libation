@@ -53,6 +53,8 @@ jobs:
       - name: Unit test
         if: ${{ inputs.run-unit-tests }}
         working-directory: ./Source
+        env:
+          LIBATION_HEADLESS_CAPTURE_OUTPUT: ${{ matrix.ui == 'Avalonia' && matrix.architecture == 'x64' && format('{0}/cross-platform-captures/windows-x64', github.workspace) || '' }}
         run: |
           $testProjects = @(Get-ChildItem -Path "_Tests/*.Tests/*.csproj")
           if ($testProjects.Count -eq 0) { throw "No unit-test projects were found." }
@@ -60,7 +62,16 @@ jobs:
             dotnet run --project $testProject.FullName --configuration Release -- --minimum-expected-tests 1
             if ($LASTEXITCODE -ne 0) { throw "Unit tests failed for $($testProject.FullName)" }
           }
-        
+
+      - name: Upload Windows contemporary captures
+        if: ${{ always() && inputs.run-unit-tests && matrix.ui == 'Avalonia' && matrix.architecture == 'x64' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: contemporary-captures-windows-x64
+          path: ./cross-platform-captures/windows-x64/*.png
+          if-no-files-found: error
+          retention-days: ${{ inputs.retention-days }}
+
       - name: Publish
         working-directory: ./Source
         run: |
