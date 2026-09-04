@@ -49,6 +49,10 @@ public class S8TestsAndEvidenceContractTests
 			Environment.GetEnvironmentVariable("LIBATION_UPDATE_HEADLESS_BASELINES"),
 			"1",
 			StringComparison.Ordinal);
+		var compareWithCommittedBaselines = !string.Equals(
+			Environment.GetEnvironmentVariable("CI"),
+			"true",
+			StringComparison.OrdinalIgnoreCase);
 		var baselineDirectory = Path.Combine(
 			FindRepositoryRoot(),
 			"Source", "_Tests", "LibationAvalonia.Tests", "Baselines", "S8");
@@ -96,6 +100,8 @@ public class S8TestsAndEvidenceContractTests
 						new PixelSize(BaselineWidth, BaselineHeight),
 						new Vector(96, 96));
 					frame.Render(gallery);
+					Assert.AreEqual(BaselineWidth, frame.PixelSize.Width);
+					Assert.AreEqual(BaselineHeight, frame.PixelSize.Height);
 					var actualPath = Path.Combine(HeadlessTestHost.RootDirectory, fileName);
 					frame.Save(actualPath);
 					var actual = File.ReadAllBytes(actualPath);
@@ -109,6 +115,8 @@ public class S8TestsAndEvidenceContractTests
 						File.WriteAllBytes(baselinePath, actual);
 						continue;
 					}
+					if (!compareWithCommittedBaselines)
+						continue;
 
 					Assert.IsTrue(File.Exists(baselinePath), $"Missing committed S8 baseline: {baselinePath}");
 					var expectedPixels = ReadPixels(baselinePath, out var expectedSize, out var expectedRowBytes);

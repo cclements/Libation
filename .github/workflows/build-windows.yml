@@ -28,6 +28,7 @@ jobs:
     name: "Windows-${{ matrix.release_name }}-${{ matrix.architecture }} (${{ matrix.ui }})"
     runs-on: windows-latest
     strategy:
+      fail-fast: false
       matrix:
         ui: [Avalonia]
         architecture: [x64]
