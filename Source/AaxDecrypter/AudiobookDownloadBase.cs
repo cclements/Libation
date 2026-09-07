@@ -78,22 +78,27 @@ public abstract class AudiobookDownloadBase
 
 	public async Task<bool> RunAsync()
 	{
-		await InputFileStream.BeginDownloadingAsync();
-		var progressTask = Task.Run(reportProgress);
-
-		(bool success, var elapsed) = await AsyncSteps.RunAsync();
-
-		//Stop the downloader so it doesn't keep running in the background.
-		if (!success)
-			NfsPersister.Dispose();
-
-		await progressTask;
-
-		var speedup = DownloadOptions.RuntimeLength / elapsed;
-		Serilog.Log.Information($"Speedup is {speedup:F0}x realtime.");
-
-		NfsPersister.Dispose();
-		return success;
+		Task progressTask = Task.CompletedTask;
+		try
+		{
+			await InputFileStream.BeginDownloadingAsync();
+			progressTask = Task.Run(reportProgress);
+			(bool success, var elapsed) = await AsyncSteps.RunAsync();
+			if (!success)
+				NfsPersister.Dispose();
+			await progressTask;
+			var speedup = DownloadOptions.RuntimeLength / elapsed;
+			Serilog.Log.Information($"Speedup is {speedup:F0}x realtime.");
+			return success;
+		}
+		finally
+		{
+			// Includes first-request/admission failures and exceptions before a conversion can finalize.
+			downloadFinished = true;
+			m_nfsPersister?.Dispose();
+			try { await progressTask; }
+			catch (Exception ex) { Serilog.Log.Warning(ex, "Download progress reporting stopped with an error."); }
+		}
 
 		async Task reportProgress()
 		{
@@ -193,9 +198,9 @@ public abstract class AudiobookDownloadBase
 				return nfsp = newNetworkFilePersister();
 
 			nfsp = new NetworkFileStreamPersister(jsonDownloadState);
-			// The download url expires after 1 hour.
-			// The new url points to the same file.
-			nfsp.NetworkFileStream.SetUriForSameFile(new Uri(DownloadOptions.DownloadUrl));
+			// Signed query parameters may expire. Begin validates that the renewed license still selects
+			// the saved resource before any cached bytes are combined with a response.
+			nfsp.NetworkFileStream.SetUriForSameFile(new Uri(DownloadOptions.DownloadUrl), DownloadOptions.DownloadIdentity);
 			return nfsp;
 		}
 		catch
@@ -219,7 +224,8 @@ public abstract class AudiobookDownloadBase
 
 		NetworkFileStreamPersister newNetworkFilePersister()
 		{
-			var networkFileStream = new NetworkFileStream(tempFilePath, new Uri(DownloadOptions.DownloadUrl), 0, new() { { "User-Agent", DownloadOptions.UserAgent } });
+			var networkFileStream = new NetworkFileStream(tempFilePath, new Uri(DownloadOptions.DownloadUrl), 0,
+				new() { { "User-Agent", DownloadOptions.UserAgent } }, DownloadOptions.DownloadIdentity);
 			return new NetworkFileStreamPersister(networkFileStream, jsonDownloadState);
 		}
 	}

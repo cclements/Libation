@@ -3,442 +3,497 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Runtime.ExceptionServices;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace AaxDecrypter;
 
-/// <summary>A resumable, simultaneous file downloader and reader. </summary>
+/// <summary>A resumable, simultaneous file downloader and reader.</summary>
 public class NetworkFileStream : Stream, IUpdatable
 {
 	public event EventHandler? Updated;
 
-	#region Public Properties
-
-	/// <summary> Location to save the downloaded data. </summary>
 	[JsonProperty(Required = Required.Always)]
 	public string SaveFilePath { get; }
 
-	/// <summary> Http(s) address of the file to download. </summary>
 	[JsonProperty(Required = Required.Always)]
 	public Uri Uri { get; private set; }
 
-	/// <summary> Http headers to be sent to the server with the request. </summary>
 	[JsonProperty(Required = Required.Always)]
 	public Dictionary<string, string> RequestHeaders { get; private set; }
 
-	/// <summary> The position in <see cref="SaveFilePath"/> that has been written and flushed to disk. </summary>
+	private long writePosition;
+	/// <summary>Only bytes written and flushed to disk are committed for readers and resume.</summary>
 	[JsonProperty(Required = Required.Always)]
-	public long WritePosition { get; private set; }
+	public long WritePosition { get => Interlocked.Read(ref writePosition); private set => Interlocked.Exchange(ref writePosition, value); }
 
-	/// <summary> The total length of the <see cref="Uri"/> file to download. </summary>
 	[JsonProperty(Required = Required.Always)]
 	public long ContentLength { get; private set; }
 
+	/// <summary>The strong HTTP entity tag associated with committed partial bytes, when available.</summary>
+	[JsonProperty]
+	public string? EntityTag { get; private set; }
+
+	/// <summary>A nonsecret digest binding the saved bytes to the selected resource.</summary>
+	[JsonProperty]
+	public string? ResourceIdentity { get; private set; }
+
+	/// <summary>The admitted final response target, including redirects, under the same identity rules.</summary>
+	[JsonProperty]
+	public string? EffectiveResourceIdentity { get; private set; }
+
 	[JsonIgnore]
-	public bool IsCancelled => _cancellationSource.IsCancellationRequested;
+	public bool IsCancelled => cancellationSource.IsCancellationRequested;
 
 	[JsonIgnore]
 	public Task? DownloadTask { get; private set; }
 
-	private long _speedLimit = 0;
-	/// <summary>bytes per second</summary>
-	public long SpeedLimit { get => _speedLimit; set => _speedLimit = value <= 0 ? 0 : Math.Max(value, MIN_BYTES_PER_SECOND); }
+	private long speedLimit;
+	/// <summary>Bytes per second; zero disables throttling.</summary>
+	public long SpeedLimit { get => Interlocked.Read(ref speedLimit); set => Interlocked.Exchange(ref speedLimit, value <= 0 ? 0 : Math.Max(value, MIN_BYTES_PER_SECOND)); }
 
-	#endregion
+	private readonly FileStream writeFile;
+	private readonly FileStream readFile;
+	private readonly CancellationTokenSource cancellationSource = new();
+	private readonly object startGate = new();
+	private readonly object progressGate = new();
+	private Task? beginTask;
+	private volatile ExceptionDispatchInfo? downloadFailure;
+	private string requestedIdentity;
+	private string? requestedDownloadIdentity;
+	private DateTime nextUpdateTime;
+	private bool disposed;
 
-	#region Private Properties
-	private FileStream _writeFile { get; }
-	private FileStream _readFile { get; }
-	private CancellationTokenSource _cancellationSource { get; } = new();
-	private EventWaitHandle? _downloadedPiece { get; set; }
-
-	private DateTime NextUpdateTime { get; set; }
-
-	#endregion
-
-	#region Constants
-
-	//Download memory buffer size
 	private const int DOWNLOAD_BUFF_SZ = 8 * 1024;
-
-	//NetworkFileStream will flush all data in _writeFile to disk after every
-	//DATA_FLUSH_SZ bytes are written to the file stream.
 	private const int DATA_FLUSH_SZ = 1024 * 1024;
-
-	//Number of times per second the download rate is checked and throttled
 	private const int THROTTLE_FREQUENCY = 8;
-
-	//Minimum throttle rate. The minimum amount of data that can be throttled
-	//on each iteration of the download loop is DOWNLOAD_BUFF_SZ.
+	private const int MAX_CONNECTION_RETRIES = 5;
 	public const int MIN_BYTES_PER_SECOND = DOWNLOAD_BUFF_SZ * THROTTLE_FREQUENCY;
 
-	#endregion
-
-	#region Constructor
-
-	/// <summary> A resumable, simultaneous file downloader and reader. </summary>
-	/// <param name="saveFilePath">Path to a location on disk to save the downloaded data from <paramref name="uri"/></param>
-	/// <param name="uri">Http(s) address of the file to download.</param>
-	/// <param name="writePosition">The position in <paramref name="uri"/> to begin downloading.</param>
-	/// <param name="requestHeaders">Http headers to be sent to the server with the <see cref="HttpWebRequest"/>.</param>
-	public NetworkFileStream(string saveFilePath, Uri uri, long writePosition = 0, Dictionary<string, string>? requestHeaders = null)
+	public NetworkFileStream(string saveFilePath, Uri uri, long writePosition = 0,
+		Dictionary<string, string>? requestHeaders = null, string? downloadIdentity = null)
 	{
 		SaveFilePath = ArgumentValidator.EnsureNotNullOrWhiteSpace(saveFilePath, nameof(saveFilePath));
 		Uri = ArgumentValidator.EnsureNotNull(uri, nameof(uri));
 		WritePosition = ArgumentValidator.EnsureGreaterThan(writePosition, nameof(writePosition), -1);
-
-		if (!Directory.Exists(Path.GetDirectoryName(saveFilePath)))
-			throw new ArgumentException($"Specified {nameof(saveFilePath)} directory \"{Path.GetDirectoryName(saveFilePath)}\" does not exist.");
-
+		ResourceIdentity = requestedIdentity = GetResourceIdentity(uri, downloadIdentity);
+		requestedDownloadIdentity = downloadIdentity;
 		RequestHeaders = requestHeaders ?? new();
 
-		_writeFile = new FileStream(SaveFilePath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite)
-		{
-			Position = WritePosition
-		};
+		if (!Directory.Exists(Path.GetDirectoryName(saveFilePath)))
+			throw new ArgumentException($"The download directory does not exist: {Path.GetDirectoryName(saveFilePath)}");
 
-		if (_writeFile.Length < WritePosition)
+		writeFile = new FileStream(SaveFilePath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite);
+		try
 		{
-			_writeFile.Dispose();
-			throw new InvalidDataException($"{SaveFilePath} file length is shorter than {WritePosition}");
+			if (writeFile.Length < WritePosition)
+				throw new InvalidDataException("The cached file is shorter than its saved download position.");
+			writeFile.Position = WritePosition;
+			readFile = new FileStream(SaveFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
 		}
-
-		_readFile = new FileStream(SaveFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-
-		SetUriForSameFile(uri);
+		catch
+		{
+			writeFile.Dispose();
+			cancellationSource.Dispose();
+			throw;
+		}
 	}
 
-	#endregion
+	// Missing identity in legacy JSON must remain missing. Constructing a new URI digest here would
+	// incorrectly turn old, unvalidated bytes into an admitted resumable state.
+	[JsonConstructor]
+	private NetworkFileStream(string saveFilePath, Uri uri, Dictionary<string, string> requestHeaders,
+		long writePosition, long contentLength, string? entityTag, string? resourceIdentity, string? effectiveResourceIdentity)
+		: this(saveFilePath, uri, writePosition, requestHeaders)
+	{
+		ContentLength = contentLength;
+		EntityTag = entityTag;
+		ResourceIdentity = resourceIdentity;
+		EffectiveResourceIdentity = effectiveResourceIdentity;
+	}
 
-	#region Downloader
+	/// <summary>Bind a renewed URL to the current selection before starting the download.</summary>
+	public void SetUriForSameFile(Uri uriToSameFile, string? downloadIdentity = null)
+	{
+		string identity = GetResourceIdentity(uriToSameFile, downloadIdentity);
+		lock (startGate)
+		{
+			ObjectDisposedException.ThrowIf(disposed, this);
+			if (beginTask is not null)
+				throw new InvalidOperationException("Cannot change the resource after downloading has started.");
+			// Reject a mismatch in Begin, not in the caller's legacy load-error path that deletes cache files.
+			requestedIdentity = identity;
+			requestedDownloadIdentity = downloadIdentity;
+			Uri = uriToSameFile;
+		}
+	}
 
-	/// <summary> Update the <see cref="Dinah.Core.IO.JsonFilePersister{T}"/>. </summary>
+	private static string GetResourceIdentity(Uri uri, string? downloadIdentity)
+	{
+		ArgumentNullException.ThrowIfNull(uri);
+		if (!uri.IsAbsoluteUri || uri.Scheme is not ("http" or "https"))
+			throw new ArgumentException("Downloads require an absolute HTTP or HTTPS URI.", nameof(uri));
+		string resource = string.IsNullOrEmpty(downloadIdentity)
+			? "uri\n" + uri.GetComponents(UriComponents.HttpRequestUrl, UriFormat.UriEscaped)
+			: "content\n" + uri.GetLeftPart(UriPartial.Path) + "\n" + downloadIdentity;
+		return Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(resource)));
+	}
+
+	/// <summary>Return after the first response is admitted; DownloadTask owns the full transfer.</summary>
+	public Task BeginDownloadingAsync()
+	{
+		lock (startGate)
+		{
+			ObjectDisposedException.ThrowIf(disposed, this);
+			if (beginTask is not null) return beginTask;
+			var admitted = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+			beginTask = admitted.Task;
+			// Do not pass a cancellation token to Task.Run: even pre-start cancellation must execute cleanup.
+			DownloadTask = Task.Run(() => DownloadLoopInternal(admitted));
+			return beginTask;
+		}
+	}
+
+	private async Task DownloadLoopInternal(TaskCompletionSource admitted)
+	{
+		try
+		{
+			cancellationSource.Token.ThrowIfCancellationRequested();
+			if (ResourceIdentity is null || !string.Equals(ResourceIdentity, requestedIdentity, StringComparison.Ordinal))
+				throw new InvalidDataException("The cached download has a missing or different resource identity; its partial bytes were retained.");
+			if (ContentLength < 0 || (WritePosition > 0 && (ContentLength == 0 || WritePosition > ContentLength)))
+				throw new InvalidDataException("The saved download position and content length are inconsistent.");
+			if (WritePosition > 0 && EffectiveResourceIdentity is null)
+				throw new InvalidDataException("The cached download has no final response identity; its bytes were retained.");
+			if (ContentLength > 0 && WritePosition == ContentLength)
+			{
+				admitted.TrySetResult();
+				return;
+			}
+			if (WritePosition > 0 && !TryStrongEntityTag(EntityTag, out _))
+				throw new InvalidDataException("The cached partial has no strong entity tag and cannot be safely resumed; its bytes were retained.");
+
+			using var client = new HttpClient();
+			bool firstResponse = true;
+			int retries = 0;
+			do
+			{
+				using var block = await RequestNextByteRangeAsync(client).ConfigureAwait(false);
+				cancellationSource.Token.ThrowIfCancellationRequested();
+				if (firstResponse)
+				{
+					ContentLength = block.FileSize;
+					EntityTag = block.EntityTag;
+					EffectiveResourceIdentity = block.EffectiveResourceIdentity;
+					// A previous failed write can leave an uncommitted tail. Only discard it after admission.
+					writeFile.SetLength(WritePosition);
+					writeFile.Position = WritePosition;
+					firstResponse = false;
+					OnUpdate(waitForWrite: true);
+					admitted.TrySetResult();
+				}
+
+				long attemptStart = WritePosition;
+				try
+				{
+					await DownloadToFile(block).ConfigureAwait(false);
+				}
+				catch (IOException ex) when (!IsCancelled && WritePosition > attemptStart && WritePosition < ContentLength
+					&& TryStrongEntityTag(EntityTag, out _) && IsRetryableConnectionFailure(ex) && ++retries <= MAX_CONNECTION_RETRIES)
+				{
+					// DownloadToFile already rolled its uncommitted tail back. The next request revalidates
+					// the same entity and total length before any further bytes can be appended.
+					Serilog.Log.Debug("Resuming an interrupted download at committed position {Position}", WritePosition);
+				}
+			} while (WritePosition < ContentLength);
+		}
+		catch (Exception ex)
+		{
+			downloadFailure = ExceptionDispatchInfo.Capture(ex);
+			admitted.TrySetException(ex);
+			try { readFile.Dispose(); }
+			catch (Exception closeError) { Serilog.Log.Error(closeError, "Could not close the failed download reader."); }
+			throw;
+		}
+		finally
+		{
+			try { writeFile.Dispose(); }
+			catch (Exception closeError)
+			{
+				if (downloadFailure is null)
+				{
+					downloadFailure = ExceptionDispatchInfo.Capture(closeError);
+					admitted.TrySetException(closeError);
+					try { readFile.Dispose(); }
+					catch (Exception readCloseError) { Serilog.Log.Error(readCloseError, "Could not close the failed download reader."); }
+					SignalReaders();
+					throw;
+				}
+				Serilog.Log.Error(closeError, "Could not close the failed download writer.");
+			}
+			SignalReaders();
+			OnUpdate(waitForWrite: true);
+		}
+	}
+
+	private static bool IsRetryableConnectionFailure(IOException error)
+		=> error is HttpIOException { HttpRequestError: HttpRequestError.ResponseEnded }
+			|| error.InnerException is System.ComponentModel.Win32Exception { NativeErrorCode: -2146893008 };
+
+	private async Task<BlockResponse> RequestNextByteRangeAsync(HttpClient client)
+	{
+		long start = WritePosition;
+		using var request = new HttpRequestMessage(HttpMethod.Get, Uri);
+		foreach (var header in RequestHeaders)
+		{
+			if (!header.Key.Equals("Range", StringComparison.OrdinalIgnoreCase)
+				&& !header.Key.Equals("If-Range", StringComparison.OrdinalIgnoreCase)
+				&& !header.Key.Equals("Accept-Encoding", StringComparison.OrdinalIgnoreCase))
+				request.Headers.Add(header.Key, header.Value);
+		}
+		request.Headers.Range = new RangeHeaderValue(start, null);
+		request.Headers.AcceptEncoding.Add(new StringWithQualityHeaderValue("identity"));
+		if (start > 0)
+		{
+			if (!TryStrongEntityTag(EntityTag, out var tag))
+				throw new InvalidDataException("A strong entity tag is required before combining partial responses.");
+			request.Headers.IfRange = new RangeConditionHeaderValue(tag!);
+		}
+
+		var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationSource.Token).ConfigureAwait(false);
+		try
+		{
+			if (response.Content.Headers.ContentEncoding.Any(x => !x.Equals("identity", StringComparison.OrdinalIgnoreCase)))
+				throw new InvalidDataException("Encoded HTTP responses are not supported for byte-exact audiobook ranges.");
+			long size;
+			long total;
+			if (response.StatusCode == HttpStatusCode.PartialContent)
+			{
+				var range = response.Content.Headers.ContentRange;
+				if (range is null || !range.Unit.Equals("bytes", StringComparison.OrdinalIgnoreCase)
+					|| !range.HasRange || !range.HasLength || range.From != start || range.To < range.From
+					|| range.Length <= 0 || range.To >= range.Length)
+					throw new InvalidDataException("The response does not describe the exact requested byte range and a finite total length.");
+				total = range.Length!.Value;
+				size = range.To!.Value - start + 1;
+				if (response.Content.Headers.ContentLength is long declared && declared != size)
+					throw new InvalidDataException("Content-Length does not match Content-Range.");
+			}
+			else if (response.StatusCode == HttpStatusCode.OK && start == 0)
+			{
+				if (response.Content.Headers.ContentLength is not long declared || declared < 0 || response.Content.Headers.Contains("Content-Range"))
+					throw new InvalidDataException("A full response must have an explicit content length and no Content-Range.");
+				total = size = declared;
+			}
+			else
+				throw new WebException($"The server responded with unexpected download status {response.StatusCode}; cached bytes were retained.");
+
+			var effectiveUri = response.RequestMessage?.RequestUri
+				?? throw new InvalidDataException("The response has no final resource URI.");
+			string effectiveIdentity = GetResourceIdentity(effectiveUri, requestedDownloadIdentity);
+			if (start > 0 && !string.Equals(EffectiveResourceIdentity, effectiveIdentity, StringComparison.Ordinal))
+				throw new InvalidDataException("The resumed response selected a different final resource; cached bytes were retained.");
+
+			if (ContentLength != 0 && ContentLength != total)
+				throw new InvalidDataException("The response total length differs from the saved resource length.");
+			string? responseTag = TryStrongEntityTag(response.Headers.ETag?.ToString(), out var strongTag) ? strongTag!.ToString() : null;
+			if (start > 0 && !string.Equals(EntityTag, responseTag, StringComparison.Ordinal))
+				throw new InvalidDataException("The resumed response did not preserve the strong entity tag of the cached bytes.");
+			if (start + size < total && responseTag is null)
+				throw new InvalidDataException("A bounded partial response requires a strong entity tag before another range can be combined.");
+			return new BlockResponse(response, size, total, responseTag, effectiveIdentity);
+		}
+		catch
+		{
+			response.Dispose();
+			throw;
+		}
+	}
+
+	private static bool TryStrongEntityTag(string? value, out EntityTagHeaderValue? tag)
+		=> EntityTagHeaderValue.TryParse(value, out tag) && !tag.IsWeak && tag.Tag != "*";
+
+	private sealed record BlockResponse(HttpResponseMessage Response, long BlockSize, long FileSize, string? EntityTag, string EffectiveResourceIdentity) : IDisposable
+	{
+		public void Dispose() => Response.Dispose();
+	}
+
+	private async Task DownloadToFile(BlockResponse block)
+	{
+		long endPosition = WritePosition + block.BlockSize;
+		long position = WritePosition;
+		long nextFlush = position + Math.Min(DATA_FLUSH_SZ, block.FileSize - position);
+		bool complete = false;
+		using var network = await block.Response.Content.ReadAsStreamAsync(cancellationSource.Token).ConfigureAwait(false);
+		var buffer = new byte[DOWNLOAD_BUFF_SZ];
+		try
+		{
+			DateTime throttleStart = DateTime.UtcNow;
+			long bytesSinceThrottle = 0;
+			while (position < endPosition)
+			{
+				int count = (int)Math.Min(buffer.Length, Math.Min(endPosition - position, nextFlush - position));
+				int read = await network.ReadAsync(buffer.AsMemory(0, count), cancellationSource.Token).ConfigureAwait(false);
+				if (read == 0) throw new EndOfStreamException("The HTTP body ended before its advertised range was complete.");
+				await writeFile.WriteAsync(buffer.AsMemory(0, read), cancellationSource.Token).ConfigureAwait(false);
+				position += read;
+				if (position >= nextFlush && position < endPosition)
+				{
+					await CommitPosition(position).ConfigureAwait(false);
+					nextFlush = position + Math.Min(DATA_FLUSH_SZ, block.FileSize - position);
+				}
+
+				bytesSinceThrottle += read;
+				long limit = SpeedLimit;
+				if (limit >= MIN_BYTES_PER_SECOND && bytesSinceThrottle > limit / THROTTLE_FREQUENCY)
+				{
+					int delay = (int)(throttleStart.AddSeconds(1d / THROTTLE_FREQUENCY) - DateTime.UtcNow).TotalMilliseconds;
+					if (delay > 0) await Task.Delay(delay, cancellationSource.Token).ConfigureAwait(false);
+					throttleStart = DateTime.UtcNow;
+					bytesSinceThrottle = 0;
+				}
+			}
+			// Even the final advertised byte is not committed until HTTP framing proves the block ended.
+			if (await network.ReadAsync(buffer.AsMemory(0, 1), cancellationSource.Token).ConfigureAwait(false) != 0)
+				throw new InvalidDataException("The HTTP body exceeds its advertised byte range.");
+			await CommitPosition(position).ConfigureAwait(false);
+			complete = true;
+		}
+		finally
+		{
+			if (!complete)
+			{
+				try { writeFile.SetLength(WritePosition); writeFile.Position = WritePosition; }
+				catch (Exception ex) { Serilog.Log.Error(ex, "Could not remove an uncommitted download tail."); }
+			}
+			SignalReaders();
+			OnUpdate(waitForWrite: true);
+		}
+	}
+
+	private async Task CommitPosition(long position)
+	{
+		await writeFile.FlushAsync(cancellationSource.Token).ConfigureAwait(false);
+		WritePosition = position;
+		SignalReaders();
+		OnUpdate();
+	}
+
+	private void SignalReaders()
+	{
+		lock (progressGate) Monitor.PulseAll(progressGate);
+	}
+
 	private void OnUpdate(bool waitForWrite = false)
 	{
 		try
 		{
-			if (waitForWrite || DateTime.UtcNow > NextUpdateTime)
+			if (waitForWrite || DateTime.UtcNow > nextUpdateTime)
 			{
 				Updated?.Invoke(this, EventArgs.Empty);
-				//JsonFilePersister Will not allow update intervals shorter than 100 milliseconds
-				//If an update is called less than 100 ms since the last update, persister will
-				//sleep the thread until 100 ms has elapsed.
-				NextUpdateTime = DateTime.UtcNow.AddMilliseconds(110);
+				nextUpdateTime = DateTime.UtcNow.AddMilliseconds(110);
 			}
 		}
-		catch (Exception ex)
-		{
-			Serilog.Log.Error(ex, "An error was encountered while saving the download progress to JSON");
-		}
+		catch (Exception ex) { Serilog.Log.Error(ex, "Could not save download progress."); }
 	}
 
-	/// <summary> Set a different <see cref="System.Uri"/> to the same file targeted by this instance of <see cref="NetworkFileStream"/> </summary>
-	/// <param name="uriToSameFile">New <see cref="System.Uri"/> host must match existing host.</param>
-	public void SetUriForSameFile(Uri uriToSameFile)
-	{
-		ArgumentValidator.EnsureNotNullOrWhiteSpace(uriToSameFile?.AbsoluteUri, nameof(uriToSameFile));
-
-		if (Path.GetFileName(uriToSameFile.LocalPath) != Path.GetFileName(Uri.LocalPath))
-			throw new ArgumentException($"New uri to the same file must have the same file name.");
-		if (uriToSameFile.Host != Uri.Host)
-			throw new ArgumentException($"New uri to the same file must have the same host.\r\n Old Host :{Uri.Host}\r\nNew Host: {uriToSameFile.Host}");
-		if (DownloadTask is not null)
-			throw new InvalidOperationException("Cannot change Uri after download has started.");
-
-		Uri = uriToSameFile;
-	}
-
-	/// <summary> Begins downloading <see cref="Uri"/> to <see cref="SaveFilePath"/> in a background thread. </summary>
-	/// <returns>The downloader <see cref="Task"/></returns>
-	public async Task BeginDownloadingAsync()
-	{
-		if (ContentLength != 0 && WritePosition == ContentLength)
-		{
-			DownloadTask = Task.CompletedTask;
-			return;
-		}
-
-		if (ContentLength != 0 && WritePosition > ContentLength)
-			throw new WebException($"Specified write position (0x{WritePosition:X10}) is larger than  {nameof(ContentLength)} (0x{ContentLength:X10}).");
-
-		//Initiate connection with the first request block and
-		//get the total content length before returning.
-		var client = new HttpClient();
-		var response = await RequestNextByteRangeAsync(client);
-
-		if (ContentLength != 0 && ContentLength != response.FileSize)
-			throw new WebException($"Content length of 0x{response.FileSize:X10} differs from partially downloaded content length of 0x{ContentLength:X10}");
-
-		ContentLength = response.FileSize;
-
-		_downloadedPiece = new EventWaitHandle(false, EventResetMode.AutoReset);
-		//Hand off the client and the open request to the downloader to download and write data to file.
-		DownloadTask = Task.Run(() => DownloadLoopInternal(client, response), _cancellationSource.Token);
-	}
-
-    // avoid infinite retry loops if the server consistently fails for a particular title
-    private const int MAX_TLS_RETRIES = 5;
-
-    private async Task DownloadLoopInternal(HttpClient client, BlockResponse blockResponse)
-	{
-		try
-		{
-			var startPosition = WritePosition;
-
-            var tlsRetryCount = 0;
-            while (WritePosition < ContentLength && !IsCancelled)
-			{
-				try
-				{
-					await DownloadToFile(blockResponse);
-				}
-				catch (HttpIOException e)
-					when (e.HttpRequestError is HttpRequestError.ResponseEnded
-							&& WritePosition != startPosition
-							&& WritePosition < ContentLength && !IsCancelled)
-				{
-					Serilog.Log.Logger.Debug($"The download connection ended before the file completed downloading all 0x{ContentLength:X10} bytes");
-
-					//the download made *some* progress since the last attempt.
-					//Try again to complete the download from where it left off.
-					//Make sure to rewind file to last flush position.
-					_writeFile.Position = startPosition = WritePosition;
-					blockResponse.Dispose();
-					blockResponse = await RequestNextByteRangeAsync(client);
-
-					Serilog.Log.Logger.Debug($"Resuming the file download starting at position 0x{WritePosition:X10}.");
-                }
-                catch (IOException e)
-                    when (e.InnerException is System.ComponentModel.Win32Exception { NativeErrorCode: -2146893008 }
-                            && WritePosition != startPosition
-                            && WritePosition < ContentLength && !IsCancelled
-							&& ++tlsRetryCount <= MAX_TLS_RETRIES)
-                {
-                    Serilog.Log.Logger.Warning($"TLS decryption failure at position 0x{WritePosition:X10}. Reconnecting and resuming download.");
-
-                    _writeFile.Position = startPosition = WritePosition;
-                    blockResponse.Dispose();
-                    blockResponse = await RequestNextByteRangeAsync(client);
-
-                    Serilog.Log.Logger.Debug($"Resuming the file download starting at position 0x{WritePosition:X10}.");
-                }
-            }
-		}
-		catch (Exception ex)
-		{
-			//Don't throw from DownloadTask.
-			//This task gets awaited in Dispose() and we don't want to have an unhandled exception there.
-			Serilog.Log.Error(ex, "An error was encountered during the download process.");
-		}
-		finally
-		{
-			_writeFile.Dispose();
-			blockResponse.Dispose();
-			client.Dispose();
-		}
-	}
-
-	private async Task<BlockResponse> RequestNextByteRangeAsync(HttpClient client)
-	{
-		using var request = new HttpRequestMessage(HttpMethod.Get, Uri);
-
-		//Just in case it snuck in the saved json (Issue #1232)
-		RequestHeaders.Remove("Range");
-
-		foreach (var header in RequestHeaders)
-			request.Headers.Add(header.Key, header.Value);
-
-		request.Headers.Add("Range", $"bytes={WritePosition}-");
-
-		var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, _cancellationSource.Token);
-
-		if (response.StatusCode != HttpStatusCode.PartialContent)
-			throw new WebException($"Server at {Uri.Host} responded with unexpected status code: {response.StatusCode}.");
-
-		var totalSize = response.Content.Headers.ContentRange?.Length ??
-			throw new WebException("The response did not contain a total content length.");
-
-		var rangeSize = response.Content.Headers.ContentLength ??
-			throw new WebException($"The response did not contain a {nameof(response.Content.Headers.ContentLength)};");
-
-		return new BlockResponse(response, rangeSize, totalSize);
-	}
-
-	private readonly record struct BlockResponse(HttpResponseMessage Response, long BlockSize, long FileSize) : IDisposable
-	{
-		public void Dispose() => Response?.Dispose();
-	}
-
-	/// <summary> Download <see cref="Uri"/> to <see cref="SaveFilePath"/>.</summary>
-	private async Task DownloadToFile(BlockResponse block)
-	{
-		var endPosition = WritePosition + block.BlockSize;
-		using var networkStream = await block.Response.Content.ReadAsStreamAsync(_cancellationSource.Token);
-
-		var downloadPosition = WritePosition;
-		var nextFlush = downloadPosition + DATA_FLUSH_SZ;
-		var buff = new byte[DOWNLOAD_BUFF_SZ];
-
-		try
-		{
-			DateTime startTime = DateTime.UtcNow;
-			long bytesReadSinceThrottle = 0;
-			int bytesRead;
-			do
-			{
-				bytesRead = await networkStream.ReadAsync(buff, _cancellationSource.Token);
-				await _writeFile.WriteAsync(buff, 0, bytesRead, _cancellationSource.Token);
-
-				downloadPosition += bytesRead;
-
-				if (downloadPosition > nextFlush)
-				{
-					await _writeFile.FlushAsync(_cancellationSource.Token);
-					WritePosition = downloadPosition;
-					OnUpdate();
-					nextFlush = downloadPosition + DATA_FLUSH_SZ;
-					_downloadedPiece?.Set();
-				}
-
-				#region throttle
-
-				bytesReadSinceThrottle += bytesRead;
-
-				if (SpeedLimit >= MIN_BYTES_PER_SECOND && bytesReadSinceThrottle > SpeedLimit / THROTTLE_FREQUENCY)
-				{
-					var delayMS = (int)(startTime.AddSeconds(1d / THROTTLE_FREQUENCY) - DateTime.UtcNow).TotalMilliseconds;
-					if (delayMS > 0)
-						await Task.Delay(delayMS, _cancellationSource.Token);
-
-					startTime = DateTime.UtcNow;
-					bytesReadSinceThrottle = 0;
-				}
-
-				#endregion
-
-			} while (downloadPosition < endPosition && !IsCancelled && bytesRead > 0);
-
-			await _writeFile.FlushAsync(_cancellationSource.Token);
-			WritePosition = downloadPosition;
-
-			if (!IsCancelled && WritePosition < endPosition)
-				throw new WebException($"Downloaded size (0x{WritePosition:X10}) is less than {nameof(ContentLength)} (0x{ContentLength:X10}).");
-
-			if (WritePosition > endPosition)
-				throw new WebException($"Downloaded size (0x{WritePosition:X10}) is greater than {nameof(ContentLength)} (0x{ContentLength:X10}).");
-		}
-		catch (OperationCanceledException)
-		{
-			Serilog.Log.Information("Download was cancelled");
-		}
-		finally
-		{
-			_downloadedPiece?.Set();
-			OnUpdate(waitForWrite: true);
-		}
-	}
-
-	#endregion
-
-	#region Download Stream Reader
-
+	[JsonIgnore] public override bool CanRead => readFile.CanRead;
+	[JsonIgnore] public override bool CanSeek => readFile.CanSeek;
+	[JsonIgnore] public override bool CanWrite => false;
+	[JsonIgnore] public override bool CanTimeout => false;
+	[JsonIgnore] public override int ReadTimeout { get => base.ReadTimeout; set => base.ReadTimeout = value; }
+	[JsonIgnore] public override int WriteTimeout { get => base.WriteTimeout; set => base.WriteTimeout = value; }
+	[JsonIgnore] public override long Position { get => readFile.Position; set => Seek(value, SeekOrigin.Begin); }
 	[JsonIgnore]
-	public override bool CanRead => _readFile.CanRead;
+	public override long Length => beginTask?.IsCompletedSuccessfully == true
+		? ContentLength : throw new InvalidOperationException("The initial download response has not been admitted.");
 
-	[JsonIgnore]
-	public override bool CanSeek => _readFile.CanSeek;
-
-	[JsonIgnore]
-	public override bool CanWrite => false;
-
-	[JsonIgnore]
-	public override long Length
-	{
-		get
-		{
-			if (DownloadTask is null)
-				throw new InvalidOperationException($"Background downloader must first be started by calling {nameof(BeginDownloadingAsync)}");
-			return ContentLength;
-		}
-	}
-
-	[JsonIgnore]
-	public override long Position { get => _readFile.Position; set => Seek(value, SeekOrigin.Begin); }
-
-	[JsonIgnore]
-	public override bool CanTimeout => false;
-
-	[JsonIgnore]
-	public override int ReadTimeout { get => base.ReadTimeout; set => base.ReadTimeout = value; }
-
-	[JsonIgnore]
-	public override int WriteTimeout { get => base.WriteTimeout; set => base.WriteTimeout = value; }
-
-	public override void Flush() => throw new InvalidOperationException();
-	public override void SetLength(long value) => throw new InvalidOperationException();
-	public override void Write(byte[] buffer, int offset, int count) => throw new InvalidOperationException();
+	public override void Flush() => throw new NotSupportedException();
+	public override void SetLength(long value) => throw new NotSupportedException();
+	public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
 
 	public override int Read(byte[] buffer, int offset, int count)
 	{
-		if (DownloadTask is null)
-			throw new InvalidOperationException($"Background downloader must first be started by calling {nameof(BeginDownloadingAsync)}");
-
-		var toRead = Math.Min(count, Length - Position);
-		WaitToPosition(Position + toRead);
-		return IsCancelled ? 0 : _readFile.Read(buffer, offset, count);
+		ArgumentNullException.ThrowIfNull(buffer);
+		ArgumentOutOfRangeException.ThrowIfNegative(offset);
+		ArgumentOutOfRangeException.ThrowIfNegative(count);
+		if (offset > buffer.Length - count) throw new ArgumentException("The buffer range is invalid.");
+		downloadFailure?.Throw();
+		ObjectDisposedException.ThrowIf(disposed, this);
+		try
+		{
+			int toRead = (int)Math.Min(count, Math.Max(0, Length - Position));
+			if (toRead == 0) return 0;
+			WaitToPosition(Position + toRead);
+			return readFile.Read(buffer, offset, toRead);
+		}
+		catch (ObjectDisposedException) when (downloadFailure is not null)
+		{
+			downloadFailure.Throw();
+			throw;
+		}
 	}
 
 	public override long Seek(long offset, SeekOrigin origin)
 	{
-		var newPosition = origin switch
+		downloadFailure?.Throw();
+		ObjectDisposedException.ThrowIf(disposed, this);
+		long position = origin switch
 		{
-			SeekOrigin.Current => Position + offset,
-			SeekOrigin.End => ContentLength + offset,
-			_ => offset,
+			SeekOrigin.Begin => offset,
+			SeekOrigin.Current => checked(Position + offset),
+			SeekOrigin.End => checked(Length + offset),
+			_ => throw new ArgumentException("Unknown seek origin.", nameof(origin))
 		};
-
-		WaitToPosition(newPosition);
-		return _readFile.Position = newPosition;
+		if (position < 0) throw new IOException("Cannot seek before the start of the download.");
+		WaitToPosition(Math.Min(position, Length));
+		return readFile.Position = position;
 	}
 
-	/// <summary>Blocks until the file has downloaded to at least <paramref name="requiredPosition"/>, then returns. </summary>
-	/// <param name="requiredPosition">The minimum required flushed data length in <see cref="SaveFilePath"/>.</param>
 	private void WaitToPosition(long requiredPosition)
 	{
-		while (WritePosition < requiredPosition
-			&& DownloadTask?.IsCompleted is false
-			&& !IsCancelled)
+		lock (progressGate)
 		{
-			_downloadedPiece?.WaitOne(50);
+			while (WritePosition < requiredPosition)
+			{
+				downloadFailure?.Throw();
+				ObjectDisposedException.ThrowIf(disposed, this);
+				if (DownloadTask?.IsCompleted != false)
+					throw new IOException("The download ended before the requested bytes were committed.");
+				Monitor.Wait(progressGate, 50);
+			}
+			downloadFailure?.Throw();
+			ObjectDisposedException.ThrowIf(disposed, this);
 		}
 	}
 
-	private bool disposed = false;
-
-	/*
-	 * https://learn.microsoft.com/en-us/dotnet/api/system.io.stream.dispose?view=net-7.0
-	 * 
-	 * In derived classes, do not override the Close() method, instead, put all of the
-	 * Stream cleanup logic in the Dispose(Boolean) method.
-	 */
 	protected override void Dispose(bool disposing)
 	{
-		if (disposing && !Interlocked.CompareExchange(ref disposed, true, false))
+		if (disposing)
 		{
-			_cancellationSource.Cancel();
-			DownloadTask?.GetAwaiter().GetResult();
-			_downloadedPiece?.Dispose();
-			_cancellationSource?.Dispose();
-			_readFile.Dispose();
-			_writeFile.Dispose();
+			Task? producer;
+			lock (startGate)
+			{
+				if (disposed) return;
+				disposed = true;
+				producer = DownloadTask;
+			}
+			cancellationSource.Cancel();
+			SignalReaders();
+			try { producer?.GetAwaiter().GetResult(); }
+			catch { /* The original failure belongs to Begin/DownloadTask/readers, not cleanup. */ }
+			readFile.Dispose();
+			writeFile.Dispose();
+			cancellationSource.Dispose();
 			OnUpdate(waitForWrite: true);
 		}
-
 		base.Dispose(disposing);
 	}
-
-	#endregion
 }
