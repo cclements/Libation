@@ -2,9 +2,8 @@
 using DataLayer;
 using FileManager;
 using Mpeg4Lib.Boxes;
-using Mpeg4Lib.ID3;
-using Mpeg4Lib.Util;
 using System;
+using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.IO;
 
@@ -49,152 +48,179 @@ public static class AudioFormatDecoder
 	public static AudioFormat FromMpeg3(LongPath mp3Filename)
 	{
 		using var mp3File = File.Open(mp3Filename, FileMode.Open, FileAccess.Read, FileShare.Read);
-		if (Id3Header.Create(mp3File) is Id3Header id3header)
-			id3header.SeekForwardToPosition(mp3File, mp3File.Position + id3header.Size);
-		else
-		{
-			Serilog.Log.Logger.Debug("File appears not to have ID3 tags.");
-			mp3File.Position = 0;
-		}
+		long audioEnd = mp3File.Length;
+		Span<byte> tagMarker = stackalloc byte[3];
+		if (TryReadAt(mp3File, audioEnd - 128, tagMarker) && tagMarker.SequenceEqual("TAG"u8))
+			audioEnd -= 128;
 
-		if (!SeekToFirstKeyFrame(mp3File))
-		{
-			Serilog.Log.Logger.Warning("Invalid frame sync read from file at end of ID3 tag.");
+		if (!TrySkipId3(mp3File, audioEnd, out long audioStart)
+			|| !TryFindMp3Frame(mp3File, audioStart, audioEnd, out long frameStart, out var header))
 			return AudioFormat.Default;
-		}
 
-		var mpegSize = mp3File.Length - mp3File.Position;
-		if (mpegSize < 64)
-		{
-			Serilog.Log.Logger.Warning("Remaining file length is too short to contain any mp3 frames. {File}", mp3Filename);
+		var frame = new byte[header.FrameLength];
+		if (!TryReadAt(mp3File, frameStart, frame))
 			return AudioFormat.Default;
-		}
 
-		#region read first mp3 frame header
-		//https://www.codeproject.com/Articles/8295/MPEG-Audio-Frame-Header#VBRIHeader
-		var reader = new BitReader(mp3File.ReadBlock(4));
-		reader.Position = 11; //Skip frame header magic bits
-		var versionId = (Version)reader.Read(2);
-		var layerDesc = (Layer)reader.Read(2);
+		long audioBytes = audioEnd - frameStart;
+		if (TryReadXingBitrate(frame, header, audioBytes, out int bitrate, out bool hasXing)
+			|| TryReadVbriBitrate(frame, header, audioBytes, out bitrate, out _))
+			return new AudioFormat(Codec.Mp3, bitrate, header.SampleRate, header.Channels);
 
-		if (layerDesc is not Layer.Layer_3)
-		{
-			Serilog.Log.Logger.Warning("Could not read mp3 data from {layerVersion} file.", layerDesc);
+		// An identified but unusable VBR tag does not justify reporting its first frame's CBR table value.
+		if (hasXing || HasMarker(frame, 36, "VBRI"u8))
 			return AudioFormat.Default;
-		}
 
-		if (versionId is Version.Reserved)
-		{
-			Serilog.Log.Logger.Warning("Mp3 data data cannot be read from a file with version = 'Reserved'");
-			return AudioFormat.Default;
-		}
-
-		var protectionBit = reader.ReadBool();
-		var bitrateIndex = reader.Read(4);
-		var freqIndex = reader.Read(2);
-		_ = reader.ReadBool();                  //Padding bit
-		_ = reader.ReadBool();                  //Private bit
-		var channelMode = reader.Read(2);
-		_ = reader.Read(2);                     //Mode extension
-		_ = reader.ReadBool();                  //Copyright
-		_ = reader.ReadBool();                  //Original
-		_ = reader.Read(2);                     //Emphasis
-		#endregion
-
-		//Read the sample rate,and channels from the first frame's header.
-		var sampleRate = Mp3SampleRateIndex[versionId][freqIndex];
-		var channelCount = channelMode == 3 ? 1 : 2;
-
-		//Try to read variable bitrate info from the first frame.
-		//Revert to fixed bitrate from frame header if not found.
-		var bitrate
-			= TryReadXingBitrate(out var br) ? br
-			: TryReadVbriBitrate(out br) ? br
-			: Mp3BitrateIndex[versionId][bitrateIndex];
-
-		return new AudioFormat(Codec.Mp3, bitrate, sampleRate, channelCount);
-
-		#region Variable bitrate header readers
-		bool TryReadXingBitrate(out int bitrate)
-		{
-			const int XingHeader = 0x58696e67;
-			const int InfoHeader = 0x496e666f;
-
-			var sideInfoSize = GetSideInfo(channelCount == 2, versionId) + (protectionBit ? 0 : 2);
-			mp3File.Position += sideInfoSize;
-
-			if (mp3File.ReadUInt32BE() is XingHeader or InfoHeader)
-			{
-				//Xing or Info header (common)
-				var flags = mp3File.ReadUInt32BE();
-				bool hasFramesField = (flags & 1) == 1;
-				bool hasBytesField = (flags & 2) == 2;
-
-				if (hasFramesField)
-				{
-					var numFrames = mp3File.ReadUInt32BE();
-					if (hasBytesField)
-					{
-						mpegSize = mp3File.ReadUInt32BE();
-					}
-
-					var samplesPerFrame = GetSamplesPerFrame(sampleRate);
-					var duration = samplesPerFrame * numFrames / sampleRate;
-					bitrate = (short)(mpegSize / duration / 1024 * 8);
-					return true;
-				}
-			}
-			else
-				mp3File.Position -= sideInfoSize + 4;
-
-			bitrate = 0;
-			return false;
-		}
-
-		bool TryReadVbriBitrate(out int bitrate)
-		{
-			const int VBRIHeader = 0x56425249;
-
-			mp3File.Position += 32;
-
-			if (mp3File.ReadUInt32BE() is VBRIHeader)
-			{
-				//VBRI header (rare)
-				_ = mp3File.ReadBlock(6);
-				mpegSize = mp3File.ReadUInt32BE();
-				var numFrames = mp3File.ReadUInt32BE();
-
-				var samplesPerFrame = GetSamplesPerFrame(sampleRate);
-				var duration = samplesPerFrame * numFrames / sampleRate;
-				bitrate = (short)(mpegSize / duration / 1024 * 8);
-				return true;
-			}
-			bitrate = 0;
-			return false;
-		}
-		#endregion
+		return new AudioFormat(Codec.Mp3, header.BitRate, header.SampleRate, header.Channels);
 	}
 
-	#region MP3 frame decoding helpers
-	private static bool SeekToFirstKeyFrame(Stream file)
+	#region MP3 metadata helpers
+	private static bool TrySkipId3(Stream file, long audioEnd, out long audioStart)
 	{
-		//Frame headers begin with first 11 bits set.
-		const int MaxSeekBytes = 4096;
-		var maxPosition = Math.Min(file.Length, file.Position + MaxSeekBytes) - 2;
+		audioStart = 0;
+		Span<byte> header = stackalloc byte[10];
+		if (!TryReadAt(file, 0, header[..3]) || !header[..3].SequenceEqual("ID3"u8))
+			return true;
+		if (!TryReadAt(file, 0, header) || header[3] is < 2 or > 4 || header[4] == 255)
+			return false;
 
-		while (file.Position < maxPosition)
+		int allowedFlags = header[3] switch { 2 => 0xc0, 3 => 0xe0, _ => 0xf0 };
+		if ((header[5] & ~allowedFlags) != 0 || ((header[6] | header[7] | header[8] | header[9]) & 0x80) != 0)
+			return false;
+
+		int tagSize = (header[6] << 21) | (header[7] << 14) | (header[8] << 7) | header[9];
+		bool hasFooter = header[3] == 4 && (header[5] & 0x10) != 0;
+		audioStart = 10L + tagSize + (hasFooter ? 10 : 0);
+		if (audioStart > audioEnd)
+			return false;
+		if (hasFooter)
 		{
-			if (file.ReadByte() == 0xff)
-			{
-				if ((file.ReadByte() & 0xe0) == 0xe0)
-				{
-					file.Position -= 2;
-					return true;
-				}
-				file.Position--;
-			}
+			Span<byte> footer = stackalloc byte[10];
+			if (!TryReadAt(file, audioStart - 10, footer) || !footer[..3].SequenceEqual("3DI"u8)
+				|| !footer[3..].SequenceEqual(header[3..]))
+				return false;
+		}
+		return true;
+	}
+
+	private static bool TryFindMp3Frame(Stream file, long start, long end, out long frameStart, out Mp3FrameHeader header)
+	{
+		frameStart = 0;
+		header = default;
+		const int MaxSeekBytes = 4096;
+		if (end - start < 4)
+			return false;
+		var candidates = new byte[(int)Math.Min(end - start, MaxSeekBytes + 3)];
+		if (!TryReadAt(file, start, candidates))
+			return false;
+		Span<byte> nextBytes = stackalloc byte[4];
+		for (int offset = 0; offset < MaxSeekBytes && offset <= candidates.Length - 4; offset++)
+		{
+			if (!TryReadMp3Header(candidates.AsSpan(offset, 4), out var candidate)
+				|| candidate.FrameLength > end - (start + offset))
+				continue;
+
+			long nextStart = start + offset + candidate.FrameLength;
+			// Confirm sync with a complete compatible next frame, or one complete frame ending at EOF.
+			// Bitrate, padding and channel mode may change between Layer III frames.
+			if (nextStart != end && (!TryReadAt(file, nextStart, nextBytes)
+				|| !TryReadMp3Header(nextBytes, out var next)
+				|| next.Version != candidate.Version || next.SampleRate != candidate.SampleRate
+				|| next.FrameLength > end - nextStart))
+				continue;
+
+			frameStart = start + offset;
+			header = candidate;
+			return true;
 		}
 		return false;
+	}
+
+	private static bool TryReadMp3Header(ReadOnlySpan<byte> bytes, out Mp3FrameHeader header)
+	{
+		header = default;
+		uint bits = BinaryPrimitives.ReadUInt32BigEndian(bytes);
+		var version = (Version)((bits >> 19) & 3);
+		int layer = (int)((bits >> 17) & 3);
+		int bitrateIndex = (int)((bits >> 12) & 15);
+		int rateIndex = (int)((bits >> 10) & 3);
+		// MPEG-1/2 and the existing MPEG-2.5 extension are supported for Layer III. Free-format has
+		// no table-derived frame length and is intentionally unsupported by this metadata inspector.
+		if ((bits & 0xffe00000) != 0xffe00000 || version == Version.Reserved || layer != 1
+			|| bitrateIndex is 0 or 15 || rateIndex == 3 || (bits & 3) == 2)
+			return false;
+
+		int rate = Mp3SampleRateIndex[version][rateIndex];
+		int bitrate = Mp3BitrateIndex[version][bitrateIndex];
+		int channels = ((bits >> 6) & 3) == 3 ? 1 : 2;
+		int frameLength = (version == Version.Version_1 ? 144000 : 72000) * bitrate / rate + (int)((bits >> 9) & 1);
+		header = new(version, bitrate, rate, channels, frameLength);
+		return true;
+	}
+
+	private static bool TryReadXingBitrate(ReadOnlySpan<byte> frame, Mp3FrameHeader header, long audioBytes,
+		out int bitrate, out bool present)
+	{
+		bitrate = 0;
+		// LAME writes Xing/Info at these offsets even with CRC protection; CRC does not add two here.
+		int offset = 4 + GetSideInfo(header.Channels == 2, header.Version);
+		present = HasMarker(frame, offset, "Xing"u8) || HasMarker(frame, offset, "Info"u8);
+		if (!present || frame.Length - offset < 8)
+			return false;
+
+		uint flags = BinaryPrimitives.ReadUInt32BigEndian(frame[(offset + 4)..]);
+		int required = 8 + ((flags & 1) != 0 ? 4 : 0) + ((flags & 2) != 0 ? 4 : 0)
+			+ ((flags & 4) != 0 ? 100 : 0) + ((flags & 8) != 0 ? 4 : 0);
+		if ((flags & ~15u) != 0 || (flags & 1) == 0 || required > frame.Length - offset)
+			return false;
+
+		uint frames = BinaryPrimitives.ReadUInt32BigEndian(frame[(offset + 8)..]);
+		long bytes = (flags & 2) != 0 ? BinaryPrimitives.ReadUInt32BigEndian(frame[(offset + 12)..]) : audioBytes;
+		return TryGetAverageBitrate(header, audioBytes, frames, bytes, out bitrate);
+	}
+
+	private static bool TryReadVbriBitrate(ReadOnlySpan<byte> frame, Mp3FrameHeader header, long audioBytes,
+		out int bitrate, out bool present)
+	{
+		bitrate = 0;
+		const int offset = 4 + 32;
+		present = HasMarker(frame, offset, "VBRI"u8);
+		if (!present || frame.Length - offset < 18 || BinaryPrimitives.ReadUInt16BigEndian(frame[(offset + 4)..]) != 1)
+			return false;
+
+		uint bytes = BinaryPrimitives.ReadUInt32BigEndian(frame[(offset + 10)..]);
+		uint frames = BinaryPrimitives.ReadUInt32BigEndian(frame[(offset + 14)..]);
+		return TryGetAverageBitrate(header, audioBytes, frames, bytes, out bitrate);
+	}
+
+	private static bool TryGetAverageBitrate(Mp3FrameHeader header, long audioBytes, uint frames, long bytes, out int bitrate)
+	{
+		bitrate = 0;
+		if (frames == 0 || bytes < header.FrameLength || bytes > audioBytes)
+			return false;
+
+		// Retain the existing VBR 1024 divisor and truncation. A decimal-unit migration is separate.
+		double average = bytes * 8d * header.SampleRate / (header.SamplesPerFrame * (double)frames * 1024d);
+		if (!double.IsFinite(average) || average < 1 || average >= 4096)
+			return false; // AudioFormat persists bitrate in 12 bits; never wrap or spill into its codec field.
+		bitrate = (int)average;
+		return true;
+	}
+
+	private static bool HasMarker(ReadOnlySpan<byte> frame, int offset, ReadOnlySpan<byte> marker)
+		=> offset >= 0 && frame.Length - offset >= marker.Length && frame.Slice(offset, marker.Length).SequenceEqual(marker);
+
+	private static bool TryReadAt(Stream file, long offset, Span<byte> bytes)
+	{
+		if (offset < 0 || offset > file.Length || bytes.Length > file.Length - offset)
+			return false;
+		file.Position = offset;
+		try { file.ReadExactly(bytes); return true; }
+		catch (EndOfStreamException) { return false; }
+	}
+
+	private readonly record struct Mp3FrameHeader(Version Version, int BitRate, int SampleRate, int Channels, int FrameLength)
+	{
+		public int SamplesPerFrame => Version == Version.Version_1 ? 1152 : 576;
 	}
 
 	private enum Version
@@ -204,16 +230,6 @@ public static class AudioFormatDecoder
 		Version_2,
 		Version_1
 	}
-
-	private enum Layer
-	{
-		Reserved,
-		Layer_3,
-		Layer_2,
-		Layer_1
-	}
-
-	private static double GetSamplesPerFrame(int sampleRate) => sampleRate >= 32000 ? 1152 : 576;
 
 	private static byte GetSideInfo(bool stereo, Version version) => (stereo, version) switch
 	{

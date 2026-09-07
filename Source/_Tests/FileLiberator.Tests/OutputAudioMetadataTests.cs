@@ -109,7 +109,7 @@ public class OutputAudioMetadataTests
 		var process = CreateProcessWithInput(options, source);
 		var outputPath = Path.Combine(tempDirectory, "output.mp3");
 		// MPEG-1 layer III, 128 kbit/s, 44.1 kHz, mono. Payload is synthetic; no audio decode is performed.
-		File.WriteAllBytes(outputPath, [0xff, 0xfb, 0x90, 0xc0, .. new byte[128]]);
+		File.WriteAllBytes(outputPath, [0xff, 0xfb, 0x90, 0xc0, .. new byte[413]]);
 
 		var actual = process.GetFileFormatInfo(options, new TempFile(outputPath));
 
