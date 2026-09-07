@@ -19,7 +19,7 @@ ROUTES = [
     "Settings",
     "Tools",
     "Trash",
-    "About",
+    # About is a utility dialog, not a rendered route body. Capture it attended.
 ]
 
 
@@ -96,6 +96,12 @@ PLANS = {
 
 for name, items in PLANS.items():
     with open(os.path.join(HERE, name), "w", encoding="utf-8") as plan_file:
-        json.dump({"settleMs": 900, "entries": items}, plan_file, indent=2)
+        plan = {"settleMs": 900, "entries": items}
+        if name in ("all-routes.json", "s2-shell.json"):
+            plan["excludedSurfaces"] = [{
+                "surface": "About utility dialog",
+                "reason": "No route body; requires attended capture until a dialog contract exists.",
+            }]
+        json.dump(plan, plan_file, indent=2)
         plan_file.write("\n")
     print(f"{name}: {len(items)} entries")

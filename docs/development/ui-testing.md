@@ -118,7 +118,17 @@ tokens, and personally identifying metadata before admission.
 
 ## Current tooling and evidence limits
 
-At the September 7 source baseline, `CaptureSurface` supports Route,
+The September 7 reliability slice adds finite `stageTimeoutMs` waits (default
+30 seconds), profile/draft/geometry verification, precise failure receipts,
+and native screenshot scale checks. Route/About is rejected because it is a
+utility dialog with no route body; canonical plans enumerate the nine rendered
+routes. Output directories must be empty. `capture-diagnostics/` is reserved
+for raw failure evidence and cannot be a planned frame namespace. A produced
+PNG still requires pixel inspection; compositor-internal stale textures are
+not fully detectable from layout bounds. Source hashes at launch do not bind
+an existing `--no-build` apphost to those sources.
+
+At the September 7 source baseline before that slice, `CaptureSurface` supports Route,
 ComponentGallery and Onboarding. It has no first-class Dialog/Window/Message
 capture entry. About's accepted route cannot satisfy its rendered-readiness
 predicate. The audit also rejected malformed narrow captures and qualified

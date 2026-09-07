@@ -164,24 +164,6 @@
       "height": 560
     },
     {
-      "profile": "Cellar",
-      "route": "About",
-      "width": 1456,
-      "height": 1060
-    },
-    {
-      "profile": "Cellar",
-      "route": "About",
-      "width": 960,
-      "height": 720
-    },
-    {
-      "profile": "Cellar",
-      "route": "About",
-      "width": 720,
-      "height": 560
-    },
-    {
       "profile": "TastingRoom",
       "route": "Overview",
       "width": 1456,
@@ -342,24 +324,12 @@
       "route": "Trash",
       "width": 720,
       "height": 560
-    },
+    }
+  ],
+  "excludedSurfaces": [
     {
-      "profile": "TastingRoom",
-      "route": "About",
-      "width": 1456,
-      "height": 1060
-    },
-    {
-      "profile": "TastingRoom",
-      "route": "About",
-      "width": 960,
-      "height": 720
-    },
-    {
-      "profile": "TastingRoom",
-      "route": "About",
-      "width": 720,
-      "height": 560
+      "surface": "About utility dialog",
+      "reason": "No route body; requires attended capture until a dialog contract exists."
     }
   ]
 }

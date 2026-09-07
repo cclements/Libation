@@ -4,6 +4,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Threading;
 using LibationAvalonia.Dialogs;
+using LibationAvalonia.Diagnostics;
 using LibationFileManager;
 using LibationUiBase.Forms;
 using ReactiveUI.Avalonia;
@@ -133,6 +134,24 @@ static class Program
 				crashLogFile = PreLoggingCrashLog.TryWrite(exception, [("ReleaseIdentifier", LibationScaffolding.ReleaseIdentifier.ToString())]);
 		}
 		catch { /* continue to show the crash dialog even if logging fails */ }
+
+		if (CaptureEnvironment.IsRequested)
+		{
+			// Native startup can fail after AppBuilder has begun global setup but
+			// before Application.Current exists. A second setup for a crash dialog
+			// masks that original error and leaves an unattended capture waiting.
+			Console.Error.WriteLine(exception);
+			try
+			{
+				System.IO.Directory.CreateDirectory(CaptureEnvironment.OutputDirectory);
+				System.IO.File.AppendAllText(
+					System.IO.Path.Combine(CaptureEnvironment.OutputDirectory, "capture-log.txt"),
+					$"FAILED\tstartup/runtime\t{exception}{Environment.NewLine}");
+			}
+			catch { /* stderr and the exit code still preserve the failure */ }
+			Environment.Exit(3);
+			return;
+		}
 
 		//Run setup if needed so that we can show the crash dialog
 		BuildAvaloniaApp()?.SetupWithoutStarting();

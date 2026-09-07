@@ -3,6 +3,7 @@ using LibationFileManager;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -82,6 +83,8 @@ public sealed record CaptureEntry(
 public sealed record CapturePlan(int SettleMs, IReadOnlyList<CaptureEntry> Entries)
 {
 	public const int DefaultSettleMs = 800;
+	public const int DefaultStageTimeoutMs = 30_000;
+	public int StageTimeoutMs { get; init; } = DefaultStageTimeoutMs;
 
 	private static readonly JsonSerializerOptions options = new()
 	{
@@ -119,11 +122,21 @@ public sealed record CapturePlan(int SettleMs, IReadOnlyList<CaptureEntry> Entri
 		if (raw?.Entries is not { Count: > 0 })
 			throw new CapturePlanException("Capture plan has no entries.");
 
+		var settleMs = raw.SettleMs ?? DefaultSettleMs;
+		var stageTimeoutMs = raw.StageTimeoutMs ?? DefaultStageTimeoutMs;
+		if (settleMs is < 0 or > 10_000)
+			throw new CapturePlanException("settleMs must be between 0 and 10000.");
+		if (stageTimeoutMs is < 100 or > 120_000)
+			throw new CapturePlanException("stageTimeoutMs must be between 100 and 120000.");
+
+		var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 		var entries = new List<CaptureEntry>(raw.Entries.Count);
 		foreach (var entry in raw.Entries)
 		{
 			if (!TryParseDefined(entry.Profile, out ExperienceStyle profile))
 				throw new CapturePlanException($"Unknown profile '{entry.Profile}'.");
+			if (profile is ExperienceStyle.FollowSystem or ExperienceStyle.CurrentAvalonia)
+				throw new CapturePlanException($"Capture profile '{profile}' is not an explicit contemporary profile; use Cellar, TastingRoom, or HighContrast.");
 			var surface = entry.Surface is null ? CaptureSurface.Route
 				: TryParseDefined(entry.Surface, out CaptureSurface parsedSurface) ? parsedSurface
 				: throw new CapturePlanException($"Unknown surface '{entry.Surface}'.");
@@ -131,6 +144,8 @@ public sealed record CapturePlan(int SettleMs, IReadOnlyList<CaptureEntry> Entri
 				? AppRouteId.Overview
 				: TryParseDefined(entry.Route, out AppRouteId parsedRoute) ? parsedRoute
 				: throw new CapturePlanException($"Unknown route '{entry.Route}'.");
+			if (surface == CaptureSurface.Route && route == AppRouteId.About)
+				throw new CapturePlanException($"Entry {entries.Count} ({entry.File ?? $"{profile}/About"}): About is a utility dialog with no capturable route body; its dialog requires an attended capture.");
 			if (entry.Width < 720 || entry.Height < 560)
 				throw new CapturePlanException($"Entry {profile}/{surface} is below the 720x560 minimum window.");
 			if (entry.FlightSelectionCount < 0)
@@ -159,7 +174,7 @@ public sealed record CapturePlan(int SettleMs, IReadOnlyList<CaptureEntry> Entri
 			if (!double.IsFinite(logicalScale) || logicalScale <= 0)
 				throw new CapturePlanException($"Entry {profile}/{surface} has invalid logical scale {logicalScale}.");
 
-			entries.Add(new CaptureEntry(
+			var captureEntry = new CaptureEntry(
 				profile,
 				surface,
 				route,
@@ -181,10 +196,19 @@ public sealed record CapturePlan(int SettleMs, IReadOnlyList<CaptureEntry> Entri
 				FocusFailedProcessingItem = entry.FocusFailedProcessingItem,
 				OnboardingStep = entry.OnboardingStep,
 				OnboardingScanActive = entry.OnboardingScanActive,
-			});
+			};
+			var name = captureEntry.FileName;
+			if (string.IsNullOrWhiteSpace(name) || Path.IsPathRooted(name)
+				|| name.Split('/')[0].Equals("capture-diagnostics", StringComparison.OrdinalIgnoreCase)
+				|| name.Contains('\\') || name.Contains(':') || name.Split('/').Any(segment => segment is "" or "." or "..")
+				|| name.Any(char.IsControl) || !name.EndsWith(".png", StringComparison.OrdinalIgnoreCase))
+				throw new CapturePlanException($"Entry {entries.Count} has an invalid relative PNG file name '{name}'.");
+			if (!names.Add(name))
+				throw new CapturePlanException($"Entry {entries.Count} duplicates capture file '{name}'; each entry needs a unique file name.");
+			entries.Add(captureEntry);
 		}
 
-		return new CapturePlan(raw.SettleMs ?? DefaultSettleMs, entries);
+		return new CapturePlan(settleMs, entries) { StageTimeoutMs = stageTimeoutMs };
 	}
 
 	private static bool TryParseDefined<TEnum>(string? value, out TEnum parsed)
@@ -194,6 +218,7 @@ public sealed record CapturePlan(int SettleMs, IReadOnlyList<CaptureEntry> Entri
 	private sealed class RawPlan
 	{
 		[JsonPropertyName("settleMs")] public int? SettleMs { get; set; }
+		[JsonPropertyName("stageTimeoutMs")] public int? StageTimeoutMs { get; set; }
 		[JsonPropertyName("entries")] public List<RawEntry>? Entries { get; set; }
 	}
 

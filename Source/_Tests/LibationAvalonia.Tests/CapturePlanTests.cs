@@ -97,4 +97,59 @@ public class CapturePlanTests
 	{
 		Assert.ThrowsExactly<CapturePlanException>(() => CapturePlan.Parse("""{"entries":[]}"""));
 	}
+	[TestMethod]
+	public void Parse_RejectsAboutBeforeAnUnsatisfiableRenderedWait()
+	{
+		var error = Assert.ThrowsExactly<CapturePlanException>(() => CapturePlan.Parse("""
+			{"entries":[{"profile":"Cellar","route":"About","width":720,"height":560,"file":"about.png"}]}
+			"""));
+		StringAssert.Contains(error.Message, "Entry 0 (about.png)");
+		StringAssert.Contains(error.Message, "utility dialog");
+	}
+
+	[TestMethod]
+	public void Parse_RejectsInfiniteWaitAndAmbiguousOutputContracts()
+	{
+		var entry = """{"profile":"Cellar","route":"Library","width":720,"height":560}""";
+		foreach (var settings in new[] { "\"settleMs\":-1", "\"settleMs\":10001", "\"stageTimeoutMs\":0", "\"stageTimeoutMs\":120001" })
+			Assert.ThrowsExactly<CapturePlanException>(() => CapturePlan.Parse("{" + settings + ",\"entries\":[" + entry + "]}"));
+		Assert.ThrowsExactly<CapturePlanException>(() => CapturePlan.Parse("{\"entries\":[" + entry + "," + entry + "]}"));
+		Assert.ThrowsExactly<CapturePlanException>(() => CapturePlan.Parse("""
+			{"entries":[{"profile":"Cellar","route":"Library","width":720,"height":560,"file":"../outside.png"}]}
+			"""));
+		Assert.ThrowsExactly<CapturePlanException>(() => CapturePlan.Parse("""
+			{"entries":[{"profile":"FollowSystem","route":"Library","width":720,"height":560}]}
+			"""));
+	}
+
+	[TestMethod]
+	public void Parse_ReservesFailureDiagnosticsOutsidePlannedFrames()
+	{
+		Assert.ThrowsExactly<CapturePlanException>(() => CapturePlan.Parse("""
+			{"entries":[{"profile":"Cellar","route":"Library","width":720,"height":560,"file":"Capture-Diagnostics/window-0000.png"}]}
+			"""));
+		var plan = CapturePlan.Parse("""
+			{"entries":[{"profile":"Cellar","route":"Library","width":720,"height":560,"file":"window-0000.png"}]}
+			""");
+		Assert.AreEqual("window-0000.png", plan.Entries[0].FileName);
+	}
+
+	[TestMethod]
+	public void CanonicalPlans_OnlyContainSupportedUniqueCaptures()
+	{
+		var directory = new DirectoryInfo(AppContext.BaseDirectory);
+		while (directory is not null && !Directory.Exists(Path.Combine(directory.FullName, "Scripts", "capture-plans")))
+			directory = directory.Parent;
+		Assert.IsNotNull(directory);
+		var plans = Directory.GetFiles(Path.Combine(directory.FullName, "Scripts", "capture-plans"), "*.json");
+		Assert.IsGreaterThan(0, plans.Length);
+		foreach (var path in plans)
+		{
+			var plan = CapturePlan.Load(path);
+			Assert.IsTrue(plan.Entries.All(entry => entry.Surface != CaptureSurface.Route || entry.Route != AppRouteId.About), path);
+			if (Path.GetFileName(path) == "all-routes.json")
+				Assert.AreEqual(54, plan.Entries.Count, "Nine rendered routes, two profiles, three sizes; the About utility dialog remains attended coverage.");
+		}
+	}
+
 }

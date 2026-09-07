@@ -51,4 +51,32 @@ public class OnboardingContractTests
 			window.Close();
 		});
 	}
+	[TestMethod]
+	public async Task CaptureProjection_ResetsDraftWhenTheNextEntryChangesProfile()
+	{
+		await HeadlessTestHost.Reset(ExperienceStyle.Cellar);
+		await HeadlessTestHost.Dispatch(() =>
+		{
+			var window = new MainWindow(HeadlessTestHost.ExperienceManager, null);
+			try
+			{
+				window.Show();
+				var shell = (window.Content as AppShellView)?.DataContext as AppShellViewModel;
+				Assert.IsNotNull(shell);
+				using var onboarding = new OnboardingViewModel(shell.CommandAdapter, true, HeadlessTestHost.Configuration);
+				onboarding.PrepareCaptureState(4, true);
+				Assert.AreEqual(OnboardingProfileChoice.Cellar, onboarding.SelectedProfile);
+				var saved = HeadlessTestHost.Configuration.GetContemporaryExperienceSettings() with { ExperienceStyle = ExperienceStyle.TastingRoom };
+				HeadlessTestHost.Configuration.SaveContemporaryExperienceSettings(saved);
+				onboarding.PrepareCaptureState(1, false);
+				Assert.AreEqual(OnboardingProfileChoice.TastingRoom, onboarding.SelectedProfile);
+				Assert.AreEqual(1, onboarding.StepNumber);
+				Assert.IsFalse(onboarding.IsScanning);
+				Assert.IsFalse(onboarding.CanRequestFirstFlight);
+				Assert.AreEqual(saved, HeadlessTestHost.Configuration.GetContemporaryExperienceSettings());
+			}
+			finally { window.Close(); }
+		});
+	}
+
 }

@@ -208,6 +208,11 @@ public sealed class OnboardingViewModel : SecondaryDestinationViewModel
 	{
 		if (stepNumber is < 1 or > LastStepIndex + 1)
 			throw new ArgumentOutOfRangeException(nameof(stepNumber), stepNumber, global::LibationAvalonia.Properties.Resources.OnboardingViewModelOnboardingCaptureStepMustBeFrom1);
+		// Each projection starts from this entry's saved profile, not the profile
+		// that happened to be active when the reused view model was constructed.
+		SelectedProfile = ReadPersistedChoice(configuration);
+		HasExplicitProfileChoice = true;
+		NeedsExplicitProfileChoice = false;
 		isCaptureProjection = true;
 		captureScanActive = scanActive;
 		StepIndex = stepNumber - 1;

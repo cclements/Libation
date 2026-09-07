@@ -14,10 +14,11 @@ using LibationFileManager;
 using LibationUiBase.ProcessQueue;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace LibationAvalonia.Views;
@@ -59,20 +60,32 @@ public partial class MainWindow
 		if (!CaptureEnvironment.IsRequested)
 			return;
 
+		// Opened can run synchronously inside desktop startup. Even an invalid
+		// plan must yield before shutdown so the lifetime cannot re-show a window
+		// that this callback already closed.
+		await Task.Yield();
+
 		var log = new StringBuilder();
 		var exitCode = 0;
+		var identity = "startup";
+		var stage = "plan validation";
 		try
 		{
 			if (capturePlanPreparationFailure is not null)
 				throw capturePlanPreparationFailure;
 			var plan = capturePlanPreparedBeforeShow ?? CapturePlan.Load(CaptureEnvironment.PlanPath);
 			var outDir = Directory.CreateDirectory(CaptureEnvironment.OutputDirectory).FullName;
+			Task Stage(string name, Func<CancellationToken, Task> action)
+			{
+				stage = name;
+				return CaptureReadiness.RunAsync(identity, name, plan.StageTimeoutMs, action);
+			}
 			HorizontalContentAlignment = Avalonia.Layout.HorizontalAlignment.Stretch;
 			VerticalContentAlignment = Avalonia.Layout.VerticalAlignment.Stretch;
 			var osHandshake = CaptureEnvironment.OsHandshakeDirectory;
 			if (osHandshake is not null)
 				Directory.CreateDirectory(osHandshake);
-			await WaitForLibraryReadyAsync();
+			await Stage("library startup", WaitForLibraryReadyAsync);
 			var routeContent = Content as AppShellView
 				?? throw new InvalidOperationException("The contemporary shell was not available for capture.");
 			var main = ViewModel
@@ -101,6 +114,7 @@ public partial class MainWindow
 				try
 				{
 					var entry = plan.Entries[index];
+					identity = $"{index:D4}/{entry.FileName}";
 					SizeCaptureHost(captureHost, entry);
 					SizeCaptureSurface(routeContent, entry);
 					SizeCaptureSurface(galleryContent, entry);
@@ -112,11 +126,12 @@ public partial class MainWindow
 						DensityMode = entry.Density,
 						DecorationLevel = entry.Decoration,
 						ReducedMotionPreference = entry.Motion,
-						LibraryViewMode = entry.LibraryView ?? baseline.LibraryViewMode,
+						LibraryViewMode = entry.LibraryView ?? LibraryViewMode.Details,
+						UseSystemTypography = false,
 						UseContemporaryShell = true,
 					});
-					await WaitForCaptureExperienceAsync(entry);
-					await SettleAsync(plan.SettleMs / 2);
+					await Stage("profile application", token => WaitForCaptureExperienceAsync(entry, token));
+					await Stage("profile layout", token => SettleAsync(plan.SettleMs / 2, token));
 
 					if (entry.Surface == CaptureSurface.ComponentGallery)
 					{
@@ -147,17 +162,44 @@ public partial class MainWindow
 						routeContent.IsVisible = true;
 						ResizeForCapture(entry);
 						NavigateContemporary(entry.Route);
-						await WaitForRouteReadyAsync(entry.Route);
-						await WaitForRenderedRouteAsync(routeContent, entry.Route);
+						await Stage("route data", token => WaitForRouteReadyAsync(entry.Route, token));
+						await Stage("rendered route", token => WaitForRenderedRouteAsync(routeContent, entry.Route, token));
 						PrepareFlightForCapture(entry);
-						await PrepareProcessingForCaptureAsync(entry);
+						await Stage("processing fixture", token => PrepareProcessingForCaptureAsync(entry, token));
 						PrepareDecanterForCapture(entry);
-						await FocusFailedProcessingItemForCaptureAsync(entry);
+						await Stage("processing focus", _ => FocusFailedProcessingItemForCaptureAsync(entry));
 					}
-					await WaitForVisibleCoverLoadsAsync();
-					await SettleAsync(plan.SettleMs);
+					await Stage("visible covers", WaitForVisibleCoverLoadsAsync);
+					await Stage("frame presentation", token => PresentCaptureFrameAsync(captureHost, plan.SettleMs, token));
+					stage = "state and geometry validation";
 					VerifyCaptureState(entry);
-					await PresentCaptureFrameAsync(captureHost, plan.SettleMs);
+					var activeSurface = entry.Surface switch
+					{
+						CaptureSurface.ComponentGallery => (Control)galleryContent,
+						CaptureSurface.Onboarding => onboardingContent,
+						_ => routeContent,
+					};
+					if (!activeSurface.IsEffectivelyVisible)
+						throw new CapturePlanException($"Capture '{identity}' has no visible surface.");
+					CaptureReadiness.ValidateGeometry(entry, ClientSize, captureHost.Bounds, activeSurface.Bounds,
+						activeSurface.RenderTransform?.Value ?? Matrix.Identity, RenderScaling);
+					if (entry.Surface == CaptureSurface.Onboarding
+						&& (onboardingViewModel.StepNumber != entry.OnboardingStep
+							|| onboardingViewModel.SelectedProfile.ToString() != entry.Profile.ToString()
+							|| onboardingViewModel.IsScanning != entry.OnboardingScanActive))
+						throw new CapturePlanException($"Capture '{identity}' has a mismatched onboarding draft.");
+					var frameState = new
+					{
+						Index = index, entry.FileName, Surface = entry.Surface.ToString(), Route = entry.Route.ToString(),
+						Profile = contemporaryShellViewModel!.Profile.Style.ToString(),
+						Density = Configuration.Instance.DensityMode.ToString(), Decoration = Configuration.Instance.DecorationLevel.ToString(),
+						Motion = Configuration.Instance.ReducedMotionPreference.ToString(), entry.LogicalScale, RenderScaling,
+						ClientWidth = ClientSize.Width, ClientHeight = ClientSize.Height,
+						SurfaceWidth = activeSurface.Bounds.Width, SurfaceHeight = activeSurface.Bounds.Height,
+						OnboardingDraft = entry.Surface == CaptureSurface.Onboarding ? onboardingViewModel.SelectedProfile.ToString() : null,
+						OnboardingStep = entry.Surface == CaptureSurface.Onboarding ? onboardingViewModel.StepNumber : (int?)null,
+					};
+					File.WriteAllText(Path.Combine(outDir, $"frame-{index:D4}.json"), JsonSerializer.Serialize(frameState));
 
 					if (osHandshake is null)
 					{
@@ -167,7 +209,7 @@ public partial class MainWindow
 					}
 					else
 					{
-						await WaitForOsCaptureAsync(osHandshake, index, entry);
+						await Stage("OS capture acknowledgement", token => WaitForOsCaptureAsync(osHandshake, index, entry, RenderScaling, token));
 						log.AppendLine($"{entry.FileName}\tmacOS screencapture handshake\trequested {entry.Width}x{entry.Height}");
 					}
 				}
@@ -179,7 +221,7 @@ public partial class MainWindow
 		}
 		catch (Exception ex)
 		{
-			log.AppendLine($"FAILED\t{ex}");
+			log.AppendLine($"FAILED\t{identity}\t{stage}\t{ex}");
 			exitCode = 3;
 		}
 
@@ -221,7 +263,7 @@ public partial class MainWindow
 			shell.Library.OpenItem(first);
 	}
 
-	private async Task PrepareProcessingForCaptureAsync(CaptureEntry entry)
+	private async Task PrepareProcessingForCaptureAsync(CaptureEntry entry, CancellationToken cancellationToken)
 	{
 		if (contemporaryShellViewModel is not { } shell)
 			return;
@@ -278,7 +320,7 @@ public partial class MainWindow
 				statusOverride: "Waiting to process");
 			shell.Processing.Source.RunningTime = "03:18";
 
-			await WaitForPropertyAsync(shell.Processing, () =>
+			await CaptureReadiness.WaitUntilAsync(() =>
 				shell.Processing.Active.Count == 1
 				&& ReferenceEquals(shell.Processing.Active[0].Source, active)
 				&& shell.Processing.Waiting.Count == 1
@@ -286,17 +328,17 @@ public partial class MainWindow
 				&& shell.Processing.Completed.Count == 1
 				&& ReferenceEquals(shell.Processing.Completed[0].Source, completed)
 				&& shell.Processing.Failed.Count == 1
-				&& ReferenceEquals(shell.Processing.Failed[0].Source, failed));
+				&& ReferenceEquals(shell.Processing.Failed[0].Source, failed), cancellationToken);
 			return;
 		}
 
 		if (entry.ProcessingScenario == ProcessingCaptureScenario.Empty || entry.ProcessingSeedCount == 0)
 		{
-			await WaitForPropertyAsync(shell.Processing, () =>
+			await CaptureReadiness.WaitUntilAsync(() =>
 				shell.Processing.Active.Count == 0
 				&& shell.Processing.Waiting.Count == 0
 				&& shell.Processing.Completed.Count == 0
-				&& shell.Processing.Failed.Count == 0);
+				&& shell.Processing.Failed.Count == 0, cancellationToken);
 			return;
 		}
 
@@ -306,11 +348,11 @@ public partial class MainWindow
 			.ToArray();
 		if (seeded.Length == 0)
 		{
-			await WaitForPropertyAsync(shell.Processing, () =>
+			await CaptureReadiness.WaitUntilAsync(() =>
 				shell.Processing.Active.Count == 0
 				&& shell.Processing.Waiting.Count == 0
 				&& shell.Processing.Completed.Count == 0
-				&& shell.Processing.Failed.Count == 0);
+				&& shell.Processing.Failed.Count == 0, cancellationToken);
 			return;
 		}
 		queue.Enqueue(seeded);
@@ -331,13 +373,13 @@ public partial class MainWindow
 				0,
 				statusOverride: "Waiting to process");
 
-		await WaitForPropertyAsync(shell.Processing, () =>
+		await CaptureReadiness.WaitUntilAsync(() =>
 			shell.Processing.Active.Count == 1
 			&& ReferenceEquals(shell.Processing.Active[0].Source, seeded[0])
 			&& shell.Processing.Waiting.Count == seeded.Length - 1
 			&& shell.Processing.Waiting.Select(item => item.Source).SequenceEqual(seeded.Skip(1))
 			&& shell.Processing.Completed.Count == 0
-			&& shell.Processing.Failed.Count == 0);
+			&& shell.Processing.Failed.Count == 0, cancellationToken);
 	}
 
 	private void ClearCaptureSeedState()
@@ -432,7 +474,7 @@ public partial class MainWindow
 		surface.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left;
 		surface.VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top;
 		surface.RenderTransformOrigin = new RelativePoint(0, 0, RelativeUnit.Relative);
-		surface.RenderTransform = Avalonia.Media.Transformation.TransformOperations.Parse($"scale({entry.LogicalScale})");
+		surface.RenderTransform = Avalonia.Media.Transformation.TransformOperations.Parse(FormattableString.Invariant($"scale({entry.LogicalScale})"));
 	}
 
 	private static void SizeCaptureHost(Control surface, CaptureEntry entry)
@@ -460,74 +502,80 @@ public partial class MainWindow
 		MinHeight = entry.Height;
 	}
 
-	private async Task WaitForLibraryReadyAsync()
+	private async Task WaitForLibraryReadyAsync(CancellationToken cancellationToken)
 	{
-		while (loadedLibrary is null || ViewModel?.BindToGridTask is null)
-			await Task.Delay(50);
+		await CaptureReadiness.WaitUntilAsync(() => loadedLibrary is not null && ViewModel?.BindToGridTask is not null, cancellationToken);
 
-		await ViewModel.BindToGridTask;
+		await ViewModel!.BindToGridTask!.WaitAsync(cancellationToken);
 		await Dispatcher.UIThread.InvokeAsync(() => { }, DispatcherPriority.Background);
 	}
 
 	private static async Task WaitForOsCaptureAsync(
 		string handshakeDirectory,
 		int index,
-		CaptureEntry entry)
+		CaptureEntry entry, double renderScaling, CancellationToken cancellationToken)
 	{
 		var stem = index.ToString("D4");
 		var ready = Path.Combine(handshakeDirectory, $"ready-{stem}.txt");
 		var acknowledged = Path.Combine(handshakeDirectory, $"ack-{stem}.txt");
-		File.WriteAllText(ready, $"{entry.FileName}\t{entry.Width}\t{entry.Height}{Environment.NewLine}");
-		while (!File.Exists(acknowledged))
-			await Task.Delay(50);
+		// Publish complete metadata atomically; the driver must never observe a partial line.
+		var temporaryReady = ready + ".tmp";
+		File.WriteAllText(temporaryReady, FormattableString.Invariant($"{entry.FileName}\t{entry.Width}\t{entry.Height}\t{renderScaling}{Environment.NewLine}"));
+		File.Move(temporaryReady, ready);
+		await CaptureReadiness.WaitUntilAsync(() => File.Exists(acknowledged), cancellationToken);
 	}
 
-	private async Task WaitForRouteReadyAsync(Shell.AppRouteId route)
+	private async Task WaitForRouteReadyAsync(Shell.AppRouteId route, CancellationToken cancellationToken)
 	{
 		if (contemporaryShellViewModel is not { } shell)
 			throw new InvalidOperationException("The contemporary shell was not available for capture.");
 
-		await WaitForPropertyAsync(shell, () => shell.CurrentRoute.Id == route);
-		await WaitForPropertyAsync(shell.Library, () => !shell.Library.IsLoading);
+		await CaptureReadiness.WaitUntilAsync(() => shell.CurrentRoute.Id == route, cancellationToken);
+		await CaptureReadiness.WaitUntilAsync(() => !shell.Library.IsLoading, cancellationToken);
 		if (route == Shell.AppRouteId.Overview)
-			await WaitForPropertyAsync(shell.Dashboard, () => shell.Dashboard.HasDashboardData || shell.Dashboard.HasError);
+			await CaptureReadiness.WaitUntilAsync(() => shell.Dashboard.HasDashboardData || shell.Dashboard.HasError, cancellationToken);
 		else if (route == Shell.AppRouteId.Downloads)
-			await WaitForPropertyAsync(shell.Downloads, () => !shell.Downloads.IsLoading);
+			await CaptureReadiness.WaitUntilAsync(() => !shell.Downloads.IsLoading, cancellationToken);
 		else if (route == Shell.AppRouteId.History)
-			await WaitForPropertyAsync(shell.History, () => !shell.History.IsLoading);
+			await CaptureReadiness.WaitUntilAsync(() => !shell.History.IsLoading, cancellationToken);
 		else if (route == Shell.AppRouteId.Trash)
-			await WaitForPropertyAsync(shell.Trash, () => !shell.Trash.IsLoading);
+			await CaptureReadiness.WaitUntilAsync(() => !shell.Trash.IsLoading, cancellationToken);
 
 		await Dispatcher.UIThread.InvokeAsync(() => { }, DispatcherPriority.Background);
 	}
 
-	private static async Task WaitForRenderedRouteAsync(AppShellView shellView, Shell.AppRouteId route)
+	private static async Task WaitForRenderedRouteAsync(AppShellView shellView, Shell.AppRouteId route, CancellationToken cancellationToken)
 	{
 		while (!shellView.IsRoutePresented(route))
 		{
 			await Dispatcher.UIThread.InvokeAsync(() => { }, DispatcherPriority.Render);
-			await Task.Delay(50);
+			await Task.Delay(50, cancellationToken);
 		}
 		await Dispatcher.UIThread.InvokeAsync(() => { }, DispatcherPriority.Background);
 	}
 
-	private async Task WaitForCaptureExperienceAsync(CaptureEntry entry)
+	private async Task WaitForCaptureExperienceAsync(CaptureEntry entry, CancellationToken cancellationToken)
 	{
 		if (contemporaryShellViewModel is not { } shell)
 			throw new InvalidOperationException("The contemporary shell was not available for capture.");
 
-		await WaitForPropertyAsync(shell, () => shell.Profile.Style == entry.Profile);
+		await CaptureReadiness.WaitUntilAsync(() => shell.Profile.Style == entry.Profile, cancellationToken);
 		await Dispatcher.UIThread.InvokeAsync(() => { }, DispatcherPriority.Background);
 	}
 
 	private void VerifyCaptureState(CaptureEntry entry)
 	{
-		if (entry.Surface != CaptureSurface.Route)
-			return;
-		if (contemporaryShellViewModel is not { } shell)
+				if (contemporaryShellViewModel is not { } shell)
 			throw new InvalidOperationException("The contemporary shell was not available for capture.");
 		if (shell.Profile.Style != entry.Profile)
 			throw new CapturePlanException($"Capture profile drifted from {entry.Profile} to {shell.Profile.Style} before presentation.");
+		if (Configuration.Instance.DensityMode != entry.Density
+			|| Configuration.Instance.DecorationLevel != entry.Decoration
+			|| Configuration.Instance.ReducedMotionPreference != entry.Motion
+			|| Configuration.Instance.LibraryViewMode != (entry.LibraryView ?? LibraryViewMode.Details))
+			throw new CapturePlanException("Capture settings drifted before presentation.");
+		if (entry.Surface != CaptureSurface.Route)
+			return;
 		if (shell.CurrentRoute.Id != entry.Route)
 			throw new CapturePlanException($"Capture route drifted from {entry.Route} to {shell.CurrentRoute.Id} before presentation.");
 		if (entry.ProcessingScenario == ProcessingCaptureScenario.Mixed
@@ -540,7 +588,7 @@ public partial class MainWindow
 		}
 	}
 
-	private static async Task PresentCaptureFrameAsync(Control captureHost, int settleMs)
+	private static async Task PresentCaptureFrameAsync(Control captureHost, int settleMs, CancellationToken cancellationToken)
 	{
 		await Dispatcher.UIThread.InvokeAsync(() =>
 		{
@@ -550,10 +598,10 @@ public partial class MainWindow
 		}, DispatcherPriority.Render);
 		// Dispatcher completion only proves that Avalonia scheduled the frame. The
 		// native-window capture must also wait for the compositor to present it.
-		await SettleAsync(settleMs);
+		await SettleAsync(settleMs, cancellationToken);
 	}
 
-	private async Task WaitForVisibleCoverLoadsAsync()
+	private async Task WaitForVisibleCoverLoadsAsync(CancellationToken cancellationToken)
 	{
 		for (;;)
 		{
@@ -582,38 +630,15 @@ public partial class MainWindow
 				continue;
 			}
 
-			await Task.WhenAll(pending);
+			await Task.WhenAll(pending).WaitAsync(cancellationToken);
 		}
-	}
-
-	private static Task WaitForPropertyAsync(INotifyPropertyChanged source, Func<bool> predicate)
-	{
-		if (predicate())
-			return Task.CompletedTask;
-
-		var completion = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-		PropertyChangedEventHandler? handler = null;
-		handler = (_, _) =>
-		{
-			if (!predicate())
-				return;
-			source.PropertyChanged -= handler;
-			completion.TrySetResult();
-		};
-		source.PropertyChanged += handler;
-		if (predicate())
-		{
-			source.PropertyChanged -= handler;
-			completion.TrySetResult();
-		}
-		return completion.Task;
 	}
 
 	/// <summary>Two dispatcher passes at Background priority plus a real delay, so layout, bindings and dashboard refresh settle.</summary>
-	private static async Task SettleAsync(int milliseconds)
+	private static async Task SettleAsync(int milliseconds, CancellationToken cancellationToken)
 	{
 		await Dispatcher.UIThread.InvokeAsync(() => { }, DispatcherPriority.Background);
-		await Task.Delay(milliseconds);
+		await Task.Delay(milliseconds, cancellationToken);
 		await Dispatcher.UIThread.InvokeAsync(() => { }, DispatcherPriority.Background);
 	}
 
