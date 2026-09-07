@@ -91,12 +91,27 @@ import sys
 manifest, out, status = Path(sys.argv[1]), Path(sys.argv[2]), int(sys.argv[3])
 entries = []
 if manifest.exists():
-    for index, name, width, height in csv.reader(manifest.open(), delimiter="\t"):
+    for row in csv.reader(manifest.open(), delimiter="\t"):
+        index, name, width, height = row[:4]
+        surface, fixture = row[4:] if len(row) == 6 else ("route", "-")
         path = out / name
         produced = path.is_file() and path.stat().st_size > 0
+        state = None
+        state_path = out / f"frame-{int(index):04d}.json"
+        if state_path.is_file():
+            try:
+                state = json.loads(state_path.read_text())
+            except (OSError, ValueError):
+                pass  # Preserve an interrupted state receipt without claiming it parsed.
+        is_native = surface in ("dialog", "window", "message")
         entries.append({
-            "index": int(index), "file": name, "requestedClientDips": [int(width), int(height)],
+            "index": int(index), "file": name,
+            "requestedClientDips": None if is_native else [int(width), int(height)],
+            "requestedViewportDips": [int(width), int(height)],
+            "actualClientDips": [state.get("ClientWidth"), state.get("ClientHeight")] if state else None,
+            "surface": surface, "fixture": fixture if fixture != "-" else None,
             "produced": produced, "sha256": hashlib.sha256(path.read_bytes()).hexdigest() if produced else None,
+            "closeReceipt": f"closed-{int(index):04d}.json" if (out / f"closed-{int(index):04d}.json").is_file() else None,
             "stateReceipt": f"frame-{int(index):04d}.json" if (out / f"frame-{int(index):04d}.json").is_file() else None,
         })
 (out / "result.json").write_text(json.dumps({
@@ -127,6 +142,8 @@ with open(manifest_path, "w", encoding="utf-8") as target:
             subject = "componentgallery"
         elif surface == "onboarding":
             subject = f"onboarding-step{entry.get('onboardingStep', 1)}"
+        elif surface in ("dialog", "window", "message"):
+            subject = f"{surface}-{entry['fixture'].lower()}-{entry.get('windowSize', 'Natural').lower()}"
         else:
             subject = entry["route"].lower()
         name = entry.get("file") or (
@@ -138,7 +155,7 @@ with open(manifest_path, "w", encoding="utf-8") as target:
                 or any(part in ("", ".", "..") for part in name.split("/"))
                 or any(ord(character) < 32 for character in name)):
             raise SystemExit(f"invalid relative PNG capture file name: {name!r}")
-        target.write(f"{index}\t{name}\t{entry['width']}\t{entry['height']}\n")
+        target.write(f"{index}\t{name}\t{entry['width']}\t{entry['height']}\t{surface}\t{entry.get('fixture', '-').lower()}\n")
 PY
 
 # Preserve the exact plan and app identity even when the run fails before its first frame.
@@ -193,7 +210,7 @@ DEADLINE=$((SECONDS + 900))
 STAGE_SECONDS=150
 PLANNED=0
 MISSING=0
-while IFS=$'\t' read -r INDEX NAME WIDTH HEIGHT; do
+while IFS=$'\t' read -r INDEX NAME WIDTH HEIGHT SURFACE FIXTURE; do
 	PLANNED=$((PLANNED + 1))
 	STEM="$(printf '%04d' "$INDEX")"
 	READY="$HANDSHAKE/ready-$STEM.txt"
@@ -216,17 +233,28 @@ while IFS=$'\t' read -r INDEX NAME WIDTH HEIGHT; do
 		sleep 0.05
 	done
 
-	IFS=$'\t' read -r READY_NAME READY_WIDTH READY_HEIGHT READY_SCALE < "$READY"
-	if [[ $READY_NAME != "$NAME" || $READY_WIDTH != "$WIDTH" || $READY_HEIGHT != "$HEIGHT" || -z $READY_SCALE ]]; then
+	IFS=$'\t' read -r READY_NAME READY_WIDTH READY_HEIGHT READY_SCALE READY_TITLE READY_SURFACE READY_FIXTURE < "$READY"
+	if [[ $READY_NAME != "$NAME" || $READY_SURFACE != "$SURFACE" || $READY_FIXTURE != "$FIXTURE" || -z $READY_SCALE || -z $READY_TITLE ]]; then
 		echo "capture handshake mismatch for entry $INDEX" >&2
 		exit 1
 	fi
 
+	# A native fixture uses its real natural size, bounded by the requested
+	# viewport. Route/control captures still require the exact planned client.
+	if [[ $SURFACE == dialog || $SURFACE == window || $SURFACE == message ]]; then
+		if [[ ! $READY_WIDTH =~ ^[0-9]+$ || ! $READY_HEIGHT =~ ^[0-9]+$ ]] || ((READY_WIDTH <= 0 || READY_HEIGHT <= 0 || READY_WIDTH > WIDTH || READY_HEIGHT > HEIGHT)); then
+			echo "native fixture geometry exceeds its viewport for $NAME" >&2
+			exit 1
+		fi
+	elif [[ $READY_WIDTH != "$WIDTH" || $READY_HEIGHT != "$HEIGHT" ]]; then
+		echo "capture client geometry mismatch for $NAME" >&2
+		exit 1
+	fi
 	STAGE_DEADLINE=$((SECONDS + 15))
 	WINDOW_INFO=""
 	while [[ -z $WINDOW_INFO ]]; do
 		set +e
-		WINDOW_INFO="$("$WINDOW_HELPER" "$APP_PID" 2>/dev/null)"
+		WINDOW_INFO="$("$WINDOW_HELPER" "$APP_PID" "$READY_TITLE" 2>/dev/null)"
 		WINDOW_STATUS=$?
 		set -e
 		if [[ $WINDOW_STATUS -eq 0 && -n $WINDOW_INFO ]]; then
@@ -244,7 +272,7 @@ while IFS=$'\t' read -r INDEX NAME WIDTH HEIGHT; do
 		sleep 0.05
 	done
 	IFS=$'\t' read -r WINDOW_ID WINDOW_WIDTH WINDOW_HEIGHT <<< "$WINDOW_INFO"
-	if [[ -z ${WINDOW_HEIGHT:-} || $WINDOW_WIDTH -ne $WIDTH || $WINDOW_HEIGHT -lt $HEIGHT ]]; then
+	if [[ -z ${WINDOW_HEIGHT:-} || $WINDOW_WIDTH -ne $READY_WIDTH || $WINDOW_HEIGHT -lt $READY_HEIGHT ]]; then
 		echo "invalid Libation window metadata for $NAME: $WINDOW_INFO" >&2
 		exit 1
 	fi
@@ -254,7 +282,7 @@ while IFS=$'\t' read -r INDEX NAME WIDTH HEIGHT; do
 	mkdir -p "$(dirname "$TARGET")"
 	/usr/sbin/screencapture -x -o -l"$WINDOW_ID" "$RAW"
 	python3 "$ROOT/Scripts/crop-macos-window.py" \
-		"$RAW" "$TARGET" "$WINDOW_WIDTH" "$WINDOW_HEIGHT" "$WIDTH" "$HEIGHT" "$READY_SCALE"
+		"$RAW" "$TARGET" "$WINDOW_WIDTH" "$WINDOW_HEIGHT" "$READY_WIDTH" "$READY_HEIGHT" "$READY_SCALE"
 	rm -f "$RAW"
 	if [[ ! -s $TARGET ]]; then
 		echo "screencapture did not write $TARGET" >&2
@@ -268,7 +296,18 @@ while IFS=$'\t' read -r INDEX NAME WIDTH HEIGHT; do
 	: > "$ACK"
 done < "$MANIFEST"
 
-STAGE_DEADLINE=$((SECONDS + 15))
+# An attended final fixture must receive its complete application stage budget.
+# Read the preserved plan, not a source plan that may have been edited mid-run.
+FINAL_GRACE="$(python3 - "$OUT/plan.json" <<'CLOSE_GRACE'
+import json
+import sys
+with open(sys.argv[1], encoding="utf-8") as source:
+    plan = json.load(source)
+timeout_ms = min(120000, max(100, int(plan.get("stageTimeoutMs", 30000))))
+print((timeout_ms + 999) // 1000 + 5 if plan["entries"][-1].get("waitForNativeClose", False) else 15)
+CLOSE_GRACE
+)"
+STAGE_DEADLINE=$((SECONDS + FINAL_GRACE))
 while kill -0 "$APP_PID" 2>/dev/null; do
 	if ((SECONDS >= DEADLINE || SECONDS >= STAGE_DEADLINE)); then
 		echo "Libation did not exit after the final capture acknowledgement" >&2

@@ -135,6 +135,36 @@ public class CapturePlanTests
 	}
 
 	[TestMethod]
+	public void Parse_NativeFixturesHaveExplicitIdentityAndViewportSemantics()
+	{
+		var plan = CapturePlan.Parse("""
+			{"entries":[
+			 {"profile":"Cellar","surface":"Dialog","fixture":"Settings","width":1280,"height":900},
+			 {"profile":"TastingRoom","surface":"Window","fixture":"About","windowSize":"Clamped","width":360,"height":400},
+			 {"profile":"Cellar","surface":"Message","fixture":"RemoveConfirmation","width":720,"height":560,"waitForNativeClose":true}]}
+			""");
+		Assert.IsTrue(plan.Entries.All(entry => entry.IsTopLevel));
+		Assert.AreEqual("cellar-dialog-settings-natural-1280x900.png", plan.Entries[0].FileName);
+		Assert.AreEqual("tastingroom-window-about-clamped-360x400.png", plan.Entries[1].FileName);
+		Assert.AreEqual(CaptureFixture.RemoveConfirmation, plan.Entries[2].Fixture);
+		Assert.IsTrue(plan.Entries[2].WaitForNativeClose);
+	}
+
+	[TestMethod]
+	public void Parse_NativeFixturesRejectAmbiguousKindsAndSideEffectState()
+	{
+		foreach (var extra in new[] { "", ",\"fixture\":\"About\"", ",\"fixture\":\"Anything\"",
+			",\"fixture\":\"Settings\",\"route\":\"Settings\"", ",\"fixture\":\"Settings\",\"logicalScale\":2",
+			",\"fixture\":\"Settings\",\"openFlight\":true", ",\"fixture\":\"Settings\",\"processingScenario\":\"Mixed\"",
+			",\"fixture\":\"Settings\",\"windowSize\":\"Wide\"" })
+			Assert.ThrowsExactly<CapturePlanException>(() => CapturePlan.Parse(
+				"{\"entries\":[{\"profile\":\"Cellar\",\"surface\":\"Dialog\",\"width\":900,\"height\":750" + extra + "}]}"), extra);
+		Assert.ThrowsExactly<CapturePlanException>(() => CapturePlan.Parse("""
+			{"entries":[{"profile":"Cellar","route":"Settings","fixture":"Settings","width":900,"height":750}]}
+			"""));
+	}
+
+	[TestMethod]
 	public void CanonicalPlans_OnlyContainSupportedUniqueCaptures()
 	{
 		var directory = new DirectoryInfo(AppContext.BaseDirectory);

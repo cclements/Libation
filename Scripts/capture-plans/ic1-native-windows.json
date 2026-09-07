@@ -1,0 +1,116 @@
+{
+  "settleMs": 1000,
+  "stageTimeoutMs": 30000,
+  "entries": [
+    {
+      "profile": "Cellar",
+      "surface": "Dialog",
+      "fixture": "Settings",
+      "windowSize": "Natural",
+      "width": 1280,
+      "height": 900
+    },
+    {
+      "profile": "Cellar",
+      "surface": "Dialog",
+      "fixture": "Settings",
+      "windowSize": "Clamped",
+      "width": 720,
+      "height": 560
+    },
+    {
+      "profile": "Cellar",
+      "surface": "Window",
+      "fixture": "About",
+      "windowSize": "Natural",
+      "width": 720,
+      "height": 560
+    },
+    {
+      "profile": "Cellar",
+      "surface": "Window",
+      "fixture": "About",
+      "windowSize": "Clamped",
+      "width": 360,
+      "height": 400
+    },
+    {
+      "profile": "Cellar",
+      "surface": "Message",
+      "fixture": "RemoveConfirmation",
+      "windowSize": "Natural",
+      "width": 720,
+      "height": 560
+    },
+    {
+      "profile": "Cellar",
+      "surface": "Message",
+      "fixture": "RemoveConfirmation",
+      "windowSize": "Clamped",
+      "width": 265,
+      "height": 110
+    },
+    {
+      "profile": "Cellar",
+      "route": "Overview",
+      "width": 720,
+      "height": 560,
+      "file": "cellar-owner-restored.png"
+    },
+    {
+      "profile": "TastingRoom",
+      "surface": "Dialog",
+      "fixture": "Settings",
+      "windowSize": "Natural",
+      "width": 1280,
+      "height": 900
+    },
+    {
+      "profile": "TastingRoom",
+      "surface": "Dialog",
+      "fixture": "Settings",
+      "windowSize": "Clamped",
+      "width": 720,
+      "height": 560
+    },
+    {
+      "profile": "TastingRoom",
+      "surface": "Window",
+      "fixture": "About",
+      "windowSize": "Natural",
+      "width": 720,
+      "height": 560
+    },
+    {
+      "profile": "TastingRoom",
+      "surface": "Window",
+      "fixture": "About",
+      "windowSize": "Clamped",
+      "width": 360,
+      "height": 400
+    },
+    {
+      "profile": "TastingRoom",
+      "surface": "Message",
+      "fixture": "RemoveConfirmation",
+      "windowSize": "Natural",
+      "width": 720,
+      "height": 560
+    },
+    {
+      "profile": "TastingRoom",
+      "surface": "Message",
+      "fixture": "RemoveConfirmation",
+      "windowSize": "Clamped",
+      "width": 265,
+      "height": 110
+    },
+    {
+      "profile": "TastingRoom",
+      "route": "Overview",
+      "width": 720,
+      "height": 560,
+      "file": "tastingroom-owner-restored.png"
+    }
+  ]
+}

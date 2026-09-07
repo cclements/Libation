@@ -42,7 +42,13 @@ public enum CaptureSurface
 	Route,
 	ComponentGallery,
 	Onboarding,
+	Dialog,
+	Window,
+	Message,
 }
+
+public enum CaptureFixture { Settings, About, RemoveConfirmation }
+public enum CaptureWindowSize { Natural, Clamped }
 
 public enum ProcessingCaptureScenario
 {
@@ -77,6 +83,10 @@ public sealed record CaptureEntry(
 	public bool FocusFailedProcessingItem { get; init; }
 	public int OnboardingStep { get; init; } = 1;
 	public bool OnboardingScanActive { get; init; }
+	public CaptureFixture? Fixture { get; init; }
+	public CaptureWindowSize WindowSize { get; init; } = CaptureWindowSize.Natural;
+	public bool WaitForNativeClose { get; init; }
+	public bool IsTopLevel => Surface is CaptureSurface.Dialog or CaptureSurface.Window or CaptureSurface.Message;
 	public string FileName => File ?? CapturePlan.DefaultFileName(this);
 }
 
@@ -99,6 +109,7 @@ public sealed record CapturePlan(int SettleMs, IReadOnlyList<CaptureEntry> Entri
 		{
 			CaptureSurface.ComponentGallery => "componentgallery",
 			CaptureSurface.Onboarding => $"onboarding-step{entry.OnboardingStep}",
+			CaptureSurface.Dialog or CaptureSurface.Window or CaptureSurface.Message => $"{entry.Surface}-{entry.Fixture}-{entry.WindowSize}".ToLowerInvariant(),
 			_ => entry.Route.ToString().ToLowerInvariant(),
 		};
 		return $"{entry.Profile.ToString().ToLowerInvariant()}-{surface}-{entry.Width}x{entry.Height}.png";
@@ -140,14 +151,30 @@ public sealed record CapturePlan(int SettleMs, IReadOnlyList<CaptureEntry> Entri
 			var surface = entry.Surface is null ? CaptureSurface.Route
 				: TryParseDefined(entry.Surface, out CaptureSurface parsedSurface) ? parsedSurface
 				: throw new CapturePlanException($"Unknown surface '{entry.Surface}'.");
-			var route = entry.Route is null && surface is CaptureSurface.ComponentGallery or CaptureSurface.Onboarding
+			var route = entry.Route is null && surface != CaptureSurface.Route
 				? AppRouteId.Overview
 				: TryParseDefined(entry.Route, out AppRouteId parsedRoute) ? parsedRoute
 				: throw new CapturePlanException($"Unknown route '{entry.Route}'.");
 			if (surface == CaptureSurface.Route && route == AppRouteId.About)
-				throw new CapturePlanException($"Entry {entries.Count} ({entry.File ?? $"{profile}/About"}): About is a utility dialog with no capturable route body; its dialog requires an attended capture.");
-			if (entry.Width < 720 || entry.Height < 560)
-				throw new CapturePlanException($"Entry {profile}/{surface} is below the 720x560 minimum window.");
+				throw new CapturePlanException($"Entry {entries.Count} ({entry.File ?? $"{profile}/About"}): About is a utility dialog with no capturable route body; use surface Window with fixture About for the inert informational window.");
+			var isTopLevel = surface is CaptureSurface.Dialog or CaptureSurface.Window or CaptureSurface.Message;
+			CaptureFixture? fixture = entry.Fixture is null ? null
+				: TryParseDefined(entry.Fixture, out CaptureFixture parsedFixture) ? parsedFixture
+				: throw new CapturePlanException($"Unknown fixture '{entry.Fixture}'.");
+			var windowSize = entry.WindowSize is null ? CaptureWindowSize.Natural
+				: TryParseDefined(entry.WindowSize, out CaptureWindowSize parsedWindowSize) ? parsedWindowSize
+				: throw new CapturePlanException($"Unknown windowSize '{entry.WindowSize}'.");
+			if (isTopLevel && (surface, fixture) is not
+				((CaptureSurface.Dialog, CaptureFixture.Settings) or (CaptureSurface.Window, CaptureFixture.About) or (CaptureSurface.Message, CaptureFixture.RemoveConfirmation)))
+				throw new CapturePlanException($"Entry {profile}/{surface} requires its explicit supported fixture: Dialog/Settings, Window/About, or Message/RemoveConfirmation.");
+			if (!isTopLevel && (fixture is not null || entry.WindowSize is not null || entry.WaitForNativeClose))
+				throw new CapturePlanException("fixture, windowSize, and waitForNativeClose are only supported for Dialog, Window, and Message captures.");
+			if (isTopLevel && (entry.Route is not null || entry.FlightSelectionCount != 0 || entry.ProcessingSeedCount != 0
+				|| entry.ProcessingScenario is not null || entry.OpenFlight || entry.OpenDetails || entry.OpenDecanter
+				|| entry.FocusFailedProcessingItem || entry.OnboardingScanActive || entry.OnboardingStep != 1 || entry.LibraryView is not null))
+				throw new CapturePlanException("Top-level fixtures cannot request route, queue, selection, onboarding, or library-view state.");
+			if (entry.Width < (isTopLevel ? 265 : 720) || entry.Height < (isTopLevel ? 110 : 560))
+				throw new CapturePlanException($"Entry {profile}/{surface} is below its minimum capture viewport.");
 			if (entry.FlightSelectionCount < 0)
 				throw new CapturePlanException($"Entry {profile}/{surface} has a negative Flight selection count.");
 			if (entry.ProcessingSeedCount < 0)
@@ -171,6 +198,8 @@ public sealed record CapturePlan(int SettleMs, IReadOnlyList<CaptureEntry> Entri
 				: TryParseDefined(entry.Motion, out ReducedMotionPreference parsedMotion) ? parsedMotion
 				: throw new CapturePlanException($"Unknown motion preference '{entry.Motion}'.");
 			var logicalScale = entry.LogicalScale ?? 1d;
+			if (isTopLevel && logicalScale != 1d)
+				throw new CapturePlanException("Top-level fixtures use native rendering; logicalScale must be 1.");
 			if (!double.IsFinite(logicalScale) || logicalScale <= 0)
 				throw new CapturePlanException($"Entry {profile}/{surface} has invalid logical scale {logicalScale}.");
 
@@ -189,6 +218,9 @@ public sealed record CapturePlan(int SettleMs, IReadOnlyList<CaptureEntry> Entri
 				entry.OpenDetails,
 				entry.File)
 			{
+				Fixture = fixture,
+				WindowSize = windowSize,
+				WaitForNativeClose = entry.WaitForNativeClose,
 				ProcessingScenario = processingScenario,
 				Motion = motion,
 				LogicalScale = logicalScale,
@@ -226,6 +258,9 @@ public sealed record CapturePlan(int SettleMs, IReadOnlyList<CaptureEntry> Entri
 	{
 		[JsonPropertyName("profile")] public string? Profile { get; set; }
 		[JsonPropertyName("surface")] public string? Surface { get; set; }
+		[JsonPropertyName("fixture")] public string? Fixture { get; set; }
+		[JsonPropertyName("windowSize")] public string? WindowSize { get; set; }
+		[JsonPropertyName("waitForNativeClose")] public bool WaitForNativeClose { get; set; }
 		[JsonPropertyName("route")] public string? Route { get; set; }
 		[JsonPropertyName("width")] public int Width { get; set; }
 		[JsonPropertyName("height")] public int Height { get; set; }

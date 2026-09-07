@@ -45,7 +45,7 @@ public partial class MainWindow
 		try
 		{
 			capturePlanPreparedBeforeShow = CapturePlan.Load(CaptureEnvironment.PlanPath);
-			PrepareInitialCaptureSize(capturePlanPreparedBeforeShow.Entries[0]);
+			PrepareInitialCaptureSize(OwnerCaptureEntry(capturePlanPreparedBeforeShow.Entries[0]));
 		}
 		catch (Exception ex)
 		{
@@ -111,14 +111,16 @@ public partial class MainWindow
 
 			for (var index = 0; index < plan.Entries.Count; index++)
 			{
+				CaptureWindowFixture? nativeFixture = null;
 				try
 				{
 					var entry = plan.Entries[index];
 					identity = $"{index:D4}/{entry.FileName}";
-					SizeCaptureHost(captureHost, entry);
-					SizeCaptureSurface(routeContent, entry);
-					SizeCaptureSurface(galleryContent, entry);
-					SizeCaptureSurface(onboardingContent, entry);
+					var ownerEntry = OwnerCaptureEntry(entry);
+					SizeCaptureHost(captureHost, ownerEntry);
+					SizeCaptureSurface(routeContent, ownerEntry);
+					SizeCaptureSurface(galleryContent, ownerEntry);
+					SizeCaptureSurface(onboardingContent, ownerEntry);
 					var baseline = Configuration.Instance.GetContemporaryExperienceSettings();
 					Configuration.Instance.SaveContemporaryExperienceSettings(baseline with
 					{
@@ -133,7 +135,20 @@ public partial class MainWindow
 					await Stage("profile application", token => WaitForCaptureExperienceAsync(entry, token));
 					await Stage("profile layout", token => SettleAsync(plan.SettleMs / 2, token));
 
-					if (entry.Surface == CaptureSurface.ComponentGallery)
+					if (entry.IsTopLevel)
+					{
+						galleryContent.IsVisible = onboardingContent.IsVisible = false;
+						routeContent.IsVisible = true;
+						ResizeForCapture(ownerEntry);
+						NavigateContemporary(AppRouteId.Overview);
+						await Stage("fixture owner route", token => WaitForRouteReadyAsync(AppRouteId.Overview, token));
+						await Stage("fixture owner presentation", token => WaitForRenderedRouteAsync(routeContent, AppRouteId.Overview, token));
+						stage = "native fixture construction";
+						nativeFixture = new CaptureWindowFixture(this, entry, Configuration.Instance);
+						nativeFixture.Show();
+						await Stage("native fixture readiness", nativeFixture.WaitUntilReadyAsync);
+					}
+					else if (entry.Surface == CaptureSurface.ComponentGallery)
 					{
 						routeContent.IsVisible = false;
 						onboardingContent.IsVisible = false;
@@ -170,18 +185,20 @@ public partial class MainWindow
 						await Stage("processing focus", _ => FocusFailedProcessingItemForCaptureAsync(entry));
 					}
 					await Stage("visible covers", WaitForVisibleCoverLoadsAsync);
-					await Stage("frame presentation", token => PresentCaptureFrameAsync(captureHost, plan.SettleMs, token));
+					var capturedWindow = nativeFixture?.Window ?? (Window)this;
+					await Stage("frame presentation", token => PresentCaptureFrameAsync(capturedWindow, plan.SettleMs, token));
 					stage = "state and geometry validation";
 					VerifyCaptureState(entry);
-					var activeSurface = entry.Surface switch
+					var activeSurface = nativeFixture?.Window.Content as Control ?? (entry.Surface switch
 					{
 						CaptureSurface.ComponentGallery => (Control)galleryContent,
 						CaptureSurface.Onboarding => onboardingContent,
 						_ => routeContent,
-					};
+					});
 					if (!activeSurface.IsEffectivelyVisible)
 						throw new CapturePlanException($"Capture '{identity}' has no visible surface.");
-					CaptureReadiness.ValidateGeometry(entry, ClientSize, captureHost.Bounds, activeSurface.Bounds,
+					if (nativeFixture is not null) nativeFixture.Validate();
+					else CaptureReadiness.ValidateGeometry(entry, ClientSize, captureHost.Bounds, activeSurface.Bounds,
 						activeSurface.RenderTransform?.Value ?? Matrix.Identity, RenderScaling);
 					if (entry.Surface == CaptureSurface.Onboarding
 						&& (onboardingViewModel.StepNumber != entry.OnboardingStep
@@ -193,8 +210,12 @@ public partial class MainWindow
 						Index = index, entry.FileName, Surface = entry.Surface.ToString(), Route = entry.Route.ToString(),
 						Profile = contemporaryShellViewModel!.Profile.Style.ToString(),
 						Density = Configuration.Instance.DensityMode.ToString(), Decoration = Configuration.Instance.DecorationLevel.ToString(),
-						Motion = Configuration.Instance.ReducedMotionPreference.ToString(), entry.LogicalScale, RenderScaling,
-						ClientWidth = ClientSize.Width, ClientHeight = ClientSize.Height,
+						Motion = Configuration.Instance.ReducedMotionPreference.ToString(), entry.LogicalScale, RenderScaling = capturedWindow.RenderScaling,
+						ClientWidth = capturedWindow.ClientSize.Width, ClientHeight = capturedWindow.ClientSize.Height,
+						Fixture = entry.Fixture?.ToString(), WindowSize = entry.IsTopLevel ? entry.WindowSize.ToString() : null,
+						WindowType = capturedWindow.GetType().Name, WindowTitle = capturedWindow.Title,
+						HasExpectedOwner = nativeFixture is null || capturedWindow.Owner == this,
+						IsModal = nativeFixture?.IsModal, entry.WaitForNativeClose,
 						SurfaceWidth = activeSurface.Bounds.Width, SurfaceHeight = activeSurface.Bounds.Height,
 						OnboardingDraft = entry.Surface == CaptureSurface.Onboarding ? onboardingViewModel.SelectedProfile.ToString() : null,
 						OnboardingStep = entry.Surface == CaptureSurface.Onboarding ? onboardingViewModel.StepNumber : (int?)null,
@@ -204,18 +225,35 @@ public partial class MainWindow
 					if (osHandshake is null)
 					{
 						var path = Path.Combine(outDir, entry.FileName);
-						var actual = SaveWindowBitmap(path);
+						var actual = SaveWindowBitmap(capturedWindow, path);
 						log.AppendLine($"{entry.FileName}\t{actual.Width}x{actual.Height}\trequested {entry.Width}x{entry.Height}");
 					}
 					else
 					{
-						await Stage("OS capture acknowledgement", token => WaitForOsCaptureAsync(osHandshake, index, entry, RenderScaling, token));
-						log.AppendLine($"{entry.FileName}\tmacOS screencapture handshake\trequested {entry.Width}x{entry.Height}");
+						await Stage("OS capture acknowledgement", token => WaitForOsCaptureAsync(osHandshake, index, entry, capturedWindow, token));
+						log.AppendLine($"{entry.FileName}\tmacOS screencapture handshake\tviewport {entry.Width}x{entry.Height}\tclient {capturedWindow.ClientSize}");
 					}
+					if (nativeFixture is not null && entry.WaitForNativeClose)
+						await Stage("attended native fixture close", nativeFixture.WaitUntilClosedAsync);
 				}
 				finally
 				{
-					ClearCaptureSeedState();
+					try
+					{
+						if (nativeFixture is not null)
+						{
+							var previousStage = stage;
+							nativeFixture.Dispose();
+							await Stage("native fixture cleanup", nativeFixture.WaitUntilClosedAsync);
+							stage = previousStage;
+							File.WriteAllText(Path.Combine(outDir, $"closed-{index:D4}.json"), JsonSerializer.Serialize(new
+							{
+								Index = index, plan.Entries[index].FileName, Fixture = plan.Entries[index].Fixture?.ToString(),
+								nativeFixture.IsClosed, nativeFixture.CloseResult, OwnerVisible = IsVisible, OwnerEnabled = IsEnabled,
+							}));
+						}
+					}
+					finally { ClearCaptureSeedState(); }
 				}
 			}
 		}
@@ -447,6 +485,9 @@ public partial class MainWindow
 		}, DispatcherPriority.Background);
 	}
 
+	private static CaptureEntry OwnerCaptureEntry(CaptureEntry entry)
+		=> entry.IsTopLevel ? entry with { Width = 1280, Height = 900, LogicalScale = 1 } : entry;
+
 	private void ResizeForCapture(CaptureEntry entry)
 	{
 		WindowState = WindowState.Normal;
@@ -513,14 +554,14 @@ public partial class MainWindow
 	private static async Task WaitForOsCaptureAsync(
 		string handshakeDirectory,
 		int index,
-		CaptureEntry entry, double renderScaling, CancellationToken cancellationToken)
+		CaptureEntry entry, Window window, CancellationToken cancellationToken)
 	{
 		var stem = index.ToString("D4");
 		var ready = Path.Combine(handshakeDirectory, $"ready-{stem}.txt");
 		var acknowledged = Path.Combine(handshakeDirectory, $"ack-{stem}.txt");
 		// Publish complete metadata atomically; the driver must never observe a partial line.
 		var temporaryReady = ready + ".tmp";
-		File.WriteAllText(temporaryReady, FormattableString.Invariant($"{entry.FileName}\t{entry.Width}\t{entry.Height}\t{renderScaling}{Environment.NewLine}"));
+		File.WriteAllText(temporaryReady, FormattableString.Invariant($"{entry.FileName}\t{window.ClientSize.Width}\t{window.ClientSize.Height}\t{window.RenderScaling}\t{window.Title}\t{entry.Surface.ToString().ToLowerInvariant()}\t{entry.Fixture?.ToString().ToLowerInvariant() ?? "-"}{Environment.NewLine}"));
 		File.Move(temporaryReady, ready);
 		await CaptureReadiness.WaitUntilAsync(() => File.Exists(acknowledged), cancellationToken);
 	}
@@ -643,14 +684,14 @@ public partial class MainWindow
 	}
 
 	/// <summary>Renders the whole window at its render scaling and returns the pixel size written.</summary>
-	private PixelSize SaveWindowBitmap(string path)
+	private static PixelSize SaveWindowBitmap(Window window, string path)
 	{
-		var scale = RenderScaling;
+		var scale = window.RenderScaling;
 		var size = new PixelSize(
-			Math.Max(1, (int)Math.Round(Bounds.Width * scale)),
-			Math.Max(1, (int)Math.Round(Bounds.Height * scale)));
+			Math.Max(1, (int)Math.Round(window.ClientSize.Width * scale)),
+			Math.Max(1, (int)Math.Round(window.ClientSize.Height * scale)));
 		using var bitmap = new RenderTargetBitmap(size, new Vector(96 * scale, 96 * scale));
-		bitmap.Render((Visual)(Content ?? throw new InvalidOperationException("The capture window has no content.")));
+		bitmap.Render((Visual)(window.Content ?? throw new InvalidOperationException("The capture window has no content.")));
 		bitmap.Save(path);
 		return size;
 	}

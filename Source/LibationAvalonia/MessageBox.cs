@@ -114,7 +114,7 @@ public class MessageBox
 		return await DisplayWindow(dialog, owner);
 	});
 
-	private static MessageBoxWindow CreateMessageBox(TopLevel? owner, string message, string caption, MessageBoxButtons buttons, MessageBoxIcon icon, MessageBoxDefaultButton defaultButton, bool saveAndRestorePosition = true)
+	internal static MessageBoxWindow CreateMessageBox(TopLevel? owner, string message, string caption, MessageBoxButtons buttons, MessageBoxIcon icon, MessageBoxDefaultButton defaultButton, bool saveAndRestorePosition = true)
 	{
 		var dialog = new MessageBoxWindow(saveAndRestorePosition);
 

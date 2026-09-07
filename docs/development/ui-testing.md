@@ -128,13 +128,50 @@ PNG still requires pixel inspection; compositor-internal stale textures are
 not fully detectable from layout bounds. Source hashes at launch do not bind
 an existing `--no-build` apphost to those sources.
 
-At the September 7 source baseline before that slice, `CaptureSurface` supports Route,
-ComponentGallery and Onboarding. It has no first-class Dialog/Window/Message
-capture entry. About's accepted route cannot satisfy its rendered-readiness
-predicate. The audit also rejected malformed narrow captures and qualified
-mixed profile/draft state. IC-1 owns those reliability and coverage corrections.
-Until fixed, use a specific attended protocol for unavailable surfaces; retain
-blocked coverage rather than treating a timeout as an inspected screen.
+The native-window slice adds three explicit, closed fixture pairs:
+
+| Surface | Fixture | Existing window and presentation |
+|---|---|---|
+| `Dialog` | `Settings` | `SettingsDialog`, Audio File Settings tab, modal owner |
+| `Window` | `About` | `AboutDialog`, owned informational window |
+| `Message` | `RemoveConfirmation` | `MessageBoxWindow`, synthetic two-book Yes/No confirmation, No default button |
+
+`Scripts/capture-plans/ic1-native-windows.json` captures all three at natural
+and clamped sizes in Cellar and Tasting Room, with a shell frame after each
+profile to check owner restoration. For these surfaces, `width` and `height`
+are available client viewport caps. `windowSize: "Natural"` uses the existing
+window's natural size and rejects a smaller viewport. `"Clamped"` explicitly
+caps the native window, retaining overflow as evidence instead of repairing
+its descendants. These fixtures use native rendering (`logicalScale: 1`);
+route, queue, selection and onboarding flags are rejected. They are a bounded
+fixture list, not reflection-based arbitrary dialog construction.
+
+Settings uses an ephemeral configuration copy. The wrapper blocks pointer
+and action-key input and hides actionable content from accessibility
+invocation; Escape and native window closure remain available. It disables
+its owner while shown, restores the owner's previous enabled state, closes
+only its exact fixture window, and awaits modal completion under the stage
+deadline. Native window identity, actual client size, profile, owner, and
+close/reset results are recorded. The macOS driver requires the exact window
+title within the launched PID and rejects ambiguous matches; it no longer
+chooses the largest window when a smaller fixture is intended.
+
+`waitForNativeClose: true` is an optional attended lane. After the screenshot
+acknowledgement, the application waits up to `stageTimeoutMs` for Escape or
+native close. Use an unlocked desktop and CUA for that interaction. Do not
+claim native key delivery from a headless routed-key test. With the default
+`false`, the fixture closes automatically after capture. The result manifest
+distinguishes viewport caps from actual captured client dimensions and links
+both frame-state and close receipts.
+
+These input-shielded captures establish visual/lifecycle fixture evidence;
+they cannot establish screen-reader behavior, Save correctness, update/link
+actions, account behavior, real deletion, or the full product navigation
+flow. Use a specific attended protocol for other windows and those actions.
+Retain blocked coverage and rejected frames rather than treating a timeout
+or visible overflow as an accepted screen. The headless native-window tests
+use per-test Avalonia application scopes, keeping their font/layout caches
+separate from the existing shared-session pixel baseline.
 
 Use copied profiles and inert fixtures selected through `LIBATION_FILES_DIR`.
 Do not point fixture seeding/cleanup at a normal profile. Prevent automatic
@@ -145,7 +182,7 @@ own attended test scope; visual fixtures do not prove them.
 On this macOS host, the capture driver's Swift window helper may need writable
 `CLANG_MODULE_CACHE_PATH` and `SWIFT_MODULECACHE_PATH` under `/private/tmp`.
 That helper compilation is distinct from building the application. The driver
-has a full-run timeout; IC-1 must also make individual readiness waits finite.
+has a full-run timeout and every application readiness/close stage is bounded.
 
 The [status ledger](../design/contemporary-cellar-status.md) owns historical
 source/automation/headless/package receipts and links to current progress.

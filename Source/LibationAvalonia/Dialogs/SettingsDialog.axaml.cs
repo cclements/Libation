@@ -13,11 +13,15 @@ public partial class SettingsDialog : DialogWindow
 {
 	private readonly SettingsVM settingsDisp;
 
-	private readonly Configuration config = Design.IsDesignMode ? Configuration.CreateMockInstance() : Configuration.Instance;
+	private readonly Configuration config;
 	public SettingsDialog() : this(SettingsDialogSection.Important) { }
 
 	public SettingsDialog(SettingsDialogSection section)
+		: this(section, Design.IsDesignMode ? Configuration.CreateMockInstance() : Configuration.Instance) { }
+
+	internal SettingsDialog(SettingsDialogSection section, Configuration configuration)
 	{
+		config = configuration;
 		InitializeComponent();
 
 		DataContext = settingsDisp = new(config);
