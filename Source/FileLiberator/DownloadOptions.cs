@@ -3,6 +3,7 @@ using DataLayer;
 using Dinah.Core;
 using LibationFileManager;
 using LibationFileManager.Templates;
+using Newtonsoft.Json;
 using System;
 using System.IO;
 
@@ -14,6 +15,7 @@ public partial class DownloadOptions : IDownloadOptions, IDisposable
 	public LibraryBook LibraryBook { get; }
 	public LibraryBookDto LibraryBookDto { get; }
 	public string DownloadUrl { get; }
+	public string? DownloadIdentity { get; }
 	public KeyData[]? DecryptionKeys { get; }
 	public required TimeSpan RuntimeLength { get; init; }
 	public OutputFormat OutputFormat { get; }
@@ -66,6 +68,15 @@ public partial class DownloadOptions : IDownloadOptions, IDisposable
 		DecryptionKeys = licInfo.DecryptionKeys;
 		DrmType = licInfo.DrmType;
 		ContentMetadata = contentMetadata;
+		var reference = contentMetadata.ContentReference;
+		// Only complete provider identity permits query renewal. The network stream also binds the
+		// URI's scheme, authority and full selected path; missing metadata falls back to the exact URI.
+		DownloadIdentity = reference is null || string.IsNullOrWhiteSpace(reference.Acr)
+			|| string.IsNullOrWhiteSpace(reference.Asin) || string.IsNullOrWhiteSpace(reference.Codec)
+			|| string.IsNullOrWhiteSpace(reference.Version)
+			? null
+			: JsonConvert.SerializeObject(new[] { DrmType.ToString(), reference.Asin, reference.Acr,
+				reference.Codec, reference.Version, reference.ContentFormat, reference.Marketplace });
 		InputType
 		= licInfo.DrmType is AudibleApi.Common.DrmType.Widevine ? AAXClean.FileType.Dash
 		: licInfo.DrmType is AudibleApi.Common.DrmType.Adrm && licInfo.DecryptionKeys?.Length == 1 && licInfo.DecryptionKeys[0].KeyPart1.Length == 4 && licInfo.DecryptionKeys[0].KeyPart2 is null ? AAXClean.FileType.Aax

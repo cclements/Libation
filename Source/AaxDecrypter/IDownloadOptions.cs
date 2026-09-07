@@ -29,6 +29,8 @@ public interface IDownloadOptions
 {
 	event EventHandler<long> DownloadSpeedChanged;
 	string DownloadUrl { get; }
+	/// <summary>Stable, nonsecret content identity for renewing a signed URL; null binds to the exact URL.</summary>
+	string? DownloadIdentity => null;
 	string UserAgent { get; }
 	KeyData[]? DecryptionKeys { get; }
 	TimeSpan RuntimeLength { get; }
