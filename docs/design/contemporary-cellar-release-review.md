@@ -2,6 +2,17 @@
 
 Decision: **NO-GO for rollout; keep the source integration experimental and default-off.**
 
+September 7 update: the whole-app interface audit identifies open navigation,
+short-window, contrast, composition and modal/platform coverage findings.
+Complete the current IC-0–IC-9 program before claiming interface readiness;
+see the [evidence ledger](contemporary-cellar-status.md) and
+[development workflow](../development/interface-workflow.md). This document's
+S9 matrix remains historical evidence and does not close those newer findings.
+Release actions follow the active user request; historical S9 grants below do
+not supply current authority.
+
+## Historical S9 evidence
+
 S9 is complete at the source, automated, headless-render, and non-release package-artifact tiers. Exact source `d78737f8` passed fork-only validation run `33826389731` across three Windows, two macOS, and four Linux jobs. That run produced nine platform packages plus Windows and Linux capture artifacts. It did not install or launch those packages, exercise a manual screen reader, sign or notarize the macOS bundles, distribute a beta, publish a release, or authorize rollout.
 
 ## Rollout controls

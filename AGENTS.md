@@ -1,5 +1,44 @@
 # AGENTS.md
 
+## Audio and dependency development
+
+Audio, native interop, downloader/output-lifecycle and dependency changes follow
+[the delivery process](docs/development/delivery-process.md). In the companion records
+workspace, `DEVELOPMENT.md` routes to the A0–A6 work packages and the audio/integration
+roadmap. Preserve existing domain owners and public API/ABI contracts; verify the actual
+package/native graph and distinguish source, decode, provider and release evidence.
+
+## Interface development
+
+User-visible Avalonia work follows [the interface workflow](docs/development/interface-workflow.md)
+and [UI evidence guide](docs/development/ui-testing.md). The active completion sequence is IC-0–IC-9;
+the companion records checkout owns the plan, progress and surface/state ledgers linked from the workflow.
+Historical S0–S9 passes are bounded receipts, not current whole-app completion. Preserve the existing
+library/Flight/queue/settings owners, current-Avalonia rollback and default-off behavior. Documentation-only
+changes use document/link/diff inspection rather than the application build/test commands below.
+
+## Environment scope
+
+The Cursor Cloud instructions below describe its Linux environment. Do not apply its display, keyring,
+shell-startup, or runtime assumptions to macOS or Windows. On a local checkout, verify the host and follow
+the current handoff and platform-specific build/QA instructions. Compilation is not runtime proof.
+On this macOS host the installed SDK is `/Users/chris/.dotnet/dotnet`; check shell availability rather than
+inferring it from the Linux `.bashrc` setup.
+
+## Dependency advisory handling
+
+Do not dismiss NU1903 warnings as harmless or suppress them globally. Record the resolved package/version,
+advisory, affected platform/input path, and upgrade or documented mitigation before accepting a warning.
+
+2026-09-04 documentation reconciliation: the retained DataLayer `obj/project.assets.json` (dated September 1)
+resolves `SQLitePCLRaw.lib.e_sqlite3/2.1.12`. The published
+[GHSA-2m69-gcr7-jv3q / CVE-2025-6965 advisory](https://github.com/advisories/GHSA-2m69-gcr7-jv3q)
+lists package versions through 2.1.11 as affected. That cached resolution is outside the listed range;
+it does not identify the native library inside an installed application or prove current restore/runtime
+safety. Disposition: remove the obsolete blanket waiver; if a future restore reports NU1903, assess its
+exact advisory and resolved dependency. No restore, package upgrade, or runtime security test was performed
+for this documentation change.
+
 ## Cursor Cloud specific instructions
 
 Libation is a cross-platform .NET desktop/CLI app for downloading and de-DRMing Audible
@@ -30,8 +69,8 @@ plus a headless CLI (`LibationCli`) that shares the same config and SQLite libra
   - `dotnet build Source/LibationCli/LibationCli.csproj`
 - There is no dedicated lint step; the repo's `.editorconfig` is minimal and CI
   (`.github/workflows/validate.yml`) only builds and tests. The compiler/analyzer warnings from a
-  normal build serve as the static-analysis check. (A known transitive `NU1903` SQLite
-  vulnerability warning is expected and harmless.)
+  normal build serve as the static-analysis check. Treat dependency security warnings according to
+  Dependency advisory handling above.
 
 ### Testing
 - Test projects live under `Source/_Tests/` and use MSTest on **Microsoft.Testing.Platform**

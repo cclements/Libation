@@ -20,6 +20,15 @@ We welcome contributions! Whether it's fixing bugs, adding features, or improvin
 - Ensure your code builds and runs without errors.
 - Clean up any unused dependencies or imports.
 
+## Plan and verify the change
+
+For planning and verification, use [the delivery process](delivery-process.md) and,
+for user-visible Avalonia changes, [the interface workflow](interface-workflow.md).
+Name the issue/work packet, changed behavior and observed checks; distinguish
+source, native, package, rendered, interaction and installed-platform evidence.
+Audio changes include the relevant timing/content/recovery and dependency
+boundaries. Documentation-only changes use document/link/diff inspection.
+
 ## Logging and secrets
 
 We ask people to attach `Log.log` to public issue reports, so treat everything written there as published.

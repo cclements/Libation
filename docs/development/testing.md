@@ -2,7 +2,19 @@
 
 How to run Libation's automated tests, and how to put the app into a known state so you can check a UI change by eye.
 
+For user-visible changes, follow the [interface workflow](interface-workflow.md)
+and [UI evidence guide](ui-testing.md) to select relevant checks and record
+rendered/interaction/platform coverage. Documentation-only changes use
+document/link/diff inspection; the application commands below are not their gate.
+
 ## Automated tests
+
+For audio, native and dependency changes, select checks using the
+[delivery-process impact matrix](delivery-process.md#select-verification-by-impact).
+Record the intended test identities, actual selected count and expected skips;
+an exit-zero run selecting none of the intended tests is not a pass. Parser/native
+tests in the separate AAXClean/Codecs repositories follow their own current
+runner and package graph, not automatically Libation's runner convention.
 
 Test projects live under `Source/_Tests/`. They use MSTest on the [Microsoft.Testing.Platform](https://learn.microsoft.com/dotnet/core/testing/microsoft-testing-platform-intro) runner, which is selected by `global.json`.
 
@@ -32,6 +44,8 @@ Each one tests the source project of the same name:
 | `LibationFileManager.Tests` | Configuration, settings, upgrades, and naming templates |
 | `LibationSearchEngine.Tests` | Lucene indexing and search syntax |
 | `LibationUiBase.Tests` | Shared grid view models and status icons |
+| `LibationAvalonia.Tests` | Contemporary shell, shared controls, Flight, route/capture and headless rendering contracts |
+| `LibationCli.Tests` | CLI contracts |
 
 `AssertionHelper` is a shared helper library, not a test project.
 

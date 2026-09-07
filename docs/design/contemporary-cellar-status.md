@@ -1,10 +1,25 @@
 # Contemporary Cellar evidence ledger
 
-Updated 2026-09-03. This ledger records only evidence admitted for the exact source named in each row. It does not turn source, test, capture, package, or fork delivery into rollout approval.
+Updated 2026-09-07. This file retains evidence admitted for the exact source named in each historical row. It does not turn source, test, capture, package, or fork delivery into current interface completion or rollout approval.
 
-Binding plan: `docs/superpowers/specs/2026-09-01-contemporary-cellar-replan-design.md` in the records repository. Current development branch: `contemporary-cellar-v2` on the `cclements/Libation` fork. `UseContemporaryShell` remains default-off.
+## Current completion program
 
-## Slice status
+The September 7 audit found 18 defects/evidence gaps across layout, controls,
+dialogs, accessibility and installed-platform proof. The IC-0–IC-9 plan replaces
+S0–S9 as the current completion sequence. **IC-0 is ready; no IC packet or audit
+finding is closed.** The companion records checkout's
+[progress ledger](../../../docs/development/interface-progress.md) owns live
+statuses; use the [interface workflow](../development/interface-workflow.md)
+for implementation and review. Do not maintain a second IC status table here.
+
+The inspected product branch is `contemporary-cellar-v2` at `f88536e6` before
+these documentation changes. Remote parity was not refreshed. The historical
+September 1 spec remains an input for preserved invariants and original design
+intent; it no longer dictates current execution order, full-suite-per-slice
+testing or the incorrect 1456 × 1060 reference size. `UseContemporaryShell`
+remains default-off.
+
+## Historical S0–S9 slice evidence
 
 | Slice | State | Exact source and admitted evidence | Remaining boundary |
 |---|---|---|---|
@@ -21,7 +36,7 @@ Binding plan: `docs/superpowers/specs/2026-09-01-contemporary-cellar-replan-desi
 
 ## Current rollout disposition
 
-**NO-GO for rollout.** The contemporary shell remains experimental and default-off. S0-S9 establish the named source, automated contracts, Windows/Linux headless rendering, and a supported-platform non-release package-artifact matrix. They do not establish installed-package behavior, manual assistive-technology behavior, signing/notarization, beta acceptance, or owner release admission.
+**NO-GO for rollout.** The contemporary shell remains experimental and default-off. S0-S9 establish the named source, automated contracts, Windows/Linux headless rendering, and a supported-platform non-release package-artifact matrix. They do not close the current whole-app visual/adaptation defects or establish installed-package behavior, manual assistive-technology behavior, signing/notarization, beta acceptance, or owner release admission. Later contradictory evidence reopens the affected claim while preserving its historical receipt.
 
 | Stage | State | Evidence still required to advance |
 |---|---|---|

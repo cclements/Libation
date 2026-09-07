@@ -1,5 +1,11 @@
 # Handoff: Contemporary Cellar consolidated source integration
 
+> Archived source-integration handoff. This is not the current continuation
+> point. Use the [interface workflow](../development/interface-workflow.md)
+> and [current evidence boundary](contemporary-cellar-status.md), which lead to
+> the IC-0–IC-9 plan and live progress ledger. The source, branches, checks and
+> grants below are dated receipts, not current completion or authority.
+
 ## Outcome
 - Completed: Prompts 01–10 are integrated at source level on the default-off
   Contemporary Cellar graph; Prompt 12 source review records a rollout

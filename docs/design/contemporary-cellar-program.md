@@ -1,4 +1,12 @@
 # Contemporary Cellar program baseline
+
+> Historical implementation baseline. Current work follows the September 7
+> IC-0–IC-9 program linked from the [interface workflow](../development/interface-workflow.md)
+> and [evidence ledger](contemporary-cellar-status.md). Branches, first tranches,
+> prompt order and action grants below describe the original delivery. Preserve
+> its ownership/compatibility invariants; use the active request and current plan
+> for execution, verification and authority.
+
 This file binds the implementation pack to the live repository before production
 UI changes. The UI intake was measured at
 `094e207c0b245f36592ce31000f693674b886057`; the final source delivery is

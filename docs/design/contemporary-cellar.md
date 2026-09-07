@@ -4,6 +4,11 @@ the same library, processing queue, commands, and persisted data two deliberate
 compositions: Cellar and Tasting Room. It does not create a second application
 state graph, processing engine, or library index.
 
+For current implementation priorities and acceptance, use the
+[interface workflow](../development/interface-workflow.md) and
+[evidence ledger](contemporary-cellar-status.md). The intent below is not a
+claim that every rendered state currently meets it.
+
 ## Product intent
 
 - Make the library and current work legible before exposing advanced controls.
@@ -64,9 +69,11 @@ Their hierarchy, proportions, palette, glyph vocabulary, and signature surfaces
 inform production code. No generated board pixels, fake cover art, or generated
 lettering ship in the application.
 
-Current production assets are code-native vectors with recorded provenance in
-`docs/design/asset-manifest.md`. Runtime screenshots have not been admitted
-because this task does not yet have a safe isolated app-launch configuration or
-the required cross-platform environments. See
-`docs/design/contemporary-cellar-release-review.md` for the exact evidence
-boundary.
+Production asset provenance is recorded in [asset-manifest.md](asset-manifest.md).
+Isolated macOS captures and historical Windows/Linux headless frames exist;
+their exact states and limitations are recorded in the
+[evidence ledger](contemporary-cellar-status.md). The September 7 audit found
+remaining whole-app visual and adaptive defects. Captures do not prove installed
+platform behavior or complete keyboard/screen-reader journeys. See the
+[release review](contemporary-cellar-release-review.md) for the retained
+default-off boundary.
