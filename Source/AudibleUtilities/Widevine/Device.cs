@@ -104,7 +104,14 @@ internal class Device
 
 			var input = new BigInteger(block, isUnsigned: true, isBigEndian: true);
 			var result = BigInteger.ModPow(input, Exponent, Modulus);
-			return result.ToByteArray(isUnsigned: true, isBigEndian: true);
+			var unpaddedSignature = result.ToByteArray(isUnsigned: true, isBigEndian: true);
+			var modulusWidth = (rsa.KeySize + 7) / 8;
+			if (unpaddedSignature.Length > modulusWidth)
+				throw new CryptographicException("RSA signature exceeds the modulus width.");
+
+			var signature = new byte[modulusWidth];
+			unpaddedSignature.CopyTo(signature, modulusWidth - unpaddedSignature.Length);
+			return signature;
 		}
 
 		private static byte[] MaskGeneratorFunction1(byte[] Z, int zOff, int zLen, int length)
