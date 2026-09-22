@@ -640,6 +640,44 @@ public class NetworkFileStreamContractTests
 		Assert.AreEqual(0, server.Requests.Count);
 	}
 
+	[TestMethod]
+	public async Task Private_persisted_partial_reopens_and_finishes_against_the_same_validator()
+	{
+		await using var server = new LoopbackServer(Response.Partial("bytes 2-3/4", "cd", "\"one\""));
+		string state = Path.Combine(directory, "resume.json");
+		using (var initial = Resume(server.Uri, "ab", 4, "\"one\""))
+		using (var saved = new NetworkFileStreamPersister(initial, state)) { }
+		using (var restored = new NetworkFileStreamPersister(state))
+		{
+			await restored.NetworkFileStream.BeginDownloadingAsync().WaitAsync(Timeout);
+			await restored.NetworkFileStream.DownloadTask!.WaitAsync(Timeout);
+		}
+		using var completed = new NetworkFileStreamPersister(state);
+		Assert.AreEqual(4, completed.NetworkFileStream.WritePosition);
+		Assert.AreEqual("abcd", File.ReadAllText(completed.NetworkFileStream.SaveFilePath));
+		Assert.AreEqual("\"one\"", server.Requests.Single()["If-Range"]);
+		if (!OperatingSystem.IsWindows())
+			Assert.AreEqual(UnixFileMode.UserRead | UnixFileMode.UserWrite, File.GetUnixFileMode(state));
+	}
+
+	[TestMethod]
+	public async Task Checkpoint_failure_does_not_replace_the_original_download_failure()
+	{
+		await using var server = new LoopbackServer(new Response(403, "no", 2));
+		string state = Path.Combine(directory, "resume.json");
+		using var stream = new NetworkFileStream(Path.Combine(directory, "partial"), server.Uri);
+		using var persister = new NetworkFileStreamPersister(stream, state);
+		File.Delete(state);
+		Directory.CreateDirectory(state); // Inject publication failure at the final checkpoint.
+		var failure = await Assert.ThrowsAsync<WebException>(() => stream.BeginDownloadingAsync().WaitAsync(Timeout));
+		var taskFailure = await Assert.ThrowsAsync<WebException>(() => stream.DownloadTask!.WaitAsync(Timeout));
+		Assert.AreSame(failure, taskFailure);
+		Assert.AreSame(failure, Assert.Throws<WebException>(() => stream.Read(new byte[1], 0, 1)));
+		persister.Dispose();
+		using var exclusive = File.Open(stream.SaveFilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
+		Assert.AreEqual(1, Directory.GetFiles(directory).Length);
+	}
+
 	private sealed record Response(int Status, string Body, long DeclaredLength, string? Range = null, string? Etag = null, bool Chunked = false, string? Location = null, string? ContentEncoding = null)
 	{
 		public static Response Partial(string range, string body, string? etag = null)

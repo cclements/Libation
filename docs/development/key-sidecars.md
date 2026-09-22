@@ -22,7 +22,8 @@ are test inputs. Mode and symlink execution is macOS APFS evidence; broader ACL,
 other-host and physical archival-destination proof remain open.
 
 The existing download cache and retention/archival owners remain in place. Network
-resume JSON still contains URLs/headers; minimizing or protecting that state,
+resume JSON still contains URLs/headers and now uses the same private writer
+([resume persistence](resume-persistence.md)); minimizing that state,
 explicit abandonment/retention rules, crash-left staging files and whole-book
 publication/restart journals remain separate A3.3 work. File content flush and
 rename are not a power-loss or directory-fsync guarantee.
