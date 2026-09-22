@@ -187,7 +187,7 @@ public class OutputAudioMetadataTests
 
 	// Tiny metadata-only MP4 fixtures. Zero-filled compressed samples do not prove AC-4 decoding,
 	// conversion quality, or playback; they deliberately vary the metadata read by the completion step.
-	private static byte[] CreateAc4File(ushort sampleRate, ushort channels, uint frameSize)
+	internal static byte[] CreateAc4File(ushort sampleRate, ushort channels, uint frameSize)
 	{
 		const uint sampleCount = 2;
 		const uint frameDelta = 1024;
