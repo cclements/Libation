@@ -419,7 +419,8 @@ public class DownloadDecryptBook : AudioDecodable, IProcessable<DownloadDecryptB
 					entry.Extension,
 					Configuration.OverwriteExisting);
 
-			await moveWithProgress.MoveAsync(entry.FilePath, realDest, Configuration.OverwriteExisting, cancellationToken);
+			if (!await moveWithProgress.MoveAsync(entry.FilePath, realDest, Configuration.OverwriteExisting, cancellationToken))
+				throw new IOException("The output file transfer stopped before publication completed.");
 
 			// propagate corrected path for cue file (after this for-loop)
 			entries[i] = entry with { FilePath = realDest };
