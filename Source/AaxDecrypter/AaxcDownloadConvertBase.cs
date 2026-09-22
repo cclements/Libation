@@ -83,7 +83,7 @@ public abstract class AaxcDownloadConvertBase : AudiobookDownloadBase
 		void WriteKeyFile(string contents)
 		{
 			var keyFile = Path.Combine(Path.ChangeExtension(InputFileStream.SaveFilePath, ".key"));
-			File.WriteAllText(keyFile, contents + Environment.NewLine);
+			KeySidecar.WriteAllText(keyFile, contents + Environment.NewLine);
 			OnTempFileCreated(new(keyFile));
 		}
 	}
