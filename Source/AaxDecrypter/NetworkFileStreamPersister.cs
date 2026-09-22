@@ -44,7 +44,18 @@ internal sealed class NetworkFileStreamPersister : IDisposable
         this.path = Path.GetFullPath(path);
         this.jsonPath = string.IsNullOrWhiteSpace(jsonPath) ? null : jsonPath.Trim();
         var json = JToken.Parse(File.ReadAllText(this.path));
-        Target = (this.jsonPath is null ? json : json.SelectToken(this.jsonPath))?.ToObject<NetworkFileStream>()
+        var serializer = JsonSerializer.CreateDefault();
+        serializer.Error += (_, error) =>
+        {
+            // Required-property validation can fail after the JSON constructor opened the
+            // cached input. Release that object, but leave the error unhandled for the caller.
+            if (error.CurrentObject is NetworkFileStream stream)
+            {
+                try { stream.Dispose(); }
+                catch { /* Preserve the original deserialization failure. */ }
+            }
+        };
+        Target = (this.jsonPath is null ? json : json.SelectToken(this.jsonPath))?.ToObject<NetworkFileStream>(serializer)
             ?? throw new FormatException("File was not in a format able to be imported");
         Target.Updated += Save;
     }

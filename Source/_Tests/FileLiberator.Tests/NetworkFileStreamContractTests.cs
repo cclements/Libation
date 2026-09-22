@@ -439,6 +439,70 @@ public class NetworkFileStreamContractTests
 	}
 
 	[TestMethod]
+	[DataRow("invalid-json")]
+	[DataRow("inconsistent-position")]
+	[DataRow("missing-state")]
+	public async Task Resume_open_failure_retains_both_cache_files_without_requesting(string condition)
+	{
+		await using var server = new LoopbackServer(new Response(200, "replacement", 11));
+		string jsonPath = Path.Combine(directory, "fixture.json");
+		string audioPath = Path.Combine(directory, "fixture.aaxc");
+		using (var saved = Resume(server.Uri, "ab", 4, "\"one\"", "edition-1", cacheName: "fixture.aaxc"))
+			File.WriteAllText(jsonPath, JsonConvert.SerializeObject(saved));
+		if (condition == "invalid-json") File.WriteAllText(jsonPath, "{ invalid synthetic checkpoint");
+		else if (condition == "inconsistent-position")
+		{
+			var state = JObject.Parse(File.ReadAllText(jsonPath));
+			state["WritePosition"] = 99;
+			File.WriteAllText(jsonPath, state.ToString());
+		}
+		else File.Delete(jsonPath);
+		string? originalState = File.Exists(jsonPath) ? File.ReadAllText(jsonPath) : null;
+		var owner = new ProbeDownloader(directory, new FixtureOptions(server.Uri, "edition-1"));
+		Exception? failure = null;
+		try { await owner.RunAsync().WaitAsync(Timeout); }
+		catch (Exception ex) { failure = ex; }
+		Assert.IsNotNull(failure, "Unusable resume state must fail rather than silently discard the cached book.");
+		Assert.IsFalse(failure is TimeoutException);
+		Assert.AreEqual("ab", File.ReadAllText(audioPath));
+		Assert.AreEqual(originalState, File.Exists(jsonPath) ? File.ReadAllText(jsonPath) : null);
+		Assert.AreEqual(0, server.Requests.Count);
+		using var exclusive = File.Open(audioPath, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
+	}
+
+	[TestMethod]
+	[DataRow(false)]
+	[DataRow(true)]
+	public async Task Fresh_download_still_starts_with_absent_or_empty_cache(bool emptyCache)
+	{
+		await using var server = new LoopbackServer(new Response(200, "abcd", 4));
+		string audioPath = Path.Combine(directory, "fixture.aaxc");
+		if (emptyCache) File.WriteAllText(audioPath, "");
+		var owner = new ProbeDownloader(directory, new FixtureOptions(server.Uri, "edition-1"));
+		Assert.IsTrue(await owner.RunAsync().WaitAsync(Timeout));
+		Assert.AreEqual("abcd", File.ReadAllText(audioPath));
+		Assert.AreEqual(1, server.Requests.Count);
+		using var exclusive = File.Open(audioPath, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
+	}
+
+	[TestMethod]
+	[DataRow(1)]
+	[DataRow(2)]
+	public async Task Cache_notification_failure_releases_the_stream_and_preserves_the_original_error(int failAt)
+	{
+		await using var server = new LoopbackServer();
+		var owner = new ProbeDownloader(directory, new FixtureOptions(server.Uri, "edition-1"));
+		var expected = new InvalidOperationException("synthetic subscriber failure");
+		int calls = 0;
+		owner.TempFileCreated += (_, _) => { if (++calls == failAt) throw expected; };
+		var actual = await Assert.ThrowsAsync<InvalidOperationException>(() => owner.RunAsync().WaitAsync(Timeout));
+		Assert.AreSame(expected, actual);
+		Assert.AreEqual(0, server.Requests.Count);
+		Assert.IsTrue(File.Exists(Path.Combine(directory, "fixture.json")));
+		using var exclusive = File.Open(Path.Combine(directory, "fixture.aaxc"), FileMode.Open, FileAccess.ReadWrite, FileShare.None);
+	}
+
+	[TestMethod]
 	[DataRow("query", true)]
 	[DataRow("acr", false)]
 	[DataRow("codec", false)]
@@ -503,6 +567,7 @@ public class NetworkFileStreamContractTests
 
 	private sealed class ProbeDownloader(string directory, IDownloadOptions options) : AudiobookDownloadBase(directory, directory, options)
 	{
+		protected override long InputFilePosition => InputFileStream.WritePosition;
 		protected override Task<bool> Step_DownloadAndDecryptAudiobookAsync() => Task.FromResult(true);
 	}
 

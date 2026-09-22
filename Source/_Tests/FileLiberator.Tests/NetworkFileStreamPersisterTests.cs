@@ -156,6 +156,20 @@ public class NetworkFileStreamPersisterTests
         Assert.AreEqual(hasPrevious ? 1 : 0, Directory.GetFiles(directory).Length);
     }
 
+    [TestMethod]
+    [DataRow("required-field")]
+    [DataRow("property-conversion")]
+    public void FailedResumeDeserializationClosesAnyPartiallyConstructedStream(string condition)
+    {
+        WriteSnapshot(legacy: false);
+        var json = JObject.Parse(File.ReadAllText(statePath));
+        if (condition == "required-field") json.Remove("ContentLength");
+        else json["SpeedLimit"] = "invalid synthetic number";
+        File.WriteAllText(statePath, json.ToString());
+        Assert.Throws<JsonSerializationException>(() => new NetworkFileStreamPersister(statePath));
+        using var exclusive = File.Open(mediaPath, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
+    }
+
     private NetworkFileStream CreateStream() => new(mediaPath, SyntheticUri,
         requestHeaders: new Dictionary<string, string> { ["Synthetic-Header"] = "initial-fixture" });
 

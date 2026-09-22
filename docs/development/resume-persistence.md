@@ -15,6 +15,14 @@ Downloads still own update throttling and error reporting. Disposal joins the
 producer, saves its last checkpoint and detaches the event handler. Failed initial
 persistence closes the newly owned stream without replacing the original error.
 
+Resume-open failures retain the existing JSON and cached audio instead of deleting
+them and silently starting over. A nonempty partial file without its checkpoint
+also fails before making an HTTP request. An empty orphan can still start fresh.
+Initialization owns cleanup until the persister is assigned to the operation,
+including failed temporary-file notifications. Deserialization errors release
+any stream already constructed before required-property validation fails.
+The original error remains the failure reported by the operation.
+
 ## Writer decision
 
 The resolved Dinah.Core 11.0.0.1 assembly was inspected before changing the owner.
@@ -44,4 +52,6 @@ Unix mode and symlink execution here is macOS APFS evidence. Windows still uses
 inherited ACLs; no new Windows ACL guarantee is claimed. Files remain plaintext
 and accessible to the same user. File flush/rename is not a power-loss or
 directory-fsync guarantee. Abandonment, retention, crash-left staging cleanup
-and whole-book publication journals remain separate work.
+and whole-book publication journals remain separate work. Unusable retained
+state requires an explicit recovery/abandonment decision; this change does not
+add an automatic deletion or new user-facing recovery control.

@@ -191,42 +191,37 @@ public abstract class AudiobookDownloadBase
 
 	private NetworkFileStreamPersister OpenNetworkFileStream()
 	{
-		NetworkFileStreamPersister? nfsp = default;
+		NetworkFileStreamPersister? nfsp = null;
 		try
 		{
-			if (!File.Exists(jsonDownloadState))
-				return nfsp = newNetworkFilePersister();
-
-			nfsp = new NetworkFileStreamPersister(jsonDownloadState);
-			// Signed query parameters may expire. Begin validates that the renewed license still selects
-			// the saved resource before any cached bytes are combined with a response.
-			nfsp.NetworkFileStream.SetUriForSameFile(new Uri(DownloadOptions.DownloadUrl), DownloadOptions.DownloadIdentity);
+			if (File.Exists(jsonDownloadState))
+			{
+				nfsp = new NetworkFileStreamPersister(jsonDownloadState);
+				// Signed query parameters may expire. Begin validates the renewed selection
+				// before any cached bytes are combined with a response.
+				nfsp.NetworkFileStream.SetUriForSameFile(new Uri(DownloadOptions.DownloadUrl), DownloadOptions.DownloadIdentity);
+			}
+			else
+			{
+				if (File.Exists(tempFilePath) && new FileInfo(tempFilePath).Length > 0)
+					throw new InvalidDataException("The cached download has no resume state; its partial bytes were retained.");
+				var stream = new NetworkFileStream(tempFilePath, new Uri(DownloadOptions.DownloadUrl), 0,
+					new() { { "User-Agent", DownloadOptions.UserAgent } }, DownloadOptions.DownloadIdentity);
+				nfsp = new NetworkFileStreamPersister(stream, jsonDownloadState);
+			}
+			nfsp.NetworkFileStream.RequestHeaders["User-Agent"] = DownloadOptions.UserAgent;
+			nfsp.NetworkFileStream.SpeedLimit = DownloadOptions.DownloadSpeedBps;
+			OnTempFileCreated(new(tempFilePath, DownloadOptions.InputType.ToString()));
+			OnTempFileCreated(new(jsonDownloadState));
 			return nfsp;
 		}
 		catch
 		{
-			nfsp?.Target?.Dispose();
-			FileUtility.SaferDelete(jsonDownloadState);
-			FileUtility.SaferDelete(tempFilePath);
-			return nfsp = newNetworkFilePersister();
-		}
-		finally
-		{
-			//nfsp will only be null when an unhandled exception occurs. Let the caller handle it.
-			if (nfsp is not null)
-			{
-				nfsp.NetworkFileStream.RequestHeaders["User-Agent"] = DownloadOptions.UserAgent;
-				nfsp.NetworkFileStream.SpeedLimit = DownloadOptions.DownloadSpeedBps;
-				OnTempFileCreated(new(tempFilePath, DownloadOptions.InputType.ToString()));
-				OnTempFileCreated(new(jsonDownloadState));
-			}
-		}
-
-		NetworkFileStreamPersister newNetworkFilePersister()
-		{
-			var networkFileStream = new NetworkFileStream(tempFilePath, new Uri(DownloadOptions.DownloadUrl), 0,
-				new() { { "User-Agent", DownloadOptions.UserAgent } }, DownloadOptions.DownloadIdentity);
-			return new NetworkFileStreamPersister(networkFileStream, jsonDownloadState);
+			// A load, setup or subscriber failure is not permission to discard a partial
+			// book. The lazy field has not yet taken ownership, so clean up locally.
+			try { nfsp?.Dispose(); }
+			catch (Exception ex) { Serilog.Log.Warning(ex, "Could not close the failed resume setup."); }
+			throw;
 		}
 	}
 }
