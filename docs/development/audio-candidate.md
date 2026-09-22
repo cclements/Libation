@@ -1,8 +1,8 @@
 # Cumulative local audio integration candidate
 
 This isolated branch explicitly pins
-`AAXClean.Codecs 3.1.1-local.20260922.775bcc5.eac393c6db7.osxarm64`.
-Its exact transitive parser is `AAXClean 3.1.1-local.20260922.93c6db7`.
+`AAXClean.Codecs 3.1.1-local.20260922.3a6cff8.ownedfc2c0af.osxarm64`.
+Its exact transitive parser is `AAXClean 3.1.1-local.20260922.fc2c0af`.
 These are private development identities, not published packages. The native
 payload is verified only on macOS arm64 and remains NONFREE/UNREDISTRIBUTABLE.
 Do not publish/install this graph as an official release. The active app and
@@ -69,3 +69,9 @@ key-sidecar writes; see audio-transfer.md and key-sidecars.md for their distinct
 filesystem evidence and recovery limits. E-AC-3 descriptor bitrates now use
 decimal units at the parser boundary (128 maps to 128000 bit/s). Historical
 persisted AudioFormat values still require a separately designed migration.
+
+The closeout parser also promptly releases internally opened files when filename
+construction fails. Stream-taking constructors preserve caller ownership on
+failure. The cumulative app retains immutable DASH key selection; see
+dash-key-selection.md. The selected parser and Codecs source branches include
+explicit validation/publication gates, but no official publication occurred.

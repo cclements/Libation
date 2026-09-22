@@ -15,7 +15,7 @@
 
 	<ItemGroup>
 	  <!-- Local integration candidate; see docs/development/audio-candidate.md. -->
-	  <PackageReference Include="AAXClean.Codecs" Version="[3.1.1-local.20260922.775bcc5.eac393c6db7.osxarm64]" />
+	  <PackageReference Include="AAXClean.Codecs" Version="[3.1.1-local.20260922.3a6cff8.ownedfc2c0af.osxarm64]" />
 	</ItemGroup>
 
 	<ItemGroup>
