@@ -37,7 +37,8 @@ public static class MpegUtil
 
 		if (matchSourceBitrate)
 		{
-			int kbps = (int)Math.Round(mp4File.AverageBitrate * bitrateMultiple / 1024);
+			// Encoder controls use decimal kbit/s; persisted metadata units are separate.
+			int kbps = (int)Math.Round(mp4File.AverageBitrate * bitrateMultiple / 1000);
 
 			if (lameConfig.VBR is null)
 				lameConfig.BitRate = kbps;

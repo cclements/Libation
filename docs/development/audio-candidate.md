@@ -1,8 +1,8 @@
 # Local presented-chapter integration candidate
 
 This isolated branch explicitly pins
-`AAXClean.Codecs 3.1.1-local.20260922.b18ebc3.preroll8148435.osxarm64`.
-Its exact transitive parser is `AAXClean 3.1.1-local.20260922.8148435`.
+`AAXClean.Codecs 3.1.1-local.20260922.775bcc5.filter36a9e1c.osxarm64`.
+Its exact transitive parser is `AAXClean 3.1.1-local.20260922.36a9e1c`.
 These are private development identities, not published packages. The native
 payload is verified only on macOS arm64 and remains NONFREE/UNREDISTRIBUTABLE.
 Do not publish/install this graph as an official release. The active app and
@@ -58,3 +58,8 @@ synthetic AAC-LC evidence; it does not establish HE/USAC/AC-4, provider acquisit
 installed-player behavior, accessibility, all-RID or release acceptance. Existing
 source/provider metadata unit migration and general sample-group rewriting remain
 separate work.
+
+The final audio candidate also includes terminal filter failure propagation and
+full linked-worker cleanup. MP3 source-bitrate matching now converts bit/s to
+decimal kbit/s (128000 becomes 128), preserving existing channel/rate scaling,
+explicit settings and the separate historical metadata migration boundary.
