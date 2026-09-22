@@ -61,24 +61,24 @@ public partial class DownloadOptions
 			chapters[index].LengthMs = chapters[index + 1].StartOffsetMs - chapters[index].StartOffsetMs;
 		return chapters;
 	}
-	internal void ReconcileChapterDuration(TimeSpan mediaDuration)
+	internal void ReconcileChapterDuration(TimeSpan presentedDuration)
 	{
-		if (mediaDuration <= TimeSpan.Zero)
+		if (presentedDuration <= TimeSpan.Zero)
 			throw new InvalidDataException("The input contains no playable audio duration.");
 
 		var outro = Config.StripAudibleBrandAudio
 			? TimeSpan.FromMilliseconds(ContentMetadata.ChapterInfo.BrandOutroDurationMs)
 			: TimeSpan.Zero;
-		if (outro < TimeSpan.Zero || outro >= mediaDuration)
+		if (outro < TimeSpan.Zero || outro >= presentedDuration)
 			throw new InvalidDataException("Branding exceeds the available audio duration.");
 
 		// Provider chapter coordinates have millisecond precision. A requested outro
 		// trim cannot safely use an incomplete/contradictory provider endpoint.
 		if (outro > TimeSpan.Zero &&
-			Math.Abs((mediaDuration - outro - declaredChapterInfo.EndOffset).Ticks) > TimeSpan.TicksPerMillisecond)
+			Math.Abs((presentedDuration - outro - declaredChapterInfo.EndOffset).Ticks) > TimeSpan.TicksPerMillisecond)
 			throw new InvalidDataException("The branding endpoint does not match the input audio duration.");
 
-		var end = mediaDuration - outro;
+		var end = presentedDuration - outro;
 		if (declaredChapterInfo.StartOffset < TimeSpan.Zero || declaredChapterInfo.StartOffset >= end)
 			throw new InvalidDataException("The chapter start exceeds the available audio duration.");
 

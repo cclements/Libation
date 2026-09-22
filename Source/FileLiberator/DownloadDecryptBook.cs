@@ -231,9 +231,11 @@ public class DownloadDecryptBook : AudioDecodable, IProcessable<DownloadDecryptB
 
 		// Split and MP3 consumers also use ChapterInfo. Disabling tag fixup must
 		// not leave their final chapter negative or silently truncate a source tail.
+		// Provider chapters use the presented timeline, excluding edit-list priming
+		// and padding. The parser owns the mapping back to media samples.
 		if (options.Config.AllowLibationFixup || options.OutputFormat == OutputFormat.Mp3 ||
 			converter is AaxcDownloadMultiConverter)
-			options.ReconcileChapterDuration(aaxFile.Duration);
+			options.ReconcileChapterDuration(aaxFile.PresentedDuration);
 
 		if (options.Config.AllowLibationFixup)
 			FillMissingTags(tags, options.LibraryBook.Book, options.LibraryBookDto, options.ContentMetadata.ContentReference, options.DrmType);
