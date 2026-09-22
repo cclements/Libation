@@ -2,7 +2,6 @@
 using Mpeg4Lib;
 using System;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace AaxDecrypter;
@@ -37,21 +36,13 @@ public abstract class AaxcDownloadConvertBase : AudiobookDownloadBase
 			throw new InvalidOperationException($"{nameof(DownloadOptions.DecryptionKeys)} cannot be null or empty for a '{DownloadOptions.InputType}' file.");
 		else if (DownloadOptions.InputType is FileType.Dash)
 		{
-			//We may have multiple keys , so use the key whose key ID matches
-			//the dash files default Key ID.
-			var keyIds = keys.Select(k => new Guid(k.KeyPart1, bigEndian: true)).ToArray();
-
 			var dash = new DashFile(InputFileStream);
 			if (dash.Tenc is null)
 				throw new InvalidOperationException("The DASH file does not contain 'tenc' box, indicating that it is unencrypted.");
 
-			var kidIndex = Array.IndexOf(keyIds, dash.Tenc.DefaultKID);
-			if (kidIndex == -1)
-				throw new InvalidOperationException($"None of the {keyIds.Length} key IDs match the dash file's default KeyID of {dash.Tenc.DefaultKID}");
+			// Select by KID without changing the shared license key collection.
+			var (keyId, key) = DashKeySelector.Select(keys, dash.Tenc.DefaultKID);
 
-			keys[0] = keys[kidIndex];
-			var keyId = keys[kidIndex].KeyPart1;
-			var key = keys[kidIndex].KeyPart2 ?? throw new InvalidOperationException($"{nameof(DownloadOptions.DecryptionKeys)} for '{DownloadOptions.InputType}' must have a non-null decryption key (KeyPart2).");
 			dash.SetDecryptionKey(keyId, key);
 			WriteKeyFile($"KeyId={Convert.ToHexString(keyId)}{Environment.NewLine}Key={Convert.ToHexString(key)}");
 
