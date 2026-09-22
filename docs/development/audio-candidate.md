@@ -1,8 +1,8 @@
-# Local presented-chapter integration candidate
+# Cumulative local audio integration candidate
 
 This isolated branch explicitly pins
-`AAXClean.Codecs 3.1.1-local.20260922.775bcc5.filter36a9e1c.osxarm64`.
-Its exact transitive parser is `AAXClean 3.1.1-local.20260922.36a9e1c`.
+`AAXClean.Codecs 3.1.1-local.20260922.775bcc5.eac393c6db7.osxarm64`.
+Its exact transitive parser is `AAXClean 3.1.1-local.20260922.93c6db7`.
 These are private development identities, not published packages. The native
 payload is verified only on macOS arm64 and remains NONFREE/UNREDISTRIBUTABLE.
 Do not publish/install this graph as an official release. The active app and
@@ -63,3 +63,9 @@ The final audio candidate also includes terminal filter failure propagation and
 full linked-worker cleanup. MP3 source-bitrate matching now converts bit/s to
 decimal kbit/s (128000 becomes 128), preserving existing channel/rate scaling,
 explicit settings and the separate historical metadata migration boundary.
+
+This candidate also includes staged single-file publication and owner-only atomic
+key-sidecar writes; see audio-transfer.md and key-sidecars.md for their distinct
+filesystem evidence and recovery limits. E-AC-3 descriptor bitrates now use
+decimal units at the parser boundary (128 maps to 128000 bit/s). Historical
+persisted AudioFormat values still require a separately designed migration.

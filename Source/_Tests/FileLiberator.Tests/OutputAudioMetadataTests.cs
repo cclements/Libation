@@ -188,6 +188,23 @@ public class OutputAudioMetadataTests
 	// Tiny metadata-only MP4 fixtures. Zero-filled compressed samples do not prove AC-4 decoding,
 	// conversion quality, or playback; they deliberately vary the metadata read by the completion step.
 	internal static byte[] CreateAc4File(ushort sampleRate, ushort channels, uint frameSize)
+        => CreateMetadataFile(sampleRate, channels, frameSize, "ac-4", Box("dac4", [0]));
+
+    internal static byte[] CreateEac3File()
+    {
+        var writer = new Mpeg4Lib.Util.BitWriter();
+        writer.Write(128, 13); // decimal kbit/s
+        writer.Write(0, 3); // one independent substream
+        writer.Write(0, 2); // 48 kHz
+        writer.Write(16, 5); // E-AC-3 bsid
+        writer.Write(0, 1); writer.Write(0, 1); writer.Write(0, 3);
+        writer.Write(2, 3); // stereo
+        writer.Write(0, 1); writer.Write(0, 3); writer.Write(0, 4); writer.Write(0, 1);
+        return CreateMetadataFile(48000, 2, 512, "ec-3", Box("dec3", writer.ToByteArray()));
+    }
+
+    private static byte[] CreateMetadataFile(ushort sampleRate, ushort channels, uint frameSize,
+        string codec, byte[] codecBox)
 	{
 		const uint sampleCount = 2;
 		const uint frameDelta = 1024;
@@ -202,9 +219,9 @@ public class OutputAudioMetadataTests
 			UInt16s(0, 0, 0x0100, 0), new byte[36], UInt32s(0, 0));
 		byte[] mdhd = Box("mdhd", UInt32s(0, 0, 0, sampleRate, mediaDuration, 0));
 		byte[] hdlr = Box("hdlr", UInt32s(0, 0), Encoding.ASCII.GetBytes("soun"), new byte[12]);
-		byte[] sampleEntry = Box("ac-4",
+		byte[] sampleEntry = Box(codec,
 			new byte[6], UInt16s(1), new byte[8],
-			UInt16s(channels, 16, 0, 0, sampleRate, 0), Box("dac4", [0]));
+			UInt16s(channels, 16, 0, 0, sampleRate, 0), codecBox);
 		byte[] stsd = Box("stsd", UInt32s(0, 1), sampleEntry);
 		byte[] stts = Box("stts", UInt32s(0, 1, sampleCount, frameDelta));
 		byte[] stsc = Box("stsc", UInt32s(0, 1, 1, sampleCount, 1));

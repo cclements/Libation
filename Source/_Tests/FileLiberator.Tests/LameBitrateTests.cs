@@ -43,6 +43,21 @@ public class LameBitrateTests
         Assert.AreEqual(96, abr ? options.ABRRateKbps : options.BitRate);
     }
 
+    [TestMethod]
+    [DataRow(false)]
+    [DataRow(true)]
+    public void Eac3DescriptorFeedsDecimalSourceRateIntoMp3Controls(bool abr)
+    {
+        // Complete metadata-only MP4; synthetic compressed bytes are never decoded.
+        using var source = new Mp4File(new MemoryStream(OutputAudioMetadataTests.CreateEac3File()));
+        var options = new LameConfig { OutputSampleRate = 48000, VBR = abr ? VBRMode.ABR : null };
+        MpegUtil.ConfigureLameOptions(source, options, false, true, null);
+        Assert.AreEqual(128, abr ? options.ABRRateKbps : options.BitRate);
+        Assert.AreEqual(128000, source.AverageBitrate);
+        Assert.AreEqual(48000, options.OutputSampleRate);
+        Assert.AreEqual(MPEGMode.Stereo, options.Mode);
+    }
+
     private static Mp4File Source(int channels)
         // Two 512-byte samples at 32000/1024 frames per second: exactly 128000 bit/s.
         // Payload is metadata-only synthetic AC-4, never decoded.
