@@ -166,13 +166,7 @@ public class DownloadDecryptBook : AudioDecodable, IProcessable<DownloadDecryptB
 				abDownloader = new UnencryptedAudiobookDownloader(outputDir, cacheDir, dlOptions);
 			else
 			{
-				AaxcDownloadConvertBase converter
-					= dlOptions.Config.SplitFilesByChapter && dlOptions.ChapterInfo.Count > 1 ?
-					new AaxcDownloadMultiConverter(outputDir, cacheDir, dlOptions) :
-					new AaxcDownloadSingleConverter(outputDir, cacheDir, dlOptions);
-
-				if (dlOptions.Config.AllowLibationFixup)
-					converter.RetrievedMetadata += Converter_RetrievedMetadata;
+				var converter = CreateConverter(outputDir, cacheDir, dlOptions);
 
 				abDownloader = converter;
 			}
@@ -219,37 +213,30 @@ public class DownloadDecryptBook : AudioDecodable, IProcessable<DownloadDecryptB
 	}
 
 	#region Decryptor event handlers
+	internal AaxcDownloadConvertBase CreateConverter(string outputDir, string cacheDir, DownloadOptions options)
+	{
+		AaxcDownloadConvertBase converter = options.Config.SplitFilesByChapter && options.ChapterInfo.Count > 1
+			? new AaxcDownloadMultiConverter(outputDir, cacheDir, options)
+			: new AaxcDownloadSingleConverter(outputDir, cacheDir, options);
+		converter.RetrievedMetadata += Converter_RetrievedMetadata;
+		return converter;
+	}
+
 	private void Converter_RetrievedMetadata(object? sender, Mpeg4Lib.MetadataItems tags)
 	{
 		if (sender is not AaxcDownloadConvertBase converter ||
 			converter.AaxFile is not Mpeg4Lib.Mpeg4File aaxFile ||
-			converter.DownloadOptions is not DownloadOptions options ||
-			options.ChapterInfo.Chapters is not List<Mpeg4Lib.Chapter> chapters)
+			converter.DownloadOptions is not DownloadOptions options)
 			return;
 
-		#region Prevent erroneous truncation due to incorrect chapter info
+		// Split and MP3 consumers also use ChapterInfo. Disabling tag fixup must
+		// not leave their final chapter negative or silently truncate a source tail.
+		if (options.Config.AllowLibationFixup || options.OutputFormat == OutputFormat.Mp3 ||
+			converter is AaxcDownloadMultiConverter)
+			options.ReconcileChapterDuration(aaxFile.Duration);
 
-		//Sometimes the chapter info is not accurate. Since AAXClean trims audio
-		//files to the chapters start and end, if the last chapter's end time is
-		//before the end of the audio file, the file will be truncated to match
-		//the chapter. This is never desirable, so pad the last chapter to match
-		//the original audio length.
-
-		var fileDuration = aaxFile.Duration;
-		if (options.Config.StripAudibleBrandAudio)
-			fileDuration -= TimeSpan.FromMilliseconds(options.ContentMetadata.ChapterInfo.BrandOutroDurationMs);
-
-		var durationDelta = fileDuration - options.ChapterInfo.EndOffset;
-		//Remove the last chapter and re-add it with the durationDelta that will
-		//make the chapter's end coincide with the end of the audio file.
-		var lastChapter = chapters[^1];
-
-		chapters.Remove(lastChapter);
-		options.ChapterInfo.Add(lastChapter.Title, lastChapter.Duration + durationDelta);
-
-		#endregion
-
-		FillMissingTags(tags, options.LibraryBook.Book, options.LibraryBookDto, options.ContentMetadata.ContentReference, options.DrmType);
+		if (options.Config.AllowLibationFixup)
+			FillMissingTags(tags, options.LibraryBook.Book, options.LibraryBookDto, options.ContentMetadata.ContentReference, options.DrmType);
 	}
 
 	/// <summary>Audible's own format for <c>rldt</c>, which Libation matches when it supplies the tag itself.</summary>

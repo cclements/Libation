@@ -226,9 +226,7 @@ public partial class DownloadOptions
 
 		var titleConcat = config.CombineNestedChapterTitles ? ": " : null;
 		var chapters
-			= flattenChapters(chapterInfo.Chapters, titleConcat)
-			.OrderBy(c => c.StartOffsetMs)
-			.ToList();
+			= PrepareChapterTimeline(chapterInfo.Chapters, titleConcat);
 
 		if (config.MergeOpeningAndEndCredits)
 			combineCredits(chapters);
@@ -237,21 +235,24 @@ public partial class DownloadOptions
 			stripBranding(chapters, chapterInfo.BrandIntroDurationMs, chapterInfo.BrandOutroDurationMs);
 
 		if (config.SplitFilesByChapter)
-			combineShortChapters(chapters, config.MinimumFileDuration * 1000);
+			combineShortChapters(chapters, (long)config.MinimumFileDuration * 1000);
 
-		var dlOptions = new DownloadOptions(config, libraryBook, licInfo)
+		chapters.RemoveAll(c => c.LengthMs == 0);
+		if (chapters.Count == 0)
+			throw new InvalidDataException("Chapter metadata contains no playable audio after branding removal.");
+
+		if (chapterInfo.RuntimeLengthMs < 0 || chapterInfo.RuntimeLengthMs > MaximumChapterMilliseconds)
+			throw new InvalidDataException("The provider runtime exceeds the supported timeline.");
+
+		var prepared = new Mpeg4Lib.ChapterInfo(TimeSpan.FromMilliseconds(chapters[0].StartOffsetMs));
+		foreach (var chapter in chapters)
+			prepared.AddChapter(chapter.Title, TimeSpan.FromMilliseconds(chapter.LengthMs));
+
+		return new DownloadOptions(config, libraryBook, licInfo)
 		{
-			ChapterInfo = new Mpeg4Lib.ChapterInfo(TimeSpan.FromMilliseconds(chapters[0].StartOffsetMs)),
+			ChapterInfo = prepared,
 			RuntimeLength = TimeSpan.FromMilliseconds(chapterInfo.RuntimeLengthMs),
 		};
-
-		//Build AAXClean.ChapterInfo
-		for (int i = 0; i < chapters.Count; i++)
-		{
-			dlOptions.ChapterInfo.AddChapter(chapters[i].Title, TimeSpan.FromMilliseconds(chapters[i].LengthMs));
-		}
-
-		return dlOptions;
 	}
 
 	public static LameConfig GetLameOptions(Configuration config)
@@ -363,37 +364,46 @@ public partial class DownloadOptions
 		if (chapters is null)
 			return [];
 
-		List<Chapter> chaps = new();
-
-		foreach (var c in chapters)
+		List<Chapter> result = [];
+		foreach (var provider in chapters)
 		{
-			if (c.Chapters is null)
-				chaps.Add(c);
-			else if (titleConcat is null)
+			ValidateChapter(provider);
+			var chapter = CopyChapter(provider);
+			if (provider.Chapters is not { Length: > 0 })
 			{
-				chaps.Add(c);
-				chaps.AddRange(flattenChapters(c.Chapters, titleConcat));
+				result.Add(chapter);
+				continue;
 			}
+
+			var children = flattenChapters(provider.Chapters, titleConcat).Where(c => c.LengthMs > 0).ToList();
+			if (children.Count == 0)
+			{
+				result.Add(chapter);
+				continue;
+			}
+			if (ChapterEnd(chapter) > children[0].StartOffsetMs)
+				throw new InvalidDataException("A chapter's own audio overlaps its children.");
+
+			if (titleConcat is null || chapter.LengthMs >= 10000)
+				result.Add(chapter);
 			else
 			{
-				if (c.LengthMs < 10000)
-				{
-					c.Chapters[0].StartOffsetMs = c.StartOffsetMs;
-					c.Chapters[0].StartOffsetSec = c.StartOffsetSec;
-					c.Chapters[0].LengthMs += c.LengthMs;
-				}
-				else
-					chaps.Add(c);
-
-				var children = flattenChapters(c.Chapters, titleConcat);
-
-				foreach (var child in children)
-					child.Title = $"{c.Title}{titleConcat}{child.Title}";
-
-				chaps.AddRange(children);
+				// Merge only owned projections. Preserve any gap before the child.
+				var end = ChapterEnd(children[0]);
+				children[0].StartOffsetMs = chapter.StartOffsetMs;
+				children[0].StartOffsetSec = chapter.StartOffsetMs / 1000;
+				children[0].LengthMs = end - chapter.StartOffsetMs;
 			}
+
+			if (titleConcat is not null)
+				foreach (var child in children)
+					child.Title = $"{chapter.Title}{titleConcat}{child.Title}";
+			result.AddRange(children);
 		}
-		return chaps;
+
+		result = result.OrderBy(c => c.StartOffsetMs).ToList();
+		ValidateChapterOrder(result);
+		return result;
 	}
 
 	/*
@@ -435,8 +445,16 @@ public partial class DownloadOptions
 
 	public static void stripBranding(List<Chapter> chapters, long introMs, long outroMs)
 	{
+		ValidateChapterOrder(chapters);
+		if (chapters.Count == 0 || introMs < 0 || outroMs < 0 ||
+			introMs > chapters[0].LengthMs || outroMs > chapters[^1].LengthMs ||
+			(chapters.Count == 1 && introMs >= chapters[0].LengthMs - outroMs))
+			throw new InvalidDataException("Branding durations do not fit the chapter edges.");
+
+		// Validate both edges before changing either one.
 		chapters[0].LengthMs -= introMs;
 		chapters[0].StartOffsetMs += introMs;
+		chapters[0].StartOffsetSec = chapters[0].StartOffsetMs / 1000;
 		chapters[^1].LengthMs -= outroMs;
 	}
 

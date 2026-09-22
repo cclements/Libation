@@ -19,7 +19,13 @@ public partial class DownloadOptions : IDownloadOptions, IDisposable
 	public KeyData[]? DecryptionKeys { get; }
 	public required TimeSpan RuntimeLength { get; init; }
 	public OutputFormat OutputFormat { get; }
-	public required Mpeg4Lib.ChapterInfo ChapterInfo { get; init; }
+	private Mpeg4Lib.ChapterInfo chapterInfo = null!;
+	private Mpeg4Lib.ChapterInfo declaredChapterInfo = null!;
+	public required Mpeg4Lib.ChapterInfo ChapterInfo
+	{
+		get => chapterInfo;
+		init => chapterInfo = declaredChapterInfo = value;
+	}
 	public string Title => LibraryBook.Book.Title;
 	public string Subtitle => LibraryBook.Book.Subtitle;
 	public string? Publisher => LibraryBook.Book.Publisher;
